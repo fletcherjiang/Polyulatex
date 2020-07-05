@@ -7,7 +7,6 @@ set(BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 option(ENABLE_OPEN_SRC "Enable acl compile in opensource." FALSE)
 
 if(ENABLE_OPEN_SRC)
-
 if(DEFINED ENV{ASCEND_CUSTOM_PATH})
     set(ASCEND_DIR $ENV{ASCEND_CUSTOM_PATH})
 else()
@@ -108,6 +107,7 @@ else()
     else()
         message(STATUS "PLATFORM param is invalid, should be train or inference, you choose nothing!")
     endif()
+endif()
 endif()
 
 ###################################################################################################
