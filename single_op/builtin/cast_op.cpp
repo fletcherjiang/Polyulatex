@@ -1,0 +1,77 @@
+/**
+* @file cast_op.cpp
+*
+* Copyright (C) Huawei Technologies Co., Ltd. 2019-2020. All Rights Reserved.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+*/
+
+#include "acl/ops/acl_cblas.h"
+#include "types/op_attr.h"
+#include "types/tensor_desc_internal.h"
+#include "common/common_inner.h"
+#include "toolchain/profiling_manager.h"
+
+namespace {
+    constexpr char const *OP_NAME_CAST = "Cast";
+    constexpr char const *ATTR_NAME_TRUNCATE = "truncate";
+    constexpr char const *ATTR_NAME_DST_TYPE = "dst_type";
+    constexpr int CAST_INPUT_NUM = 1;
+    constexpr int CAST_OUTPUT_NUM = 1;
+}
+
+aclError aclopCast(const aclTensorDesc *srcDesc,
+                   const aclDataBuffer *srcBuffer,
+                   const aclTensorDesc *dstDesc,
+                   aclDataBuffer *dstBuffer,
+                   uint8_t truncate,
+                   aclrtStream stream)
+{
+    ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
+    ACL_REQUIRES_NOT_NULL(dstDesc);
+    const aclTensorDesc *inputDesc[CAST_INPUT_NUM] = {srcDesc};
+    const aclTensorDesc *outputDesc[CAST_OUTPUT_NUM] = {dstDesc};
+    const aclDataBuffer *inputs[CAST_OUTPUT_NUM] = {srcBuffer};
+    aclDataBuffer *outputs[CAST_OUTPUT_NUM] = {dstBuffer};
+    aclopAttr opAttr;
+    if (GetIfCastHasTruncateAttr()) {
+        ACL_LOG_INFO("Need to set truncate attr in aclopCast");
+        opAttr.SetAttr(ATTR_NAME_TRUNCATE, static_cast<bool>(truncate));
+    }
+    opAttr.SetAttr(ATTR_NAME_DST_TYPE, static_cast<int64_t>(dstDesc->dataType));
+    return aclopExecuteV2(OP_NAME_CAST,
+                          CAST_INPUT_NUM,
+                          const_cast<aclTensorDesc **>(inputDesc),
+                          const_cast<aclDataBuffer **>(inputs),
+                          CAST_OUTPUT_NUM,
+                          const_cast<aclTensorDesc **>(outputDesc),
+                          outputs,
+                          &opAttr,
+                          stream);
+}
+
+aclError aclopCreateHandleForCast(aclTensorDesc *srcDesc,
+                                  aclTensorDesc *dstDesc,
+                                  uint8_t truncate,
+                                  aclopHandle **handle)
+{
+    ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
+    ACL_REQUIRES_NOT_NULL(dstDesc);
+    const aclTensorDesc *inputDesc[CAST_INPUT_NUM] = {srcDesc};
+    const aclTensorDesc *outputDesc[CAST_OUTPUT_NUM] = {dstDesc};
+    aclopAttr opAttr;
+    if (GetIfCastHasTruncateAttr()) {
+        ACL_LOG_INFO("Need to set truncate attr in aclopCreateHandleForCast");
+        opAttr.SetAttr(ATTR_NAME_TRUNCATE, static_cast<bool>(truncate));
+    }
+    opAttr.SetAttr(ATTR_NAME_DST_TYPE, static_cast<int64_t>(dstDesc->dataType));
+    return aclopCreateHandle(OP_NAME_CAST,
+                             CAST_INPUT_NUM,
+                             inputDesc,
+                             CAST_OUTPUT_NUM,
+                             outputDesc,
+                             &opAttr,
+                             handle);
+}
