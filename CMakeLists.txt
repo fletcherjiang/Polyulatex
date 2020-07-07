@@ -17,7 +17,7 @@ if (DEFINED ENV{D_PKG_SERVER})
     set(ACL_PB_PKG $ENV{D_PKG_SERVER})
     message("Download packages from DPKG server")
 elseif(DEFINED ENV{MSLIBS_SERVER})
-    set(ACL_PB_PKG "http://$ENV{MSLIBS_SERVER}:8081")
+    set(ACL_PB_PKG $ENV{MSLIBS_SERVER})
     message("Download packages from MSPKG server")
 endif ()
 
