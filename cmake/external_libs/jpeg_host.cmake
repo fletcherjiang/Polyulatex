@@ -3,7 +3,7 @@ if (HAVE_JPEG)
 endif()
 
 if (ACL_PB_PKG)
-        set(REQ_URL "${ACL_PB_PKG}/libs/libjpeg_turbo/2.0.5/2.0.5.tar.gz")
+        set(REQ_URL "${ACL_PB_PKG}/libs/libjpeg-turbo/2.0.5/2.0.5.tar.gz")
 else()
         set(REQ_URL "https://github.com/libjpeg-turbo/libjpeg-turbo/archive/2.0.5.tar.gz")
         set(MD5 "f5b264466739ad02f01ae649582cb1d4")
