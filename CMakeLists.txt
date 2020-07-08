@@ -108,9 +108,15 @@ endif()
 endif()
 
 ###################################################################################################
-set(PROTO_LIST
-    "${TOP_DIR}/metadef/proto/om.proto"
-)
+if(NOT ENABLE_OPEN_SRC)
+    set(PROTO_LIST
+        "${TOP_DIR}/metadef/proto/om.proto"
+    )
+else()
+    set(PROTO_LIST
+        "${BASE_DIR}/third_party/proto/metadef/proto/om.proto"
+    )
+endif()
 
 protobuf_generate(acl PROTO_SRCS PROTO_HDRS ${PROTO_LIST})
 
