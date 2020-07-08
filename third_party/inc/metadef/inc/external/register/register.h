@@ -94,6 +94,9 @@ Status AutoMappingSubgraphIndex(const ge::Graph &graph,
 Status AutoMappingSubgraphIndex(const ge::Graph &graph,
                                 const std::function<Status(int data_index, int &parent_input_index)> &input,
                                 const std::function<Status(int netoutput_index, int &parent_output_index)> &output);
+Status AutoMappingSubgraphIndexByDataNodeAndOutputNodesInfo(const ge::Graph &graph,
+    const std::function<Status(int data_index, int &parent_input_index)> &input,
+    const std::function<Status(int netoutput_index, int &parent_output_index)> &output);
 using google::protobuf::Message;
 class OpRegistrationDataImpl;
 

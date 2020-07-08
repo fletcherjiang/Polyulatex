@@ -315,6 +315,9 @@ const std::string HCOM_MULTI_MODE = "ge.hcomMultiMode";
 // atc and ir option
 const char *const INPUT_SHAPE_RANGE = "input_shape_range";
 
+// Configure express high compile performance or high execute performance
+// normal: no need to compile, used saved .o files directly
+// high: need to recompile, high execute performance mode
 const std::string PERFORMANCE_MODE = "ge.performance_mode";
 
 // Graph run mode

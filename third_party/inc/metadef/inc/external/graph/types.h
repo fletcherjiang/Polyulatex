@@ -26,6 +26,9 @@ static const int64_t UNKNOWN_DIM = -1;
 static const int64_t UNKNOWN_DIM_NUM = -2;
 static const std::vector<int64_t> UNKNOWN_SHAPE = {-1};
 static const std::vector<int64_t> UNKNOWN_RANK = {-2};
+// When data type unit is bit, this offset need to be added.
+static const int kDataTypeSizeBitOffset = 1000;
+static const int kBitNumOfOneByte = 8;
 
 #if(defined(HOST_VISIBILITY)) && (defined(__GNUC__))
 #define GE_FUNC_HOST_VISIBILITY __attribute__((visibility("default")))
@@ -66,6 +69,7 @@ enum DataType {
   DT_DUAL = 25,            // dual output type
   DT_VARIANT = 26,         // dt_variant type
   DT_BF16 = 27,            // bf16 type
+  DT_INT4 = 28,            // int4 type
   DT_UNDEFINED             // Used to indicate a DataType field has not been set.
 };
 
@@ -99,6 +103,7 @@ inline int GetSizeByDataType(DataType data_type) {
       5,   // DT_DUAL = 25,               dual output type (float + int8)
       8,   // DT_VARIANT                  variant type
       2,   // DT_BF16 = 27,               bf16 type
+      kDataTypeSizeBitOffset + 4,    // DT_INT4 = 28,             int4 type
            // DT_UNDEFINED    Used to indicate a DataType field has not been set.
   };
   if (data_type >= DT_UNDEFINED) {
@@ -106,6 +111,14 @@ inline int GetSizeByDataType(DataType data_type) {
   }
   return data_type_size[data_type];
 }
+
+///
+/// @brief Calculates the length in bytes based on the DataType and the number of elements.
+/// @param element_count
+/// @param data_type
+/// @return
+///
+int64_t GetSizeInBytes(int64_t element_count, DataType data_type);
 
 enum Format {
   FORMAT_NCHW = 0,   // NCHW
@@ -156,18 +169,18 @@ enum Format {
   FORMAT_MAX = 0xff
 };
 
-/**
- * Get format from primary and sub-format,
- * in bits field:
- * ----------------------------------
- * |  1 byte  |   2 bytes  | 1 byte |
- * |----------|------------|--------|
- * | reserved | sub-format | format |
- * ----------------------------------
- * @param primary_format
- * @param sub_format
- * @return
- */
+///
+/// Get format from primary and sub-format,
+/// in bits field:
+/// ----------------------------------
+/// |  1 byte  |   2 bytes  | 1 byte |
+/// |----------|------------|--------|
+/// | reserved | sub-format | format |
+/// ----------------------------------
+/// @param primary_format
+/// @param sub_format
+/// @return
+///
 inline int32_t GetFormatFromSub(int32_t primary_format, int32_t sub_format) {
   return static_cast<int32_t>((static_cast<uint32_t>(primary_format) & 0xff) |
                               ((static_cast<uint32_t>(sub_format) & 0xffff) << 8));
@@ -203,11 +216,11 @@ enum DeviceType {
   CPU = 1,
 };
 
-/**
- * Get a format name from enum
- * @param format
- * @return
- */
+///
+/// @brief Get a format name from enum
+/// @param format
+/// @return
+///
 GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY
 const char *GetFormatName(Format format);
 

@@ -32,13 +32,15 @@ class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY Buffer {
  public:
   Buffer();
   Buffer(const Buffer &other);
+  Buffer(Buffer &&buffer) noexcept;
 
   explicit Buffer(std::size_t bufferSize, std::uint8_t defualtVal = 0);
 
   ~Buffer() = default;
 
   Buffer &operator=(const Buffer &other);
-
+  void ShareFrom(Buffer &other);
+  static Buffer CreateShareFrom(Buffer &other);
   static Buffer CopyFrom(const std::uint8_t *data, std::size_t bufferSize);
 
   const std::uint8_t *GetData() const;

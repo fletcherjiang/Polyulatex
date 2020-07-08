@@ -72,7 +72,8 @@ class TensorUtils {
   static ge::graphStatus CalcTensorMemSize(const GeShape &shape, Format format, DataType data_type, int64_t &mem_size);
   static ge::graphStatus GetTensorMemorySizeInBytes(const GeTensorDesc &desc_temp, int64_t &size_temp);
   static ge::graphStatus GetTensorSizeInBytes(const GeTensorDesc &desc_temp, int64_t &size_temp);
-  static ge::graphStatus CheckShapeByShapeRange(const GeShape &shape, const std::vector<std::pair<int64_t, int64_t>> &shape_range);
+  static ge::graphStatus CheckShapeByShapeRange(const GeShape &shape,
+                                                const std::vector<std::pair<int64_t, int64_t>> &shape_range);
 };
 }  // namespace ge
 #endif  // INC_GRAPH_UTILS_TENSOR_UTILS_H_

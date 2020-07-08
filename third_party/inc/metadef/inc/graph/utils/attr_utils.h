@@ -107,6 +107,9 @@ class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY AttrUtils {
   static bool SetListListInt(AttrHolderAdapter &&obj, const string &name, const vector<vector<int64_t>> &value);
   static bool GetListListInt(ConstAttrHolderAdapter &&obj, const string &name, vector<vector<int64_t>> &value);
 
+  static bool SetListListFloat(AttrHolderAdapter &&obj, const string &name, const vector<vector<float>> &value);
+  static bool GetListListFloat(ConstAttrHolderAdapter &&obj, const string &name, vector<vector<float>> &value);
+
   static bool SetListDataType(AttrHolderAdapter &&obj, const string &name, const vector<ge::DataType> &value);
   static bool GetListDataType(ConstAttrHolderAdapter &&obj, const string &name, vector<ge::DataType> &value);
 

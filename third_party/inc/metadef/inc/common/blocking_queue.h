@@ -128,6 +128,20 @@ class BlockingQueue {
     queue_.clear();
   }
 
+  void SetMaxSize(uint32_t size) {
+    std::unique_lock<std::mutex> lock(mutex_);
+    if (size == 0) {
+      max_size_ = kDefaultMaxQueueSize;
+      return;
+    }
+    max_size_ = size;
+  }
+
+  uint32_t Size() {
+    std::unique_lock<std::mutex> lock(mutex_);
+    return queue_.size();
+  }
+
  private:
   std::list<T> queue_;
   std::mutex mutex_;

@@ -23,13 +23,21 @@
 #include <vector>
 #include <mutex>
 
+namespace ErrorMessage {
+#ifdef __GNUC__
+int FormatErrorMessage(char *str_dst, size_t dst_max, const char *format, ...) __attribute__((format(printf, 3, 4)));
+#else
+int FormatErrorMessage(char *str_dst, size_t dst_max, const char *format, ...);
+#endif
+}
+
 ///
 /// @brief Report error message
 /// @param [in] key: vector parameter key
 /// @param [in] value: vector parameter value
 ///
 #define REPORT_INPUT_ERROR(error_code, key, value)                                          \
-  ErrorManager::GetInstance().ATCReportErrMessage(error_code, key, value);                  \
+  ErrorManager::GetInstance().ATCReportErrMessage(error_code, key, value)
 
 ///
 /// @brief Report error message
@@ -37,25 +45,25 @@
 /// @param [in] value: vector parameter value
 ///
 #define REPORT_ENV_ERROR(error_code, key, value)                                            \
-  ErrorManager::GetInstance().ATCReportErrMessage(error_code, key, value);                  \
+  ErrorManager::GetInstance().ATCReportErrMessage(error_code, key, value)
 
-#define REPORT_INNER_ERROR(error_code, fmt, ...)                                            \
-{                                                                                           \
-  char str[512];                                                                            \
-  int ret = sprintf_s(str, 512, fmt, ##__VA_ARGS__);                                        \
-  if (ret > 0) {                                                                            \
-    ret = ErrorManager::GetInstance().ReportInterErrMessage(error_code, std::string(str));  \
-  }                                                                                         \
-}                                                                                           \
+#define REPORT_INNER_ERROR(error_code, fmt, ...)                                                                       \
+do {                                                                                                                   \
+  char error_message_str[512] = {0};                                                                                   \
+  int error_message_ret = ErrorMessage::FormatErrorMessage(error_message_str, 512, fmt, ##__VA_ARGS__);                              \
+  if (error_message_ret > 0) {                                                                                         \
+    error_message_ret = ErrorManager::GetInstance().ReportInterErrMessage(error_code, std::string(error_message_str)); \
+  }                                                                                                                    \
+} while(0)
 
-#define REPORT_CALL_ERROR(error_code, fmt, ...)                                             \
-{                                                                                           \
-  char str[512];                                                                            \
-  int ret = sprintf_s(str, 512, fmt, ##__VA_ARGS__);                                        \
-  if (ret > 0) {                                                                            \
-    ret = ErrorManager::GetInstance().ReportInterErrMessage(error_code, std::string(str));  \
-  }                                                                                         \
-}                                                                                           \
+#define REPORT_CALL_ERROR(error_code, fmt, ...)                                                                        \
+do {                                                                                                                   \
+  char error_message_str[512] = {0};                                                                                   \
+  int error_message_ret = ErrorMessage::FormatErrorMessage(error_message_str, 512, fmt, ##__VA_ARGS__);                              \
+  if (error_message_ret > 0) {                                                                                         \
+    error_message_ret = ErrorManager::GetInstance().ReportInterErrMessage(error_code, std::string(error_message_str)); \
+  }                                                                                                                    \
+} while(0)
 
 namespace ErrorMessage {
   // first stage

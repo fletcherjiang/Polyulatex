@@ -90,6 +90,7 @@ class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY GeAttrValue {
   using LIST_NAMED_ATTRS = vector<NAMED_ATTRS>;
   using LIST_LIST_INT = vector<vector<int64_t>>;
   using LIST_DATA_TYPE = vector<ge::DataType>;
+  using LIST_LIST_FLOAT = vector<vector<FLOAT>>;
 
   using NamedAttrs = ge::NamedAttrs;    // for cce use (ge::GeAttrValue::NamedAttrs).
 
@@ -106,6 +107,7 @@ class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY GeAttrValue {
     VT_NAMED_ATTRS,
     VT_LIST_LIST_INT,
     VT_DATA_TYPE,
+    VT_LIST_LIST_FLOAT,
 
     VT_LIST_BASE = 1000,
     VT_LIST_STRING = VT_LIST_BASE + VT_STRING,
@@ -136,7 +138,8 @@ class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY GeAttrValue {
                                    std::is_same<LIST_GRAPH, DT>::value || std::is_same<LIST_TENSOR, DT>::value ||
                                    std::is_same<LIST_TENSOR_DESC, DT>::value || std::is_same<LIST_BYTES, DT>::value ||
                                    std::is_same<LIST_NAMED_ATTRS, DT>::value ||
-                                   std::is_same<LIST_LIST_INT, DT>::value || std::is_same<LIST_DATA_TYPE, DT>::value;
+                                   std::is_same<LIST_LIST_INT, DT>::value || std::is_same<LIST_DATA_TYPE, DT>::value ||
+                                   std::is_same<LIST_LIST_FLOAT, DT>::value;
   };
 
   template <typename vector_type>
@@ -322,6 +325,7 @@ class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY GeAttrValue {
   VALUE_SET_GET_DEC(vector<GeAttrValue::BYTES>)
   VALUE_SET_GET_DEC(vector<NamedAttrs>)
   VALUE_SET_GET_DEC(vector<vector<int64_t>>)  //lint !e665
+  VALUE_SET_GET_DEC(vector<vector<float>>)  //lint !e665
   VALUE_SET_GET_DEC(vector<ge::DataType>)     //lint !e665
 #undef VALUE_SET_GET_DEC
 
