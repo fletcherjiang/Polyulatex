@@ -50,7 +50,7 @@ checkopts()
 {
   VERBOSE=""
   THREAD_NUM=8
-  PLATFORM=""
+  PLATFORM="all"
   PRODUCT="normal"
   ENABLE_GITEE="off"
   # Process the options
