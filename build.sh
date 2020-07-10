@@ -87,7 +87,6 @@ checkopts()
     esac
   done
 }
-checkopts "$@"
 
 mk_dir() {
     local create_dir="$1"  # the target to make
@@ -95,9 +94,6 @@ mk_dir() {
     mkdir -pv "${create_dir}"
     echo "created ${create_dir}"
 }
-
-# Acl build start
-echo "---------------- ACL build start ----------------"
 
 # create build path
 build_acl()
@@ -129,16 +125,6 @@ build_acl()
   fi
   echo "ACL build success!"
 }
-
-g++ -v
-mk_dir ${OUTPUT_PATH}
-build_acl || { echo "ACL build failed."; return; }
-echo "---------------- ACL build finished ----------------"
-
-chmod -R 750 ${OUTPUT_PATH}
-find ${OUTPUT_PATH} -name "*.so*" -print0 | xargs -0 chmod 500
-
-echo "---------------- ACL output generated ----------------"
 
 # generate output package in tar form, including ut/st libraries/executables
 generate_package()
@@ -181,8 +167,35 @@ generate_package()
   find ${OUTPUT_PATH}/${ACL_LIB_PATH}/stub -maxdepth 1 -name "libascendcl.so" -exec cp -f {} ${OUTPUT_PATH}/${FWK_PATH}/stub \;
   find ${OUTPUT_PATH}/${ACL_LIB_PATH}/stub -maxdepth 1 -name "libacl_op_compiler.so" -exec cp -f {} ${OUTPUT_PATH}/${FWK_PATH}/stub \;
 
-  tar -cf acl_lib.tar fwkacllib acllib
+  if [ "x${PLATFORM}" = "xtrain" ]
+  then
+    tar -cf acl_lib.tar fwkacllib
+  elif [ "x${PLATFORM}" = "xinference" ]
+  then
+    tar -cf acl_lib.tar acllib
+  elif [ "x${PLATFORM}" = "xall" ]
+  then
+    tar -cf acl_lib.tar fwkacllib acllib
+  fi
 }
 
-generate_package
-echo "---------------- ACL package archive generated ----------------"
+main()
+{
+  checkopts "$@"
+
+  # Acl build start
+  echo "---------------- ACL build start ----------------"
+  g++ -v
+  mk_dir ${OUTPUT_PATH}
+  build_acl || { echo "ACL build failed."; return; }
+  echo "---------------- ACL build finished ----------------"
+
+  chmod -R 750 ${OUTPUT_PATH}
+  find ${OUTPUT_PATH} -name "*.so*" -print0 | xargs -0 chmod 500
+
+  echo "---------------- ACL output generated ----------------"
+  generate_package
+  echo "---------------- ACL package archive generated ----------------"
+}
+
+main "$@"
