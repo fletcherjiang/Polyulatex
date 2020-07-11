@@ -54,11 +54,10 @@ checkopts()
   PRODUCT="normal"
   ENABLE_GITEE="off"
   # Process the options
-  while getopts 'ustchj:vS:' opt
+  while getopts 'ustchj:p:g:vS:M' opt
   do
     OPTARG=$(echo ${OPTARG} | tr '[A-Z]' '[a-z]')
     case "${opt}" in
-
       h)
         usage
         exit 0
