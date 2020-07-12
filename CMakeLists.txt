@@ -237,6 +237,7 @@ target_link_directories(ascendcl PRIVATE
 )
 
 set(linklibs ascend_hal_stub)
+if (NOT ENABLE_OPEN_SRC)
 if (PRODUCT)
 if (${PRODUCT} STREQUAL  "npuf10")
     set(linklibs )
@@ -249,6 +250,10 @@ if (${PRODUCT} STREQUAL  "npuf10")
 else ()
     list(APPEND linklibs ascend_hal_stub)
 endif()
+endif()
+else ()
+if((PRODUCT STREQUAL "flr2") OR (PRODUCT STREQUAL "flr3"))
+    set(linklibs )
 endif()
 
 if(${TARGET_SYSTEM_NAME} STREQUAL "Windows")
