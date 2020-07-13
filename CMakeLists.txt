@@ -255,6 +255,7 @@ else ()
 if((PRODUCT STREQUAL "flr2") OR (PRODUCT STREQUAL "flr3"))
     set(linklibs )
 endif()
+endif()
 
 if(${TARGET_SYSTEM_NAME} STREQUAL "Windows")
 set(linklibs ascend_hal)
