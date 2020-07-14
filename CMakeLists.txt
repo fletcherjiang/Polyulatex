@@ -72,17 +72,17 @@ else()
     find_module(ge_executor_shared libge_executor.so ${ASCEND_ACL_DIR})
     find_module(ge_common libge_common.so ${ASCEND_ACL_DIR})
     find_module(graph libgraph.so ${ASCEND_ACL_DIR})
-    find_module(register libregister.so ${ASCEND_RUNTIME_DIR})
-    find_module(datatransfer libdatatransfer.so ${ASCEND_RUNTIME_DIR})
     find_module(error_manager liberror_manager.so ${ASCEND_ACL_DIR})
     find_module(msprofiler_ext libmsprofiler.a ${ASCEND_ACL_DIR})
-    find_module(msprofiler_fwkacl_ext libmsprofiler_fwkacl.a ${ASCEND_RUNTIME_DIR})
 
     if(PLATFORM STREQUAL "train")
         find_module(adump_server libadump_server.a ${ASCEND_RUNTIME_DIR})
         find_module(runtime libruntime.so ${ASCEND_RUNTIME_DIR})
         find_module(ascend_hal_stub libascend_hal.so ${ASCEND_DRIVER_DIR}/driver)
         find_module(ge_runner libge_runner.so ${ASCEND_RUNTIME_DIR})
+        find_module(register libregister.so ${ASCEND_RUNTIME_DIR})
+        find_module(datatransfer libdatatransfer.so ${ASCEND_RUNTIME_DIR})
+        find_module(msprofiler_fwkacl_ext libmsprofiler_fwkacl.a ${ASCEND_RUNTIME_DIR})
         if(PRODUCT STREQUAL "flr3")
             message(FATAL_ERROR "This platform is not supported in train mode, build terminated")
         endif()
@@ -91,11 +91,17 @@ else()
         find_module(runtime libruntime.so ${ASCEND_ACL_DIR})
         if(NOT ((PRODUCT STREQUAL "flr2") OR (PRODUCT STREQUAL "flr3")))
             find_module(ge_runner libge_runner.so ${ASCEND_RUNTIME_DIR})
+            find_module(register libregister.so ${ASCEND_RUNTIME_DIR})
+            find_module(datatransfer libdatatransfer.so ${ASCEND_RUNTIME_DIR})
             find_module(ascend_hal_stub libascend_hal.so ${ASCEND_DRIVER_DIR})
+            find_module(msprofiler_fwkacl_ext libmsprofiler_fwkacl.a ${ASCEND_RUNTIME_DIR})
         endif()
     elseif(PLATFORM STREQUAL "all")
         find_module(ge_runner libge_runner.so ${ASCEND_RUNTIME_DIR})
+        find_module(register libregister.so ${ASCEND_RUNTIME_DIR})
+        find_module(datatransfer libdatatransfer.so ${ASCEND_RUNTIME_DIR})
         find_module(adump_server libadump_server.a ${ASCEND_RUNTIME_DIR})
+        find_module(msprofiler_fwkacl_ext libmsprofiler_fwkacl.a ${ASCEND_RUNTIME_DIR})
         find_module(runtime libruntime.so ${ASCEND_RUNTIME_DIR})
         find_module(ascend_hal_stub libascend_hal.so ${ASCEND_DRIVER_DIR})
     else()
@@ -377,6 +383,7 @@ set_target_properties(ascendcl_static PROPERTIES
 )
 endif()
 
+if(ENABLE_OPEN_SRC AND ((PRODUCT STREQUAL "flr2") OR (PRODUCT STREQUAL "flr3")))
 ############ fwk/libascendcl.so ############
 add_library(fwk_ascendcl SHARED
     tensor_data_transfer/tensor_data_transfer.cpp
@@ -471,6 +478,7 @@ set_target_properties(fwk_ascendcl PROPERTIES
     OUTPUT_NAME ascendcl
     LIBRARY_OUTPUT_DIRECTORY fwkacl
 )
+endif()
 
 ##################################################################################################################
 add_custom_target(
@@ -818,7 +826,7 @@ set_target_properties(acl_retr PROPERTIES
 )
 endif()
 
-
+if(ENABLE_OPEN_SRC AND ((PRODUCT STREQUAL "flr2") OR (PRODUCT STREQUAL "flr3")))
 ############ libacl_op_compiler.so ############
 add_library(acl_op_compiler SHARED
     single_op/op_compiler.cpp
@@ -884,6 +892,7 @@ target_link_libraries(acl_op_compiler PRIVATE
     -ldl
      $<$<NOT:$<STREQUAL:${TARGET_SYSTEM_NAME},Android>>:-lrt>
 )
+endif()
 
 ############ install ############
 set(INSTALL_BASE_DIR "")
@@ -900,19 +909,28 @@ install(TARGETS  ascendcl acl_dvpp acl_cblas acl_retr acl_op_compiler ascendcl_s
     ARCHIVE DESTINATION ${INSTALL_LIBRARY_DIR}
 )
 else()
-install(TARGETS  ascendcl acl_dvpp acl_cblas acl_retr acl_op_compiler OPTIONAL
+install(TARGETS  ascendcl acl_dvpp acl_cblas acl_retr OPTIONAL
     LIBRARY DESTINATION ${INSTALL_LIBRARY_DIR}
     ARCHIVE DESTINATION ${INSTALL_LIBRARY_DIR}
 )
+if(NOT (ENABLE_OPEN_SRC AND ((PRODUCT STREQUAL "flr2") OR (PRODUCT STREQUAL "flr3"))))
+install(TARGETS  acl_op_compiler OPTIONAL
+    LIBRARY DESTINATION ${INSTALL_LIBRARY_DIR}
+    ARCHIVE DESTINATION ${INSTALL_LIBRARY_DIR}
+)
+endif()
 endif()
 
 install(TARGETS stub_ascendcl stub_acl_dvpp stub_acl_cblas stub_acl_retr stub_acl_op_compiler OPTIONAL
     LIBRARY DESTINATION ${INSTALL_LIBRARY_DIR}/stub
 )
 
+if(NOT (ENABLE_OPEN_SRC AND ((PRODUCT STREQUAL "flr2") OR (PRODUCT STREQUAL "flr3"))))
 install(TARGETS fwk_ascendcl OPTIONAL
     LIBRARY DESTINATION ${INSTALL_LIBRARY_DIR}/fwkacl
 )
+endif()
+
 add_dependencies(stub_ascendcl stub_src)
 add_dependencies(stub_acl_op_compiler stub_src)
 add_dependencies(stub_acl_retr stub_src)
