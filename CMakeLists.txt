@@ -383,7 +383,7 @@ set_target_properties(ascendcl_static PROPERTIES
 )
 endif()
 
-if(ENABLE_OPEN_SRC AND ((PRODUCT STREQUAL "flr2") OR (PRODUCT STREQUAL "flr3")))
+if(NOT (ENABLE_OPEN_SRC AND ((PRODUCT STREQUAL "flr2") OR (PRODUCT STREQUAL "flr3"))))
 ############ fwk/libascendcl.so ############
 add_library(fwk_ascendcl SHARED
     tensor_data_transfer/tensor_data_transfer.cpp
@@ -826,7 +826,7 @@ set_target_properties(acl_retr PROPERTIES
 )
 endif()
 
-if(ENABLE_OPEN_SRC AND ((PRODUCT STREQUAL "flr2") OR (PRODUCT STREQUAL "flr3")))
+if(NOT (ENABLE_OPEN_SRC AND ((PRODUCT STREQUAL "flr2") OR (PRODUCT STREQUAL "flr3"))))
 ############ libacl_op_compiler.so ############
 add_library(acl_op_compiler SHARED
     single_op/op_compiler.cpp
