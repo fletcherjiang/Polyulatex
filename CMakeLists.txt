@@ -687,6 +687,7 @@ target_link_options(acl_dvpp PRIVATE
 target_link_libraries(acl_dvpp PRIVATE
     $<BUILD_INTERFACE:intf_pub>
     $<$<NOT:$<STREQUAL:${PRODUCT},npuf10>>:static_turbojpeg>
+    static_mmpa
     -Wl,--no-as-needed
     runtime
     alog
