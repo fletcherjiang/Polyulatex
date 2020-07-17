@@ -161,7 +161,7 @@ generate_package()
   find ${OUTPUT_PATH}/${ACL_LIB_PATH}/stub -maxdepth 1 -name "libascendcl.so" -exec cp -f {} ${OUTPUT_PATH}/${ACL_PATH}/stub \;
   find ${OUTPUT_PATH}/${ACL_LIB_PATH}/stub -maxdepth 1 -name "libacl_retr.so" -exec cp -f {} ${OUTPUT_PATH}/${ACL_PATH}/stub \;
 
-  if [ "x${PRODUCT}" != "xflr2" &&  "x${PRODUCT}" != "xflr3" ]
+  if [ "x${PRODUCT}" != "xflr2" ] && [ "x${PRODUCT}" != "xflr3" ]
   then
     find ${OUTPUT_PATH}/${ACL_LIB_PATH}/fwkacl -maxdepth 1 -name "libascendcl.so" -exec cp -f {} ${OUTPUT_PATH}/${FWK_PATH} \;
     find ${OUTPUT_PATH}/${ACL_LIB_PATH} -maxdepth 1 -name "libacl_op_compiler.so" -exec cp -f {} ${OUTPUT_PATH}/${FWK_PATH} \;
