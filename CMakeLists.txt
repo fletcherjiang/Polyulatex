@@ -27,7 +27,7 @@ include(${BASE_DIR}/cmake/external_libs/protobuf_shared.cmake)
 include(${BASE_DIR}/cmake/external_libs/protoc.cmake)
 include(${BASE_DIR}/cmake/external_libs/json.cmake)
 include(${BASE_DIR}/cmake/external_libs/securec.cmake)
-include(${BASE_DIR}/cmake/external_libs/jpeg_host.cmake)
+include(${BASE_DIR}/cmake/external_libs/jpeg.cmake)
 
 if(DEFINED ENV{D_LINK_PATH})
     # D_LINK_PATH is set
@@ -67,7 +67,7 @@ else()
     set(ASCEND_DRIVER_DIR ${ASCEND_DIR}/driver/lib64)
 
     find_module(slog libalog.so ${ASCEND_ATC_DIR})
-    find_module(alog libalog.so ${ASCEND_ACL_DIR})
+    find_module(alog libalog.so ${ASCEND_ATC_DIR})
     find_module(static_mmpa libmmpa.a ${ASCEND_ATC_DIR})
     find_module(ge_executor_shared libge_executor.so ${ASCEND_ACL_DIR})
     find_module(ge_common libge_common.so ${ASCEND_ACL_DIR})
