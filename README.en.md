@@ -5,8 +5,8 @@
 - [acl](#acl)
     - [Description](#Description)
     - [Instructions](#Instructions)
-    - [Contributing](Contributing)
-    - [Gitee Feature](#Gitee Feature)
+    - [Contributing](#Contributing)
+    - [Gitee Feature](#gitee-feature)
     - [License](#license)
 
 <!-- /TOC -->
