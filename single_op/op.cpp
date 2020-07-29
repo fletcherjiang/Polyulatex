@@ -57,7 +57,7 @@ struct aclopHandle {
 aclError aclopSetModelDir(const char *modelDir)
 {
     ACL_LOG_INFO("start to execute aclopSetModelDir");
-    ACL_REQUIRES_NOT_NULL(modelDir);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelDir);
     std::unique_lock<std::mutex> lk(g_aclInitMutex);
     if (g_aclInitFlag) {
         ACL_LOG_ERROR("repeatedly set model dir.");
@@ -75,7 +75,7 @@ aclError aclopLoad(const void *model, size_t modelSize)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
     ACL_LOG_INFO("start to execute aclopLoad");
-    ACL_REQUIRES_NOT_NULL(model);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(model);
     if (modelSize == 0) {
         ACL_LOG_ERROR("the value of modelSize[%zu] can't be zero", modelSize);
         return ACL_ERROR_INVALID_PARAM;
@@ -101,8 +101,8 @@ aclError aclopCreateHandle(const char *opType,
     ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_HANDLE);
     ACL_LOG_INFO("start to execute aclopCreateHandle");
-    ACL_REQUIRES_NOT_NULL(opType);
-    ACL_REQUIRES_NOT_NULL(handle);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(opType);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(handle);
     ACL_REQUIRES_NON_NEGATIVE(numInputs);
     ACL_REQUIRES_NON_NEGATIVE(numOutputs);
     ACL_REQUIRES_OK(array_utils::CheckPtrArray(numInputs, inputDesc));
@@ -154,9 +154,9 @@ aclError aclopExecWithHandle(aclopHandle *handle,
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
     ACL_LOG_INFO("start to execute aclopExecWithHandle");
-    ACL_REQUIRES_NOT_NULL(handle);
-    ACL_REQUIRES_NON_NEGATIVE(numInputs);
-    ACL_REQUIRES_NON_NEGATIVE(numOutputs);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(handle);
+    ACL_REQUIRES_NON_NEGATIVE_WITH_INPUT_REPORT(numInputs);
+    ACL_REQUIRES_NON_NEGATIVE_WITH_INPUT_REPORT(numOutputs);
     ACL_REQUIRES_OK(array_utils::CheckPtrArray(numInputs, inputs));
     ACL_REQUIRES_OK(array_utils::CheckPtrArray(numOutputs, outputs));
     if (array_utils::IsAllTensorEmpty(numOutputs, outputs)) {
@@ -190,9 +190,9 @@ aclError aclopExecute(const char *opType,
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
     ACL_LOG_INFO("start to execute aclopExecute");
-    ACL_REQUIRES_NOT_NULL(opType);
-    ACL_REQUIRES_NON_NEGATIVE(numInputs);
-    ACL_REQUIRES_NON_NEGATIVE(numOutputs);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(opType);
+    ACL_REQUIRES_NON_NEGATIVE_WITH_INPUT_REPORT(numInputs);
+    ACL_REQUIRES_NON_NEGATIVE_WITH_INPUT_REPORT(numOutputs);
     ACL_REQUIRES_OK(array_utils::CheckPtrArray(numInputs, inputDesc));
     ACL_REQUIRES_OK(array_utils::CheckPtrArray(numOutputs, outputDesc));
     if (array_utils::IsAllTensorEmpty(numOutputs, outputDesc)) {
@@ -229,7 +229,7 @@ aclError aclopExecuteV2(const char *opType,
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
     ACL_LOG_INFO("start to execute aclopExecuteV2");
-    ACL_REQUIRES_NOT_NULL(opType);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(opType);
     ACL_REQUIRES_NON_NEGATIVE(numInputs);
     ACL_REQUIRES_NON_NEGATIVE(numOutputs);
     ACL_REQUIRES_OK(array_utils::CheckPtrArray(numInputs, inputDesc));
@@ -260,8 +260,8 @@ aclError aclopExecuteV2(const char *opType,
 aclError aclTransTensorDescFormat(const aclTensorDesc *srcDesc, aclFormat dstFormat, aclTensorDesc **dstDesc)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
-    ACL_REQUIRES_NOT_NULL(srcDesc);
-    ACL_REQUIRES_NOT_NULL(dstDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(srcDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dstDesc);
 
     ge::Shape shape(srcDesc->dims);
     auto srcFormat = static_cast<ge::Format>(srcDesc->format);
@@ -294,10 +294,10 @@ aclError aclopCreateKernel(const char *opType,
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
     ACL_LOG_INFO("start to execute aclopCreateKernel");
-    ACL_REQUIRES_NOT_NULL(opType);
-    ACL_REQUIRES_NOT_NULL(kernelId);
-    ACL_REQUIRES_NOT_NULL(kernelName);
-    ACL_REQUIRES_NOT_NULL(binData);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(opType);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(kernelId);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(kernelName);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(binData);
 
     auto *registration = new(std::nothrow) OpKernelRegistration();
     ACL_CHECK_MALLOC_RESULT(registration);
@@ -324,9 +324,9 @@ aclError aclopUpdateParams(const char *opType,
                            const aclopAttr *attr)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
-    ACL_REQUIRES_NOT_NULL(opType);
-    ACL_REQUIRES_NON_NEGATIVE(numInputs);
-    ACL_REQUIRES_NON_NEGATIVE(numOutputs);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(opType);
+    ACL_REQUIRES_NON_NEGATIVE_WITH_INPUT_REPORT(numInputs);
+    ACL_REQUIRES_NON_NEGATIVE_WITH_INPUT_REPORT(numOutputs);
     ACL_REQUIRES_OK(array_utils::CheckPtrArray(numInputs, inputDesc));
     ACL_REQUIRES_OK(array_utils::CheckPtrArray(numOutputs, outputDesc));
 
@@ -348,9 +348,9 @@ aclError aclopSetKernelArgs(aclopKernelDesc *kernelDesc,
                             const void *args,
                             uint32_t argSize)
 {
-    ACL_REQUIRES_NOT_NULL(kernelDesc);
-    ACL_REQUIRES_NOT_NULL(args);
-    ACL_REQUIRES_NOT_NULL(kernelId);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(kernelDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(args);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(kernelId);
 
     ACL_LOG_DEBUG("start to execute aclopSetKernelArgs, kernelId = %s, blockDim = %u, argSize = %u", kernelId, blockDim,
                   argSize);
@@ -364,10 +364,10 @@ aclError aclopSetKernelArgs(aclopKernelDesc *kernelDesc,
 aclError aclopSetKernelWorkspaceSizes(aclopKernelDesc *kernelDesc, int numWorkspaces, size_t *workspaceSizes)
 {
     ACL_LOG_DEBUG("start to execute aclopSetKernelWorkspaceSizes");
-    ACL_REQUIRES_NOT_NULL(kernelDesc);
-    ACL_REQUIRES_NON_NEGATIVE(numWorkspaces);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(kernelDesc);
+    ACL_REQUIRES_NON_NEGATIVE_WITH_INPUT_REPORT(numWorkspaces);
     if (numWorkspaces != 0) {
-        ACL_REQUIRES_NOT_NULL(workspaceSizes);
+        ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(workspaceSizes);
     }
 
     for (int i = 0; i < numWorkspaces; ++i) {
@@ -379,7 +379,7 @@ aclError aclopSetKernelWorkspaceSizes(aclopKernelDesc *kernelDesc, int numWorksp
 
 aclError aclopUnregisterCompileFunc(const char *opType)
 {
-    ACL_REQUIRES_NOT_NULL(opType);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(opType);
     ACL_LOG_INFO("aclopUnregisterCompileFunc in, opType = %s", opType);
     acl::OpKernelSelector::GetInstance().Unregister(opType);
     ACL_LOG_INFO("Unregistering compile function successfully. op type = %s", opType);
@@ -388,8 +388,8 @@ aclError aclopUnregisterCompileFunc(const char *opType)
 
 aclError aclopRegisterCompileFunc(const char *opType, aclopCompileFunc func)
 {
-    ACL_REQUIRES_NOT_NULL(opType);
-    ACL_REQUIRES_NOT_NULL(func);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(opType);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(func);
     bool ret = acl::OpKernelSelector::GetInstance().Register(opType, func);
     if (ret) {
         ACL_LOG_INFO("Registering compile function successfully. op type = %s", opType);

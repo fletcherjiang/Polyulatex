@@ -33,7 +33,7 @@ const std::string ACL_MAX_OPQUEUE_NUM = "max_opqueue_num";
 
 void OpModelManager::SetCompileFlag(int32_t flag)
 {
-    SetCompileFlag(flag);
+    SetGlobalCompileFlag(flag);
 }
 
 aclError OpModelManager::HandleMaxOpQueueConfig(const char *configPath)
@@ -86,17 +86,29 @@ bool OpModelManager::OmFileFilterFn(const std::string &fileName)
 
 bool OpModelManager::IsDynamicOpModel(const OpModelDef &modelDef)
 {
-    for (size_t i = 0; i < modelDef.inputDescArr.size(); ++i) {
-        if (modelDef.inputDescArr[i].IsDynamicTensor()) {
-            return true;
+    if (modelDef.isStaticModelWithFuzzCompile == 0) {
+        // 0: ACL_OP_COMPILE_DEFAULT mode
+        ACL_LOG_INFO("the model is compiled by exact compile");
+        for (size_t i = 0; i < modelDef.inputDescArr.size(); ++i) {
+            if (modelDef.inputDescArr[i].IsDynamicTensor()) {
+                return true;
+            }
         }
-    }
-    for (size_t i = 0; i < modelDef.outputDescArr.size(); ++i) {
-        if (modelDef.outputDescArr[i].IsDynamicTensor()) {
-            return true;
+        for (size_t i = 0; i < modelDef.outputDescArr.size(); ++i) {
+            if (modelDef.outputDescArr[i].IsDynamicTensor()) {
+                return true;
+            }
         }
+        return false;
+    } else if (modelDef.isStaticModelWithFuzzCompile == 1) {
+        // 1:ACL_OP_COMPILE_FUZZ mode but model is static
+        ACL_LOG_INFO("the model is static model with fuzz compile");
+        return false;
+    } else {
+        // 2:ACL_OP_COMPILE_FUZZ mode and model is dynamic
+        ACL_LOG_INFO("the model is dynamic model with fuzz compile");
+        return true;
     }
-    return false;
 }
 
 bool OpModelManager::IsDynamicOpModel(const AclOp &aclOp)
@@ -241,6 +253,7 @@ void OpModelManager::SetTensorShapeStatus(const AclOp &aclOp, std::vector<aclTen
 {
     // Save shape status for tensors
     SetShapeStatus(aclOp.numInputs, aclOp.inputDesc, shapeStatus);
+    SetShapeStatus(aclOp.numOutputs, aclOp.outputDesc, shapeStatus);
     std::lock_guard<std::mutex> lk(shapeStatusMutex_);
     tensorShapeStatus_.emplace_back(make_pair(aclOp.opType, shapeStatus));
 }
@@ -301,6 +314,27 @@ void OpModelManager::SetTensorShapeRange(const AclOp &aclOp, const std::vector<a
         // Save shape range for input tensors
         for (size_t rangeIndex = 0; rangeIndex < aclOp.inputDesc[tensorIndex]->shapeRange.size(); ++rangeIndex) {
             shapeRanges.emplace_back(aclOp.inputDesc[tensorIndex]->shapeRange[rangeIndex]);
+        }
+    }
+
+    for (int tensorIndex = 0; tensorIndex < aclOp.numOutputs; ++tensorIndex) {
+        // Complete the shape range for static tensor
+        if (aclOp.outputDesc[tensorIndex]->shapeRange.empty()) {
+            if ((aclOp.outputDesc[tensorIndex]->dims.size() > 0) &&
+                (aclOp.outputDesc[tensorIndex]->dims[0] == UNKNOW_RANK)) {
+                ACL_LOG_INFO("the %d outputTensor dim is unknownrank", tensorIndex);
+            } else {
+                std::vector<std::pair<int64_t, int64_t>> range;
+                for (size_t dimIndex = 0; dimIndex < aclOp.outputDesc[tensorIndex]->dims.size(); ++dimIndex) {
+                    range.emplace_back(make_pair(aclOp.outputDesc[tensorIndex]->dims[dimIndex],
+                        aclOp.outputDesc[tensorIndex]->dims[dimIndex]));
+                }
+                const_cast<aclTensorDesc *>(aclOp.outputDesc[tensorIndex])->shapeRange = range;
+            }
+        }
+        // Save shape range for output tensors
+        for (size_t rangeIndex = 0; rangeIndex < aclOp.outputDesc[tensorIndex]->shapeRange.size(); ++rangeIndex) {
+            shapeRanges.emplace_back(aclOp.outputDesc[tensorIndex]->shapeRange[rangeIndex]);
         }
     }
     std::string tensorShapeStatusDesc = TensorStatusToStr(tensorShapeStatus);
@@ -548,7 +582,13 @@ bool OpModelManager::CheckShapeRange(const AclOp &aclOp,
         ACL_LOG_WARN("the dims is not in range of shapeRange");
         return false;
     }
-    ACL_LOG_INFO("inputDesc check success and no check output");
+    ACL_LOG_INFO("inputDesc check success");
+    ret = CheckRange(aclOp.numOutputs, aclOp.outputDesc,
+        tensorShapeStatus, shapeRange, rangeIndex, statusIndex, tensorDimSize);
+    if (!ret) {
+        ACL_LOG_WARN("the dims is not in range of shapeRange");
+        return false;
+    }
     return true;
 }
 
@@ -615,7 +655,10 @@ void OpModelManager::FixedAclopMatch(AclOp &aclOpMatch,
     // will not exceed the length of shapeRange and tensorShapeStatus
     FixedAclOp(aclOpMatch.numInputs, aclOpMatch.inputDesc, tensorShapeStatus, shapeRange,
         tensorDims, storageTensorDims, tensorStatusIndex, shapeIndex, shapeBegin);
-    ACL_LOG_INFO("InputDesc FixedAclopMatch succ and no fixed output");
+    ACL_LOG_INFO("InputDesc FixedAclopMatch success");
+    FixedAclOp(aclOpMatch.numOutputs, aclOpMatch.outputDesc, tensorShapeStatus, shapeRange,
+        tensorDims, storageTensorDims, tensorStatusIndex, shapeIndex, shapeBegin);
+    ACL_LOG_INFO("OutputDesc FixedAclopMatch success");
 }
 
 static bool BackAclOp(int tensorNum,
@@ -692,6 +735,15 @@ aclError OpModelManager::MatchOpModel(const AclOp &aclOp, OpModel &opModel, bool
             aclOp.opType.c_str(), modelDef->modelPath.c_str());
         ret = modelCache_.GetOpModel(*modelDef, opModel);
         return ret;
+    } else {
+        ret = opModels_.Get(aclOp, modelDef, true);
+        if (ret == ACL_SUCCESS) {
+            isDynamic = false;
+            ACL_LOG_INFO("Match static model success111. opType = %s, opModel = %s",
+                aclOp.opType.c_str(), modelDef->modelPath.c_str());
+            ret = modelCache_.GetOpModel(*modelDef, opModel);
+            return ret;
+        }
     }
     // First find in the dynamic model map
     ACL_LOG_INFO("Match static opModels fail, begin to match model from dynamic opModels. opType = %s",
@@ -715,9 +767,9 @@ aclError OpModelManager::MatchOpModel(const AclOp &aclOp, OpModel &opModel, bool
         for (size_t j = 0; j < shapeRanges.size(); ++j) {
             ACL_LOG_INFO("shapeRanges[%d] size is %zu, shapeStatus[%d] size is %zu",
                 j, shapeRanges[j].size(), i, shapeStatus[i].size());
-            if (static_cast<size_t>(aclOp.numInputs) != shapeStatus[i].size()) {
+            if (static_cast<size_t>(aclOp.numInputs + aclOp.numOutputs) != shapeStatus[i].size()) {
                 ACL_LOG_WARN("The numbers of tensor[%zu] is not equal to tensor dims[%zu] in model",
-                    static_cast<size_t>(aclOp.numInputs), shapeStatus[i].size());
+                    static_cast<size_t>(aclOp.numInputs + aclOp.numOutputs), shapeStatus[i].size());
                 continue;
             }
             if (!CheckShapeRange(aclOp, shapeStatus[i], shapeRanges[j])) {
@@ -725,13 +777,11 @@ aclError OpModelManager::MatchOpModel(const AclOp &aclOp, OpModel &opModel, bool
                 continue;
             }
             AclOp aclOpMatch = AclOp(aclOp);
-            ACL_LOG_INFO("before FixedAclopMatch aclOp = %s, aclOpMatch = %s",
-                aclOp.DebugString().c_str(), aclOpMatch.DebugString().c_str());
+            ACL_LOG_INFO("before FixedAclopMatch aclOpMatch = %s", aclOpMatch.DebugString().c_str());
             std::vector<std::vector<int64_t>> tensorDims;
             std::vector<int64_t> storageTensorDims;
             FixedAclopMatch(aclOpMatch, shapeStatus[i], shapeRanges[j], tensorDims, storageTensorDims);
-            ACL_LOG_INFO("after FixedAclopMatch aclOp = %s aclOpMatch = %s",
-                aclOp.DebugString().c_str(), aclOpMatch.DebugString().c_str());
+            ACL_LOG_INFO("after FixedAclopMatch aclOpMatch = %s", aclOpMatch.DebugString().c_str());
             ret = dynamicOpModels_.Get(aclOpMatch, modelDef, true);
             if (ret == ACL_SUCCESS) {
                 ACL_LOG_INFO("Match dynamic model success. opType = %s, opModel = %s",
@@ -739,6 +789,17 @@ aclError OpModelManager::MatchOpModel(const AclOp &aclOp, OpModel &opModel, bool
                 isDynamic = true;
                 ret = dynamicModelCache_.GetOpModel(*modelDef, opModel);
                 return ret;
+            } else {
+                // aicpu is -2 but need to set const
+                ACL_REQUIRES_OK(SetHostMemToConst(aclOpMatch));
+                ret = dynamicOpModels_.Get(aclOpMatch, modelDef, true);
+                if (ret == ACL_SUCCESS) {
+                    ACL_LOG_INFO("Match dynamic model success111. opType = %s, opModel = %s",
+                        aclOpMatch.opType.c_str(), modelDef->modelPath.c_str());
+                    isDynamic = true;
+                    ret = dynamicModelCache_.GetOpModel(*modelDef, opModel);
+                    return ret;
+                }
             }
         }
     }

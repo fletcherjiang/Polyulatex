@@ -76,7 +76,7 @@ aclError aclFvNotifyWait(rtNotify_t &notify, aclrtStream &stream)
 aclError aclCheckResult(const void *retCode)
 {
     ACL_LOG_INFO("aclCheckResult start.");
-    ACL_REQUIRES_NOT_NULL(retCode);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(retCode);
     int32_t result = 0;
     aclrtRunMode runMode;
     aclError ret = aclrtGetRunMode(&runMode);

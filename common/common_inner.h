@@ -29,8 +29,8 @@ void SetCastHasTruncateAttr(bool hasTruncate);
 
 bool GetIfCastHasTruncateAttr();
 
-void SetCompileFlag(int32_t flag);
+void SetGlobalCompileFlag(int32_t flag);
 
-int32_t GetCompileFlag();
+int32_t GetGlobalCompileFlag();
 
 #endif // ACL_COMMON_INNER_API_H_

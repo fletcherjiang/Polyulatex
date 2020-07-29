@@ -116,7 +116,7 @@ namespace acl {
         aclError validPyrDownInputRet = ValidatePyrDownFormat(
             static_cast<acldvppPixelFormat>(inputDesc->dvppPicDesc.format));
         if (validPyrDownInputRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("input acldvppPicDesc format validate failed, result = %d, format = %u.",
+            ACL_LOG_ERROR("input acldvppPicDesc format verify failed, result = %d, format = %u.",
                           validPyrDownInputRet, inputDesc->dvppPicDesc.format);
             return validPyrDownInputRet;
         }
@@ -124,7 +124,7 @@ namespace acl {
         aclError validPyrDownOutputRet = ValidatePyrDownFormat(
             static_cast<acldvppPixelFormat>(outputDesc->dvppPicDesc.format));
         if (validPyrDownOutputRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("output acldvppPicDesc format validate failed, result = %d, format = %u.",
+            ACL_LOG_ERROR("output acldvppPicDesc format verify failed, result = %d, format = %u.",
                           validPyrDownOutputRet, outputDesc->dvppPicDesc.format);
             return validPyrDownOutputRet;
         }
@@ -194,7 +194,7 @@ namespace acl {
         // check param
         aclError validEqualizeHistRet = ValidEqualizeHistParam(inputDesc, outputDesc);
         if (validEqualizeHistRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("valid equalize hist param failed, result = %d.", validEqualizeHistRet);
+            ACL_LOG_ERROR("verify equalize hist param failed, result = %d.", validEqualizeHistRet);
             return validEqualizeHistRet;
         }
 
@@ -374,7 +374,7 @@ namespace acl {
         // valid input param
         std::unique_ptr<uint16_t[]> roiNumsPtr(new (std::nothrow)uint16_t[size]);
         if (roiNumsPtr == nullptr) {
-            ACL_LOG_ERROR("create batch crop roiNumsPtr failed, roiNums size = %u.", size);
+            ACL_LOG_ERROR("create batch crop roiNums pointer failed, roiNums size = %u.", size);
             return ACL_ERROR_INVALID_PARAM;
         }
 
@@ -585,7 +585,7 @@ namespace acl {
         aclError validVpcInputRet = ValidateCalcHistFormat(
             static_cast<acldvppPixelFormat>(srcPicDesc->dvppPicDesc.format));
         if (validVpcInputRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("input acldvppPicDesc format validate failed, result = %d, format = %u.",
+            ACL_LOG_ERROR("input acldvppPicDesc format verify failed, result = %d, format = %u.",
                           validVpcInputRet, srcPicDesc->dvppPicDesc.format);
             return validVpcInputRet;
         }
@@ -686,7 +686,7 @@ namespace acl {
         // create acldvppHist in host addr
         aclHist = new (hostAddr)acldvppHist;
         if (aclHist == nullptr) {
-            ACL_LOG_ERROR("new acldvppHist failed");
+            ACL_LOG_ERROR("create acldvppHist with function new failed");
             ACL_DELETE_ARRAY_AND_SET_NULL(hostAddr);
             return nullptr;
         }
@@ -731,7 +731,7 @@ namespace acl {
 
         // apply host memory for hist data
         if (histSize <= 0) {
-            ACL_LOG_ERROR("histSize must be positive, histSize = %u", histSize);
+            ACL_LOG_ERROR("histSize must be positive, histSize = %u.", histSize);
             aclHist->~acldvppHist();
             (void)rtFree(histData);
             histData = nullptr;
@@ -743,7 +743,7 @@ namespace acl {
 
         aclHist->dvppHistDesc.hist = new (std::nothrow)uint32_t[histSize];
         if (aclHist->dvppHistDesc.hist == nullptr) {
-            ACL_LOG_ERROR("new hist data failed on host side.");
+            ACL_LOG_ERROR("create hist data with function new failed on host side.");
             aclHist->~acldvppHist();
             (void)rtFree(histData);
             histData = nullptr;
@@ -772,7 +772,7 @@ namespace acl {
         // create acldvppHist in device addr
         aclHist = new (devAddr)acldvppHist;
         if (aclHist == nullptr) {
-            ACL_LOG_ERROR("new acldvppHist failed");
+            ACL_LOG_ERROR("create acldvppHist with function new failed");
             (void)rtFree(devAddr);
             devAddr = nullptr;
             return nullptr;
@@ -790,7 +790,7 @@ namespace acl {
         void *histData = nullptr;
         rtErr = rtDvppMalloc(&histData, histLen);
         if (rtErr != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("malloc device memory for acl dvpp hist data, size = %u, runtime result = %d",
+            ACL_LOG_ERROR("malloc device memory for acl dvpp hist data failed, size = %u, runtime result = %d",
                 histLen, rtErr);
             aclHist->~acldvppHist();
             (void)rtFree(devAddr);
@@ -860,7 +860,7 @@ namespace acl {
             case ACL_HOST: {
                 errno_t err = memset_s(hist->dvppHistDesc.hist, hist->shareBuffer.length, 0, histLen);
                 if (err != EOK) {
-                    ACL_LOG_ERROR("memset_s hist data to 0 fail, destMax = %u, count = %u.",
+                    ACL_LOG_ERROR("set hist data to 0 failed, destMax = %u, count = %u.",
                                 hist->shareBuffer.length, histLen);
                     return ACL_ERROR_INTERNAL_ERROR;
                 }
@@ -886,7 +886,7 @@ namespace acl {
     uint32_t ImageProcessorV200::acldvppGetHistDims(acldvppHist *hist)
     {
         if (hist == nullptr) {
-            ACL_LOG_ERROR("param hist is nullptr.");
+            ACL_LOG_ERROR("param hist is nullptr");
             return 0;
         }
         return hist->dvppHistDesc.dims;
@@ -933,11 +933,11 @@ namespace acl {
     aclError ImageProcessorV200::acldvppSetResizeConfigInterpolation(acldvppResizeConfig *resizeConfig,
                                                                      uint32_t interpolation)
     {
-        ACL_LOG_DEBUG("start to execute acldvppSetResizeConfigInterpolation");
+        ACL_LOG_DEBUG("start to execute acldvppSetResizeConfigInterpolation.");
         ACL_REQUIRES_NOT_NULL(resizeConfig);
         // 3 interplation type(value: 0 default Bilinear/1 Bilinear/2 Nearest neighbor)
         if (interpolation > DVPP_RESIZE_INTERPLATION_TYPE_UPPER) {
-            ACL_LOG_ERROR("the current interpolation[%u] is not support", interpolation);
+            ACL_LOG_ERROR("the current interpolation[%u] is not support.", interpolation);
             return ACL_ERROR_INVALID_PARAM;
         }
         resizeConfig->dvppResizeConfig.interpolation = interpolation;
@@ -946,7 +946,7 @@ namespace acl {
 
     aclError ImageProcessorV200::acldvppSetChannelDescMode(acldvppChannelDesc *channelDesc, uint32_t mode)
     {
-        ACL_LOG_INFO("start to execute acldvppSetChannelDescMode");
+        ACL_LOG_INFO("start to execute acldvppSetChannelDescMode.");
         ACL_REQUIRES_NOT_NULL(channelDesc);
         if ((mode > (DVPP_CHNMODE_VPC | DVPP_CHNMODE_JPEGD | DVPP_CHNMODE_JPEGE)) ||
             (mode < DVPP_CHNMODE_VPC)) {
@@ -1170,7 +1170,7 @@ namespace acl {
         aclError validConvertColorInputRet = ValidateVpcInputFormat(
             static_cast<acldvppPixelFormat>(inputDesc->dvppPicDesc.format));
         if (validConvertColorInputRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("input acldvppPicDesc format validate failed, result = %d, format = %u.",
+            ACL_LOG_ERROR("input acldvppPicDesc format verify failed, result = %d, format = %u.",
                           validConvertColorInputRet, inputDesc->dvppPicDesc.format);
             return validConvertColorInputRet;
         }
@@ -1178,7 +1178,7 @@ namespace acl {
         aclError validConvertColorOutputRet = ValidateConvertColorOutputFormat(
             static_cast<acldvppPixelFormat>(outputDesc->dvppPicDesc.format));
         if (validConvertColorOutputRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("output acldvppPicDesc format validate failed, result = %d, format = %u.",
+            ACL_LOG_ERROR("output acldvppPicDesc format verify failed, result = %d, format = %u.",
                           validConvertColorOutputRet, outputDesc->dvppPicDesc.format);
             return validConvertColorOutputRet;
         }
@@ -1191,7 +1191,7 @@ namespace acl {
         bool validPicParam = (srcWidth == 0) || (srcHeight == 0) ||
                              (srcWidthStride == 0) || (srcHeightStride == 0);
         if (validPicParam) {
-            ACL_LOG_ERROR("convert color src picture parameters is 0, "
+            ACL_LOG_ERROR("verify src picture width and height failed, 0 is invalid value, "
                           "width = %u, height = %u, widthStride = %u, heightStride = %u",
                           srcWidth, srcHeight, srcWidthStride, srcHeightStride);
             return ACL_ERROR_INVALID_PARAM;
@@ -1216,7 +1216,7 @@ namespace acl {
         aclError validFormatRet = ValidateEqualizeHistFormat(
             static_cast<acldvppPixelFormat>(inputDesc->dvppPicDesc.format));
         if (validFormatRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("input acldvppPicDesc format validate failed, result = %d, format = %u.",
+            ACL_LOG_ERROR("input acldvppPicDesc format verify failed, result = %d, format = %u.",
                           validFormatRet, inputDesc->dvppPicDesc.format);
             return validFormatRet;
         }
@@ -1250,7 +1250,7 @@ namespace acl {
 
     acldvppLutMap *ImageProcessorV200::acldvppCreateLutMap()
     {
-        ACL_LOG_INFO("start to execute acldvppCreateLutMap.");
+        ACL_LOG_INFO("start to execute acldvppCreateLutMap");
         acldvppLutMap *aclLutMap = nullptr;
         // alloc memory
         uint32_t acldvppLutMapSize = acl::dvpp::CalAclDvppStructSize(aclLutMap);
@@ -1263,7 +1263,7 @@ namespace acl {
         // create acldvppLutMap in memory
         aclLutMap = new (structAddr)acldvppLutMap();
         if (aclLutMap == nullptr) {
-            ACL_LOG_ERROR("new acldvppLutMap failed.");
+            ACL_LOG_ERROR("create acldvppLutMap with function new failed.");
             ACL_FREE(structAddr);
             return nullptr;
         }
@@ -1325,7 +1325,7 @@ namespace acl {
 
     acldvppBorderConfig *ImageProcessorV200::acldvppCreateBorderConfig()
     {
-        ACL_LOG_INFO("start to execute acldvppCreateBorderConfig.");
+        ACL_LOG_INFO("start to execute acldvppCreateBorderConfig");
         acldvppBorderConfig *aclBorderConfig = nullptr;
         // alloc memory
         uint32_t acldvppLutMapSize = acl::dvpp::CalAclDvppStructSize(aclBorderConfig);
@@ -1338,7 +1338,7 @@ namespace acl {
         // create acldvppLutMap in memory
         aclBorderConfig = new (structAddr)acldvppBorderConfig();
         if (aclBorderConfig == nullptr) {
-            ACL_LOG_ERROR("new acldvppBorderConfig failed.");
+            ACL_LOG_ERROR("create acldvppBorderConfig with function new failed.");
             ACL_FREE(structAddr);
             return nullptr;
         }
@@ -1355,7 +1355,7 @@ namespace acl {
     void ImageProcessorV200::SetDvppWaitTaskType(acldvppChannelDesc *channelDesc)
     {
         channelDesc->dvppWaitTaskType = EVENT_TASK;
-        ACL_LOG_INFO("dvpp wait task type is event");
+        ACL_LOG_INFO("dvpp wait task type is event.");
     }
 
     aclError ImageProcessorV200::acldvppPngGetImageInfo(const void *data,

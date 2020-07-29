@@ -15,8 +15,9 @@
 #include <cstdarg>
 #include <cstdio>
 #include "toolchain/slog.h"
-#include "acl/acl_base.h"
+#include "common/util/error_manager/error_manager.h"
 #include "mmpa/mmpa_api.h"
+#include "acl/acl_base.h"
 
 #define ACL_MODE_ID ASCENDCL
 #define APP_MODE_ID APP
@@ -34,7 +35,18 @@ private:
     static aclLogLevel GetCurLogLevel();
     static bool isEnableEvent_;
 };
-}
+
+class ACL_FUNC_VISIBILITY AclErrorLogManager {
+public:
+    AclErrorLogManager(const std::string &firstStage, const std::string &secondStage);
+    virtual ~AclErrorLogManager();
+    static const std::string &GetStagesHeader();
+    // typename T must be basic data type
+    template<typename T>
+    static std::string CombineLogStr(const std::vector<std::string> keys, const std::vector<T> values);
+};
+} // namespace acl
+
 #ifdef RUN_TEST
 #define ACL_LOG_INFO(fmt, ...)                                                                      \
     do {                                                                                            \
@@ -139,6 +151,15 @@ inline bool IsInfoLogEnabled()
     } \
     while (0)
 
+#define ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(val) \
+    do { \
+    if ((val) == nullptr) { \
+        ACL_LOG_ERROR("param [%s] must not be null.", #val); \
+        REPORT_INPUT_ERROR("EH0002", {"param"}, {#val}); \
+        return ACL_ERROR_INVALID_PARAM; } \
+    } \
+    while (0)
+
 #define ACL_REQUIRES_NOT_NULL(val) \
     do { \
         if ((val) == nullptr) { \
@@ -151,6 +172,15 @@ inline bool IsInfoLogEnabled()
     do { \
         if ((val) == nullptr) { \
             ACL_LOG_ERROR("param [%s] must not be null.", #val); \
+            return nullptr; } \
+        } \
+    while (0)
+
+#define ACL_REQUIRES_NOT_NULL_RET_NULL_INPUT_REPORT(val) \
+    do { \
+        if ((val) == nullptr) { \
+            ACL_LOG_ERROR("param [%s] must not be null.", #val); \
+            REPORT_INPUT_ERROR("EH0002", {"param"}, {#val}); \
             return nullptr; } \
         } \
     while (0)
@@ -206,15 +236,35 @@ inline bool IsInfoLogEnabled()
 #define ACL_REQUIRES_NON_NEGATIVE(val) \
     do { \
         if ((val) < 0) { \
-            ACL_LOG_ERROR("param [%s] must not be non-negative.", #val); \
+            ACL_LOG_ERROR("param [%s] must be non-negative.", #val); \
             return ACL_ERROR_INVALID_PARAM; } \
         } \
     while (0)
 
-#define  ACL_REQUIRES_POSITIVE(val) \
+#define ACL_REQUIRES_NON_NEGATIVE_WITH_INPUT_REPORT(val) \
+    do { \
+        if ((val) < 0) { \
+            ACL_LOG_ERROR("param [%s] must be non-negative.", #val); \
+            REPORT_INPUT_ERROR("EH0001", std::vector<string>({"param", "value", "reason"}), \
+            std::vector<string>({#val, std::to_string(val), "must be non-negative"})); \
+            return ACL_ERROR_INVALID_PARAM; } \
+        } \
+    while (0)
+
+#define ACL_REQUIRES_POSITIVE(val) \
     do { \
         if ((val) <= 0) { \
             ACL_LOG_ERROR("param [%s] must be positive.", #val); \
+            return ACL_ERROR_INVALID_PARAM; } \
+        } \
+    while (0)
+
+#define ACL_REQUIRES_POSITIVE_WITH_INPUT_REPORT(val) \
+    do { \
+        if ((val) <= 0) { \
+            ACL_LOG_ERROR("param [%s] must be positive.", #val); \
+            REPORT_INPUT_ERROR("EH0001", std::vector<string>({"param", "value", "reason"}), \
+            std::vector<string>({#val, std::to_string(val), "must be positive"})); \
             return ACL_ERROR_INVALID_PARAM; } \
         } \
     while (0)
@@ -312,7 +362,7 @@ inline bool IsInfoLogEnabled()
         if (newAddr == nullptr) { \
             ACL_LOG_ERROR("new memory failed"); \
             mmAlignFree(mallocAddr); \
-            return nullptr;; \
+            return nullptr; \
         } \
     } \
     while (0)

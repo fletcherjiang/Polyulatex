@@ -28,7 +28,8 @@ aclError OpExecutor::DoExecuteAsync(ge::SingleOp *singleOp,
                                     const AclOp &aclOp,
                                     const aclDataBuffer *const *inputs,
                                     aclDataBuffer *const *outputs,
-                                    std::map<int32_t, bool> optionalInputMap)
+                                    std::map<int32_t, bool> optionalInputMap,
+                                    bool executeWithExactModel)
 {
     std::vector<ge::DataBuffer> inputVec;
     std::vector<ge::DataBuffer> outputVec;
@@ -39,7 +40,7 @@ aclError OpExecutor::DoExecuteAsync(ge::SingleOp *singleOp,
             ACL_LOG_INFO("unused optional input, index %d", i);
             continue;
         }
-        if (aclOp.inputDesc[i]->IsConstTensor()) {
+        if (aclOp.inputDesc[i]->CheckConstTensor(executeWithExactModel)) {
             ACL_LOG_INFO("the inputTensor is const tensor, index %d", i);
             continue;
         }
@@ -51,7 +52,7 @@ aclError OpExecutor::DoExecuteAsync(ge::SingleOp *singleOp,
     }
 
     for (int i = 0; i < aclOp.numOutputs; ++i) {
-        if (aclOp.outputDesc[i]->IsConstTensor()) {
+        if (aclOp.outputDesc[i]->CheckConstTensor(executeWithExactModel)) {
             ACL_LOG_INFO("the outputTensor is const tensor, index %d", i);
             continue;
         }
@@ -75,14 +76,15 @@ aclError OpExecutor::DoExecuteAsync(ge::SingleOp *singleOp,
 aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
                                     const AclOp &aclOp,
                                     const aclDataBuffer *const inputs[],
-                                    aclDataBuffer *const outputs[])
+                                    aclDataBuffer *const outputs[],
+                                    bool executeWithExactModel)
 {
     std::vector<ge::DataBuffer> inputVec;
     std::vector<ge::DataBuffer> outputVec;
     std::vector<ge::GeTensorDesc> inputDesc;
     std::vector<ge::GeTensorDesc> outputDesc;
     for (int i = 0; i < aclOp.numInputs; ++i) {
-        if (aclOp.inputDesc[i]->IsConstTensor()) {
+        if (aclOp.inputDesc[i]->CheckConstTensor(executeWithExactModel)) {
             ACL_LOG_INFO("the inputTensor is const tensor, index %d", i);
             continue;
         }
@@ -109,7 +111,7 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
     }
     ACL_LOG_INFO("Inputbuff and inputDesc are ready");
     for (int i = 0; i < aclOp.numOutputs; ++i) {
-        if (aclOp.outputDesc[i]->IsConstTensor()) {
+        if (aclOp.outputDesc[i]->CheckConstTensor(executeWithExactModel)) {
             ACL_LOG_INFO("the outputTensor is const tensor, index %d", i);
             continue;
         }
@@ -207,16 +209,17 @@ aclError OpExecutor::ExecuteAsync(const AclOp &aclOp,
     OpModel opModel;
     aclError ret;
     bool isDynamic = false;
+
     ACL_REQUIRES_OK(OpModelManager::GetInstance().MatchOpModel(aclOp, opModel, isDynamic));
     ACL_LOG_DEBUG("match opModel success, opType = %s, isDynamic = %d", aclOp.opType.c_str(), isDynamic);
+    bool isExactModel = (opModel.isStaticModelWithFuzzCompile == 0) ? true : false;
     if (isDynamic) {
         ACL_LOG_INFO("begin to load dynamic model. model = %s", opModel.name.c_str());
         auto executor = LoadDynamicSingleOp(opModel, stream);
         if (executor == nullptr) {
             return ACL_ERROR_OP_LOAD_FAILED;
         }
-
-        ret = DoExecuteAsync(executor, aclOp, inputs, outputs);
+        ret = DoExecuteAsync(executor, aclOp, inputs, outputs, isExactModel);
     } else {
         ACL_LOG_INFO("begin to load static model. model = %s", opModel.name.c_str());
         auto executor = LoadSingleOp(opModel, stream);
@@ -225,12 +228,7 @@ aclError OpExecutor::ExecuteAsync(const AclOp &aclOp,
         }
         std::map <int32_t, bool> optionalInputMap;
         array_utils::GetOptionalInputMap(aclOp.numInputs, aclOp.inputDesc, optionalInputMap);
-        AclOp aclopHostMemToConst = aclOp;
-        if (opModel.isStaticModelWithFuzzCompile == 0) {
-            // only ACL_OP_COMPILE_DEFAULT need to be set const, ACL_OP_COMPILE_FUZZ mode may be static model
-            ACL_REQUIRES_OK(OpModelManager::GetInstance().SetHostMemToConst(aclopHostMemToConst));
-        }
-        ret = DoExecuteAsync(executor, aclopHostMemToConst, inputs, outputs, optionalInputMap);
+        ret = DoExecuteAsync(executor, aclOp, inputs, outputs, optionalInputMap, isExactModel);
     }
 
     return ret;

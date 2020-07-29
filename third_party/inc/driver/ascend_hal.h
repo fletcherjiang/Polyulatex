@@ -51,7 +51,7 @@ typedef unsigned int uint32_t;
  * @attention minor version range form 0x00 to 0xff.
  * when add new API, should add minor version.
  */
-#define __HAL_API_VER_MINOR 0x02
+#define __HAL_API_VER_MINOR 0x03
 /**
  * @ingroup driver
  * @brief API patch version,
@@ -59,7 +59,7 @@ typedef unsigned int uint32_t;
  * when modify enum para, struct para add patch version.
  * this means when new API compatible with old API, change patch version
  */
-#define __HAL_API_VER_PATCH 0x03
+#define __HAL_API_VER_PATCH 0x04
 
 /**
  * @ingroup driver
@@ -234,6 +234,8 @@ typedef enum {
     MEM_TYPE_IMU_DDR,
     MEM_TYPE_BBOX_DDR,
     MEM_TYPE_BBOX_HDR,
+    MEM_TYPE_REG_SRAM,
+    MEM_TYPE_REG_DDR,
     MEM_CTRL_TYPE_MAX,
 } MEM_CTRL_TYPE;
 
@@ -2461,6 +2463,7 @@ int halMbufAllocEx(unsigned int size, unsigned int align, unsigned long flag, in
 * @return   0 for success, others for fail
 */
 int halMbufFree(Mbuf *mbuf);
+
 /**
 * @ingroup driver
 * @brief get Data addr of Mbuf
@@ -2470,7 +2473,29 @@ int halMbufFree(Mbuf *mbuf);
 * @param [out] unsigned int *size: size of the Mbuf data
 * @return   0 for success, others for fail
 */
-int halMbufGetDataPtr (Mbuf *mbuf, void **buf, unsigned int *size);
+// Deprecated by 2021-09-17
+int halMbufGetDataPtr(Mbuf *mbuf, void **buf, unsigned int *size);
+
+/**
+* @ingroup driver
+* @brief get Data addr of Mbuf
+* @attention null
+* @param [in] Mbuf *mbuf: Mbuf addr
+* @param [out] void **buf: Mbuf data addr
+* @return   0 for success, others for fail
+*/
+int halMbufGetBuffAddr(Mbuf *mbuf, void **buf);
+
+/**
+* @ingroup driver
+* @brief get total Buffer size of Mbuf
+* @attention null
+* @param [in] Mbuf *mbuf: Mbuf addr
+* @param [out] unsigned int *totalSize: total buffer size of Mbuf
+* @return   0 for success, others for fail
+*/
+int halMbufGetBuffSize(Mbuf *mbuf, unsigned int *totalSize);
+
 /**
 * @ingroup driver
 * @brief set Data len of Mbuf
@@ -2928,6 +2953,8 @@ struct event_info {
     struct event_info_priv priv;
 };
 
+#define EVENT_SUMMARY_RSV 4
+
 struct event_summary {
     int pid; /* dst PID */
     unsigned int grp_id;
@@ -2935,6 +2962,9 @@ struct event_summary {
     unsigned int subevent_id;
     unsigned int msg_len;
     char *msg;
+    unsigned int dst_engine; /* dst system cpu type, SCHEDULE_DST_ENGINE */
+    SCHEDULE_POLICY policy;
+    int rsv[EVENT_SUMMARY_RSV];
 };
 
 /**
@@ -3126,6 +3156,12 @@ typedef struct {
 }QueueAttr;
 
 typedef struct {
+    unsigned int *qids;
+    unsigned int queNum;
+    unsigned int reserve[QUEUE_RESERVE_LEN];
+}QidsOfPid;
+
+typedef struct {
     unsigned long long enqueDropCnt;
     unsigned long long dequeDropCnt;
 }QUEUE_DROP_PKT_STAT;
@@ -3136,6 +3172,16 @@ typedef enum queue_query_item {
     QUERY_QUEUE_DROP_STAT,
     QUERY_QUEUE_BUTTOM,
 }QUEUE_QUERY_ITEM;
+
+#define QUEUE_MAX_RESERV 5
+
+struct QueueSubscriber {
+    unsigned int devId;
+    unsigned int spGrpId;
+    int pid;
+    int groupId;
+    int rsv[QUEUE_MAX_RESERV];
+};
 
 /**
 * @ingroup driver
@@ -3276,13 +3322,33 @@ DLLEXPORT drvError_t halQueueGetQidbyName(unsigned int devId, unsigned int spGrp
 
 /**
 * @ingroup driver
+* @brief  get qids by pid
+* @attention null
+* @param [in] devId: logic devid
+* @param [in] spGrpId: share pool group id
+* @param [in] pid: pid
+* @param [in] maxQueSize: max number of return queue
+* @param [inout] info: qids is an array for output result and queNum is the number of all qids
+* @return   0 for success, others for fail
+*/
+DLLEXPORT drvError_t halQueueGetQidsbyPid(unsigned int devId, unsigned int spGrpId, unsigned int pid,
+       unsigned int maxQueSize, QidsOfPid *info);
+
+/**
+* @ingroup driver
 * @brief get queue max num
 * @attention null
 * @param [out] unsigned int *maxQueNum: queue max num
 * @return   0 for success, others for fail
 */
 DLLEXPORT drvError_t halQueueGetMaxNum(unsigned int *maxQueNum);
-
+/**
+* @ingroup driver
+* @Pause or recover Enqueue event in same queue-group
+* @param [in] struct QueueSubscriber subscriber: info of pause event subscriber
+* @return   0 for success, others for fail
+*/
+DLLEXPORT drvError_t halQueueCtrlEvent (struct QueueSubscriber *subscriber, QUE_EVENT_CMD cmdType);
 #define DRV_NOTIFY_TYPE_TOTAL_SIZE 1
 #define DRV_NOTIFY_TYPE_NUM 2
 /**

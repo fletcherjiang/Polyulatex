@@ -24,6 +24,7 @@
 #include <vector>
 #include "external/register/register_types.h"
 #include "external/graph/tensor.h"
+#include "external/register/register_error_codes.h"
 
 #define REGISTER_OP_TILING(optype, opfunc) REGISTER_OP_TILING_UNIQ_HELPER(optype, opfunc, __COUNTER__)
 
@@ -32,6 +33,7 @@
 #define REGISTER_OP_TILING_UNIQ(optype, opfunc, counter) \
   static OpTilingRegistryInterf g_##optype##TilingRegistryInterf##counter(#optype, opfunc)
 
+using Status = domi::Status;
 namespace optiling {
 
 extern thread_local int64_t last_op_tiling_perf;
@@ -43,6 +45,19 @@ enum TensorArgType {
 };
 
 using ByteBuffer = std::stringstream;
+
+class TeOpVarAttrArgsImpl;
+class TeOpVarAttrArgs {
+  friend class VarAttrHelper;
+  public:
+    TeOpVarAttrArgs() = default;
+    ~TeOpVarAttrArgs() = default;
+
+    const uint8_t *GetData(const std::string &name, const std::string &dtype, size_t &size) const;
+  private:
+    std::shared_ptr<TeOpVarAttrArgsImpl> impl_;
+};
+
 
 struct TeOpTensor {
   std::vector<int64_t> shape;
@@ -76,6 +91,7 @@ struct TeOpParas {
   std::map<std::string, TeConstTensorData> const_inputs;
   TeOpAttrArgs attrs;
   std::string op_type;
+  TeOpVarAttrArgs var_attrs;
 };
 
 struct OpCompileInfo {
@@ -108,6 +124,7 @@ ByteBuffer &ByteBufferGet(ByteBuffer &buf, T &value) {
 }
 
 size_t ByteBufferGetAll(ByteBuffer &buf, char *dest, size_t dest_len);
+ByteBuffer &ByteBufferPut(ByteBuffer &buf, const uint8_t *data, size_t dest_len);
 }  // namespace optiling
 
 #endif  // INC_REGISTER_OP_TILING_REGISTRY_H_

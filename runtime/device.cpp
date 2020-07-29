@@ -79,7 +79,7 @@ aclError aclrtSetDeviceWithoutTsdVXX(int32_t deviceId)
     ACL_LOG_INFO("start to execute aclrtSetDeviceWithoutTsdVXX, deviceId = %d.", deviceId);
     std::string socVersion = GetSocVersion();
     if (strncmp(socVersion.c_str(), "Ascend910", strlen("Ascend910")) != 0) {
-        ACL_LOG_ERROR("The soc version is not Ascend910, not support");
+        ACL_LOG_INFO("The soc version is not Ascend910, not support");
         return ACL_ERROR_API_NOT_SUPPORT;
     }
     rtError_t rtErr = rtSetDeviceWithoutTsd(deviceId);
@@ -151,7 +151,7 @@ aclError aclrtResetDeviceWithoutTsdVXX(int32_t deviceId)
 aclError aclrtGetDevice(int32_t *deviceId)
 {
     ACL_LOG_INFO("start to execute aclrtGetDevice");
-    ACL_REQUIRES_NOT_NULL(deviceId);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(deviceId);
     rtError_t rtErr = rtGetDevice(deviceId);
     if (rtErr != RT_ERROR_NONE) {
         ACL_LOG_WARN("get device failed, runtime result = %d.", static_cast<int32_t>(rtErr));
@@ -164,7 +164,7 @@ aclError aclrtGetDevice(int32_t *deviceId)
 aclError aclrtGetRunMode(aclrtRunMode *runMode)
 {
     ACL_LOG_INFO("start to execute aclrtGetRunMode");
-    ACL_REQUIRES_NOT_NULL(runMode);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(runMode);
     rtRunMode rtMode;
     rtError_t rtErr = rtGetRunMode(&rtMode);
     if (rtErr != RT_ERROR_NONE) {
@@ -213,7 +213,7 @@ aclError aclrtSetTsDevice(aclrtTsId tsId)
 aclError aclrtGetDeviceCount(uint32_t *count)
 {
     ACL_LOG_INFO("start to execute aclrtGetDeviceCount");
-    ACL_REQUIRES_NOT_NULL(count);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(count);
 
     rtError_t rtErr = rtGetDeviceCount(reinterpret_cast<int32_t *>(count));
     if (rtErr != RT_ERROR_NONE) {

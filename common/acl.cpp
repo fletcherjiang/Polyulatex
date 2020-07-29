@@ -23,7 +23,6 @@
 #include "single_op/op_model_manager.h"
 #include "dump.h"
 #include "profiling.h"
-#include "common/util/error_manager/error_manager.h"
 #include "error_codes_inner.h"
 #include "toolchain/profiling_manager.h"
 #include "toolchain/resource_statistics.h"
@@ -47,6 +46,11 @@ aclError aclInit(const char *configPath)
     if (aclInitFlag) {
         ACL_LOG_ERROR("repeatedly initialized");
         return ACL_ERROR_REPEAT_INITIALIZE;
+    }
+    ACL_LOG_INFO("call ErrorManager.Initialize");
+    ge::Status geRet = ErrorManager::GetInstance().Init();
+    if (geRet != ge::SUCCESS) {
+        ACL_LOG_WARN("init ge error manager failed, ge result = %u", geRet);
     }
     if (DlogReportInitialize() != 0) {
         ACL_LOG_WARN("init device's log failed");
@@ -83,7 +87,7 @@ aclError aclInit(const char *configPath)
     // init GeExecutor
     ge::GeExecutor executor;
     ACL_LOG_INFO("call ge interface executor.Initialize");
-    ge::Status geRet = executor.Initialize();
+    geRet = executor.Initialize();
     if (geRet != ge::SUCCESS) {
         ACL_LOG_ERROR("init ge executor failed, ge result = %u", geRet);
         return ACL_GET_ERRCODE_GE(geRet);
@@ -179,10 +183,10 @@ bool GetAclInitFlag()
 
 aclError aclrtGetVersion(int32_t *majorVersion, int32_t *minorVersion, int32_t *patchVersion)
 {
-    ACL_LOG_INFO("start to execute aclrtGetVersion");
-    ACL_REQUIRES_NOT_NULL(majorVersion);
-    ACL_REQUIRES_NOT_NULL(minorVersion);
-    ACL_REQUIRES_NOT_NULL(patchVersion);
+    ACL_LOG_INFO("start to execute aclrtGetVersion.");
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(majorVersion);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(minorVersion);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(patchVersion);
 
     // Acl version is (*majorVersion).(*minorVersion).(*patchVersion)
     *majorVersion = ACL_MAJOR_VERSION;
@@ -216,7 +220,7 @@ bool GetIfCastHasTruncateAttr()
 
 const char *aclrtGetSocName()
 {
-    ACL_LOG_INFO("start to execute aclrtGetSocName");
+    ACL_LOG_INFO("start to execute aclrtGetSocName.");
     // get socVersion
     auto ret = InitSocVersion();
     if (ret != ACL_SUCCESS) {
@@ -229,13 +233,13 @@ const char *aclrtGetSocName()
 
 const char *aclGetRecentErrMsg()
 {
-    ACL_LOG_INFO("start to execute aclGetRecentErrMsg");
+    ACL_LOG_INFO("start to execute aclGetRecentErrMsg.");
     thread_local static std::string aclRecentErrMsg;
     aclRecentErrMsg = ErrorManager::GetInstance().GetErrorMessage();
     if (aclRecentErrMsg.empty()) {
         ACL_LOG_ERROR("get error message failed");
         return nullptr;
     }
-    ACL_LOG_INFO("execute aclGetRecentErrMsg successfully");
+    ACL_LOG_INFO("execute aclGetRecentErrMsg successfully.");
     return aclRecentErrMsg.c_str();
 }

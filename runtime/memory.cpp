@@ -32,7 +32,7 @@ aclError aclrtMalloc(void **devPtr, size_t size, aclrtMemMallocPolicy policy)
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_MALLOC_FREE);
     ACL_LOG_INFO("start to execute aclrtMalloc, size  = %zu", size);
-    ACL_REQUIRES_NOT_NULL(devPtr);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(devPtr);
     // size must be greater than zero
     if (size == 0) {
         ACL_LOG_ERROR("malloc size must be greater than zero");
@@ -68,7 +68,7 @@ aclError aclrtMallocCached(void **devPtr, size_t size, aclrtMemMallocPolicy poli
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_MALLOC_FREE);
     ACL_LOG_INFO("start to execute aclrtMallocCached, size = %zu", size);
-    ACL_REQUIRES_NOT_NULL(devPtr);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(devPtr);
 
     if (size == 0) {
         ACL_LOG_ERROR("malloc size must be greater than zero");
@@ -97,7 +97,7 @@ aclError aclrtMemFlush(void *devPtr, size_t size)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_LOG_INFO("start to execute aclrtMemFlush, size = %zu", size);
-    ACL_REQUIRES_NOT_NULL(devPtr);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(devPtr);
 
     if (size == 0) {
         ACL_LOG_ERROR("flush cache size must be greater than zero");
@@ -116,7 +116,7 @@ aclError aclrtMemInvalidate(void *devPtr, size_t size)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_LOG_INFO("start to execute aclrtMemInvalidate, size = %zu", size);
-    ACL_REQUIRES_NOT_NULL(devPtr);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(devPtr);
 
     if (size == 0) {
         ACL_LOG_ERROR("invalidate cache size must be greater than zero");
@@ -136,7 +136,7 @@ aclError aclrtFree(void *devPtr)
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_MALLOC_FREE);
     ACL_LOG_INFO("start to execute aclrtFree");
-    ACL_REQUIRES_NOT_NULL(devPtr);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(devPtr);
 
     rtError_t rtErr = rtFree(devPtr);
     if (rtErr != RT_ERROR_NONE) {
@@ -152,7 +152,7 @@ aclError aclrtMallocHost(void **hostPtr, size_t size)
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_MALLOC_FREE_HOST);
     ACL_LOG_INFO("start to execute aclrtMallocHost, size = %zu", size);
-    ACL_REQUIRES_NOT_NULL(hostPtr);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(hostPtr);
     // size must be greater than zero
     if (size == 0) {
         ACL_LOG_ERROR("malloc size must be greater than zero");
@@ -172,7 +172,7 @@ aclError aclrtFreeHost(void *hostPtr)
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_MALLOC_FREE_HOST);
     ACL_LOG_INFO("start to execute aclrtFreeHost");
-    ACL_REQUIRES_NOT_NULL(hostPtr);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(hostPtr);
     rtError_t rtErr = rtFreeHost(hostPtr);
     if (rtErr != RT_ERROR_NONE) {
         ACL_LOG_ERROR("free host memory failed, runtime result = %d", rtErr);
@@ -218,8 +218,8 @@ aclError aclrtMemcpy(void *dst,
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_LOG_INFO("start to execute aclrtMemcpy, destMaxSize = %zu, srcSize = %zu, kind = %d",
         destMax, count, static_cast<int32_t>(kind));
-    ACL_REQUIRES_NOT_NULL(dst);
-    ACL_REQUIRES_NOT_NULL(src);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dst);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(src);
 
     rtMemcpyKind_t rtKind = RT_MEMCPY_RESERVED;
     aclError ret = MemcpyKindTranslate(kind, rtKind);
@@ -242,7 +242,7 @@ aclError aclrtMemset(void *devPtr, size_t maxCount, int32_t value, size_t count)
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_LOG_INFO("start to execute aclrtMemset, maxSize = %zu, size = %zu, value = %d",
         maxCount, count, value);
-    ACL_REQUIRES_NOT_NULL(devPtr);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(devPtr);
 
     rtError_t rtErr = rtMemset(devPtr, maxCount, value, count);
     if (rtErr != RT_ERROR_NONE) {
@@ -262,8 +262,8 @@ aclError aclrtMemcpyAsync(void *dst,
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_LOG_INFO("start to execute aclrtMemcpyAsync, destMaxSize = %zu, srcSize = %zu, kind = %d",
         destMax, count, static_cast<int32_t>(kind));
-    ACL_REQUIRES_NOT_NULL(dst);
-    ACL_REQUIRES_NOT_NULL(src);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dst);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(src);
     rtMemcpyKind_t rtKindVal = RT_MEMCPY_RESERVED;
     aclError ret = MemcpyKindTranslate(kind, rtKindVal);
     if (ret != ACL_SUCCESS) {
@@ -285,7 +285,7 @@ aclError aclrtMemsetAsync(void *devPtr, size_t maxCount, int32_t value, size_t c
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_LOG_INFO("start to execute aclrtMemsetAsync, maxCount = %zu, value = %d, count = %zu",
         maxCount, value, count);
-    ACL_REQUIRES_NOT_NULL(devPtr);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(devPtr);
 
     rtError_t rtErr = rtMemsetAsync(devPtr, maxCount, value, count, stream);
     if (rtErr != RT_ERROR_NONE) {
@@ -403,8 +403,8 @@ aclError aclrtDeviceDisablePeerAccess(int32_t peerDeviceId)
 aclError aclrtGetMemInfo(aclrtMemAttr attr, size_t *free, size_t *total)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
-    ACL_REQUIRES_NOT_NULL(free);
-    ACL_REQUIRES_NOT_NULL(total);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(free);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(total);
     ACL_LOG_INFO("start to execute aclrtGetMemInfo, memory attribute = %d", static_cast<int32_t>(attr));
 
     rtError_t rtErr = rtMemGetInfoEx(static_cast<rtMemInfoType_t>(attr), free, total);

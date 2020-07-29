@@ -411,7 +411,7 @@ aclError AippParamsCheck(const aclmdlAIPP *aippParmsSet, std::string socVersion,
     int32_t aippOutputW, int32_t aippOutputH, bool isNewModel)
 {
     ACL_LOG_INFO("start to execute aclAippParamsCheck");
-    ACL_REQUIRES_NOT_NULL(aippParmsSet);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
 
     enum CceAippInputFormat inputFormat = (enum CceAippInputFormat)aippParmsSet->aippParms.inputFormat;
     aclError result = AippInputFormatCheck(inputFormat, socVersion);

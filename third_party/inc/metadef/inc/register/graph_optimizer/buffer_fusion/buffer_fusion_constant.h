@@ -20,6 +20,7 @@
 #include <vector>
 
 namespace fe {
+static const std::string UB_FUSION_OP_TYPE = "_ub_fusion_op_type";
 // add the op pattern
 static const std::string TBE_PATTERN_INPUT_NODE = "InputData";
 static const std::string TBE_PATTERN_OP_TYPE_ANY = "OpTypeAny";

@@ -66,21 +66,21 @@ namespace acl {
             // get acl run mode
             aclError getRunModeRet = aclrtGetRunMode(&aclRunMode_);
             if (getRunModeRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("get run mode failed, result = %d", getRunModeRet);
+                ACL_LOG_ERROR("get run mode failed, result = %d.", getRunModeRet);
                 return;
             }
 
             // get dvpp kernel version
             aclError getVersionRet = GetDvppKernelVersion();
             if (getVersionRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("get dvpp kernel version failed, result = %d.", getVersionRet);
+                ACL_LOG_ERROR("get dvpp kernel version failed, result = %d", getVersionRet);
                 return;
             }
 
             // init dvpp processor
             aclError initProcessorRet = InitDvppProcessor();
             if (initProcessorRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("int dvpp processor failed, result = %d", initProcessorRet);
+                ACL_LOG_ERROR("int dvpp processor failed, result = %d.", initProcessorRet);
                 dvppVersion_ = DVPP_KERNELS_UNKOWN;
                 return;
             }
@@ -92,7 +92,7 @@ namespace acl {
             rtStream_t rtStream = nullptr;
             rtError_t rtCreate = rtStreamCreate(&rtStream, RT_STREAM_PRIORITY_DEFAULT);
             if (rtCreate != RT_ERROR_NONE) {
-                ACL_LOG_ERROR("create stream failed, runtime result = %d", rtCreate);
+                ACL_LOG_ERROR("create stream failed, runtime result = %d.", rtCreate);
                 return ACL_GET_ERRCODE_RTS(rtCreate);
             }
 
@@ -144,7 +144,7 @@ namespace acl {
                     (void) rtFree(dvppVersionAddr);
                     dvppVersionAddr = nullptr;
                     (void) rtStreamDestroy(rtStream);
-                    ACL_LOG_ERROR("memcpy to host memory failed, size = %u, runtime result = %d", size, rtRet);
+                    ACL_LOG_ERROR("memcpy to host memory failed, size = %u, runtime result = %d.", size, rtRet);
                     return ACL_GET_ERRCODE_RTS(rtRet);
                 }
             }
@@ -180,7 +180,7 @@ namespace acl {
                     versionStr.length());
                 return ACL_ERROR_FEATURE_UNSUPPORTED;
             }
-            ACL_LOG_INFO("get version success, dvpp version = %d, aicpu version = %u.",
+            ACL_LOG_INFO("get version success, dvpp version = %d, aicpu version = %u",
                 static_cast<int32_t>(dvppVersion_), aicpuVersion_);
 
             // destroy resource: device memory and stream
@@ -225,7 +225,7 @@ namespace acl {
                     }
                 }
             } catch (...) {
-                ACL_LOG_ERROR("Make shared for image processor failed.");
+                ACL_LOG_ERROR("define object image processor with unique_ptr failed.");
                 return ACL_ERROR_BAD_ALLOC;
             }
 

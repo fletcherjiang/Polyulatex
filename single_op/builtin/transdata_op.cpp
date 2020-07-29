@@ -49,10 +49,10 @@ aclError aclopTransData(aclTensorDesc *srcDesc,
                         aclDataBuffer *dstBuffer,
                         aclrtStream stream)
 {
-    ACL_REQUIRES_NOT_NULL(srcDesc);
-    ACL_REQUIRES_NOT_NULL(srcBuffer);
-    ACL_REQUIRES_NOT_NULL(dstDesc);
-    ACL_REQUIRES_NOT_NULL(dstBuffer);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(srcDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(srcBuffer);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dstDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dstBuffer);
     const char *srcFormat = nullptr;
     ACL_REQUIRES_OK(GetFormatName(srcDesc->format, &srcFormat));
     const char *dstFormat = nullptr;
@@ -80,9 +80,9 @@ aclError aclopCreateHandleForTransData(aclTensorDesc *srcDesc,
                                        aclTensorDesc *dstDesc,
                                        aclopHandle **handle)
 {
-    ACL_REQUIRES_NOT_NULL(srcDesc);
-    ACL_REQUIRES_NOT_NULL(dstDesc);
-    ACL_REQUIRES_NOT_NULL(handle);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(srcDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dstDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(handle);
     const char *srcFormat = nullptr;
     ACL_REQUIRES_OK(GetFormatName(srcDesc->format, &srcFormat));
     const char *dstFormat = nullptr;

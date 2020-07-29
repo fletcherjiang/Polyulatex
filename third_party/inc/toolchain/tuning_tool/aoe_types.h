@@ -25,21 +25,6 @@ struct AoeDataInfo {
     size_t size = 0;
 };
 
-/**
- * @ingroup aoe
- *
- * aoe status
- */
-enum MsTuneStatus {
-    MSTUNE_SUCCESS,  /** tune success */
-    MSTUNE_FAILED,   /** tune failed */
-};
-
-// Option key: for train options sets
-const std::string MSTUNE_SELF_KEY = "mstune";
-const std::string MSTUNE_GEINIT_KEY = "initialize";
-const std::string MSTUNE_GESESS_KEY = "session";
-
 struct AOEBufferData {
     std::shared_ptr<uint8_t> data = nullptr;
     uint64_t length;
@@ -64,6 +49,7 @@ struct RunnerConfig {
     uint32_t modelId; // run with model Id
     // online only
     uint32_t devId;
+    std::map<std::string, std::string> options;
     std::vector<std::vector<ge::Tensor>> inputs;
     std::vector<ge::Graph> dependGraph; // run graph (for training)
 };
@@ -97,4 +83,3 @@ struct RunnerResult {
 };
 
 #endif
-

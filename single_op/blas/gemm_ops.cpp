@@ -165,11 +165,11 @@ aclError aclblasGemmEx(aclTransType transA,
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
     ACL_LOG_INFO("start to execute aclblasGemmEx");
-    ACL_REQUIRES_NOT_NULL(alpha);
-    ACL_REQUIRES_NOT_NULL(beta);
-    ACL_REQUIRES_NOT_NULL(matrixA);
-    ACL_REQUIRES_NOT_NULL(matrixB);
-    ACL_REQUIRES_NOT_NULL(matrixC);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(alpha);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(beta);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(matrixA);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(matrixB);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(matrixC);
     if (m <= 0 || n <= 0 || k <= 0) {
         ACL_LOG_ERROR("mnk must > 0. m = %d, n = %d, k = %d", m, n, k);
         return ACL_ERROR_INVALID_PARAM;
@@ -209,7 +209,7 @@ aclError aclblasCreateHandleForGemmEx(aclTransType transA,
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
     ACL_LOG_INFO("start to execute aclblasCreateHandleForGemmEx");
-    ACL_REQUIRES_NOT_NULL(handle);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(handle);
     if (m <= 0 || n <= 0 || k <= 0) {
         ACL_LOG_ERROR("The value of m,n,k must be larger than zero.m = %d, n = %d, k = %d", m, n, k);
         return ACL_ERROR_INVALID_PARAM;
