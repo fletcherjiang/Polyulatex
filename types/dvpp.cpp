@@ -36,7 +36,7 @@ namespace {
         }
         auto ret = memcpy_s(dst, dstLen, src, srcLen);
         if (ret != EOK) {
-            ACL_LOG_ERROR("call memcpy_s failed, result=%d, srcLen=%zu, dstLen=%zu", ret, srcLen, dstLen);
+            ACL_LOG_ERROR("call memcpy failed, result=%d, srcLen=%zu, dstLen=%zu", ret, srcLen, dstLen);
             return ACL_ERROR_FAILURE;
         }
 
@@ -505,7 +505,7 @@ aclError acldvppMalloc(void **devPtr, size_t size)
     ACL_PROFILING_REG(ACL_PROF_FUNC_OTHERS);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_DVPP_MALLOC_FREE);
     ACL_LOG_DEBUG("start to execute acldvppMalloc, size = %zu", size);
-    ACL_REQUIRES_NOT_NULL(devPtr);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(devPtr);
     size_t alignedSize;
     ACL_REQUIRES_OK(GetAlignedSize(size, alignedSize));
 
@@ -523,7 +523,7 @@ aclError acldvppFree(void *devPtr)
     ACL_PROFILING_REG(ACL_PROF_FUNC_OTHERS);
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_DVPP_MALLOC_FREE);
     ACL_LOG_DEBUG("start to execute acldvppFree");
-    ACL_REQUIRES_NOT_NULL(devPtr);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(devPtr);
 
     rtError_t rtErr = rtDvppFree(devPtr);
     if (rtErr != RT_ERROR_NONE) {
@@ -569,8 +569,8 @@ aclError acldvppDestroyPicDesc(acldvppPicDesc *picDesc)
 aclError acldvppSetPicDescData(acldvppPicDesc *picDesc, void *dataDev)
 {
     ACL_LOG_DEBUG("start to execute acldvppSetPicDescData");
-    ACL_REQUIRES_NOT_NULL(picDesc);
-    ACL_REQUIRES_NOT_NULL(dataDev);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(picDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataDev);
     picDesc->dvppPicDesc.data = reinterpret_cast<uintptr_t>(dataDev);
     return ACL_SUCCESS;
 }
@@ -578,7 +578,7 @@ aclError acldvppSetPicDescData(acldvppPicDesc *picDesc, void *dataDev)
 aclError acldvppSetPicDescSize(acldvppPicDesc *picDesc, uint32_t size)
 {
     ACL_LOG_DEBUG("start to execute acldvppSetPicDescSize");
-    ACL_REQUIRES_NOT_NULL(picDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(picDesc);
     picDesc->dvppPicDesc.size = size;
     return ACL_SUCCESS;
 }
@@ -586,7 +586,7 @@ aclError acldvppSetPicDescSize(acldvppPicDesc *picDesc, uint32_t size)
 aclError acldvppSetPicDescFormat(acldvppPicDesc *picDesc, acldvppPixelFormat format)
 {
     ACL_LOG_DEBUG("start to execute acldvppSetPicDescFormat");
-    ACL_REQUIRES_NOT_NULL(picDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(picDesc);
     picDesc->dvppPicDesc.format = format;
     // 0x0001 represents that picture format is used first.
     picDesc->dvppPicDesc.bitMap |= 0x0001;
@@ -596,7 +596,7 @@ aclError acldvppSetPicDescFormat(acldvppPicDesc *picDesc, acldvppPixelFormat for
 aclError acldvppSetPicDescWidth(acldvppPicDesc *picDesc, uint32_t width)
 {
     ACL_LOG_DEBUG("start to execute acldvppSetPicDescWidth");
-    ACL_REQUIRES_NOT_NULL(picDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(picDesc);
     picDesc->dvppPicDesc.width = width;
     return ACL_SUCCESS;
 }
@@ -604,7 +604,7 @@ aclError acldvppSetPicDescWidth(acldvppPicDesc *picDesc, uint32_t width)
 aclError acldvppSetPicDescHeight(acldvppPicDesc *picDesc, uint32_t height)
 {
     ACL_LOG_DEBUG("start to execute acldvppSetPicDescHeight");
-    ACL_REQUIRES_NOT_NULL(picDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(picDesc);
     picDesc->dvppPicDesc.height = height;
     return ACL_SUCCESS;
 }
@@ -612,7 +612,7 @@ aclError acldvppSetPicDescHeight(acldvppPicDesc *picDesc, uint32_t height)
 aclError acldvppSetPicDescWidthStride(acldvppPicDesc *picDesc, uint32_t widthStride)
 {
     ACL_LOG_DEBUG("start to execute acldvppSetPicDescWidthStride");
-    ACL_REQUIRES_NOT_NULL(picDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(picDesc);
     picDesc->dvppPicDesc.widthStride = widthStride;
     return ACL_SUCCESS;
 }
@@ -620,7 +620,7 @@ aclError acldvppSetPicDescWidthStride(acldvppPicDesc *picDesc, uint32_t widthStr
 aclError acldvppSetPicDescHeightStride(acldvppPicDesc *picDesc, uint32_t heightStride)
 {
     ACL_LOG_DEBUG("start to execute acldvppSetPicDescHeightStride");
-    ACL_REQUIRES_NOT_NULL(picDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(picDesc);
     picDesc->dvppPicDesc.heightStride = heightStride;
     return ACL_SUCCESS;
 }
@@ -628,7 +628,7 @@ aclError acldvppSetPicDescHeightStride(acldvppPicDesc *picDesc, uint32_t heightS
 aclError acldvppSetPicDescRetCode(acldvppPicDesc *picDesc, uint32_t retCode)
 {
     ACL_LOG_DEBUG("start to execute acldvppSetPicDescRetCode");
-    ACL_REQUIRES_NOT_NULL(picDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(picDesc);
     picDesc->dvppPicDesc.retCode = retCode;
     return ACL_SUCCESS;
 }
@@ -747,7 +747,7 @@ aclError acldvppDestroyRoiConfig(acldvppRoiConfig *roiConfig)
 
 aclError acldvppSetRoiConfigLeft(acldvppRoiConfig *config, uint32_t left)
 {
-    ACL_REQUIRES_NOT_NULL(config);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(config);
     if (left > UINT16_MAX) {
         ACL_LOG_ERROR("param great than UINT16_MAX.");
         return ACL_ERROR_INVALID_PARAM;
@@ -758,7 +758,7 @@ aclError acldvppSetRoiConfigLeft(acldvppRoiConfig *config, uint32_t left)
 
 aclError acldvppSetRoiConfigRight(acldvppRoiConfig *config, uint32_t right)
 {
-    ACL_REQUIRES_NOT_NULL(config);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(config);
     if (right > UINT16_MAX) {
         ACL_LOG_ERROR("param great than UINT16_MAX.");
         return ACL_ERROR_INVALID_PARAM;
@@ -769,7 +769,7 @@ aclError acldvppSetRoiConfigRight(acldvppRoiConfig *config, uint32_t right)
 
 aclError acldvppSetRoiConfigTop(acldvppRoiConfig *config, uint32_t top)
 {
-    ACL_REQUIRES_NOT_NULL(config);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(config);
     if (top > UINT16_MAX) {
         ACL_LOG_ERROR("param great than UINT16_MAX.");
         return ACL_ERROR_INVALID_PARAM;
@@ -780,7 +780,7 @@ aclError acldvppSetRoiConfigTop(acldvppRoiConfig *config, uint32_t top)
 
 aclError acldvppSetRoiConfigBottom(acldvppRoiConfig *config, uint32_t bottom)
 {
-    ACL_REQUIRES_NOT_NULL(config);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(config);
     if (bottom > UINT16_MAX) {
         ACL_LOG_ERROR("param great than UINT16_MAX.");
         return ACL_ERROR_INVALID_PARAM;
@@ -795,7 +795,7 @@ aclError acldvppSetRoiConfig(acldvppRoiConfig *config,
                              uint32_t top,
                              uint32_t bottom)
 {
-    ACL_REQUIRES_NOT_NULL(config);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(config);
     if (left > UINT16_MAX || right > UINT16_MAX || top > UINT16_MAX || bottom > UINT16_MAX) {
         ACL_LOG_ERROR("param great than UINT16_MAX, left=%u, right=%u, top=%u, bottom=%u.",
             left, right, top, bottom);
@@ -843,7 +843,7 @@ aclError acldvppDestroyJpegeConfig(acldvppJpegeConfig *jpegeConfig)
 aclError acldvppSetJpegeConfigLevel(acldvppJpegeConfig *jpegeConfig, uint32_t level)
 {
     ACL_LOG_DEBUG("start to execute acldvppSetJpegeConfigLevel");
-    ACL_REQUIRES_NOT_NULL(jpegeConfig);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(jpegeConfig);
     jpegeConfig->dvppJpegeConfig.level = level;
     return ACL_SUCCESS;
 }
@@ -1016,6 +1016,8 @@ aclError aclvdecSetChannelDescThreadId(aclvdecChannelDesc *channelDesc, uint64_t
     ACL_LOG_DEBUG("start to execute aclvdecSetChannelDescThreadId");
     if (channelDesc == nullptr) {
         ACL_LOG_ERROR("channelDesc is null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"channelDesc"}));
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -1028,11 +1030,15 @@ aclError aclvdecSetChannelDescCallback(aclvdecChannelDesc *channelDesc, aclvdecC
     ACL_LOG_DEBUG("start to execute aclvdecSetChannelDescCallback");
     if (channelDesc == nullptr) {
         ACL_LOG_ERROR("channelDesc is null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"channelDesc"}));
         return ACL_ERROR_INVALID_PARAM;
     }
 
     if (callback == nullptr) {
         ACL_LOG_ERROR("aclvdecCallback is null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"callback"}));
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -1045,6 +1051,8 @@ uint32_t aclvdecGetChannelDescChannelId(const aclvdecChannelDesc *channelDesc)
     ACL_LOG_DEBUG("start to execute aclvdecGetChannelDescChannelId");
     if (channelDesc == nullptr) {
         ACL_LOG_ERROR("channelDesc is null");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"channelDesc"}));
         return 0; // default 0
     }
     return channelDesc->vdecDesc.channelId;
@@ -1055,6 +1063,8 @@ uint64_t aclvdecGetChannelDescThreadId(const aclvdecChannelDesc *channelDesc)
     ACL_LOG_DEBUG("start to execute aclvdecGetChannelDescThreadId");
     if (channelDesc == nullptr) {
         ACL_LOG_ERROR("channelDesc is null");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"channelDesc"}));
         return 0; // default 0
     }
     return channelDesc->threadId;
@@ -1065,6 +1075,8 @@ aclvdecCallback aclvdecGetChannelDescCallback(const aclvdecChannelDesc *channelD
     ACL_LOG_DEBUG("start to execute aclvdecGetChannelDescCallback");
     if (channelDesc == nullptr) {
         ACL_LOG_ERROR("channelDesc is null");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"channelDesc"}));
         return nullptr; // default null
     }
     return channelDesc->callback;
@@ -1075,6 +1087,8 @@ acldvppStreamFormat aclvdecGetChannelDescEnType(const aclvdecChannelDesc *channe
     ACL_LOG_DEBUG("start to execute aclvdecGetChannelDescEnType");
     if (channelDesc == nullptr) {
         ACL_LOG_ERROR("channelDesc is null");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"channelDesc"}));
         return H265_MAIN_LEVEL;
     }
     return static_cast<acldvppStreamFormat>(channelDesc->vdecDesc.enType);
@@ -1085,6 +1099,8 @@ acldvppPixelFormat aclvdecGetChannelDescOutPicFormat(const aclvdecChannelDesc *c
     ACL_LOG_DEBUG("start to execute aclvdecGetChannelDescOutPicFormat");
     if (channelDesc == nullptr) {
         ACL_LOG_ERROR("channelDesc is null");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"channelDesc"}));
         return PIXEL_FORMAT_YUV_400;
     }
     return static_cast<acldvppPixelFormat>(channelDesc->vdecDesc.outPicFormat);
@@ -1095,6 +1111,8 @@ uint32_t aclvdecGetChannelDescOutPicWidth(const aclvdecChannelDesc *channelDesc)
     ACL_LOG_DEBUG("start to execute aclvdecGetChannelDescOutPicWidth");
     if (channelDesc == nullptr) {
         ACL_LOG_ERROR("channelDesc is null");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"channelDesc"}));
         return 0; // default 0
     }
     return channelDesc->vdecDesc.outPicWidth;
@@ -1105,6 +1123,8 @@ uint32_t aclvdecGetChannelDescOutPicHeight(const aclvdecChannelDesc *channelDesc
     ACL_LOG_DEBUG("start to execute aclvdecGetChannelDescOutPicHeight");
     if (channelDesc == nullptr) {
         ACL_LOG_ERROR("channelDesc is null");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"channelDesc"}));
         return 0; // default 0
     }
     return channelDesc->vdecDesc.outPicHeight;
@@ -1156,8 +1176,8 @@ aclError acldvppDestroyStreamDesc(acldvppStreamDesc *streamDesc)
 aclError acldvppSetStreamDescData(acldvppStreamDesc *streamDesc, void *dataDev)
 {
     ACL_LOG_DEBUG("start to execute acldvppSetStreamDescData");
-    ACL_REQUIRES_NOT_NULL(streamDesc);
-    ACL_REQUIRES_NOT_NULL(dataDev);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(streamDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataDev);
     streamDesc->dvppStreamDesc.data = reinterpret_cast<uintptr_t>(dataDev);
     return ACL_SUCCESS;
 }
@@ -1167,6 +1187,8 @@ aclError acldvppSetStreamDescSize(acldvppStreamDesc *streamDesc, uint32_t size)
     ACL_LOG_DEBUG("start to execute acldvppSetStreamDescSize");
     if (streamDesc == nullptr) {
         ACL_LOG_ERROR("streamDesc is null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"streamDesc"}));
         return ACL_ERROR_INVALID_PARAM;
     }
     streamDesc->dvppStreamDesc.size = size;
@@ -1178,6 +1200,8 @@ aclError acldvppSetStreamDescFormat(acldvppStreamDesc *streamDesc, acldvppStream
     ACL_LOG_DEBUG("start to execute acldvppSetStreamDescFormat");
     if (streamDesc == nullptr) {
         ACL_LOG_ERROR("streamDesc is null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"streamDesc"}));
         return ACL_ERROR_INVALID_PARAM;
     }
     streamDesc->dvppStreamDesc.format = static_cast<uint32_t>(format);
@@ -1189,6 +1213,8 @@ aclError acldvppSetStreamDescTimestamp(acldvppStreamDesc *streamDesc, uint64_t t
     ACL_LOG_DEBUG("start to execute acldvppSetStreamDescTimestamp");
     if (streamDesc == nullptr) {
         ACL_LOG_ERROR("streamDesc is null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"streamDesc"}));
         return ACL_ERROR_INVALID_PARAM;
     }
     streamDesc->dvppStreamDesc.timestamp = timestamp;
@@ -1200,6 +1226,8 @@ aclError acldvppSetStreamDescRetCode(acldvppStreamDesc *streamDesc, uint32_t ret
     ACL_LOG_DEBUG("start to execute acldvppSetStreamDescRetCode");
     if (streamDesc == nullptr) {
         ACL_LOG_ERROR("streamDesc is null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"streamDesc"}));
         return ACL_ERROR_INVALID_PARAM;
     }
     streamDesc->dvppStreamDesc.retCode = retCode;
@@ -1211,6 +1239,8 @@ aclError acldvppSetStreamDescEos(acldvppStreamDesc *streamDesc, uint8_t eos)
     ACL_LOG_DEBUG("start to execute acldvppSetStreamDescEos");
     if (streamDesc == nullptr) {
         ACL_LOG_ERROR("streamDesc is null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"streamDesc"}));
         return ACL_ERROR_INVALID_PARAM;
     }
     // 0: false, 1: true
@@ -1232,6 +1262,8 @@ uint32_t acldvppGetStreamDescSize(const acldvppStreamDesc *streamDesc)
     ACL_LOG_DEBUG("start to execute acldvppGetStreamDescSize");
     if (streamDesc == nullptr) {
         ACL_LOG_ERROR("streamDesc is null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"streamDesc"}));
         return 0; // default 0
     }
     return streamDesc->dvppStreamDesc.size;
@@ -1242,6 +1274,8 @@ acldvppStreamFormat acldvppGetStreamDescFormat(const acldvppStreamDesc *streamDe
     ACL_LOG_DEBUG("start to execute acldvppGetStreamDescFormat");
     if (streamDesc == nullptr) {
         ACL_LOG_ERROR("streamDesc is null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"streamDesc"}));
         return H265_MAIN_LEVEL;
     }
     return static_cast<acldvppStreamFormat>(streamDesc->dvppStreamDesc.format);
@@ -1252,6 +1286,8 @@ uint64_t acldvppGetStreamDescTimestamp(const acldvppStreamDesc *streamDesc)
     ACL_LOG_DEBUG("start to execute acldvppGetStreamDescTimestamp");
     if (streamDesc == nullptr) {
         ACL_LOG_ERROR("streamDesc is null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"streamDesc"}));
         return 0; // default 0
     }
     return streamDesc->dvppStreamDesc.timestamp;
@@ -1262,6 +1298,8 @@ uint32_t acldvppGetStreamDescRetCode(const acldvppStreamDesc *streamDesc)
     ACL_LOG_DEBUG("start to execute acldvppGetStreamDescRetCode");
     if (streamDesc == nullptr) {
         ACL_LOG_ERROR("streamDesc is null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"streamDesc"}));
         return 0; // default 0
     }
     return streamDesc->dvppStreamDesc.retCode;
@@ -1272,6 +1310,8 @@ uint8_t acldvppGetStreamDescEos(const acldvppStreamDesc *streamDesc)
     ACL_LOG_DEBUG("start to execute acldvppGetStreamDescEos");
     if (streamDesc == nullptr) {
         ACL_LOG_ERROR("streamDesc is null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"streamDesc"}));
         return 0; // default 0
     }
     return (streamDesc->dvppStreamDesc.eos) ? 1 : 0;
@@ -1381,6 +1421,8 @@ aclError aclvencSetChannelDescThreadId(aclvencChannelDesc *channelDesc, uint64_t
 {
     if (channelDesc == nullptr) {
         ACL_LOG_ERROR("channelDesc is null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"channelDesc"}));
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -1392,11 +1434,15 @@ aclError aclvencSetChannelDescCallback(aclvencChannelDesc *channelDesc, aclvencC
 {
     if (channelDesc == nullptr) {
         ACL_LOG_ERROR("channelDesc is null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"channelDesc"}));
         return ACL_ERROR_INVALID_PARAM;
     }
 
     if (callback == nullptr) {
         ACL_LOG_ERROR("aclvencCallback is null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"callback"}));
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -1408,6 +1454,8 @@ aclError aclvencSetChannelDescEnType(aclvencChannelDesc *channelDesc, acldvppStr
 {
     if (channelDesc == nullptr) {
         ACL_LOG_ERROR("channelDesc is null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"channelDesc"}));
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -1429,6 +1477,8 @@ aclError aclvencSetChannelDescPicWidth(aclvencChannelDesc *channelDesc, uint32_t
 {
     if (channelDesc == nullptr) {
         ACL_LOG_ERROR("channelDesc is null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"channelDesc"}));
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -1440,6 +1490,8 @@ aclError aclvencSetChannelDescPicHeight(aclvencChannelDesc *channelDesc, uint32_
 {
     if (channelDesc == nullptr) {
         ACL_LOG_ERROR("channelDesc is null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"channelDesc"}));
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -1451,6 +1503,8 @@ aclError aclvencSetChannelDescKeyFrameInterval(aclvencChannelDesc *channelDesc, 
 {
     if (channelDesc == nullptr) {
         ACL_LOG_ERROR("channelDesc is null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"channelDesc"}));
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -1511,7 +1565,7 @@ aclError aclvencSetChannelDescBufSize(aclvencChannelDesc *channelDesc, uint32_t 
 aclError aclvencSetChannelDescParam(aclvencChannelDesc *channelDesc,
     aclvencChannelDescParamType paramType, size_t length, const void *param)
 {
-    ACL_REQUIRES_NOT_NULL(param);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(param);
     if (g_vencSetParamFuncMap.find(paramType) == g_vencSetParamFuncMap.end()) {
         ACL_LOG_ERROR("invalid venc channelDesc parameter type %d.", static_cast<int32_t>(paramType));
         return ACL_ERROR_INVALID_PARAM;
@@ -1545,6 +1599,8 @@ uint32_t aclvencGetChannelDescChannelId(const aclvencChannelDesc *channelDesc)
 {
     if (channelDesc == nullptr) {
         ACL_LOG_ERROR("channelDesc is null");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"channelDesc"}));
         return 0; // default 0
     }
     return channelDesc->vencDesc.channelId;
@@ -1554,6 +1610,8 @@ uint64_t aclvencGetChannelDescThreadId(const aclvencChannelDesc *channelDesc)
 {
     if (channelDesc == nullptr) {
         ACL_LOG_ERROR("channelDesc is null");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"channelDesc"}));
         return 0; // default 0
     }
     return channelDesc->threadId;
@@ -1563,6 +1621,8 @@ aclvencCallback aclvencGetChannelDescCallback(const aclvencChannelDesc *channelD
 {
     if (channelDesc == nullptr) {
         ACL_LOG_ERROR("channelDesc or callback is null");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"channelDesc"}));
         return nullptr; // default null
     }
     return channelDesc->callback;
@@ -1572,6 +1632,8 @@ acldvppStreamFormat aclvencGetChannelDescEnType(const aclvencChannelDesc *channe
 {
     if (channelDesc == nullptr) {
         ACL_LOG_ERROR("channelDesc is null");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"channelDesc"}));
         return H265_MAIN_LEVEL; // default H265_MAIN_LEVEL
     }
     return static_cast<acldvppStreamFormat>(channelDesc->vencDesc.enType);
@@ -1581,6 +1643,8 @@ acldvppPixelFormat aclvencGetChannelDescPicFormat(const aclvencChannelDesc *chan
 {
     if (channelDesc == nullptr) {
         ACL_LOG_ERROR("channelDesc is null");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"channelDesc"}));
         return PIXEL_FORMAT_YUV_SEMIPLANAR_420; // default PIXEL_FORMAT_YUV_SEMIPLANAR_420
     }
     return static_cast<acldvppPixelFormat>(channelDesc->vencDesc.picFormat);
@@ -1590,6 +1654,8 @@ uint32_t aclvencGetChannelDescPicWidth(const aclvencChannelDesc *channelDesc)
 {
     if (channelDesc == nullptr) {
         ACL_LOG_ERROR("channelDesc is null");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"channelDesc"}));
         return 0; // default 0
     }
     return channelDesc->vencDesc.picWidth;
@@ -1599,6 +1665,8 @@ uint32_t aclvencGetChannelDescPicHeight(const aclvencChannelDesc *channelDesc)
 {
     if (channelDesc == nullptr) {
         ACL_LOG_ERROR("channelDesc is null");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"channelDesc"}));
         return 0; // default 0
     }
     return channelDesc->vencDesc.picHeight;
@@ -1608,6 +1676,8 @@ uint32_t aclvencGetChannelDescKeyFrameInterval(const aclvencChannelDesc *channel
 {
     if (channelDesc == nullptr) {
         ACL_LOG_ERROR("channelDesc is null");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"channelDesc"}));
         return 0; // default 0
     }
     return channelDesc->vencDesc.keyFrameInterval;
@@ -1649,9 +1719,9 @@ uint32_t aclvencGetChannelDescMaxBitRate(const aclvencChannelDesc *channelDesc)
 aclError aclvencGetChannelDescParam(const aclvencChannelDesc *channelDesc,
     aclvencChannelDescParamType paramType, size_t length, size_t *paramRetSize, void *param)
 {
-    ACL_REQUIRES_NOT_NULL(channelDesc);
-    ACL_REQUIRES_NOT_NULL(paramRetSize);
-    ACL_REQUIRES_NOT_NULL(param);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(channelDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(paramRetSize);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(param);
     if (g_vencGetParamFuncMap.find(paramType) == g_vencGetParamFuncMap.end()) {
         ACL_LOG_ERROR("invalid venc channelDesc parameter type %d.", static_cast<int32_t>(paramType));
         return ACL_ERROR_INVALID_PARAM;
@@ -1662,7 +1732,7 @@ aclError aclvencGetChannelDescParam(const aclvencChannelDesc *channelDesc,
 aclError aclvencSetFrameConfigForceIFrame(aclvencFrameConfig *config, uint8_t forceIFrame)
 {
     ACL_LOG_DEBUG("start to execute aclvencSetFrameConfigForceIFrame");
-    ACL_REQUIRES_NOT_NULL(config);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(config);
     config->vencFrameConfig.forceIFrame = (forceIFrame != 0);
     return ACL_SUCCESS;
 }
@@ -1672,6 +1742,8 @@ uint8_t aclvencGetFrameConfigForceIFrame(const aclvencFrameConfig *config)
     ACL_LOG_DEBUG("start to execute aclvencGetFrameConfigForceIFrame");
     if (config == nullptr) {
         ACL_LOG_ERROR("config is null");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"config"}));
         return 0; // default 0
     }
     return config->vencFrameConfig.forceIFrame;
@@ -1680,7 +1752,7 @@ uint8_t aclvencGetFrameConfigForceIFrame(const aclvencFrameConfig *config)
 aclError aclvencSetFrameConfigEos(aclvencFrameConfig *config, uint8_t eos)
 {
     ACL_LOG_DEBUG("start to execute aclvencSetFrameConfigEos");
-    ACL_REQUIRES_NOT_NULL(config);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(config);
     config->vencFrameConfig.eos = (eos == 0) ? false : true;
     return ACL_SUCCESS;
 }
@@ -1690,6 +1762,8 @@ uint8_t aclvencGetFrameConfigEos(const aclvencFrameConfig *config)
     ACL_LOG_DEBUG("start to execute aclvencGetFrameConfigEos");
     if (config == nullptr) {
         ACL_LOG_ERROR("config is null");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"config"}));
         return 0; // default 0
     }
     return config->vencFrameConfig.eos;
@@ -1701,6 +1775,9 @@ acldvppBatchPicDesc *acldvppCreateBatchPicDesc(uint32_t batchSize)
     // dvpp kernel process max pictures number is 128
     if (batchSize == 0 || batchSize > BATCH_MAX_SIZE) {
         ACL_LOG_ERROR("param batchSize is 0 or greater than %u, batch size = %u.", BATCH_MAX_SIZE, batchSize);
+        REPORT_INPUT_ERROR("EH0001", std::vector<std::string>({"param", "value", "reason"}),
+            std::vector<std::string>({"batchSize", std::to_string(batchSize),
+            "param batchSize is 0 or greater than" + std::to_string(batchSize)}));
         return nullptr;
     }
 
@@ -1727,7 +1804,8 @@ acldvppBatchPicDesc *acldvppCreateBatchPicDesc(uint32_t batchSize)
     uint32_t flags = RT_MEMORY_DEFAULT | RT_MEMORY_POLICY_DEFAULT_PAGE_ONLY;
     aclError ret = rtMalloc(&devPtr, devSize, flags);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("malloc device memory for acl dvpp batch pic desc, result = %d. batch size=%u.", ret, batchSize);
+        ACL_LOG_ERROR("malloc device memory for acl dvpp batch pic desc failed, result = %d. batch size=%u.",
+            ret, batchSize);
         ACL_DELETE_ARRAY_AND_SET_NULL(batchPicDesc->aclDvppPicDescs);
         ACL_ALIGN_FREE(aclBatchPicAddr);
         return nullptr;
@@ -1743,6 +1821,8 @@ acldvppPicDesc *acldvppGetPicDesc(acldvppBatchPicDesc *batchPicDesc, uint32_t in
 {
     if (batchPicDesc == nullptr) {
         ACL_LOG_ERROR("param batchPicDesc is nullptr.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"batchPicDesc"}));
         return nullptr;
     }
 
@@ -1814,6 +1894,8 @@ uint32_t aclvdecGetChannelDescOutMode(const aclvdecChannelDesc *channelDesc)
     ACL_LOG_DEBUG("start to execute aclvdecGetChannelDescOutMode");
     if (channelDesc == nullptr) {
         ACL_LOG_ERROR("channelDesc is null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"channelDesc"}));
         return 0; // default 0
     }
 
@@ -1832,7 +1914,7 @@ acldvppBorderConfig *acldvppCreateBorderConfig()
 
 aclError acldvppSetBorderConfigValue(acldvppBorderConfig *borderConfig, uint32_t index, double value)
 {
-    ACL_REQUIRES_NOT_NULL(borderConfig);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(borderConfig);
     if (index >= DVPP_MAKE_BORDER_MAX_COMPONENT) {
         ACL_LOG_ERROR("index[%u] should be smaller than array[%u]", index, DVPP_MAKE_BORDER_MAX_COMPONENT);
         return ACL_ERROR_INVALID_PARAM;
@@ -1844,14 +1926,14 @@ aclError acldvppSetBorderConfigValue(acldvppBorderConfig *borderConfig, uint32_t
 
 aclError acldvppSetBorderConfigBorderType(acldvppBorderConfig *borderConfig, acldvppBorderType borderType)
 {
-    ACL_REQUIRES_NOT_NULL(borderConfig);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(borderConfig);
     borderConfig->dvppBorderConfig.borderType = static_cast<uint32_t>(borderType);;
     return ACL_SUCCESS;
 }
 
 aclError acldvppSetBorderConfigTop(acldvppBorderConfig *borderConfig, uint32_t top)
 {
-    ACL_REQUIRES_NOT_NULL(borderConfig);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(borderConfig);
     if (top > UINT16_MAX) {
         ACL_LOG_ERROR("the param of top[%u] can't be larger than UINT16_MAX[%u]", top, UINT16_MAX);
         return ACL_ERROR_INVALID_PARAM;
@@ -1862,7 +1944,7 @@ aclError acldvppSetBorderConfigTop(acldvppBorderConfig *borderConfig, uint32_t t
 
 aclError acldvppSetBorderConfigBottom(acldvppBorderConfig *borderConfig, uint32_t bottom)
 {
-    ACL_REQUIRES_NOT_NULL(borderConfig);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(borderConfig);
     if (bottom > UINT16_MAX) {
         ACL_LOG_ERROR("the param of bottom[%u] can't be larger than UINT16_MAX[%u]", bottom, UINT16_MAX);
         return ACL_ERROR_INVALID_PARAM;
@@ -1873,7 +1955,7 @@ aclError acldvppSetBorderConfigBottom(acldvppBorderConfig *borderConfig, uint32_
 
 aclError acldvppSetBorderConfigLeft(acldvppBorderConfig *borderConfig, uint32_t left)
 {
-    ACL_REQUIRES_NOT_NULL(borderConfig);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(borderConfig);
     if (left > UINT16_MAX) {
         ACL_LOG_ERROR("the param of left[%u] can't be larger than UINT16_MAX[%u]", left, UINT16_MAX);
         return ACL_ERROR_INVALID_PARAM;
@@ -1884,7 +1966,7 @@ aclError acldvppSetBorderConfigLeft(acldvppBorderConfig *borderConfig, uint32_t 
 
 aclError acldvppSetBorderConfigRight(acldvppBorderConfig *borderConfig, uint32_t right)
 {
-    ACL_REQUIRES_NOT_NULL(borderConfig);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(borderConfig);
     if (right > UINT16_MAX) {
         ACL_LOG_ERROR("the param of right[%u] can't be larger than UINT16_MAX[%u]", right, UINT16_MAX);
         return ACL_ERROR_INVALID_PARAM;
@@ -1897,6 +1979,8 @@ double acldvppGetBorderConfigValue(const acldvppBorderConfig *borderConfig, uint
 {
     if (borderConfig == nullptr) {
         ACL_LOG_ERROR("border config is null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"borderConfig"}));
         return -1;
     }
     if (index >= DVPP_MAKE_BORDER_MAX_COMPONENT) {
@@ -1911,6 +1995,8 @@ acldvppBorderType acldvppGetBorderConfigBorderType(const acldvppBorderConfig *bo
 {
     if (borderConfig == nullptr) {
         ACL_LOG_ERROR("border config is null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"borderConfig"}));
         return BORDER_CONSTANT;
     }
 
@@ -1921,6 +2007,8 @@ uint32_t acldvppGetBorderConfigTop(const acldvppBorderConfig *borderConfig)
 {
     if (borderConfig == nullptr) {
         ACL_LOG_ERROR("border config is null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"borderConfig"}));
         return DVPP_BORDER_CONFIG_INVALID_VALUE;
     }
 
@@ -1931,6 +2019,8 @@ uint32_t acldvppGetBorderConfigBottom(const acldvppBorderConfig *borderConfig)
 {
     if (borderConfig == nullptr) {
         ACL_LOG_ERROR("border config is null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"borderConfig"}));
         return DVPP_BORDER_CONFIG_INVALID_VALUE;
     }
 
@@ -1941,6 +2031,8 @@ uint32_t acldvppGetBorderConfigLeft(const acldvppBorderConfig *borderConfig)
 {
     if (borderConfig == nullptr) {
         ACL_LOG_ERROR("border config is null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"borderConfig"}));
         return DVPP_BORDER_CONFIG_INVALID_VALUE;
     }
 
@@ -1951,6 +2043,8 @@ uint32_t acldvppGetBorderConfigRight(const acldvppBorderConfig *borderConfig)
 {
     if (borderConfig == nullptr) {
         ACL_LOG_ERROR("border config is null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"borderConfig"}));
         return DVPP_BORDER_CONFIG_INVALID_VALUE;
     }
 
@@ -1970,7 +2064,7 @@ aclError acldvppDestroyBorderConfig(acldvppBorderConfig *borderConfig)
 aclError aclvdecSetChannelDescEnType(aclvdecChannelDesc *channelDesc, acldvppStreamFormat enType)
 {
     ACL_LOG_DEBUG("start to execute aclvdecSetChannelDescEnType");
-    ACL_REQUIRES_NOT_NULL(channelDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(channelDesc);
 
     if (enType < H265_MAIN_LEVEL) {
         ACL_LOG_ERROR("unsupported enType, enType = %u", enType);

@@ -84,7 +84,7 @@ aclError aclfvDestroyInitPara(aclfvInitPara *initPara)
 aclError aclfvSet1NTopNum(aclfvInitPara *initPara, uint32_t maxTopNumFor1N)
 {
     ACL_LOG_INFO("aclfvSet1NTopNum start.");
-    ACL_REQUIRES_NOT_NULL(initPara);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(initPara);
     // maxTopNumFor1N need in [2, 4800]
     if (maxTopNumFor1N < 2 || maxTopNumFor1N > 4800) {
         ACL_LOG_ERROR("maxTopNumFor1N[%u] should be between in [2, 4800].", maxTopNumFor1N);
@@ -98,7 +98,7 @@ aclError aclfvSet1NTopNum(aclfvInitPara *initPara, uint32_t maxTopNumFor1N)
 aclError aclfvSetNMTopNum(aclfvInitPara *initPara, uint32_t maxTopNumForNM)
 {
     ACL_LOG_INFO("aclfvSetNMTopNum start.");
-    ACL_REQUIRES_NOT_NULL(initPara);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(initPara);
     // maxTopNumForNM need in [500, 4800]
     if (maxTopNumForNM < 500 || maxTopNumForNM > 4800) {
         ACL_LOG_ERROR("maxTopNumForNM[%u] should be between in [500, 4800].", maxTopNumForNM);
@@ -115,6 +115,8 @@ aclfvFeatureInfo *aclfvCreateFeatureInfo(uint32_t id0, uint32_t id1, uint32_t of
     ACL_LOG_INFO("aclfvCreateFeatureInfo start.");
     if (featureData == nullptr) {
         ACL_LOG_ERROR("create acl retr feature info failed, featureData is null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"featureData"}));
         return nullptr;
     }
 
@@ -251,6 +253,8 @@ aclfvQueryTable *aclfvCreateQueryTable(uint32_t queryCnt, uint32_t tableLen, uin
 {
     if (tableData == nullptr) {
         ACL_LOG_ERROR("create acl retr query table failed, table data is nullptr.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"tableData"}));
         return nullptr;
     }
 
@@ -287,11 +291,14 @@ aclfvSearchInput *aclfvCreateSearchInput(aclfvQueryTable *queryTable, aclfvRepoR
 {
     if (queryTable == nullptr) {
         ACL_LOG_ERROR("create acl retr search input failed, query table is nullptr.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"queryTable"}));
         return nullptr;
     }
 
     if (repoRange == nullptr) {
         ACL_LOG_ERROR("create acl retr search input failed, repo range is nullptr.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}), std::vector<std::string>({"repoRange"}));
         return nullptr;
     }
 
@@ -328,26 +335,34 @@ aclfvSearchResult *aclfvCreateSearchResult(uint32_t queryCnt, uint32_t *resultNu
 {
     if (resultNum == nullptr) {
         ACL_LOG_ERROR("create acl retr search result failed, resultNum is nullptr.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"resultNum"}));
         return nullptr;
     }
 
     if (id0 == nullptr) {
         ACL_LOG_ERROR("create acl retr search result failed, id0 is nullptr.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}), std::vector<std::string>({"id0"}));
         return nullptr;
     }
 
     if (id1 == nullptr) {
         ACL_LOG_ERROR("create acl retr search result failed, id1 is nullptr.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}), std::vector<std::string>({"id1"}));
         return nullptr;
     }
 
     if (resultOffset == nullptr) {
         ACL_LOG_ERROR("create acl retr search result failed, resultOffset is nullptr.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"resultOffset"}));
         return nullptr;
     }
 
     if (resultDistance == nullptr) {
         ACL_LOG_ERROR("create acl retr search result failed, resultDistance is nullptr.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"resultDistance"}));
         return nullptr;
     }
 
@@ -358,8 +373,7 @@ aclfvSearchResult *aclfvCreateSearchResult(uint32_t queryCnt, uint32_t *resultNu
 
     if (resultNumDataLen != queryCnt * sizeof(uint32_t)) {
         ACL_LOG_ERROR("resultNumDataLen:%u of search result should be equal to queryCnt:%u * sizeof(uint32_t).",
-            resultNumDataLen,
-            queryCnt);
+            resultNumDataLen, queryCnt);
         return nullptr;
     }
 

@@ -59,7 +59,7 @@ aclTensorDesc::aclTensorDesc(const aclTensorDesc &tensorDesc)
     Init(tensorDesc);
 }
 
-const string &aclTensorDesc::GetKey(bool isInput) const
+const string &aclTensorDesc::GetKey() const
 {
     if (!cachedKey.empty()) {
         ACL_LOG_INFO("cachedKey is not empty %s", cachedKey.c_str());
@@ -76,13 +76,10 @@ const string &aclTensorDesc::GetKey(bool isInput) const
         cachedKey += std::to_string(storageFormat);
         cachedKey.push_back('_');
     }
-    if (isInput) {
-        for (auto dim : dims) {
-            cachedKey += std::to_string(dim);
-            cachedKey.push_back('_');
-        }
+    for (auto dim : dims) {
+        cachedKey += std::to_string(dim);
+        cachedKey.push_back('_');
     }
-
     if (isConst) {
         cachedKey += "true";
     } else {
@@ -147,6 +144,17 @@ bool aclTensorDesc::IsDynamicTensor() const
         }
     }
     return false;
+}
+
+bool aclTensorDesc::CheckConstTensor(bool needCheckHostMem) const
+{
+    if (isConst) {
+        return true;
+    } else if (needCheckHostMem && (memtype == ACL_MEMTYPE_HOST)) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 void aclTensorDesc::UpdateTensorShape(const std::vector<int64_t> &shape)
@@ -239,7 +247,7 @@ void aclDestroyTensorDesc(const aclTensorDesc *desc)
 
 aclError aclSetTensorShapeRange(aclTensorDesc* desc, size_t dimsCout, int64_t dimsRange[][ACL_TENSOR_SHAPE_RANGE_NUM])
 {
-    ACL_REQUIRES_NOT_NULL(desc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(desc);
     // dimsCout should be equal to length of array dimsRange
     desc->shapeRange.clear();
     for (size_t i = 0; i < dimsCout; ++i) {
@@ -252,6 +260,7 @@ aclDataType aclGetTensorDescType(const aclTensorDesc *desc)
 {
     if (desc == nullptr) {
         ACL_LOG_ERROR("desc is null");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}), std::vector<std::string>({"desc"}));
         return ACL_DT_UNDEFINED;
     }
 
@@ -262,6 +271,7 @@ aclFormat aclGetTensorDescFormat(const aclTensorDesc *desc)
 {
     if (desc == nullptr) {
         ACL_LOG_ERROR("desc is null");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}), std::vector<std::string>({"desc"}));
         return ACL_FORMAT_UNDEFINED;
     }
 
@@ -272,6 +282,7 @@ size_t aclGetTensorDescSize(const aclTensorDesc *desc)
 {
     if (desc == nullptr) {
         ACL_LOG_ERROR("desc is null");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}), std::vector<std::string>({"desc"}));
         return 0;
     }
     size_t size = 0;
@@ -285,6 +296,7 @@ size_t aclGetTensorDescElementCount(const aclTensorDesc *desc)
 {
     if (desc == nullptr) {
         ACL_LOG_ERROR("desc is null");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}), std::vector<std::string>({"desc"}));
         return 0;
     }
 
@@ -311,6 +323,7 @@ size_t aclGetTensorDescNumDims(const aclTensorDesc *desc)
 {
     if (desc == nullptr) {
         ACL_LOG_ERROR("desc is null");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}), std::vector<std::string>({"desc"}));
         return 0;
     }
     if ((desc->dims.size() > 0) && (desc->dims[0] == UNKNOW_RANK)) {
@@ -324,8 +337,8 @@ aclError aclGetTensorDescDimRange(const aclTensorDesc* desc,
                                   size_t dimRangeNum,
                                   int64_t *dimRange)
 {
-    ACL_REQUIRES_NOT_NULL(desc);
-    ACL_REQUIRES_NOT_NULL(dimRange);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(desc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dimRange);
     if (index >= desc->shapeRange.size()) {
         ACL_LOG_ERROR("index out of range. index = %zu, numDims = %zu", index, desc->shapeRange.size());
         return ACL_ERROR_INVALID_PARAM;
@@ -344,6 +357,7 @@ int64_t aclGetTensorDescDim(const aclTensorDesc *desc, size_t index)
 {
     if (desc == nullptr) {
         ACL_LOG_ERROR("desc is null");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}), std::vector<std::string>({"desc"}));
         return -1;
     }
 
@@ -359,6 +373,8 @@ aclError aclGetTensorDescDimV2(const aclTensorDesc *desc, size_t index, int64_t 
 {
     if (desc == nullptr) {
         ACL_LOG_ERROR("desc is null");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"desc"}));
         return ACL_ERROR_INVALID_PARAM;
     }
     if (index >= desc->dims.size()) {
@@ -393,6 +409,8 @@ aclError aclUpdateDataBuffer(aclDataBuffer *dataBuffer, void *data, size_t size)
 {
     if (dataBuffer == nullptr) {
         ACL_LOG_ERROR("invalid input pointer of dataBuffer, please use aclCreateDataBuffer interface to create.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"dataBuffer"}));
         return ACL_ERROR_INVALID_PARAM;
     }
     dataBuffer->data = data;
@@ -431,6 +449,7 @@ void aclSetTensorDescName(aclTensorDesc *desc, const char *name)
 {
     if (desc == nullptr) {
         ACL_LOG_ERROR("desc is null");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}), std::vector<std::string>({"desc"}));
         return;
     }
 
@@ -462,8 +481,8 @@ aclError aclSetTensorStorageFormat(aclTensorDesc *desc, aclFormat format)
 
 aclError aclSetTensorStorageShape(aclTensorDesc *desc, int numDims, const int64_t *dims)
 {
-    ACL_REQUIRES_NOT_NULL(desc);
-    ACL_REQUIRES_NOT_NULL(dims);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(desc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dims);
 
     desc->storageDims.clear();
     for (int i = 0; i < numDims; ++i) {
@@ -484,8 +503,8 @@ aclError aclSetTensorFormat(aclTensorDesc *desc, aclFormat format)
 
 aclError aclSetTensorShape(aclTensorDesc *desc, int numDims, const int64_t *dims)
 {
-    ACL_REQUIRES_NOT_NULL(desc);
-    ACL_REQUIRES_NOT_NULL(dims);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(desc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dims);
 
     desc->storageDims.clear();
     for (int i = 0; i < numDims; ++i) {
@@ -506,8 +525,8 @@ aclError aclSetTensorOriginFormat(aclTensorDesc *desc, aclFormat format)
 
 aclError aclSetTensorOriginShape(aclTensorDesc *desc, int numDims, const int64_t *dims)
 {
-    ACL_REQUIRES_NOT_NULL(desc);
-    ACL_REQUIRES_NOT_NULL(dims);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(desc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dims);
 
     desc->dims.clear();
     for (int i = 0; i < numDims; ++i) {
@@ -519,21 +538,21 @@ aclError aclSetTensorOriginShape(aclTensorDesc *desc, int numDims, const int64_t
 
 aclTensorDesc *aclGetTensorDescByIndex(aclTensorDesc *desc, size_t index)
 {
-    ACL_REQUIRES_NOT_NULL_RET_NULL(desc);
+    ACL_REQUIRES_NOT_NULL_RET_NULL_INPUT_REPORT(desc);
 
     return (desc + index);
 }
 
 void *aclGetTensorDescAddress(const aclTensorDesc *desc)
 {
-    ACL_REQUIRES_NOT_NULL_RET_NULL(desc);
+    ACL_REQUIRES_NOT_NULL_RET_NULL_INPUT_REPORT(desc);
     return desc->address;
 }
 
 aclError aclSetTensorDynamicInput(aclTensorDesc *desc, const char *dynamicInputName)
 {
-    ACL_REQUIRES_NOT_NULL(desc);
-    ACL_REQUIRES_NOT_NULL(dynamicInputName);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(desc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dynamicInputName);
 
     desc->dynamicInputName = std::string(dynamicInputName);
     return ACL_SUCCESS;
@@ -542,8 +561,8 @@ aclError aclSetTensorDynamicInput(aclTensorDesc *desc, const char *dynamicInputN
 aclError aclSetTensorConst(aclTensorDesc *desc, void *dataBuffer, size_t length)
 {
     ACL_LOG_INFO("start to execute aclSetTensorConst");
-    ACL_REQUIRES_NOT_NULL(desc);
-    ACL_REQUIRES_NOT_NULL(dataBuffer);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(desc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataBuffer);
     if (length <= 0) {
         ACL_LOG_ERROR("The length of const dataBuffer is invalid. size = %zu", length);
         return ACL_ERROR_INVALID_PARAM;
