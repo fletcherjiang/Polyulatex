@@ -180,17 +180,16 @@ add_library(ascendcl SHARED ${SRC_LIST} ${PROTO_HDRS} $<TARGET_OBJECTS:$<IF:$<TA
 endif()
 
 if (ENABLE_OPEN_SRC)
-add_library(msprofiler_object OBJECT IMPORTED GLOBAL)
-endif()
-
-if (msprofiler_ext_LIBRARY_DIR)
-    file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/msprofiler_object)
-    execute_process(
-        COMMAND ar x ${msprofiler_ext_LIBRARY_DIR}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/msprofiler_object
-    )
-    file(GLOB MSPROFILER_OBJECT_LIST ${CMAKE_CURRENT_BINARY_DIR}/msprofiler_object/*.o)
-    set_property(TARGET msprofiler_object PROPERTY IMPORTED_OBJECTS ${MSPROFILER_OBJECT_LIST})
+    add_library(msprofiler_object OBJECT IMPORTED GLOBAL)
+    if (msprofiler_ext_LIBRARY_DIR)
+        file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/msprofiler_object)
+        execute_process(
+            COMMAND ar x ${msprofiler_ext_LIBRARY_DIR}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/msprofiler_object
+        )
+        file(GLOB MSPROFILER_OBJECT_LIST ${CMAKE_CURRENT_BINARY_DIR}/msprofiler_object/*.o)
+        set_property(TARGET msprofiler_object PROPERTY IMPORTED_OBJECTS ${MSPROFILER_OBJECT_LIST})
+    endif()
 endif()
 
 target_include_directories(ascendcl PRIVATE
@@ -352,7 +351,6 @@ target_include_directories(ascendcl_static PRIVATE
     ${BASE_DIR}
     ${BASE_DIR}/common
     ${BASE_DIR}/toolchain
-    ${BASE_DIR}/third_party/inc/toolchain/ide/ide-daemon/external
 )
 
 target_compile_options(ascendcl_static PRIVATE
@@ -658,16 +656,18 @@ add_library(acl_dvpp SHARED
 if(${TARGET_SYSTEM_NAME} STREQUAL "Windows")
     set(JPEG_INCCLUDE_PATH )
 else()
-    set(JPEG_INCCLUDE_PATH ${TOP_DIR}/third_party/libjpeg/include)
+    set(JPEG_INCCLUDE_PATH ${TOP_DIR}/open_source/libjpeg/include)
 endif()
 
 target_include_directories(acl_dvpp PRIVATE
 if(NOT ENABLE_OPEN_SRC)
     ${TOP_DIR}/inc
     ${TOP_DIR}/inc/mmpa
+    ${TOP_DIR}/metadef/inc
 else()
     ${BASE_DIR}/third_party/inc/
     ${BASE_DIR}/third_party/inc/mmpa
+    ${BASE_DIR}/third_party/inc/metadef/inc
 endif()
     ${BASE_DIR}/inc/external
     ${BASE_DIR}/inc
@@ -702,6 +702,7 @@ target_link_libraries(acl_dvpp PRIVATE
     alog
     c_sec
     ascendcl
+    error_manager
     -Wl,--as-needed
     $<$<NOT:$<STREQUAL:${TARGET_SYSTEM_NAME},Android>>:-lrt>
     -ldl
@@ -764,6 +765,7 @@ target_link_libraries(acl_cblas PRIVATE
     c_sec
     ascendcl
     alog
+    error_manager
     -Wl,--as-needed
     $<$<NOT:$<STREQUAL:${TARGET_SYSTEM_NAME},Android>>:-lrt>
     -ldl
@@ -793,8 +795,10 @@ target_include_directories(acl_retr PRIVATE
     ${BASE_DIR}/inc/external
 if(NOT ENABLE_OPEN_SRC)
     ${TOP_DIR}/inc
+    ${TOP_DIR}/metadef/inc
 else()
     ${BASE_DIR}/third_party/inc/
+    ${BASE_DIR}/third_party/inc/metadef/inc
 endif()
 )
 
@@ -825,6 +829,7 @@ target_link_libraries(acl_retr PRIVATE
     alog
     runtime
     c_sec
+    error_manager
     -Wl,--as-needed
     -ldl
 )
