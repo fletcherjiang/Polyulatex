@@ -399,17 +399,16 @@ add_library(fwk_ascendcl SHARED
 )
 
 if (ENABLE_OPEN_SRC)
-add_library(msprofiler_fwkacl_object OBJECT IMPORTED GLOBAL)
-endif()
-
-if (msprofiler_fwkacl_ext_LIBRARY_DIR)
-    file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/msprofiler_fwkacl_object)
-    execute_process(
-        COMMAND ar x ${msprofiler_fwkacl_ext_LIBRARY_DIR}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/msprofiler_fwkacl_object
-    )
-    file(GLOB MSPROFILER_FWKACL_OBJECT_LIST ${CMAKE_CURRENT_BINARY_DIR}/msprofiler_fwkacl_object/*.o)
-    set_property(TARGET msprofiler_fwkacl_object PROPERTY IMPORTED_OBJECTS ${MSPROFILER_FWKACL_OBJECT_LIST})
+    add_library(msprofiler_fwkacl_object OBJECT IMPORTED GLOBAL)
+    if (msprofiler_fwkacl_ext_LIBRARY_DIR)
+        file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/msprofiler_fwkacl_object)
+        execute_process(
+            COMMAND ar x ${msprofiler_fwkacl_ext_LIBRARY_DIR}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/msprofiler_fwkacl_object
+        )
+        file(GLOB MSPROFILER_FWKACL_OBJECT_LIST ${CMAKE_CURRENT_BINARY_DIR}/msprofiler_fwkacl_object/*.o)
+        set_property(TARGET msprofiler_fwkacl_object PROPERTY IMPORTED_OBJECTS ${MSPROFILER_FWKACL_OBJECT_LIST})
+    endif()
 endif()
 
 target_include_directories(fwk_ascendcl PRIVATE
@@ -656,7 +655,7 @@ add_library(acl_dvpp SHARED
 if(${TARGET_SYSTEM_NAME} STREQUAL "Windows")
     set(JPEG_INCCLUDE_PATH )
 else()
-    set(JPEG_INCCLUDE_PATH ${TOP_DIR}/open_source/libjpeg/include)
+    set(JPEG_INCCLUDE_PATH ${TOP_DIR}/open_source/libjpeg-turbo/include)
 endif()
 
 target_include_directories(acl_dvpp PRIVATE
