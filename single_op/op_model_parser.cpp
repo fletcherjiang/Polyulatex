@@ -97,7 +97,8 @@ aclError OpModelParser::ParseModelContent(const OpModel &opModel, uint32_t &mode
 }
 
 static void GetFuzzBuildRet(ge::Model &model,
-                            ge::GeAttrValue::LIST_NAMED_ATTRS &inputSupportAttrs)
+                            ge::GeAttrValue::LIST_NAMED_ATTRS &inputSupportAttrs,
+                            ge::GeAttrValue::LIST_NAMED_ATTRS &outputSupportAttrs)
 {
     ge::GeAttrValue::LIST_NAMED_ATTRS fuzzBuildAttrs;
     (void)ge::AttrUtils::GetListNamedAttrs(model, ge::ATTR_NAME_FUZZ_BUILD_RES_ATTRS, fuzzBuildAttrs);
@@ -109,6 +110,10 @@ static void GetFuzzBuildRet(ge::Model &model,
     ge::GeAttrValue::NAMED_ATTRS fuzzBuildAttr = fuzzBuildAttrs[0];
 
     (void)ge::AttrUtils::GetListNamedAttrs(fuzzBuildAttr, ge::ATTR_NAME_FUZZ_INPUTS_SUPPORTED_ATTRS, inputSupportAttrs);
+    (void)ge::AttrUtils::GetListNamedAttrs(fuzzBuildAttr,
+                                           ge::ATTR_NAME_FUZZ_OUTPUTS_SUPPORTED_ATTRS, outputSupportAttrs);
+    ACL_LOG_INFO("inputSupportAttrs is %zu, outputSupportAttrs is %zu",
+                 inputSupportAttrs.size(), outputSupportAttrs.size());
 }
 
 static aclError UpdateTensorAttrs(std::vector<aclTensorDesc> &tensorDescs,
@@ -144,11 +149,12 @@ static aclError UpdateTensorAttrs(std::vector<aclTensorDesc> &tensorDescs,
                 return ACL_ERROR_PARSE_MODEL;
             }
             // change LIST_INT to vector<int64>
-            bool isFuzzTensor = false;
+            bool needCheckRange = false;
             std::vector<int64_t> shapeByAttr;
             for (size_t indexShape = 0; indexShape < shape.size(); ++indexShape) {
-                if (shape.at(indexShape) < 0) {
-                    isFuzzTensor = true;
+                // if shape is -2, no need to check shape range
+                if (shape.at(indexShape) == -1) {
+                    needCheckRange = true;
                 }
                 ACL_LOG_INFO("shape is %ld", shape.at(indexShape));
                 shapeByAttr.emplace_back(shape.at(indexShape));
@@ -166,7 +172,7 @@ static aclError UpdateTensorAttrs(std::vector<aclTensorDesc> &tensorDescs,
                 rangesByAttr.emplace_back(range);
             }
 
-            if (isFuzzTensor && (shapeRange.size() != shape.size())) {
+            if (needCheckRange && (shapeRange.size() != shape.size())) {
                 ACL_LOG_ERROR("the number[%zu] of shape is not equal to number[%zu] of shapeRange in model.",
                     shape.size(), shapeRange.size());
                 return ACL_ERROR_PARSE_MODEL;
@@ -188,9 +194,10 @@ aclError OpModelParser::ToModelConfig(ge::Model &model, OpModelDef &modelDef)
     vector<ge::GeTensorDesc> outputTensorDescList;
     vector<ge::ConstGeTensorPtr> inputTensorList;
     vector<ge::ConstGeTensorPtr> outputTensorList;
-    if (!ge::AttrUtils::GetListTensor(model, ATTR_KEY_INPUT_TENSOR_DESC, inputTensorList) ||
-        !ge::AttrUtils::GetListTensor(model, ATTR_KEY_OUTPUT_TENSOR_DESC, outputTensorList) ||
-        !ge::AttrUtils::GetStr(model, ATTR_KEY_OP_TYPE, modelDef.opType)) {
+    bool missingAttrs = !ge::AttrUtils::GetListTensor(model, ATTR_KEY_INPUT_TENSOR_DESC, inputTensorList) ||
+                        !ge::AttrUtils::GetListTensor(model, ATTR_KEY_OUTPUT_TENSOR_DESC, outputTensorList) ||
+                        !ge::AttrUtils::GetStr(model, ATTR_KEY_OP_TYPE, modelDef.opType);
+    if (missingAttrs) {
         ACL_LOG_WARN("Missing required attr. model = %s", modelDef.modelPath.c_str());
         return ACL_ERROR_MODEL_MISSING_ATTR;
     }
@@ -223,19 +230,28 @@ aclError OpModelParser::ToModelConfig(ge::Model &model, OpModelDef &modelDef)
     ACL_REQUIRES_OK(ParseGeTensorDesc(outputTensorDescList, modelDef.outputDescArr, modelDef.opType));
 
     if (buildMode == 1) {
-        if (ge::AttrUtils::HasAttr(model, ge::ATTR_NAME_FUZZ_BUILD_RES_ATTRS)) {
-            // ACL_OP_COMPILE_FUZZ mode and model is dynamic
-            ACL_LOG_INFO("The model [%s] is dynamic model with fuzz compile", modelDef.opType.c_str());
-            modelDef.isStaticModelWithFuzzCompile = 2;
-            ge::GeAttrValue::LIST_NAMED_ATTRS inputSupportAttrs;
-            GetFuzzBuildRet(model, inputSupportAttrs);
-            if (inputSupportAttrs.size() != 0) {
-                ACL_REQUIRES_OK(UpdateTensorAttrs(modelDef.inputDescArr, inputSupportAttrs));
-            }
-        } else {
+        bool staticModel = !ge::AttrUtils::HasAttr(model, ge::ATTR_NAME_FUZZ_BUILD_RES_ATTRS) &&
+                           !ge::AttrUtils::HasAttr(model, "_AllShape");
+        if (staticModel) {
             // ACL_OP_COMPILE_FUZZ mode but model is static
             ACL_LOG_INFO("isStaticModelWithFuzzCompile is 1, the model is static model with fuzz compile");
             modelDef.isStaticModelWithFuzzCompile = 1;
+        } else {
+            // ACL_OP_COMPILE_FUZZ mode and model is dynamic,maybe aicpu or aicore which return fuzz res
+            ACL_LOG_INFO("The model [%s] is dynamic model with fuzz compile", modelDef.opType.c_str());
+            modelDef.isStaticModelWithFuzzCompile = 2;
+            if (ge::AttrUtils::HasAttr(model, ge::ATTR_NAME_FUZZ_BUILD_RES_ATTRS)) {
+                ACL_LOG_INFO("The model [%s] is dynamic model with fuzz result", modelDef.opType.c_str());
+                ge::GeAttrValue::LIST_NAMED_ATTRS inputSupportAttrs;
+                ge::GeAttrValue::LIST_NAMED_ATTRS outputSupportAttrs;
+                GetFuzzBuildRet(model, inputSupportAttrs, outputSupportAttrs);
+                if (inputSupportAttrs.size() != 0) {
+                    ACL_REQUIRES_OK(UpdateTensorAttrs(modelDef.inputDescArr, inputSupportAttrs));
+                }
+                if (outputSupportAttrs.size() != 0) {
+                    ACL_REQUIRES_OK(UpdateTensorAttrs(modelDef.outputDescArr, outputSupportAttrs));
+                }
+            }
         }
     }
 
@@ -296,21 +312,8 @@ aclError OpModelParser::ParseGeTensorDesc(vector<ge::GeTensorDesc> &geTensorDesc
         aclDataType dataType = ACL_DT_UNDEFINED;
         std::vector<int64_t> storageShape;
         ge::GeShape shape;
-        if (opType != "TransData") {
-            if (tensorDesc.GetFormat() != ge::FORMAT_RESERVED) {
-                format = static_cast<aclFormat>(tensorDesc.GetFormat());
-            }
-            int64_t storageFormatVal;
-            if (ge::AttrUtils::GetInt(tensorDesc, ge::ATTR_NAME_STORAGE_FORMAT, storageFormatVal)) {
-                storageFormat = static_cast<aclFormat>(storageFormatVal);
-            }
-            if (tensorDesc.GetDataType() != ge::DT_UNDEFINED) {
-                dataType = static_cast<aclDataType>(tensorDesc.GetDataType());
-            }
-            shape = tensorDesc.GetShape();
-            (void)ge::AttrUtils::GetListInt(tensorDesc, ge::ATTR_NAME_STORAGE_SHAPE, storageShape);
-        } else if (ge::AttrUtils::HasAttr(tensorDesc, ge::ATTR_NAME_STORAGE_FORMAT)) {
-            ACL_LOG_INFO("now parse tensor op is TransData");
+        if ((opType == "TransData") && ge::AttrUtils::HasAttr(tensorDesc, ge::ATTR_NAME_STORAGE_FORMAT)) {
+            ACL_LOG_INFO("now parse tensor op is new TransData");
             if (tensorDesc.GetOriginFormat() != ge::FORMAT_RESERVED) {
                 format = static_cast<aclFormat>(tensorDesc.GetOriginFormat());
             }
@@ -325,6 +328,19 @@ aclError OpModelParser::ParseGeTensorDesc(vector<ge::GeTensorDesc> &geTensorDesc
             for (size_t i = 0; i < currentShape.GetDims().size(); ++i) {
                 storageShape.emplace_back(currentShape.GetDims().at(i));
             }
+        } else {
+            if (tensorDesc.GetFormat() != ge::FORMAT_RESERVED) {
+                format = static_cast<aclFormat>(tensorDesc.GetFormat());
+            }
+            int64_t storageFormatVal;
+            if (ge::AttrUtils::GetInt(tensorDesc, ge::ATTR_NAME_STORAGE_FORMAT, storageFormatVal)) {
+                storageFormat = static_cast<aclFormat>(storageFormatVal);
+            }
+            if (tensorDesc.GetDataType() != ge::DT_UNDEFINED) {
+                dataType = static_cast<aclDataType>(tensorDesc.GetDataType());
+            }
+            shape = tensorDesc.GetShape();
+            (void)ge::AttrUtils::GetListInt(tensorDesc, ge::ATTR_NAME_STORAGE_SHAPE, storageShape);
         }
         output.emplace_back(dataType, shape.GetDims().size(), shape.GetDims().data(), format);
         output.back().storageFormat = storageFormat;

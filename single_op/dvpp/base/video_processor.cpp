@@ -143,7 +143,7 @@ namespace acl {
         // send eos to send stream to finish decode all frame
         aclError aclRet = SendEosForVdec(channelDesc);
         if (aclRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("fail to send eos to sendFrameStream, result = %d", aclRet);
+            ACL_LOG_ERROR("fail to send eos to sendFrameStream, result = %d.", aclRet);
             DestroyAllNotifyAndStreamForVdecChannel(channelDesc, isNeedNotify);
             return aclRet;
         }
@@ -151,7 +151,7 @@ namespace acl {
         // wait finish all callback task
         rtError_t rtRetVal = rtStreamSynchronize(channelDesc->getFrameStream);
         if (rtRetVal != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("fail to synchronize getFrameStream, runtime result = %d", rtRetVal);
+            ACL_LOG_ERROR("fail to synchronize getFrameStream, runtime result = %d.", rtRetVal);
             DestroyAllNotifyAndStreamForVdecChannel(channelDesc, isNeedNotify);
             return ACL_GET_ERRCODE_RTS(rtRetVal);
         }
@@ -175,7 +175,7 @@ namespace acl {
                                      nullptr, // no need smDesc
                                      channelDesc->sendFrameStream);
         if (rtRetVal != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("vdec destory channel call rtCpuKernelLaunch failed, runtime result = %d", rtRetVal);
+            ACL_LOG_ERROR("vdec destory channel call rtCpuKernelLaunch failed, runtime result = %d.", rtRetVal);
             DestroyAllNotifyAndStreamForVdecChannel(channelDesc, isNeedNotify);
             return ACL_GET_ERRCODE_RTS(rtRetVal);
         }
@@ -205,7 +205,7 @@ namespace acl {
     {
         ACL_REQUIRES_NOT_NULL(channelDesc);
         ACL_REQUIRES_NOT_NULL(channelDesc->dataBuffer.data);
-        ACL_LOG_INFO("start to execute aclvdecDestroyChannel, channelId=%u", channelDesc->vdecDesc.channelId);
+        ACL_LOG_INFO("start to execute aclvdecDestroyChannel, channelId = %u", channelDesc->vdecDesc.channelId);
 
         if (channelDesc->isNeedNotify) {
             return VdecDestroyChannel(channelDesc, true, DVPP_KERNELNAME_DESTROY_VDEC_CHANNEL);
@@ -237,7 +237,7 @@ namespace acl {
                                                      static_cast<const void *>(&output->dvppPicDesc), size,
                                                      RT_MEMCPY_HOST_TO_DEVICE);
                 if (memcpyOutputRet != RT_ERROR_NONE) {
-                    ACL_LOG_ERROR("memcpy output pic desc to device memory failed, size = %zu, runtime result = %d",
+                    ACL_LOG_ERROR("memcpy output pic desc to device memory failed, size = %zu, runtime result = %d.",
                         size, memcpyOutputRet);
                     return ACL_GET_ERRCODE_RTS(memcpyOutputRet);
                 }
@@ -252,7 +252,7 @@ namespace acl {
                                                 static_cast<const void *>(&input->dvppStreamDesc), size,
                                                 RT_MEMCPY_HOST_TO_DEVICE);
             if (memcpyInputRet != RT_ERROR_NONE) {
-                ACL_LOG_ERROR("memcpy input stream desc to device memory failed, size = %zu, runtime result = %d",
+                ACL_LOG_ERROR("memcpy input stream desc to device memory failed, size = %zu, runtime result = %d.",
                     size, memcpyInputRet);
                 return ACL_GET_ERRCODE_RTS(memcpyInputRet);
             }
@@ -276,7 +276,7 @@ namespace acl {
 
         aclError memcpyRet = CheckAndCopyVdecInfoData(input, output, isSkipFlag);
         if (memcpyRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("check and copy stream desc or pic desc failed, result = %d", memcpyRet);
+            ACL_LOG_ERROR("check and copy stream desc or pic desc failed, result = %d.", memcpyRet);
             return memcpyRet;
         }
 
@@ -284,12 +284,12 @@ namespace acl {
         uint64_t frameId = 0;
         if (!eos) {
             frameId = ++channelDesc->frameId;
-            ACL_LOG_DEBUG("vdec process data frame: channelId = %u, frameId = %lu",
+            ACL_LOG_DEBUG("vdec process data frame: channelId = %u, frameId = %lu.",
                 channelDesc->vdecDesc.channelId, frameId);
         }
         aclError launchRet = LaunchTaskForSendStream(channelDesc, input, output, eos);
         if (launchRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("launch tasks for send stream failed, result = %d", launchRet);
+            ACL_LOG_ERROR("launch tasks for send stream failed, result = %d.", launchRet);
             return launchRet;
         }
 
@@ -329,7 +329,7 @@ namespace acl {
                     std::unique_lock<std::mutex> lock{channelDesc->mutexForCallbackMap};
                     channelDesc->callbackMap.erase(frameId);
                 }
-                ACL_LOG_ERROR("launch tasks for get stream failed, result = %d", launchRet);
+                ACL_LOG_ERROR("launch tasks for get stream failed, result = %d.", launchRet);
                 return launchRet;
             }
         }
@@ -341,7 +341,7 @@ namespace acl {
                 std::unique_lock<std::mutex> lock{channelDesc->mutexForCallbackMap};
                 channelDesc->callbackMap.erase(frameId);
             }
-            ACL_LOG_ERROR("fail to synchronize sendFrameStream, runtime result = %d", streamSynRet);
+            ACL_LOG_ERROR("fail to synchronize sendFrameStream, runtime result = %d.", streamSynRet);
             return ACL_GET_ERRCODE_RTS(streamSynRet);
         }
 
@@ -512,15 +512,15 @@ namespace acl {
         // create aclvencChannelDesc in host addr
         aclChannelDesc = new (hostAddr)aclvencChannelDesc;
         if ((aclChannelDesc == nullptr) || (aclChannelDesc->vencDesc.extendInfo == nullptr)) {
-            ACL_LOG_ERROR("new aclvencChannelDesc failed");
+            ACL_LOG_ERROR("create aclvencChannelDesc with function new failed");
             ACL_ALIGN_FREE(hostAddr);
             return nullptr;
         }
         auto err = memset_s(aclChannelDesc->vencDesc.extendInfo, acl::dvpp::VENC_CHANNEL_DESC_TLV_LEN,
             0, acl::dvpp::VENC_CHANNEL_DESC_TLV_LEN);
         if (err != EOK) {
-            ACL_LOG_ERROR("memset_s vencDesc extendInfo to 0 fail, dstLen = %u, srclen = %u, result = %d.",
-                aclChannelDesc->vencDesc.len, aclChannelDesc->vencDesc.len, err);
+            ACL_LOG_ERROR("set vencDesc extendInfo to 0 failed, dstLen = %u, srclen = %u, "
+                "result = %d.", aclChannelDesc->vencDesc.len, aclChannelDesc->vencDesc.len, err);
             ACL_ALIGN_FREE(hostAddr);
             return nullptr;
         }
@@ -531,7 +531,7 @@ namespace acl {
         uint32_t flags = RT_MEMORY_DEFAULT | RT_MEMORY_POLICY_DEFAULT_PAGE_ONLY;
         rtError_t ret = rtMalloc(&devPtr, size, flags);
         if (ret != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("malloc device memory for acl venc channel desc, runtime result = %d", ret);
+            ACL_LOG_ERROR("malloc device memory for acl venc channel desc failed, runtime result = %d", ret);
             ACL_ALIGN_FREE(hostAddr);
             return nullptr;
         }
@@ -560,7 +560,7 @@ namespace acl {
         // create aclvencChannelDesc in device addr
         aclChannelDesc = new (devAddr)aclvencChannelDesc;
         if ((aclChannelDesc == nullptr) || (aclChannelDesc->vencDesc.extendInfo == nullptr)) {
-            ACL_LOG_ERROR("new aclvencChannelDesc failed");
+            ACL_LOG_ERROR("create aclvencChannelDesc with function new failed");
             (void) rtFree(devAddr);
             devAddr = nullptr;
             return nullptr;
@@ -568,8 +568,8 @@ namespace acl {
         auto err = memset_s(aclChannelDesc->vencDesc.extendInfo, acl::dvpp::VENC_CHANNEL_DESC_TLV_LEN,
             0, acl::dvpp::VENC_CHANNEL_DESC_TLV_LEN);
         if (err != EOK) {
-            ACL_LOG_ERROR("memset_s vencDesc extendInfo to 0 fail, dstLen = %u, srclen = %u, result = %d.",
-                aclChannelDesc->vencDesc.len, aclChannelDesc->vencDesc.len, err);
+            ACL_LOG_ERROR("set vencDesc extendInfo to 0 failed, dstLen = %u, srclen = %u, "
+                "result = %d.", aclChannelDesc->vencDesc.len, aclChannelDesc->vencDesc.len, err);
             (void) rtFree(devAddr);
             devAddr = nullptr;
             return nullptr;
@@ -655,7 +655,7 @@ namespace acl {
                 break;
             }
             default: {
-                ACL_LOG_ERROR("venc destroy channel desc, unkown acl run mode %d.", aclRunMode_);
+                ACL_LOG_ERROR("venc destroy channel desc failed, unkown acl run mode %d.", aclRunMode_);
                 return ACL_ERROR_INTERNAL_ERROR;
             }
         }
@@ -1686,15 +1686,15 @@ namespace acl {
         // create aclvdecChannelDesc in host addr
         aclChannelDesc = new (hostAddr)aclvdecChannelDesc;
         if ((aclChannelDesc == nullptr) || (aclChannelDesc->vdecDesc.extendInfo == nullptr)) {
-            ACL_LOG_ERROR("new aclvdecChannelDesc failed");
+            ACL_LOG_ERROR("create aclvdecChannelDesc with function new failed");
             ACL_ALIGN_FREE(hostAddr);
             return nullptr;
         }
         auto err = memset_s(aclChannelDesc->vdecDesc.extendInfo, acl::dvpp::VDEC_CHANNEL_DESC_TLV_LEN,
             0, acl::dvpp::VDEC_CHANNEL_DESC_TLV_LEN);
         if (err != EOK) {
-            ACL_LOG_ERROR("memset_s vdecDesc extendInfo to 0 fail, dstLen = %u, srclen = %u, result = %d.",
-                aclChannelDesc->vdecDesc.len, aclChannelDesc->vdecDesc.len, err);
+            ACL_LOG_ERROR("set vdecDesc extendInfo to 0 failed, dstLen = %u, srclen = %u, "
+                "result = %d.", aclChannelDesc->vdecDesc.len, aclChannelDesc->vdecDesc.len, err);
             aclChannelDesc->~aclvdecChannelDesc();
             ACL_ALIGN_FREE(hostAddr);
             return nullptr;
@@ -1707,7 +1707,7 @@ namespace acl {
         uint32_t flags = RT_MEMORY_DEFAULT | RT_MEMORY_POLICY_DEFAULT_PAGE_ONLY;
         rtError_t ret = rtMalloc(&devPtr, totalSize, flags);
         if (ret != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("malloc device memory for acl vdec channel desc, runtime result = %d", ret);
+            ACL_LOG_ERROR("malloc device memory for acl vdec channel desc failed, runtime result = %d", ret);
             aclChannelDesc->~aclvdecChannelDesc();
             ACL_ALIGN_FREE(hostAddr);
             return nullptr;
@@ -1739,7 +1739,7 @@ namespace acl {
         // create aclvdecChannelDesc in device addr
         aclChannelDesc = new (devAddr)aclvdecChannelDesc;
         if ((aclChannelDesc == nullptr) || (aclChannelDesc->vdecDesc.extendInfo == nullptr)) {
-            ACL_LOG_ERROR("new aclvdecChannelDesc failed");
+            ACL_LOG_ERROR("create aclvdecChannelDesc with function new failed");
             (void) rtFree(devAddr);
             devAddr = nullptr;
             return nullptr;
@@ -1747,8 +1747,8 @@ namespace acl {
         auto err = memset_s(aclChannelDesc->vdecDesc.extendInfo, acl::dvpp::VDEC_CHANNEL_DESC_TLV_LEN,
             0, acl::dvpp::VDEC_CHANNEL_DESC_TLV_LEN);
         if (err != EOK) {
-            ACL_LOG_ERROR("memset_s vdecDesc extendInfo to 0 fail, dstLen = %u, srclen = %u, result = %d.",
-                aclChannelDesc->vdecDesc.len, aclChannelDesc->vdecDesc.len, err);
+            ACL_LOG_ERROR("set vdecDesc extendInfo to 0 failed, dstLen = %u, srclen = %u, "
+                "result = %d.", aclChannelDesc->vdecDesc.len, aclChannelDesc->vdecDesc.len, err);
             (void) rtFree(devAddr);
             devAddr = nullptr;
             return nullptr;

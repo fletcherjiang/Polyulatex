@@ -52,7 +52,7 @@ aclError aclopCompile(const char *opType,
         ACL_LOG_ERROR("aclopCompile compile type[%d] not support", static_cast<int32_t>(compileFlag));
         return ACL_ERROR_API_NOT_SUPPORT;
     }
-    ACL_REQUIRES_NOT_NULL(opType);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(opType);
     ACL_REQUIRES_OK(array_utils::CheckPtrArray(numInputs, inputDesc));
     ACL_REQUIRES_OK(array_utils::CheckPtrArray(numOutputs, outputDesc));
     if (array_utils::IsHostMemTensorDesc(numInputs, inputDesc) != ACL_SUCCESS) {
@@ -103,7 +103,7 @@ aclError aclopCompileAndExecute(const char *opType,
         ACL_LOG_ERROR("aclopCompile compile type[%d] not support", static_cast<int32_t>(compileFlag));
         return ACL_ERROR_API_NOT_SUPPORT;
     }
-    ACL_REQUIRES_NOT_NULL(opType);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(opType);
     ACL_REQUIRES_OK(array_utils::CheckPtrArray(numInputs, inputDesc));
     ACL_REQUIRES_OK(array_utils::CheckPtrArray(numOutputs, outputDesc));
     if (array_utils::IsAllTensorEmpty(numOutputs, outputDesc)) {
@@ -150,7 +150,7 @@ aclError aclopCompileAndExecute(const char *opType,
 aclError aclSetCompileopt(aclCompileOpt opt, const char *value)
 {
     ACL_LOG_INFO("start to execute aclSetCompileopt");
-    ACL_REQUIRES_NOT_NULL(value);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(value);
     std::string optStr = compileOptMap.find(opt) != compileOptMap.end() ? compileOptMap[opt] : "";
     if (optStr.empty()) {
         ACL_LOG_ERROR("Can not find any options[%d] valid in enum aclCompileOpt, please check input option.", opt);

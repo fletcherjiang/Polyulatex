@@ -30,7 +30,7 @@ aclError aclopCast(const aclTensorDesc *srcDesc,
                    aclrtStream stream)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
-    ACL_REQUIRES_NOT_NULL(dstDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dstDesc);
     const aclTensorDesc *inputDesc[CAST_INPUT_NUM] = {srcDesc};
     const aclTensorDesc *outputDesc[CAST_OUTPUT_NUM] = {dstDesc};
     const aclDataBuffer *inputs[CAST_OUTPUT_NUM] = {srcBuffer};
@@ -58,7 +58,7 @@ aclError aclopCreateHandleForCast(aclTensorDesc *srcDesc,
                                   aclopHandle **handle)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
-    ACL_REQUIRES_NOT_NULL(dstDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dstDesc);
     const aclTensorDesc *inputDesc[CAST_INPUT_NUM] = {srcDesc};
     const aclTensorDesc *outputDesc[CAST_OUTPUT_NUM] = {dstDesc};
     aclopAttr opAttr;

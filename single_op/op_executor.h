@@ -63,22 +63,18 @@ private:
 
     static ge::DynamicSingleOp *LoadDynamicSingleOp(const OpModel &modelInfo, aclrtStream stream);
 
-    static aclError DoExecuteAsync(ge::SingleOp *singleOp,
-                                   int numInputs,
-                                   const aclDataBuffer *const inputs[],
-                                   int numOutputs,
-                                   aclDataBuffer *const outputs[]);
-
     static aclError DoExecuteAsync(ge::DynamicSingleOp *singleOp,
                                    const AclOp &aclOp,
                                    const aclDataBuffer *const inputs[],
-                                   aclDataBuffer *const outputs[]);
+                                   aclDataBuffer *const outputs[],
+                                   bool executeWithExactModel = true);
 
     static aclError DoExecuteAsync(ge::SingleOp *singleOp,
                                    const AclOp &aclOp,
                                    const aclDataBuffer *const inputs[],
                                    aclDataBuffer *const outputs[],
-                                   std::map<int32_t, bool> optionalInputMap);
+                                   std::map<int32_t, bool> optionalInputMap,
+                                   bool executeWithExactModel = true);
 };
 } // namespace acl
 

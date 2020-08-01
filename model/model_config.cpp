@@ -31,7 +31,7 @@ struct SetMdlConfigParamFunc {
 namespace {
     aclError CheckMdlLoadPriority(aclmdlConfigHandle *handle, void *attrValue, size_t valueSize)
     {
-        ACL_LOG_INFO("start to execute CheckMdlLoadPriority");
+        ACL_LOG_INFO("start to execute CheckMdlLoadPriority.");
         if (valueSize != sizeof(int32_t)) {
             ACL_LOG_ERROR("valueSize[%zu] is invalid, it should be %zu", valueSize, sizeof(int32_t));
             return ACL_ERROR_INVALID_PARAM;
@@ -58,7 +58,7 @@ namespace {
 
     aclError SetMdlLoadPriority(aclmdlConfigHandle *handle, void *attrValue)
     {
-        ACL_LOG_INFO("start to execute SetMdlLoadPriority");
+        ACL_LOG_INFO("start to execute SetMdlLoadPriority.");
         int32_t priority = *static_cast<int32_t *>(attrValue);
         handle->priority = priority;
         ACL_LOG_INFO("successfully execute SetMdlLoadPriority");
@@ -67,7 +67,7 @@ namespace {
 
     aclError CheckMdlLoadType(aclmdlConfigHandle *handle, void *attrValue, size_t valueSize)
     {
-        ACL_LOG_INFO("start to execute CheckMdlLoadType");
+        ACL_LOG_INFO("start to execute CheckMdlLoadType.");
         if (valueSize != sizeof(size_t)) {
             ACL_LOG_ERROR("valueSize[%zu] is invalid, it should be %zu", valueSize, sizeof(size_t));
             return ACL_ERROR_INVALID_PARAM;
@@ -83,7 +83,7 @@ namespace {
 
     aclError SetMdlLoadType(aclmdlConfigHandle *handle, void *attrValue)
     {
-        ACL_LOG_INFO("start to execute SetMdlLoadType");
+        ACL_LOG_INFO("start to execute SetMdlLoadType.");
         size_t type = *static_cast<size_t *>(attrValue);
         handle->mdlLoadType = type;
         handle->attrState.insert(ACL_MDL_LOAD_TYPE_SIZET);
@@ -95,7 +95,7 @@ namespace {
     // can't be nullptr
     aclError CheckMdlLoadPtrAttrEx(aclmdlConfigHandle *handle, void *attrValue, size_t valueSize)
     {
-        ACL_LOG_INFO("start to execute CheckMdlLoadPtrAttrEx");
+        ACL_LOG_INFO("start to execute CheckMdlLoadPtrAttrEx.");
         if (valueSize != sizeof(void *)) {
             ACL_LOG_ERROR("valueSize[%zu] is invalid, it should be %zu", valueSize, sizeof(void *));
             return ACL_ERROR_INVALID_PARAM;
@@ -342,8 +342,8 @@ aclError aclmdlSetConfigOpt(aclmdlConfigHandle *handle, aclmdlConfigAttr attr,
     const void *attrValue, size_t valueSize)
 {
     ACL_LOG_INFO("start to execute aclmdlSetConfigOpt, attr[%d]", static_cast<int32_t>(attr));
-    ACL_REQUIRES_NOT_NULL(handle);
-    ACL_REQUIRES_NOT_NULL(attrValue);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(handle);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attrValue);
     SetMdlConfigParamFunc paramFunc;
     if (g_setMdlConfigMap.find(attr) != g_setMdlConfigMap.end()) {
         paramFunc = g_setMdlConfigMap[attr];
@@ -381,7 +381,7 @@ aclmdlConfigHandle *aclmdlCreateConfigHandle()
 aclError aclmdlDestroyConfigHandle(aclmdlConfigHandle *handle)
 {
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_MODEL_CONFIG);
-    ACL_REQUIRES_NOT_NULL(handle);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(handle);
     ACL_DELETE_AND_SET_NULL(handle);
     ACL_ADD_RELEASE_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_MODEL_CONFIG);
     return ACL_SUCCESS;

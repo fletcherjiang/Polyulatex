@@ -69,7 +69,8 @@ enum DataType {
   DT_DUAL = 25,            // dual output type
   DT_VARIANT = 26,         // dt_variant type
   DT_BF16 = 27,            // bf16 type
-  DT_INT4 = 28,            // int4 type
+  // Rollback int4
+  // DT_INT4 = 28,            // int4 type
   DT_UNDEFINED             // Used to indicate a DataType field has not been set.
 };
 
@@ -103,7 +104,8 @@ inline int GetSizeByDataType(DataType data_type) {
       5,   // DT_DUAL = 25,               dual output type (float + int8)
       8,   // DT_VARIANT                  variant type
       2,   // DT_BF16 = 27,               bf16 type
-      kDataTypeSizeBitOffset + 4,    // DT_INT4 = 28,             int4 type
+      // Rollback int4
+      // kDataTypeSizeBitOffset + 4,    // DT_INT4 = 28,             int4 type
            // DT_UNDEFINED    Used to indicate a DataType field has not been set.
   };
   if (data_type >= DT_UNDEFINED) {
@@ -214,6 +216,11 @@ struct TensorDescInfo {
 enum DeviceType {
   NPU = 0,
   CPU = 1,
+};
+
+enum Placement {
+  kPlacementHost = 0,     // host data addr
+  kPlacementDevice = 1,   // device data addr
 };
 
 ///

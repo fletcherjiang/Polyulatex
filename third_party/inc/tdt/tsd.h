@@ -45,9 +45,10 @@ typedef enum {
 * Wait for the TSD process to issue the shutdown command
 *
 * @param NA
-* @param deviceID [IN] type #unsigned int. Physical device ID
+* @param deviceId [IN] type #unsigned int. Physical device ID
 * @param waitType [IN] type #TsdWaitType. HCCP or CP
 * @param hostPid [IN] type #unsigned int. Host pid
+* @param vfId [IN] type #unsigned int. Virtual force Id
 * @retval 0 Success
 * @retval OtherValues 0 Fail
 *
@@ -55,10 +56,11 @@ typedef enum {
 * @li libtsdppc.so: Library to which the interface belongs.
 * @li tsd.h: Header file where the interface declaration is located.
 */
-int32_t TsdWaitForShutdown(const uint32_t deviceId, const TsdWaitType waitType, const uint32_t hostPid);
+int32_t TsdWaitForShutdown(const uint32_t deviceId, const TsdWaitType waitType,
+                           const uint32_t hostPid, const uint32_t vfId);
 
 /**
-* @ingroup TsdDestory
+* @ingroup TsdDestroy
 * @brief tsd event client send abnormal msg to tsd event server
 *
 * @par Function
@@ -68,6 +70,7 @@ int32_t TsdWaitForShutdown(const uint32_t deviceId, const TsdWaitType waitType, 
 * @param deviceID [IN] type #unsigned int. Physical device ID
 * @param waitType [IN] type #TsdWaitType. HCCP or CP
 * @param hostPid [IN] type #unsigned int. Host pid
+* @param vfId [IN] type #unsigned int. Virtual force id
 * @retval 0 Success
 * @retval OtherValues 0 Fail
 *
@@ -75,7 +78,8 @@ int32_t TsdWaitForShutdown(const uint32_t deviceId, const TsdWaitType waitType, 
 * @li libtsdppc.so: Library to which the interface belongs.
 * @li tsd.h: Header file where the interface declaration is located.
 */
-int32_t TsdDestory(const uint32_t deviceId, const TsdWaitType waitType, const uint32_t hostPid);
+int32_t TsdDestroy(const uint32_t deviceId, const TsdWaitType waitType,
+                   const uint32_t hostPid, const uint32_t vfId);
 
 /**
 * @ingroup CreateOrFindCustPid
@@ -96,7 +100,8 @@ int32_t TsdDestory(const uint32_t deviceId, const TsdWaitType waitType, const ui
 * @li libtsdppc.so: Library to which the interface belongs.
 * @li tsd.h: Header file where the interface declaration is located.
 */
-int32_t CreateOrFindCustPid(const uint32_t deviceId, const uint32_t loadLibNum, char *loadLibName[], const uint32_t hostPid);
+int32_t CreateOrFindCustPid(const uint32_t deviceId, const uint32_t loadLibNum, const char *loadLibName[],
+                            const uint32_t hostPid, const uint32_t vfId);
 
 #ifdef __cplusplus
 }

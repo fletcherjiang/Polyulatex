@@ -37,51 +37,51 @@ void aclopDestroyAttr(const aclopAttr *attr)
 
 aclError aclopSetAttrBool(aclopAttr *attr, const char *attrName, uint8_t attrValue)
 {
-    ACL_REQUIRES_NOT_NULL(attr);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attr);
     return attr->SetAttr(attrName, static_cast<bool>(attrValue));
 }
 
 aclError aclopSetAttrInt(aclopAttr *attr, const char *attrName, int64_t attrValue)
 {
-    ACL_REQUIRES_NOT_NULL(attr);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attr);
     return attr->SetAttr(attrName, attrValue);
 }
 
 aclError aclopSetAttrFloat(aclopAttr *attr, const char *attrName, float attrValue)
 {
-    ACL_REQUIRES_NOT_NULL(attr);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attr);
     return attr->SetAttr(attrName, attrValue);
 }
 
 aclError aclopSetAttrString(aclopAttr *attr, const char *attrName, const char *attrValue)
 {
-    ACL_REQUIRES_NOT_NULL(attr);
-    ACL_REQUIRES_NOT_NULL(attrValue);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attr);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attrValue);
     return attr->SetAttr(attrName, std::string(attrValue));
 }
 
 aclError aclopSetAttrListBool(aclopAttr *attr, const char *attrName, int numValues, const uint8_t *values)
 {
-    ACL_REQUIRES_NOT_NULL(attr);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attr);
     auto *boolValues = reinterpret_cast<const bool *>(values);
     return attr->SetAttr(attrName, numValues, boolValues);
 }
 
 aclError aclopSetAttrListInt(aclopAttr *attr, const char *attrName, int numValues, const int64_t *values)
 {
-    ACL_REQUIRES_NOT_NULL(attr);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attr);
     return attr->SetAttr(attrName, numValues, values);
 }
 
 aclError aclopSetAttrListFloat(aclopAttr *attr, const char *attrName, int numValues, const float *values)
 {
-    ACL_REQUIRES_NOT_NULL(attr);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attr);
     return attr->SetAttr(attrName, numValues, values);
 }
 
 aclError aclopSetAttrListString(aclopAttr *attr, const char *attrName, int numValues, const char **values)
 {
-    ACL_REQUIRES_NOT_NULL(attr);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attr);
     ACL_REQUIRES_OK(acl::array_utils::CheckPtrArray(numValues, values));
     std::vector<std::string> strValues;
     for (int i = 0; i < numValues; ++i) {
@@ -96,9 +96,9 @@ aclError aclopSetAttrListListInt(aclopAttr *attr,
                                  const int *numListValues,
                                  const int64_t *const values[])
 {
-    ACL_REQUIRES_NOT_NULL(attr);
-    ACL_REQUIRES_NOT_NULL(attrName);
-    ACL_REQUIRES_NOT_NULL(numListValues);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attr);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attrName);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(numListValues);
     ACL_REQUIRES_OK(acl::array_utils::CheckPtrArray(numLists, values));
     std::vector<std::vector<int64_t>> valueVec;
     for (int i = 0; i < numLists; ++i) {

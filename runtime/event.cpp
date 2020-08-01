@@ -28,7 +28,7 @@ aclError aclrtCreateEvent(aclrtEvent *event)
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_EVENT);
     ACL_LOG_INFO("start to execute aclrtCreateEvent");
-    ACL_REQUIRES_NOT_NULL(event);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(event);
 
     rtEvent_t rtEvent = nullptr;
     rtError_t rtErr = rtEventCreate(&rtEvent);
@@ -48,7 +48,7 @@ aclError aclrtCreateEventWithFlag(aclrtEvent *event, uint32_t flag)
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_EVENT);
     ACL_LOG_INFO("start to execute aclrtCreateEventWithFlag.");
-    ACL_REQUIRES_NOT_NULL(event);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(event);
     rtEvent_t rtEvent = nullptr;
     rtError_t rtErr = rtEventCreateWithFlag(&rtEvent, flag);
     if (rtErr != RT_ERROR_NONE) {
@@ -66,7 +66,7 @@ aclError aclrtDestroyEvent(aclrtEvent event)
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_EVENT);
     ACL_LOG_INFO("start to execute aclrtDestroyEvent");
-    ACL_REQUIRES_NOT_NULL(event);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(event);
 
     rtError_t rtErr = rtEventDestroy(static_cast<rtEvent_t>(event));
     if (rtErr != RT_ERROR_NONE) {
@@ -83,7 +83,7 @@ aclError aclrtRecordEvent(aclrtEvent event, aclrtStream stream)
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_RECORD_RESET_EVENT);
     ACL_LOG_INFO("start to execute aclrtRecordEvent");
-    ACL_REQUIRES_NOT_NULL(event);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(event);
 
     rtError_t rtErr = rtEventRecord(static_cast<rtEvent_t>(event), static_cast<rtStream_t>(stream));
     if (rtErr != RT_ERROR_NONE) {
@@ -100,7 +100,7 @@ aclError aclrtResetEvent(aclrtEvent event, aclrtStream stream)
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_RECORD_RESET_EVENT);
     ACL_LOG_INFO("start to execute aclrtResetEvent");
-    ACL_REQUIRES_NOT_NULL(event);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(event);
 
     rtError_t rtErr = rtEventReset(static_cast<rtEvent_t>(event), static_cast<rtStream_t>(stream));
     if (rtErr != RT_ERROR_NONE) {
@@ -116,8 +116,8 @@ aclError aclrtQueryEvent(aclrtEvent event, aclrtEventStatus *status)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_LOG_INFO("start to execute aclrtQueryEvent");
-    ACL_REQUIRES_NOT_NULL(event);
-    ACL_REQUIRES_NOT_NULL(status);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(event);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(status);
 
     rtError_t rtErr = rtEventQuery(static_cast<rtEvent_t>(event));
     if (rtErr == RT_ERROR_NONE) {
@@ -136,7 +136,7 @@ aclError aclrtSynchronizeEvent(aclrtEvent event)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_LOG_INFO("start to execute aclrtSynchronizeEvent");
-    ACL_REQUIRES_NOT_NULL(event);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(event);
 
     rtError_t rtErr = rtEventSynchronize(static_cast<rtEvent_t>(event));
     if (rtErr != RT_ERROR_NONE) {
@@ -150,9 +150,9 @@ aclError aclrtSynchronizeEvent(aclrtEvent event)
 aclError aclrtEventElapsedTime(float *ms, aclrtEvent start, aclrtEvent end)
 {
     ACL_LOG_INFO("start to execute aclrtEventElapsedTime");
-    ACL_REQUIRES_NOT_NULL(ms);
-    ACL_REQUIRES_NOT_NULL(start);
-    ACL_REQUIRES_NOT_NULL(end);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(ms);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(start);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(end);
 
     rtError_t rtErr = rtEventElapsedTime(ms, start, end);
     if (rtErr != RT_ERROR_NONE) {
@@ -166,7 +166,7 @@ aclError aclrtEventElapsedTime(float *ms, aclrtEvent start, aclrtEvent end)
 aclError aclrtCreateNotify(int32_t deviceId, aclrtNotify *notify)
 {
     ACL_LOG_INFO("start to execute aclrtCreateNotify");
-    ACL_REQUIRES_NOT_NULL(notify);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(notify);
 
     rtNotify_t rtNotify = nullptr;
     rtError_t rtErr = rtNotifyCreate(deviceId, &rtNotify);
@@ -183,7 +183,7 @@ aclError aclrtCreateNotify(int32_t deviceId, aclrtNotify *notify)
 aclError aclrtDestroyNotify(aclrtNotify notify)
 {
     ACL_LOG_INFO("start to execute aclrtDestroyNotify");
-    ACL_REQUIRES_NOT_NULL(notify);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(notify);
 
     rtError_t rtErr = rtNotifyDestroy(static_cast<rtNotify_t>(notify));
     if (rtErr != RT_ERROR_NONE) {
@@ -197,7 +197,7 @@ aclError aclrtDestroyNotify(aclrtNotify notify)
 aclError aclrtRecordNotify(aclrtNotify notify, aclrtStream stream)
 {
     ACL_LOG_INFO("start to execute aclrtRecordNotify");
-    ACL_REQUIRES_NOT_NULL(notify);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(notify);
 
     rtError_t rtErr = rtNotifyRecord(static_cast<rtNotify_t>(notify), static_cast<rtStream_t>(stream));
     if (rtErr != RT_ERROR_NONE) {
@@ -211,7 +211,7 @@ aclError aclrtRecordNotify(aclrtNotify notify, aclrtStream stream)
 aclError aclrtWaitNotify(aclrtNotify notify, aclrtStream stream)
 {
     ACL_LOG_INFO("start to execute aclrtWaitNotify");
-    ACL_REQUIRES_NOT_NULL(notify);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(notify);
 
     rtError_t rtErr = rtNotifyWait(static_cast<rtNotify_t>(notify), static_cast<rtStream_t>(stream));
     if (rtErr != RT_ERROR_NONE) {

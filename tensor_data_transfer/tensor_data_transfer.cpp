@@ -233,6 +233,8 @@ acltdtTensorType acltdtGetTensorTypeFromItem(const acltdtDataItem *dataItem)
 {
     if (dataItem == nullptr) {
         ACL_LOG_ERROR("param [dataItem] must not be null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+            std::vector<std::string>({"dataItem"}));
         return ACL_TENSOR_DATA_UNDEFINED;
     }
     return dataItem->tdtType;
@@ -242,6 +244,7 @@ aclDataType acltdtGetDataTypeFromItem(const acltdtDataItem *dataItem)
 {
     if (dataItem == nullptr) {
         ACL_LOG_ERROR("param [dataItem] must not be null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}), std::vector<std::string>({"dataItem"}));
         return ACL_DT_UNDEFINED;
     }
     return dataItem->dataType;
@@ -257,6 +260,7 @@ size_t acltdtGetDataSizeFromItem(const acltdtDataItem *dataItem)
 {
     if (dataItem == nullptr) {
         ACL_LOG_ERROR("param [dataItem] must not be null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}), std::vector<std::string>({"dataItem"}));
         return 0;
     }
     return dataItem->dataLen;
@@ -266,6 +270,7 @@ size_t acltdtGetDimNumFromItem(const acltdtDataItem *dataItem)
 {
     if (dataItem == nullptr) {
         ACL_LOG_ERROR("param [dataItem] must not be null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}), std::vector<std::string>({"dataItem"}));
         return 0;
     }
     return dataItem->dims.size();
@@ -378,6 +383,7 @@ size_t acltdtGetDatasetSize(const acltdtDataset *dataset)
 {
     if (dataset == nullptr) {
         ACL_LOG_ERROR("dataset is null.");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}), std::vector<std::string>({"dataset"}));
         return 0;
     }
     return dataset->blobs.size();

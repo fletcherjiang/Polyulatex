@@ -63,7 +63,7 @@ aclmdlDesc *aclmdlCreateDesc()
 aclError aclmdlDestroyDesc(aclmdlDesc *modelDesc)
 {
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_DESC);
-    ACL_REQUIRES_NOT_NULL(modelDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelDesc);
     ACL_DELETE_AND_SET_NULL(modelDesc);
     ACL_ADD_RELEASE_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_DESC);
     return ACL_SUCCESS;
@@ -197,8 +197,8 @@ static aclError ModelLoadFromFileWithMem(const char *modelPath, uint32_t *modelI
 {
     ACL_LOG_INFO("start to execute ModelLoadFromFileWithMem, modelPath[%s], "
         "workSize[%zu], weightSize[%zu], priority[%d]", modelPath, workSize, weightSize, priority);
-    ACL_REQUIRES_NOT_NULL(modelPath);
-    ACL_REQUIRES_NOT_NULL(modelId);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelPath);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelId);
 
     ge::GeExecutor executor;
     uint32_t id = 0;
@@ -234,8 +234,8 @@ static aclError ModelLoadFromMemWithMem(const void *model, size_t modelSize, uin
 {
     ACL_LOG_INFO("start to execute ModelLoadFromMemWithMem, workSize[%zu], weightSize[%zu], priority[%d]",
         workSize, weightSize, priority);
-    ACL_REQUIRES_NOT_NULL(model);
-    ACL_REQUIRES_NOT_NULL(modelId);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(model);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelId);
     if (modelSize == 0) {
         ACL_LOG_ERROR("model size can't be zero");
         return ACL_ERROR_INVALID_PARAM;
@@ -266,10 +266,10 @@ static aclError ModelLoadFromFileWithQ(const char *modelPath, uint32_t *modelId,
 {
     ACL_LOG_INFO("start to execute ModelLoadFromFileWithQ, modelPath[%s], inputQNum[%zu], "
         "outputQNum[%zu], priority[%d]", modelPath, inputQNum, outputQNum, priority);
-    ACL_REQUIRES_NOT_NULL(modelPath);
-    ACL_REQUIRES_NOT_NULL(modelId);
-    ACL_REQUIRES_NOT_NULL(inputQ);
-    ACL_REQUIRES_NOT_NULL(outputQ);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelPath);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelId);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(inputQ);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(outputQ);
 
     if ((inputQNum == 0) || (outputQNum == 0)) {
         ACL_LOG_ERROR("input param is invalid, inputQNum[%zu] or outputQNum[%zu] can't be zero", inputQNum, outputQNum);
@@ -312,10 +312,10 @@ static aclError ModelLoadFromMemWithQ(const void *model, size_t modelSize, uint3
 {
     ACL_LOG_INFO("start to execute ModelLoadFromMemWithQ, modelSize[%zu], inputQNum[%zu], outputQNum[%zu], "
         "priority[%d]", modelSize, inputQNum, outputQNum, priority);
-    ACL_REQUIRES_NOT_NULL(model);
-    ACL_REQUIRES_NOT_NULL(modelId);
-    ACL_REQUIRES_NOT_NULL(inputQ);
-    ACL_REQUIRES_NOT_NULL(outputQ);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(model);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelId);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(inputQ);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(outputQ);
     if ((modelSize == 0) || (inputQNum == 0) || (outputQNum == 0)) {
         ACL_LOG_ERROR("input param is invalid, modelSize[%zu] or inputQNum[%zu] or outputQNum[%zu] can't be zero",
             modelSize, inputQNum, outputQNum);
@@ -351,7 +351,7 @@ aclError aclmdlGetDesc(aclmdlDesc *modelDesc, uint32_t modelId)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_MODEL);
     ACL_LOG_INFO("start to execute aclmdlGetDesc, model id[%u]", modelId);
-    ACL_REQUIRES_NOT_NULL(modelDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelDesc);
     modelDesc->Clear();
 
     std::vector<ge::TensorDesc> inputDesc;
@@ -521,7 +521,7 @@ aclmdlDataset *aclmdlCreateDataset()
 aclError aclmdlDestroyDataset(const aclmdlDataset *dataset)
 {
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_DATASET);
-    ACL_REQUIRES_NOT_NULL(dataset);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataset);
     for (size_t i = 0; i < dataset->blobs.size(); ++i) {
         ACL_DELETE_AND_SET_NULL((const_cast<aclmdlDataset *>(dataset))->blobs[i].tensorDesc);
     }
@@ -532,8 +532,8 @@ aclError aclmdlDestroyDataset(const aclmdlDataset *dataset)
 
 aclError aclmdlAddDatasetBuffer(aclmdlDataset *dataset, aclDataBuffer *dataBuffer)
 {
-    ACL_REQUIRES_NOT_NULL(dataset);
-    ACL_REQUIRES_NOT_NULL(dataBuffer);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataset);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataBuffer);
     AclModelTensor tensor = AclModelTensor(dataBuffer, nullptr);
     dataset->blobs.push_back(tensor);
     return ACL_SUCCESS;
@@ -543,6 +543,7 @@ size_t aclmdlGetDatasetNumBuffers(const aclmdlDataset *dataset)
 {
     if (dataset == nullptr) {
         ACL_LOG_ERROR("input param[dataset] is null");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}), std::vector<std::string>({"dataset"}));
         return 0;
     }
 
@@ -709,8 +710,8 @@ aclError ModelExecute(uint32_t modelId, const aclmdlDataset *input,
     aclmdlDataset *output, bool async, aclrtStream stream)
 {
     ACL_LOG_INFO("start to execute ModelExecute, modelId[%u]", modelId);
-    ACL_REQUIRES_NOT_NULL(input);
-    ACL_REQUIRES_NOT_NULL(output);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(input);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(output);
 
     ge::RunModelData inputData;
     inputData.timeout = 0;
@@ -730,6 +731,8 @@ aclError ModelExecute(uint32_t modelId, const aclmdlDataset *input,
         auto dataBuffer = input->blobs[i].dataBuf;
         if (dataBuffer == nullptr) {
             ACL_LOG_ERROR("input dataset blobs is null, modelId[%d], index[%zu]", modelId, i);
+            REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+                std::vector<std::string>({"dataBuffer"}));
             return ACL_ERROR_INVALID_PARAM;
         }
         inputBuffer.data = dataBuffer->data;
@@ -747,7 +750,9 @@ aclError ModelExecute(uint32_t modelId, const aclmdlDataset *input,
         ge::DataBuffer outputBuffer;
         auto dataBuffer = output->blobs[i].dataBuf;
         if (dataBuffer == nullptr) {
-            ACL_LOG_ERROR("output dataset blobs is null, modelId[%u], index[%zu]", modelId, i);
+            ACL_LOG_ERROR("output dataset blobs is null, modelId[%d], index[%zu]", modelId, i);
+            REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+                std::vector<std::string>({"dataBuffer"}));
             return ACL_ERROR_INVALID_PARAM;
         }
         outputBuffer.data = dataBuffer->data;
@@ -829,9 +834,9 @@ aclError aclmdlQuerySize(const char *fileName, size_t *workSize, size_t *weightS
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_MODEL);
     ACL_LOG_INFO("start to execute aclmdlQuerySize");
-    ACL_REQUIRES_NOT_NULL(fileName);
-    ACL_REQUIRES_NOT_NULL(workSize);
-    ACL_REQUIRES_NOT_NULL(weightSize);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(fileName);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(workSize);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(weightSize);
 
     ge::GeExecutor executor;
     std::string path(fileName);
@@ -856,9 +861,9 @@ aclError aclmdlQuerySizeFromMem(const void *model, size_t modelSize, size_t *wor
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_MODEL);
     ACL_LOG_INFO("start to execute ACL_QueryModelSizeFromMem, modelSize[%zu]", modelSize);
-    ACL_REQUIRES_NOT_NULL(model);
-    ACL_REQUIRES_NOT_NULL(workSize);
-    ACL_REQUIRES_NOT_NULL(weightSize);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(model);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(workSize);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(weightSize);
 
     ge::GeExecutor executor;
     size_t work;
@@ -882,7 +887,7 @@ aclError aclmdlSetDynamicBatchSize(uint32_t modelId, aclmdlDataset *dataset, siz
     ACL_PROFILING_REG(ACL_PROF_FUNC_MODEL);
     ACL_LOG_INFO("start to execute aclmdlSetDynamicBatchSize, modelId[%u], index[%zu], batchSize[%lu]",
         modelId, index, batchSize);
-    ACL_REQUIRES_NOT_NULL(dataset);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataset);
 
     if (batchSize == 0) {
         ACL_LOG_ERROR("input param[batchSize] invalid, batchSize can't be zero");
@@ -924,7 +929,7 @@ aclError aclmdlSetDynamicHWSize(uint32_t modelId, aclmdlDataset *dataset, size_t
     ACL_PROFILING_REG(ACL_PROF_FUNC_MODEL);
     ACL_LOG_INFO("start to execute aclmdlSetDynamicHWSize, modelId[%u], index[%zu], height[%lu], width[%lu]",
         modelId, index, height, width);
-    ACL_REQUIRES_NOT_NULL(dataset);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataset);
 
     if ((height == 0) || (width == 0)) {
         ACL_LOG_ERROR("aclmdlSetDynamicHWSize para invalid, height[%lu] or width[%lu] can't be zero.", height, width);
@@ -963,8 +968,8 @@ aclError aclmdlSetDynamicHWSize(uint32_t modelId, aclmdlDataset *dataset, size_t
 aclError aclmdlSetInputDynamicDims(uint32_t modelId, aclmdlDataset *dataset, size_t index, const aclmdlIODims *dims)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_MODEL);
-    ACL_REQUIRES_NOT_NULL(dataset);
-    ACL_REQUIRES_NOT_NULL(dims);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataset);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dims);
     if (dims->dimCount == 0) {
         ACL_LOG_ERROR("aclmdlSetInputDynamicDims param invalid, dimCount[%u] can't be zero.", dims->dimCount);
         return ACL_ERROR_INVALID_PARAM;
@@ -1161,8 +1166,8 @@ static aclError GetDims(const aclmdlDesc *modelDesc, TensorType tensorType, Dims
 
 aclError aclmdlGetInputDims(const aclmdlDesc *modelDesc, size_t index, aclmdlIODims *dims)
 {
-    ACL_REQUIRES_NOT_NULL(modelDesc);
-    ACL_REQUIRES_NOT_NULL(dims);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dims);
 
     aclError ret = GetDims(modelDesc, INPUT_TENSOR_TYPE, DIMS_TYPE_V1, index, dims);
     if (ret != ACL_SUCCESS) {
@@ -1175,8 +1180,8 @@ aclError aclmdlGetInputDims(const aclmdlDesc *modelDesc, size_t index, aclmdlIOD
 
 aclError aclmdlGetOutputDims(const aclmdlDesc *modelDesc, size_t index, aclmdlIODims *dims)
 {
-    ACL_REQUIRES_NOT_NULL(modelDesc);
-    ACL_REQUIRES_NOT_NULL(dims);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dims);
 
     aclError ret = GetDims(modelDesc, OUTPUT_TENSOR_TYPE, DIMS_TYPE_V1, index, dims);
     if (ret != ACL_SUCCESS) {
@@ -1189,8 +1194,8 @@ aclError aclmdlGetOutputDims(const aclmdlDesc *modelDesc, size_t index, aclmdlIO
 
 aclError aclmdlGetInputDimsV2(const aclmdlDesc *modelDesc, size_t index, aclmdlIODims *dims)
 {
-    ACL_REQUIRES_NOT_NULL(modelDesc);
-    ACL_REQUIRES_NOT_NULL(dims);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dims);
 
     aclError ret = GetDims(modelDesc, INPUT_TENSOR_TYPE, DIMS_TYPE_V2, index, dims);
     if (ret != ACL_SUCCESS) {
@@ -1278,8 +1283,8 @@ static aclError GetCurOuputShapeInfo(const aclmdlDesc *modelDesc, size_t index,
 
 aclError aclmdlGetCurOutputDims(const aclmdlDesc *modelDesc, size_t index, aclmdlIODims *dims)
 {
-    ACL_REQUIRES_NOT_NULL(modelDesc);
-    ACL_REQUIRES_NOT_NULL(dims);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dims);
     uint32_t modelId = modelDesc->modelId;
     size_t descSize = modelDesc->outputDesc.size();
     if (index >= descSize) {
@@ -1384,6 +1389,7 @@ aclFormat aclmdlGetInputFormat(const aclmdlDesc *modelDesc, size_t index)
     ACL_LOG_INFO("start to execute aclmdlGetInputFormat");
     if (modelDesc == nullptr) {
         ACL_LOG_ERROR("modelDesc is null");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}), std::vector<std::string>({"modelDesc"}));
         return ACL_FORMAT_UNDEFINED;
     }
 
@@ -1395,6 +1401,7 @@ aclFormat aclmdlGetOutputFormat(const aclmdlDesc *modelDesc, size_t index)
     ACL_LOG_INFO("start to execute aclmdlGetOutputFormat");
     if (modelDesc == nullptr) {
         ACL_LOG_ERROR("modelDesc is null");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"params"}), std::vector<std::string>({"modelDesc"}));
         return ACL_FORMAT_UNDEFINED;
     }
 
@@ -1417,6 +1424,7 @@ aclDataType aclmdlGetInputDataType(const aclmdlDesc *modelDesc, size_t index)
     ACL_LOG_INFO("start to execute aclmdlGetInputDataType");
     if (modelDesc == nullptr) {
         ACL_LOG_ERROR("modelDesc is null");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}), std::vector<std::string>({"modelDesc"}));
         return ACL_DT_UNDEFINED;
     }
 
@@ -1428,6 +1436,7 @@ aclDataType aclmdlGetOutputDataType(const aclmdlDesc *modelDesc, size_t index)
     ACL_LOG_INFO("start to execute aclmdlGetOutputDataType");
     if (modelDesc == nullptr) {
         ACL_LOG_ERROR("modelDesc is null");
+        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}), std::vector<std::string>({"modelDesc"}));
         return ACL_DT_UNDEFINED;
     }
 
@@ -1455,9 +1464,9 @@ static aclError aclmdlGetIndexByName(const std::vector<aclmdlTensorDesc> &desc, 
 aclError aclmdlGetInputIndexByName(const aclmdlDesc *modelDesc, const char *name, size_t *index)
 {
     ACL_LOG_INFO("start to execute aclmdlGetInputIndexByName");
-    ACL_REQUIRES_NOT_NULL(modelDesc);
-    ACL_REQUIRES_NOT_NULL(name);
-    ACL_REQUIRES_NOT_NULL(index);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(name);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(index);
 
     ACL_LOG_INFO("successfully execute aclmdlGetInputIndexByName");
     return aclmdlGetIndexByName(modelDesc->inputDesc, name, index);
@@ -1466,9 +1475,9 @@ aclError aclmdlGetInputIndexByName(const aclmdlDesc *modelDesc, const char *name
 aclError aclmdlGetOutputIndexByName(const aclmdlDesc *modelDesc, const char *name, size_t *index)
 {
     ACL_LOG_INFO("start to execute aclmdlGetOutputIndexByName");
-    ACL_REQUIRES_NOT_NULL(modelDesc);
-    ACL_REQUIRES_NOT_NULL(name);
-    ACL_REQUIRES_NOT_NULL(index);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(name);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(index);
 
     ACL_LOG_INFO("successfully execute aclmdlGetOutputIndexByName");
     return aclmdlGetIndexByName(modelDesc->outputDesc, name, index);
@@ -1477,8 +1486,8 @@ aclError aclmdlGetOutputIndexByName(const aclmdlDesc *modelDesc, const char *nam
 aclError aclmdlGetDynamicBatch(const aclmdlDesc *modelDesc, aclmdlBatch *batch)
 {
     ACL_LOG_INFO("start to execute aclmdlGetDynamicBatch");
-    ACL_REQUIRES_NOT_NULL(modelDesc);
-    ACL_REQUIRES_NOT_NULL(batch);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(batch);
 
     size_t batchCnt = modelDesc->dynamicBatch.size();
     if (batchCnt > ACL_MAX_BATCH_NUM) {
@@ -1504,8 +1513,8 @@ aclError aclmdlGetDynamicBatch(const aclmdlDesc *modelDesc, aclmdlBatch *batch)
 aclError aclmdlGetDynamicHW(const aclmdlDesc *modelDesc, size_t index, aclmdlHW *hw)
 {
     ACL_LOG_INFO("start to execute aclmdlGetDynamicHW");
-    ACL_REQUIRES_NOT_NULL(modelDesc);
-    ACL_REQUIRES_NOT_NULL(hw);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(hw);
 
     size_t hwCnt = modelDesc->dynamicHW.size();
     if (hwCnt > ACL_MAX_HW_NUM) {
@@ -1531,8 +1540,8 @@ aclError aclmdlGetDynamicHW(const aclmdlDesc *modelDesc, size_t index, aclmdlHW 
 aclError aclmdlGetInputDynamicGearCount(const aclmdlDesc *modelDesc, size_t index, size_t *gearCount)
 {
     ACL_LOG_INFO("start to execute aclmdlGetInputDynamicGearCount");
-    ACL_REQUIRES_NOT_NULL(modelDesc);
-    ACL_REQUIRES_NOT_NULL(gearCount);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(gearCount);
 
     if (index != static_cast<size_t>(-1)) {
         ACL_LOG_ERROR("aclmdlGetInputDynamicGearCount failed, index must be -1 while input is %zu.", index);
@@ -1559,8 +1568,8 @@ aclError aclmdlGetInputDynamicGearCount(const aclmdlDesc *modelDesc, size_t inde
 aclError aclmdlGetInputDynamicDims(const aclmdlDesc *modelDesc, size_t index, aclmdlIODims *dims, size_t gearCount)
 {
     ACL_LOG_INFO("start to execute aclmdlGetInputDynamicDims");
-    ACL_REQUIRES_NOT_NULL(modelDesc);
-    ACL_REQUIRES_NOT_NULL(dims);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dims);
     if (index != static_cast<std::size_t>(-1)) {
         ACL_LOG_ERROR("aclmdlGetInputDynamicDims failed, index must be -1 but it is %zu", index);
         return ACL_ERROR_INVALID_PARAM;
@@ -1603,11 +1612,11 @@ aclError aclmdlCreateAndGetOpDesc(uint32_t deviceId, uint32_t streamId, uint32_t
 {
     ACL_LOG_INFO("start to execute aclmdlCreateAndGetOpDesc, deviceId[%u], streamId[%u], taskId[%u]",
         deviceId, streamId, taskId);
-    ACL_REQUIRES_NOT_NULL(opName);
-    ACL_REQUIRES_NOT_NULL(inputDesc);
-    ACL_REQUIRES_NOT_NULL(outputDesc);
-    ACL_REQUIRES_NOT_NULL(numInputs);
-    ACL_REQUIRES_NOT_NULL(numOutputs);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(opName);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(inputDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(outputDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(numInputs);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(numOutputs);
 
     ge::GeExecutor executor;
     ge::OpDescInfo opDescInfo;
@@ -1638,7 +1647,7 @@ aclError aclmdlCreateAndGetOpDesc(uint32_t deviceId, uint32_t streamId, uint32_t
     ACL_REQUIRES_POSITIVE(inputNum);
     ACL_REQUIRES_POSITIVE(outputNum);
     *inputDesc = new(std::nothrow) aclTensorDesc[inputNum];
-    ACL_REQUIRES_NOT_NULL(*inputDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(*inputDesc);
     *outputDesc = new(std::nothrow) aclTensorDesc[outputNum];
     if (*outputDesc == nullptr) {
         ACL_LOG_ERROR("alloc outputDesc memory failed");
@@ -1670,8 +1679,8 @@ aclError aclmdlLoadWithConfig(const aclmdlConfigHandle *handle, uint32_t *modelI
     ACL_PROFILING_REG(ACL_PROF_FUNC_MODEL);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_LOAD_UNLOAD_MODEL);
     ACL_LOG_INFO("start to execute aclmdlLoadWithConfig");
-    ACL_REQUIRES_NOT_NULL(handle);
-    ACL_REQUIRES_NOT_NULL(modelId);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(handle);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelId);
     if (!CheckMdlConfigHandle(handle)) {
         ACL_LOG_ERROR("model config is invalid because some param may not be set");
         return ACL_ERROR_INVALID_PARAM;
@@ -1760,8 +1769,8 @@ static const char *TransTensorNameToReal(const aclmdlDesc *modelDesc, const stri
 const char *aclmdlGetTensorRealName(const aclmdlDesc *modelDesc, const char *name)
 {
     ACL_LOG_INFO("start to execute aclmdlGetTensorName");
-    ACL_REQUIRES_NOT_NULL_RET_NULL(modelDesc);
-    ACL_REQUIRES_NOT_NULL_RET_NULL(name);
+    ACL_REQUIRES_NOT_NULL_RET_NULL_INPUT_REPORT(modelDesc);
+    ACL_REQUIRES_NOT_NULL_RET_NULL_INPUT_REPORT(name);
     const char *realTensorName = GetRealTensorName(modelDesc, name);
     if (realTensorName != nullptr) {
         ACL_LOG_INFO("successfully execute aclmdlGetTensorName, realTensorName = %s", realTensorName);

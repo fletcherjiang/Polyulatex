@@ -25,7 +25,7 @@ aclError aclrtCreateStream(aclrtStream *stream)
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_STREAM);
     ACL_LOG_INFO("start to execute aclrtCreateStream");
-    ACL_REQUIRES_NOT_NULL(stream);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(stream);
 
     rtStream_t rtStream = nullptr;
     rtError_t rtErr = rtStreamCreate(&rtStream, RT_STREAM_PRIORITY_DEFAULT);
@@ -44,7 +44,7 @@ aclError aclrtDestroyStream(aclrtStream stream)
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_STREAM);
     ACL_LOG_INFO("start to execute aclrtDestroyStream");
-    ACL_REQUIRES_NOT_NULL(stream);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(stream);
 
     (void) ge::GeExecutor::ReleaseSingleOpResource(stream);
     (void) acl::Executors::Remove(nullptr, stream);
@@ -78,7 +78,7 @@ aclError aclrtStreamWaitEvent(aclrtStream stream, aclrtEvent event)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_LOG_INFO("start to execute aclrtStreamWaitEvent");
-    ACL_REQUIRES_NOT_NULL(event);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(event);
 
     rtError_t rtErr = rtStreamWaitEvent(static_cast<rtStream_t>(stream), static_cast<rtEvent_t>(event));
     if (rtErr != RT_ERROR_NONE) {

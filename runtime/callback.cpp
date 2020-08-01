@@ -35,7 +35,7 @@ aclError aclrtSubscribeReport(uint64_t threadId, aclrtStream stream)
 
 aclError aclrtSetExceptionInfoCallback(aclrtExceptionInfoCallback callback)
 {
-    ACL_LOG_INFO("start to execute aclrtSetExceptionInfoCallback");
+    ACL_LOG_INFO("start to execute aclrtSetExceptionInfoCallback.");
     rtError_t rtErr = rtSetTaskFailCallback(static_cast<rtTaskFailCallback>(callback));
     if (rtErr != RT_ERROR_NONE) {
         ACL_LOG_ERROR("set callback of fail task failed, runtime result = %d", static_cast<int32_t>(rtErr));
@@ -85,7 +85,7 @@ aclError aclrtLaunchCallback(aclrtCallback fn, void *userData, aclrtCallbackBloc
     aclrtStream stream)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
-    ACL_LOG_INFO("start to execute aclrtLaunchCallback");
+    ACL_LOG_INFO("start to execute aclrtLaunchCallback.");
     if ((blockType != ACL_CALLBACK_BLOCK) && (blockType != ACL_CALLBACK_NO_BLOCK)) {
         ACL_LOG_ERROR("invalid block type, the current blockType = %d", static_cast<int32_t>(blockType));
         return ACL_ERROR_INVALID_PARAM;

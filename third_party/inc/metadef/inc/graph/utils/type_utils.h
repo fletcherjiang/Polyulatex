@@ -47,9 +47,6 @@ class TypeUtils {
   static Format DomiFormatToFormat(domi::domiTensorFormat_t domi_format);
   static std::string FmkTypeToSerialString(domi::FrameworkType fmk_type);
 
-  static graphStatus Usr2DefQuantizeFactorParams(const UsrQuantizeFactorParams &usr, QuantizeFactorParams &def);
-  static graphStatus Def2UsrQuantizeFactorParams(const QuantizeFactorParams &def, UsrQuantizeFactorParams &usr);
-
   static bool GetDataTypeLength(ge::DataType data_type, uint32_t &length);
   static bool CheckUint64MulOverflow(uint64_t a, uint32_t b);
 };

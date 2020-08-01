@@ -44,71 +44,6 @@
     }                                                                                                              \
   } while (0)
 
-#define REFER_ATTR_VALUE(VT_ENUM, DataType, attr, ret) \
-  do {                                                 \
-    DataType ret;                                      \
-    attr.GetValue<DataType>(ret);                      \
-  } while (0)
-
-#define PRINT_ATTR_VALUE_IF(value_type, VT_ENUM, DataType, attr, stream) \
-  do {                                                                   \
-    if (value_type == VT_ENUM) {                                         \
-      REFER_ATTR_VALUE(VT_ENUM, DataType, attr, ret)                     \
-      stream << ret;                                                     \
-    }                                                                    \
-  } while (0)
-
-#define PRINT_LIST_ATTR_VALUE_IF(value_type, VT_ENUM, DataType, attr, stream) \
-  do {                                                                        \
-    if (value_type == VT_ENUM) {                                              \
-      REFER_ATTR_VALUE(VT_ENUM, DataType, attr, ret)                          \
-      stream << "[";                                                          \
-      for (int i = 0; i < ret.size(); i++) {                                  \
-        stream << ret[i];                                                     \
-        if (i + 1 != ret.size()) stream << ", ";                              \
-      }                                                                       \
-      stream << "]";                                                          \
-    }                                                                         \
-  } while (0)
-
-#define PRINT_ATTR_VALUE_ELIF(value_type, VT_ENUM, DataType, attr, stream) \
-  else PRINT_ATTR_VALUE_IF(value_type, VT_ENUM, DataType, attr, stream)
-
-#define PRINT_LIST_ATTR_VALUE_ELIF(value_type, VT_ENUM, DataType, attr, stream) \
-  else PRINT_LIST_ATTR_VALUE_IF(value_type, VT_ENUM, DataType, attr, stream)
-
-#define PRINT_SHAPE(i_o, n, idx, stream)                                               \
-  do {                                                                                 \
-    auto op = n->GetOpDesc();                                                          \
-    GeTensorDesc td = i_o == "input" ? op->GetInputDesc(idx) : op->GetOutputDesc(idx); \
-    auto shape = td.GetShape().GetDims();                                              \
-    stream << "[";                                                                     \
-    for (int i = 0; i < shape.size(); i++) {                                           \
-      stream << shape[i];                                                              \
-      if (i + 1 < shape.size()) stream << ", ";                                        \
-    }                                                                                  \
-    stream << "]";                                                                     \
-  } while (0)
-
-#define PRINT_ATTR_FUNC(stream)                                                                                    \
-  [&](GeAttrValue attr) {                                                                                          \
-    auto type = attr.GetValueType();                                                                               \
-    PRINT_ATTR_VALUE_IF(type, GeAttrValue::ValueType::VT_STRING, GeAttrValue::STR, attr, stream)                   \
-    PRINT_ATTR_VALUE_ELIF(type, GeAttrValue::ValueType::VT_FLOAT, GeAttrValue::FLOAT, attr, stream)                \
-    PRINT_ATTR_VALUE_ELIF(type, GeAttrValue::ValueType::VT_BOOL, GeAttrValue::BOOL, attr, stream)                  \
-    PRINT_ATTR_VALUE_ELIF(type, GeAttrValue::ValueType::VT_INT, GeAttrValue::INT, attr, stream)                    \
-    PRINT_LIST_ATTR_VALUE_ELIF(type, GeAttrValue::ValueType::VT_LIST_STRING, GeAttrValue::LIST_STR, attr, stream)  \
-    PRINT_LIST_ATTR_VALUE_ELIF(type, GeAttrValue::ValueType::VT_LIST_FLOAT, GeAttrValue::LIST_FLOAT, attr, stream) \
-    PRINT_LIST_ATTR_VALUE_ELIF(type, GeAttrValue::ValueType::VT_LIST_BOOL, GeAttrValue::LIST_BOOL, attr, stream)   \
-    PRINT_LIST_ATTR_VALUE_ELIF(type, GeAttrValue::ValueType::VT_LIST_INT, GeAttrValue::LIST_INT, attr, stream)     \
-    else if (type == GeAttrValue::ValueType::VT_TENSOR_DESC) stream << "TENSOR_DESC";                              \
-    else if (type == GeAttrValue::ValueType::VT_TENSOR) stream << "TENSOR";                                        \
-    else if (type == GeAttrValue::ValueType::VT_BYTES) stream << "BYTES";                                          \
-    else if (type == GeAttrValue::ValueType::VT_LIST_TENSOR_DESC) stream << "LIST_TENSOR_DESC";                    \
-    else if (type == GeAttrValue::ValueType::VT_LIST_TENSOR) stream << "LIST_TENSOR";                              \
-    else if (type == GeAttrValue::ValueType::VT_LIST_BYTES) stream << "LIST_BYTES";                                \
-  };
-
 namespace ge {
 enum IOType { kIn, kOut };
 
@@ -401,6 +336,8 @@ class GraphUtils {
   /// @return bool
   ///
   static bool IsRefFromInput(const OutDataAnchorPtr &out_data_anchor, int32_t &reuse_in_index);
+
+  static bool IsNoPaddingRefFromInput(const OutDataAnchorPtr &out_data_anchor, int32_t &reuse_in_index);
 
   static bool IsNodeInGraphRecursively(const ComputeGraphPtr &graph, const Node &node);
 

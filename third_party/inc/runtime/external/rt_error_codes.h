@@ -85,9 +85,13 @@ static const int32_t ACL_ERROR_RT_DEBUG_UNREGISTER_FAIL      = 507030; // debug 
 static const int32_t ACL_ERROR_RT_LABEL_CONTEXT              = 507031; // label not in current context
 static const int32_t ACL_ERROR_RT_PROGRAM_USE_OUT            = 507032; // program register num use out
 static const int32_t ACL_ERROR_RT_DEV_SETUP_ERROR            = 507033; // device setup error
+static const int32_t ACL_ERROR_RT_VECTOR_CORE_TIMEOUT        = 507034; // vector core timeout
+static const int32_t ACL_ERROR_RT_VECTOR_CORE_EXCEPTION      = 507035; // vector core exception
+static const int32_t ACL_ERROR_RT_VECTOR_CORE_TRAP_EXCEPTION = 507036; // vector core trap exception
 
 static const int32_t ACL_ERROR_RT_DRV_INTERNAL_ERROR         = 507899; // drv internal error
 static const int32_t ACL_ERROR_RT_AICPU_INTERNAL_ERROR       = 507900; // aicpu internal error
+static const int32_t ACL_ERROR_RT_SOCKET_CLOSE               = 507901; // hdc disconnect
 
 #ifdef __cplusplus
 }

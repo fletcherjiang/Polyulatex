@@ -50,7 +50,7 @@ struct ACL_FUNC_VISIBILITY aclTensorDesc {
     size_t constDataLen = 0;
     aclMemType memtype = ACL_MEMTYPE_DEVICE;
 
-    const std::string& GetKey(bool isInput = true) const;
+    const std::string& GetKey() const;
     const std::string &GetShapeKey() const;
     std::string DebugString() const;
     bool IsDynamicTensor() const;
@@ -66,6 +66,7 @@ struct ACL_FUNC_VISIBILITY aclTensorDesc {
     void Init(const aclTensorDesc &tensorDesc);
     void UpdateTensorShape(const std::vector<int64_t> &shape);
     void UpdateTensorShapeRange(const std::vector<std::pair<int64_t, int64_t>> &ranges);
+    bool CheckConstTensor(bool needCheckHostMem) const;
 
 private:
     mutable std::string cachedKey;

@@ -36,12 +36,12 @@ namespace {
     int32_t compileFlag = 0;
 }
 
-void SetCompileFlag(int32_t flag)
+void SetGlobalCompileFlag(int32_t flag)
 {
     compileFlag = flag;
 }
 
-int32_t GetCompileFlag()
+int32_t GetGlobalCompileFlag()
 {
     return compileFlag;
 }
@@ -299,8 +299,8 @@ aclError OpCompiler::MakeCompileParam(const AclOp &aclOp, CompileParam &param, i
 
 aclError OpCompiler::CompileOp(const AclOp &aclOp, std::shared_ptr<void> &modelData, size_t &modelSize)
 {
-    ACL_LOG_INFO("To compile op: %s", aclOp.opType.c_str());
-    int32_t compileFlag = GetCompileFlag();
+    int32_t compileFlag = GetGlobalCompileFlag();
+    ACL_LOG_INFO("To compile op: %s, compileFlag is %d", aclOp.opType.c_str(), compileFlag);
     CompileParam param;
     ACL_REQUIRES_OK(MakeCompileParam(aclOp, param, compileFlag));
     ACL_REQUIRES_OK(DoCompile(param, modelData, modelSize));

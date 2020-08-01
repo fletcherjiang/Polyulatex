@@ -52,6 +52,7 @@ struct Tsd2dmReqMsg {
     AlarmMessage alarmMessage;
     int32_t qsPid;
     uint32_t rosNodePid;
+    int32_t pgid;
 };
 
 using TsdCallbackFuncType = void (*)(struct Tsd2dmReqMsg *req);

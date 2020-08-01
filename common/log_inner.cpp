@@ -78,4 +78,35 @@ void AclLog::ACLSaveLog(aclLogLevel logLevel, const char* strLog)
             break;
     }
 }
+
+AclErrorLogManager::AclErrorLogManager(const std::string &firstStage, const std::string &secondStage)
+{
+    ErrorManager::GetInstance().SetStage(firstStage, secondStage);
+};
+
+AclErrorLogManager::~AclErrorLogManager()
+{
+    ErrorManager::GetInstance().SetStage("", "");
+};
+
+const std::string &AclErrorLogManager::GetStagesHeader()
+{
+    return ErrorManager::GetInstance().GetLogHeader();
+}
+
+template<typename T>
+std::string AclErrorLogManager::CombineLogStr(const std::vector<std::string> keys, const std::vector<T> values)
+{
+    std::string res;
+    if (keys.size() != values.size()) {
+        return "";
+    }
+    for (size_t index = 0; index < keys.size(); ++index) {
+        res += (keys[index] + "[" + std::to_string(values[index]) + "]");
+        if (index != (keys.size() - 1)) {
+            res += " or ";
+        }
+    }
+    return res;
+}
 }

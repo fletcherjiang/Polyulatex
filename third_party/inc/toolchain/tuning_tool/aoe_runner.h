@@ -21,6 +21,7 @@
 extern "C" {
 #endif
 
+std::string AoeGetSocVersion();
 #ifdef TUNING_TOOL_OFFLINE
 AoeStatus AoeOfflineRunnerInit(const RunnerInitConfig &initConfig);
 void AoeOfflineRunnerFinalize();

@@ -438,7 +438,7 @@ aclError aclmdlSetDump(const char *dumpCfgPath)
         return ACL_ERROR_DUMP_NOT_RUN;
     }
 
-    ACL_REQUIRES_NOT_NULL(dumpCfgPath);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dumpCfgPath);
     ge::GeExecutor geExecutor;
     nlohmann::json js;
     ge::DumpConfig dumpConfig;

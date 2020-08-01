@@ -35,7 +35,7 @@ public:
     void SetMaxOpNum(uint64_t max) { maxOpNum = max; }
 
 private:
-    static std::string TensorDescArr2Str(int num, const aclTensorDesc *const descArr[], bool isInput = true);
+    static std::string TensorDescArr2Str(int num, const aclTensorDesc *const descArr[]);
     static std::string ShapeRangeArr2Str(int num, const aclTensorDesc *const descArr[]);
     void Aging(T &agingT);
     void Updatetimestamp(T &entry);
@@ -55,7 +55,7 @@ private:
 };
 
 template<typename T>
-std::string AclShapeRangeMap<T>::TensorDescArr2Str(int num, const aclTensorDesc *const descArr[], bool isInput)
+std::string AclShapeRangeMap<T>::TensorDescArr2Str(int num, const aclTensorDesc *const descArr[])
 {
     if ((num > 0) && (descArr == nullptr)) {
         ACL_LOG_ERROR("param descArr must not be null");
@@ -67,7 +67,7 @@ std::string AclShapeRangeMap<T>::TensorDescArr2Str(int num, const aclTensorDesc 
     for (int i = 0; i < num; ++i) {
         ACL_REQUIRES_NOT_NULL_RET_STR(descArr[i]);
         ACL_LOG_DEBUG("TensorDescArr2Str::descArr[%d] addr = %p", i, descArr[i]);
-        descStr.append(descArr[i]->GetKey(isInput));
+        descStr.append(descArr[i]->GetKey());
         descStr.push_back('|');
     }
     return descStr;
@@ -196,9 +196,9 @@ void AclShapeRangeMap<T>::Insert(const AclOp &aclOp, const T &entry, T &agingT)
 {
     ACL_LOG_INFO("AclShapeRangeMap::Insert IN, aclOp = %s", aclOp.DebugString().c_str());
     string inputDescStr = TensorDescArr2Str(aclOp.numInputs, aclOp.inputDesc);
-    string outputDescStr = TensorDescArr2Str(aclOp.numOutputs, aclOp.outputDesc, false);
+    string outputDescStr = TensorDescArr2Str(aclOp.numOutputs, aclOp.outputDesc);
     string inputRangeStr = ShapeRangeArr2Str(aclOp.numInputs, aclOp.inputDesc);
-    string outputRangeStr;
+    string outputRangeStr = ShapeRangeArr2Str(aclOp.numOutputs, aclOp.outputDesc);
     string rangeKeyStr = inputRangeStr + outputRangeStr;
     ACL_LOG_INFO("inputDescStr = %s, outputDescStr = %s, inputRangeStr = %s, outputRangeStr = %s, rangeKeyStr = %s",
         inputDescStr.c_str(), outputDescStr.c_str(), inputRangeStr.c_str(),
@@ -234,9 +234,9 @@ aclError AclShapeRangeMap<T>::Get(const AclOp &aclOp, T &entry, bool needUpdateT
     const string &opType = aclOp.opType;
     auto *opAttr = aclOp.opAttr;
     string inputDescStr = TensorDescArr2Str(aclOp.numInputs, aclOp.inputDesc);
-    string outputDescStr = TensorDescArr2Str(aclOp.numOutputs, aclOp.outputDesc, false);
+    string outputDescStr = TensorDescArr2Str(aclOp.numOutputs, aclOp.outputDesc);
     string inputRangeStr = ShapeRangeArr2Str(aclOp.numInputs, aclOp.inputDesc);
-    string outputRangeStr;
+    string outputRangeStr = ShapeRangeArr2Str(aclOp.numOutputs, aclOp.outputDesc);
     string rangeKeyStr = inputRangeStr + outputRangeStr;
     ACL_LOG_INFO("inputDescStr = %s, outputDescStr = %s, inputRangeStr = %s, outputRangeStr = %s, rangeKeyStr = %s",
         inputDescStr.c_str(), outputDescStr.c_str(), inputRangeStr.c_str(),
@@ -280,7 +280,7 @@ aclError AclShapeRangeMap<T>::Get(const AclOp &aclOp, T &entry, bool needUpdateT
     auto &filteredByOutputs = iter2->second;
     auto iter3 = filteredByOutputs.find(digest);
     if (iter3 == filteredByOutputs.end()) {
-        ACL_CHECK_WITH_MESSAGE_AND_NO_RETURN(aclOp.isCompile, "Match attr by digest failed. user input attr = %s",
+        ACL_LOG_WARN("Match attr by digest failed. user input attr = %s",
             opAttr == nullptr ? "None" : opAttr->DebugString().c_str());
         return ACL_ERROR_OP_ATTR_NOT_MATCH;
     }
@@ -289,8 +289,7 @@ aclError AclShapeRangeMap<T>::Get(const AclOp &aclOp, T &entry, bool needUpdateT
     auto &filteredByAttr = iter3->second;
     auto iter4 = filteredByAttr.find(rangeKeyStr);
     if (iter4 == filteredByAttr.end()) {
-        ACL_CHECK_WITH_MESSAGE_AND_NO_RETURN(aclOp.isCompile, "Match op rangeKey failed. opType = %s, rangeKey = %s",
-            opType.c_str(), rangeKeyStr.c_str());
+        ACL_LOG_WARN("Match op rangeKey failed. opType = %s, rangeKey = %s", opType.c_str(), rangeKeyStr.c_str());
         return ACL_ERROR_OP_ATTR_NOT_MATCH;
     }
 

@@ -26,7 +26,7 @@ aclError aclrtCreateContext(aclrtContext *context, int32_t deviceId)
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_CONTEXT);
     ACL_LOG_INFO("start to execute aclrtCreateContext, device is %d.", deviceId);
-    ACL_REQUIRES_NOT_NULL(context);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(context);
 
     rtContext_t rtCtx = nullptr;
     rtError_t rtErr = rtCtxCreateEx(&rtCtx, RT_CTX_NORMAL_MODE, deviceId);
@@ -46,8 +46,8 @@ aclError aclrtDestroyContext(aclrtContext context)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_CONTEXT);
-    ACL_LOG_INFO("start to execute aclrtDestroyContext");
-    ACL_REQUIRES_NOT_NULL(context);
+    ACL_LOG_INFO("start to execute aclrtDestroyContext.");
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(context);
 
     (void) ge::GeExecutor::ReleaseSingleOpResource(context);
 
@@ -64,8 +64,8 @@ aclError aclrtDestroyContext(aclrtContext context)
 aclError aclrtSetCurrentContext(aclrtContext context)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
-    ACL_LOG_INFO("start to execute aclrtSetCurrentContext");
-    ACL_REQUIRES_NOT_NULL(context);
+    ACL_LOG_INFO("start to execute aclrtSetCurrentContext.");
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(context);
 
     rtError_t rtErr = rtCtxSetCurrent(static_cast<rtContext_t>(context));
     if (rtErr != RT_ERROR_NONE) {
@@ -80,7 +80,7 @@ aclError aclrtGetCurrentContext(aclrtContext *context)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_LOG_INFO("start to execute aclrtGetCurrentContext");
-    ACL_REQUIRES_NOT_NULL(context);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(context);
 
     rtContext_t rtCtx = nullptr;
     rtError_t rtErr = rtCtxGetCurrent(&rtCtx);

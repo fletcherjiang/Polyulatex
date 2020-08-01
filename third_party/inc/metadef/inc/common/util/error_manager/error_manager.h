@@ -22,14 +22,19 @@
 #include <string>
 #include <vector>
 #include <mutex>
+#include <cstring>
 
-namespace ErrorMessage {
+namespace error_message {
 #ifdef __GNUC__
 int FormatErrorMessage(char *str_dst, size_t dst_max, const char *format, ...) __attribute__((format(printf, 3, 4)));
+#define TRIM_PATH(x) strrchr(x, '/') ? strrchr(x, '/') + 1 : x
 #else
 int FormatErrorMessage(char *str_dst, size_t dst_max, const char *format, ...);
+#define TRIM_PATH(x) strrchr(x, '\\') ? strrchr(x, '\\') + 1 : x
 #endif
 }
+
+#define LIMIT_PER_MESSAGE 512
 
 ///
 /// @brief Report error message
@@ -47,51 +52,90 @@ int FormatErrorMessage(char *str_dst, size_t dst_max, const char *format, ...);
 #define REPORT_ENV_ERROR(error_code, key, value)                                            \
   ErrorManager::GetInstance().ATCReportErrMessage(error_code, key, value)
 
-#define REPORT_INNER_ERROR(error_code, fmt, ...)                                                                       \
-do {                                                                                                                   \
-  char error_message_str[512] = {0};                                                                                   \
-  int error_message_ret = ErrorMessage::FormatErrorMessage(error_message_str, 512, fmt, ##__VA_ARGS__);                              \
-  if (error_message_ret > 0) {                                                                                         \
-    error_message_ret = ErrorManager::GetInstance().ReportInterErrMessage(error_code, std::string(error_message_str)); \
-  }                                                                                                                    \
-} while(0)
+#define REPORT_INNER_ERROR(error_code, fmt, ...)                                                 \
+do {                                                                                             \
+  char error_message_str[LIMIT_PER_MESSAGE] = {0};                                               \
+  error_message::FormatErrorMessage(error_message_str, LIMIT_PER_MESSAGE, fmt, ##__VA_ARGS__);   \
+  error_message::FormatErrorMessage(                                                             \
+          error_message_str, LIMIT_PER_MESSAGE, "%s[FUNC:%s][FILE:%s][LINE:%d]",                 \
+          error_message_str, __FUNCTION__, TRIM_PATH(__FILE__), __LINE__);                       \
+  ErrorManager::GetInstance().ReportInterErrMessage(error_code, std::string(error_message_str)); \
+} while (0)
 
-#define REPORT_CALL_ERROR(error_code, fmt, ...)                                                                        \
-do {                                                                                                                   \
-  char error_message_str[512] = {0};                                                                                   \
-  int error_message_ret = ErrorMessage::FormatErrorMessage(error_message_str, 512, fmt, ##__VA_ARGS__);                              \
-  if (error_message_ret > 0) {                                                                                         \
-    error_message_ret = ErrorManager::GetInstance().ReportInterErrMessage(error_code, std::string(error_message_str)); \
-  }                                                                                                                    \
-} while(0)
+#define REPORT_CALL_ERROR(error_code, fmt, ...)                                                  \
+do {                                                                                             \
+  char error_message_str[LIMIT_PER_MESSAGE] = {0};                                               \
+  error_message::FormatErrorMessage(error_message_str, LIMIT_PER_MESSAGE, fmt, ##__VA_ARGS__);   \
+  error_message::FormatErrorMessage(                                                             \
+          error_message_str, LIMIT_PER_MESSAGE, "%s[FUNC:%s][FILE:%s][LINE:%d]",                 \
+          error_message_str, __FUNCTION__, TRIM_PATH(__FILE__), __LINE__);                       \
+  ErrorManager::GetInstance().ReportInterErrMessage(error_code, std::string(error_message_str)); \
+} while (0)
 
-namespace ErrorMessage {
+namespace error_message {
   // first stage
-  const std::string kInitialize   = "INIT";
-  const std::string kModelCompile = "COMP";
-  const std::string kModelLoad    = "LOAD";
-  const std::string kModelExecute = "EXEC";
-  const std::string kFinalize     = "FINAL";
+  constexpr char const *kInitialize   = "INIT";
+  constexpr char const *kModelCompile = "COMP";
+  constexpr char const *kModelLoad    = "LOAD";
+  constexpr char const *kModelExecute = "EXEC";
+  constexpr char const *kFinalize     = "FINAL";
 
   // SecondStage
   // INITIALIZE
-  const std::string kParser               = "PARSER";
-  const std::string kOpsProtoInit         = "OPS_PRO";
-  const std::string kSystemInit           = "SYS";
-  const std::string kEngineInit           = "ENGINE";
-  const std::string kOpsKernelInit        = "OPS_KER";
-  const std::string kOpsKernelBuilderInit = "OPS_KER_BLD";
+  constexpr char const *kParser               = "PARSER";
+  constexpr char const *kOpsProtoInit         = "OPS_PRO";
+  constexpr char const *kSystemInit           = "SYS";
+  constexpr char const *kEngineInit           = "ENGINE";
+  constexpr char const *kOpsKernelInit        = "OPS_KER";
+  constexpr char const *kOpsKernelBuilderInit = "OPS_KER_BLD";
   // MODEL_COMPILE
-  const std::string kPrepareOptimize    = "PRE_OPT";
-  const std::string kOriginOptimize     = "ORI_OPT";
-  const std::string kSubGraphOptimize   = "SUB_OPT";
-  const std::string kMergeGraphOptimize = "MERGE_OPT";
-  const std::string kPreBuild           = "PRE_BLD";
-  const std::string kStreamAlloc        = "STM_ALLOC";
-  const std::string kMemoryAlloc        = "MEM_ALLOC";
-  const std::string kTaskGenerate       = "TASK_GEN";
+  constexpr char const *kPrepareOptimize    = "PRE_OPT";
+  constexpr char const *kOriginOptimize     = "ORI_OPT";
+  constexpr char const *kSubGraphOptimize   = "SUB_OPT";
+  constexpr char const *kMergeGraphOptimize = "MERGE_OPT";
+  constexpr char const *kPreBuild           = "PRE_BLD";
+  constexpr char const *kStreamAlloc        = "STM_ALLOC";
+  constexpr char const *kMemoryAlloc        = "MEM_ALLOC";
+  constexpr char const *kTaskGenerate       = "TASK_GEN";
   // COMMON
-  const std::string kOther = "DEFAULT";
+  constexpr char const *kOther = "DEFAULT";
+
+  struct Context {
+    uint64_t work_stream_id;
+    std::string first_stage;
+    std::string second_stage;
+    std::string log_header;
+  };
+}
+
+// old, will be delete after all caller transfer to new
+namespace ErrorMessage {
+  // first stage
+  constexpr char const *kInitialize   = "INIT";
+  constexpr char const *kModelCompile = "COMP";
+  constexpr char const *kModelLoad    = "LOAD";
+  constexpr char const *kModelExecute = "EXEC";
+  constexpr char const *kFinalize     = "FINAL";
+
+  // SecondStage
+  // INITIALIZE
+  constexpr char const *kParser               = "PARSER";
+  constexpr char const *kOpsProtoInit         = "OPS_PRO";
+  constexpr char const *kSystemInit           = "SYS";
+  constexpr char const *kEngineInit           = "ENGINE";
+  constexpr char const *kOpsKernelInit        = "OPS_KER";
+  constexpr char const *kOpsKernelBuilderInit = "OPS_KER_BLD";
+  // MODEL_COMPILE
+  constexpr char const *kPrepareOptimize    = "PRE_OPT";
+  constexpr char const *kOriginOptimize     = "ORI_OPT";
+  constexpr char const *kSubGraphOptimize   = "SUB_OPT";
+  constexpr char const *kMergeGraphOptimize = "MERGE_OPT";
+  constexpr char const *kPreBuild           = "PRE_BLD";
+  constexpr char const *kStreamAlloc        = "STM_ALLOC";
+  constexpr char const *kMemoryAlloc        = "MEM_ALLOC";
+  constexpr char const *kTaskGenerate       = "TASK_GEN";
+  // COMMON
+  constexpr char const *kOther = "DEFAULT";
 
   struct Context {
     uint64_t work_stream_id;
@@ -188,8 +232,10 @@ class ErrorManager {
   const std::string &GetLogHeader();
 
   ErrorMessage::Context &GetErrorContext();
+  error_message::Context &GetErrorManagerContext();
 
   void SetErrorContext(ErrorMessage::Context error_context);
+  void SetErrorContext(error_message::Context error_context);
 
   void SetStage(const std::string &first_stage, const std::string &second_stage);
 
@@ -235,6 +281,9 @@ class ErrorManager {
   std::vector<ErrorItem> &GetErrorMsgContainerByWorkId(uint64_t work_id);
   std::vector<ErrorItem> &GetWarningMsgContainerByWorkId(uint64_t work_id);
 
+  void ClearErrorMsgContainerByWorkId(uint64_t work_stream_id);
+  void ClearWarningMsgContainerByWorkId(uint64_t work_stream_id);
+
   bool is_init_ = false;
   std::mutex mutex_;
   std::map<std::string, ErrorInfoConfig> error_map_;
@@ -243,7 +292,7 @@ class ErrorManager {
   std::map<uint64_t, std::vector<ErrorItem>> error_message_per_work_id_;
   std::map<uint64_t, std::vector<ErrorItem>> warning_messages_per_work_id_;
 
-  thread_local static ErrorMessage::Context error_context_;
+  thread_local static error_message::Context error_context_;
 };
 
 #endif  // ERROR_MANAGER_H_

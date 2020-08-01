@@ -99,6 +99,7 @@ Status AutoMappingSubgraphIndexByDataNodeAndOutputNodesInfo(const ge::Graph &gra
     const std::function<Status(int netoutput_index, int &parent_output_index)> &output);
 using google::protobuf::Message;
 class OpRegistrationDataImpl;
+class FrameworkRegistryImpl;
 
 using ParseParamFunc = std::function<domi::Status(const google::protobuf::Message *, ge::Operator &)>;
 using ParseParamByOpFunc = std::function<domi::Status(const ge::Operator &, ge::Operator &)>;
@@ -108,6 +109,30 @@ using FusionParseParamByOpFunc = std::function<domi::Status(const std::vector<ge
 using ParseSubgraphFunc = std::function<Status(const std::string &subgraph_name, const ge::Graph &graph)>;
 using ParseOpToGraphFunc = std::function<Status(const ge::Operator &, ge::Graph &)>;
 using ParseSubgraphFuncV2 = std::function<Status(const ge::AscendString &subgraph_name, const ge::Graph &graph)>;
+using AutoMappingSubgraphIOIndexFunc = std::function<Status(const ge::Graph &graph,
+    const std::function<Status(int data_index, int &parent_input_index)> &input,
+    const std::function<Status(int netoutput_index, int &parent_output_index)> &output)>;
+
+class FMK_FUNC_HOST_VISIBILITY FMK_FUNC_DEV_VISIBILITY FrameworkRegistry {
+ public:
+  FrameworkRegistry(const FrameworkRegistry &) = delete;
+  FrameworkRegistry& operator = (const FrameworkRegistry &) = delete;
+  static FrameworkRegistry& Instance();
+  void AddAutoMappingSubgraphIOIndexFunc(domi::FrameworkType framework, AutoMappingSubgraphIOIndexFunc fun);
+  AutoMappingSubgraphIOIndexFunc GetAutoMappingSubgraphIOIndexFunc(domi::FrameworkType framework);
+ private:
+  FrameworkRegistry();
+  std::unique_ptr<FrameworkRegistryImpl> impl_;
+};
+
+class FMK_FUNC_HOST_VISIBILITY FMK_FUNC_DEV_VISIBILITY AutoMappingSubgraphIOIndexFuncRegister {
+ public:
+  AutoMappingSubgraphIOIndexFuncRegister(domi::FrameworkType framework, AutoMappingSubgraphIOIndexFunc fun);
+};
+
+#define REGISTER_AUTOMAPPING_SUBGRAPH_IO_INDEX_FUNC(framework, fun)             \
+  static AutoMappingSubgraphIOIndexFuncRegister                                 \
+    auto_mapping_subgraph_fun_##framework(framework, fun);                      \
 
 class FMK_FUNC_HOST_VISIBILITY FMK_FUNC_DEV_VISIBILITY OpRegistrationData {
  public:

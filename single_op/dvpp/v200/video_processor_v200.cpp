@@ -181,7 +181,7 @@ namespace acl {
 
             if ((channelDesc->bufAddr == 0 && channelDesc->bufSize != 0) ||
                 (channelDesc->bufAddr != 0 && channelDesc->bufSize == 0)) {
-                ACL_LOG_ERROR("bufAddr and bufSize should be set togather.");
+                ACL_LOG_ERROR("bufAddr and bufSize should be set together.");
                 (void)acldvppDestroyStreamDesc(output);
                 channelDesc->outStreamDesc = nullptr;
                 return ACL_ERROR_RT_FAILURE;

@@ -21,14 +21,11 @@
 #include <functional>
 
 namespace ge {
-namespace {
-constexpr size_t kAlignmentBytes = 16;
-using deleter = std::function<void(uint8_t *)>;
-using allocator = std::function<void(std::unique_ptr<uint8_t[], deleter> &base_addr)>;
-}
 class AlignedPtr {
  public:
-  explicit AlignedPtr(size_t buffer_size, size_t alignment = kAlignmentBytes);
+  using Deleter = std::function<void(uint8_t *)>;
+  using Allocator = std::function<void(std::unique_ptr<uint8_t[], Deleter> &base_addr)>;
+  explicit AlignedPtr(size_t buffer_size, size_t alignment = 64);
   AlignedPtr() = default;
   ~AlignedPtr() = default;
   AlignedPtr(const AlignedPtr &) = delete;
@@ -38,11 +35,13 @@ class AlignedPtr {
 
   const uint8_t *Get() const { return aligned_addr_; }
   uint8_t *MutableGet() { return aligned_addr_; }
+  std::unique_ptr<uint8_t[], AlignedPtr::Deleter> Reset();
 
-  static std::shared_ptr<AlignedPtr> BuildFromAllocFunc(const allocator &alloc_func, const deleter &delete_func);
+  static std::shared_ptr<AlignedPtr> BuildFromAllocFunc(const AlignedPtr::Allocator &alloc_func,
+                                                        const AlignedPtr::Deleter &delete_func);
 
  private:
-  std::unique_ptr<uint8_t[], deleter> base_ = nullptr;
+  std::unique_ptr<uint8_t[], AlignedPtr::Deleter> base_ = nullptr;
   uint8_t *aligned_addr_ = nullptr;
 };
 }  // namespace ge

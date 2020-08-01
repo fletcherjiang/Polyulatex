@@ -39,11 +39,6 @@ class OpDescUtils {
   ~OpDescUtils() = default;
   static bool HasQuantizeFactorParams(const OpDescPtr& op_desc);
   static bool HasQuantizeFactorParams(const OpDesc& op_desc);
-  static graphStatus GetQuantizeFactorParams(const OpDescPtr& op_desc, QuantizeFactorParams& quant);
-  static graphStatus GetQuantizeFactorParams(const OpDesc& op_desc, QuantizeFactorParams& quant);
-  static graphStatus SetQuantizeFactorParams(const OpDescPtr &op_desc, const QuantizeFactorParams& quant);
-  static graphStatus SetQuantizeFactorParams(OpDesc& op_desc, const QuantizeFactorParams& quant);
-
   static vector<ge::NodePtr> GetConstInputNode(const ge::Node& node);
   static vector<ConstGeTensorPtr> GetInputData(const vector<ge::NodePtr>& input_nodes);
 

@@ -35,7 +35,7 @@ public:
     void SetMaxOpNum(uint64_t max) { maxOpNum = max; }
 
 private:
-    static std::string TensorDescArr2Str(int num, const aclTensorDesc *const descArr[], bool isInput = true);
+    static std::string TensorDescArr2Str(int num, const aclTensorDesc *const descArr[]);
     void Aging(T &agingT);
     void Updatetimestamp(T &entry);
     void AddMemAndAging(std::vector<std::pair<aclopAttr, T>> &modelVec,
@@ -53,7 +53,7 @@ private:
 };
 
 template<typename T>
-std::string AclOpMap<T>::TensorDescArr2Str(int num, const aclTensorDesc *const descArr[], bool isInput)
+std::string AclOpMap<T>::TensorDescArr2Str(int num, const aclTensorDesc *const descArr[])
 {
     if ((num > 0) && (descArr == nullptr)) {
         ACL_LOG_ERROR("param descArr must not be null");
@@ -64,7 +64,7 @@ std::string AclOpMap<T>::TensorDescArr2Str(int num, const aclTensorDesc *const d
     descStr.push_back('~');
     for (int i = 0; i < num; ++i) {
         ACL_REQUIRES_NOT_NULL_RET_STR(descArr[i]);
-        descStr.append(descArr[i]->GetKey(isInput));
+        descStr.append(descArr[i]->GetKey());
         descStr.push_back('|');
     }
     return descStr;
@@ -164,7 +164,7 @@ void AclOpMap<T>::Insert(const AclOp &aclOp, const T &entry, T &agingT)
 {
     ACL_LOG_DEBUG("AclOpMap::Insert IN, aclOp = %s", aclOp.DebugString().c_str());
     string inputDescStr = TensorDescArr2Str(aclOp.numInputs, aclOp.inputDesc);
-    string outputDescStr = TensorDescArr2Str(aclOp.numOutputs, aclOp.outputDesc, false);
+    string outputDescStr = TensorDescArr2Str(aclOp.numOutputs, aclOp.outputDesc);
     if (aclOp.opAttr != nullptr) {
         if (!attr_utils::SaveConstToAttr(aclOp, const_cast<aclopAttr *>(aclOp.opAttr))) {
             ACL_LOG_ERROR("save const data buffer to attr fail");
@@ -211,7 +211,7 @@ aclError AclOpMap<T>::Get(const AclOp &aclOp, T &entry, bool needUpdateTimestamp
     const string &opType = aclOp.opType;
     auto *opAttr = aclOp.opAttr;
     string inputDescStr = TensorDescArr2Str(aclOp.numInputs, aclOp.inputDesc);
-    string outputDescStr = TensorDescArr2Str(aclOp.numOutputs, aclOp.outputDesc, false);
+    string outputDescStr = TensorDescArr2Str(aclOp.numOutputs, aclOp.outputDesc);
     size_t digest = 0;
     aclopAttr emptyAttr;
     if (opAttr != nullptr) {

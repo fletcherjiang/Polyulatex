@@ -36,7 +36,7 @@ aclError aclrtGetGroupCount(uint32_t *count)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_LOG_INFO("start to execute aclrtGetGroupCount");
-    ACL_REQUIRES_NOT_NULL(count);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(count);
     rtError_t rtErr = rtGetGroupCount(count);
     if (rtErr != RT_ERROR_NONE) {
         ACL_LOG_ERROR("get group number failed, runtime result = %d", static_cast<int32_t>(rtErr));
@@ -77,7 +77,7 @@ aclrtGroupInfo *aclrtCreateGroupInfo()
 aclError aclrtDestroyGroupInfo(aclrtGroupInfo *groupInfo)
 {
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_GROUP_INFO);
-    ACL_REQUIRES_NOT_NULL(groupInfo);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(groupInfo);
     ACL_DELETE_ARRAY_AND_SET_NULL(groupInfo);
     ACL_LOG_INFO("successfully execute aclrtDestroyGroupInfo");
 
@@ -90,7 +90,7 @@ aclError aclrtGetAllGroupInfo(aclrtGroupInfo *groupInfo)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_LOG_INFO("start to execute aclrtGetAllGroupInfo");
-    ACL_REQUIRES_NOT_NULL(groupInfo);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(groupInfo);
     uint32_t count = 0;
     rtError_t rtErr = rtGetGroupCount(&count);
     if (rtErr != RT_ERROR_NONE) {
@@ -134,9 +134,9 @@ aclError aclrtGetGroupInfoDetail(const aclrtGroupInfo *groupInfo, int32_t groupI
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_LOG_INFO("start to execute aclrtGetGroupInfoDetail, groupIndex = %d", groupIndex);
-    ACL_REQUIRES_NOT_NULL(groupInfo);
-    ACL_REQUIRES_NOT_NULL(attrValue);
-    ACL_REQUIRES_NOT_NULL(paramRetSize);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(groupInfo);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attrValue);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(paramRetSize);
     uint32_t count = 0;
     rtError_t rtErr = rtGetGroupCount(&count);
     if (rtErr != RT_ERROR_NONE) {

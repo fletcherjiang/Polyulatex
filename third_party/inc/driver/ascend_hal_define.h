@@ -100,6 +100,8 @@ typedef enum event_id {
     EVENT_ACPU_MSG_TYPE2,
     EVENT_CCPU_CTRL_MSG,
     EVENT_SPLIT_KERNEL,
+    EVENT_DVPP_MPI_MSG,
+    EVENT_CDQ_MSG,
     /* Add a new event here */
     EVENT_TEST,               /* Reserve for test */
     EVENT_MAX_NUM
@@ -116,6 +118,13 @@ typedef enum schedule_priority {
     PRIORITY_LEVEL7,
     PRIORITY_MAX,
 } SCHEDULE_PRIORITY;
+
+/*=========================== Queue Manage ===========================*/
+
+typedef enum QueEventCmd {
+    QUE_PAUSE_EVENT = 1,    /* pause enque event publish in group */
+    QUE_RESUME_EVENT        /* resume enque event publish */
+} QUE_EVENT_CMD;
 
 /*=========================== Buffer Manage ===========================*/
 

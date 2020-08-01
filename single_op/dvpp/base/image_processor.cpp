@@ -349,14 +349,14 @@ namespace acl {
 
         rtError_t rtSynchronizeVal = rtStreamSynchronize(rtStream);
         if (rtSynchronizeVal != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("synchronize stream failed, runtime result = %d", rtSynchronizeVal);
+            ACL_LOG_ERROR("synchronize stream failed, runtime result = %d.", rtSynchronizeVal);
             DestroyNotifyAndStream(channelDesc, rtStream);
             return ACL_GET_ERRCODE_RTS(rtSynchronizeVal);
         }
 
         rtError_t rtDestroyVal = rtStreamDestroy(rtStream);
         if (rtDestroyVal != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("destroy stream failed, runtime result = %d", rtDestroyVal);
+            ACL_LOG_ERROR("destroy stream failed, runtime result = %d.", rtDestroyVal);
             if (channelDesc->dvppWaitTaskType == NOTIFY_TASK) {
                 (void)rtNotifyDestroy(static_cast<rtNotify_t>(channelDesc->notify));
             } else {
@@ -372,12 +372,11 @@ namespace acl {
             rtRetVal = rtEventDestroy(static_cast<rtEvent_t>(channelDesc->notify));
         }
         if (rtRetVal != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("fail to destroy Notify, runtime result = %d", rtRetVal);
+            ACL_LOG_ERROR("fail to destroy Notify, runtime result = %d.", rtRetVal);
             return ACL_GET_ERRCODE_RTS(rtRetVal);
         }
         channelDesc->notify = nullptr;
-
-        ACL_LOG_INFO("destroy dvpp channel with notify success, notifyId=%u", channelDesc->dvppDesc.notifyId);
+        ACL_LOG_INFO("destroy dvpp channel with notify success, notifyId = %u.", channelDesc->dvppDesc.notifyId);
         return ACL_SUCCESS;
     }
 
@@ -529,7 +528,7 @@ namespace acl {
         aclError validResizeInputRet = ValidateVpcInputFormat(
             static_cast<acldvppPixelFormat>(inputDesc->dvppPicDesc.format));
         if (validResizeInputRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("input picture describe format validate failed, result = %d, format = %u.",
+            ACL_LOG_ERROR("input picture describe format verify failed, result = %d, format = %u.",
                           validResizeInputRet, inputDesc->dvppPicDesc.format);
             return validResizeInputRet;
         }
@@ -538,14 +537,14 @@ namespace acl {
         aclError validResizeOutputRet = ValidateVpcOutputFormat(
             static_cast<acldvppPixelFormat>(outputDesc->dvppPicDesc.format));
         if (validResizeOutputRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("output picture describe format validate failed, result = %d, format = %u.",
+            ACL_LOG_ERROR("output picture describe format verify failed, result = %d, format = %u.",
                           validResizeOutputRet, outputDesc->dvppPicDesc.format);
             return validResizeOutputRet;
         }
         // check dvpp resize config
         aclError validResizeConfigRet = ValidateDvppResizeConfig(resizeConfig);
         if (validResizeConfigRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("resize config acldvppResizeConfig validate failed, result = %d.", validResizeConfigRet);
+            ACL_LOG_ERROR("resize config acldvppResizeConfig verify failed, result = %d.", validResizeConfigRet);
             return validResizeConfigRet;
         }
 
@@ -630,7 +629,7 @@ namespace acl {
             ACL_REQUIRES_NOT_NULL(resizeConfig);
             aclError validResizeConfigRet = ValidateDvppResizeConfig(resizeConfig);
             if (validResizeConfigRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("resize config acldvppResizeConfig validate failed, result = %d.", validResizeConfigRet);
+                ACL_LOG_ERROR("resize config acldvppResizeConfig verify failed, result = %d.", validResizeConfigRet);
                 return validResizeConfigRet;
             }
             resizeConfigSize = CalDevDvppStructRealUsedSize(&resizeConfig->dvppResizeConfig);
@@ -640,7 +639,7 @@ namespace acl {
         aclError validCropInputRet = ValidateVpcInputFormat(
             static_cast<acldvppPixelFormat>(inputDesc->dvppPicDesc.format));
         if (validCropInputRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("input acldvppPicDesc format validate failed, result = %d, format = %u.",
+            ACL_LOG_ERROR("input acldvppPicDesc format verify failed, result = %d, format = %u.",
                           validCropInputRet, inputDesc->dvppPicDesc.format);
             return validCropInputRet;
         }
@@ -649,7 +648,7 @@ namespace acl {
         aclError validCropOutputRet = ValidateVpcOutputFormat(
             static_cast<acldvppPixelFormat>(outputDesc->dvppPicDesc.format));
         if (validCropOutputRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("output acldvppPicDesc format validate failed, result = %d, format = %u.",
+            ACL_LOG_ERROR("output acldvppPicDesc format verify failed, result = %d, format = %u.",
                           validCropOutputRet, outputDesc->dvppPicDesc.format);
             return validCropOutputRet;
         }
@@ -668,7 +667,7 @@ namespace acl {
         aclError validateRet = ValidateParamForDvppVpcCropResizePaste(channelDesc, inputDesc, outputDesc, cropArea,
             nullptr, false, resizeConfig, resizeConfigSwitch, resizeConfigSize);
         if (validateRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("validate params for DvppVpcCropResize failed, ret = %d", validateRet);
+            ACL_LOG_ERROR("verify params for DvppVpcCropResize failed, ret = %d", validateRet);
             return validateRet;
         }
         // CropAndPaste have 3 inputs
@@ -800,7 +799,7 @@ namespace acl {
         // valid input param
         std::unique_ptr<uint16_t[]> roiNumsPtr(new (std::nothrow)uint16_t[size]);
         if (roiNumsPtr == nullptr) {
-            ACL_LOG_ERROR("create batch crop roiNumsPtr failed, roiNums size = %u.", size);
+            ACL_LOG_ERROR("create batch crop roiNums pointer failed, roiNums size = %u.", size);
             return ACL_ERROR_INVALID_PARAM;
         }
         uint32_t totalRoiNums = 0;
@@ -912,7 +911,7 @@ namespace acl {
                                                       acldvppRoiConfig *cropAreas[],
                                                       aclrtStream stream)
     {
-        ACL_LOG_INFO("start to execute acldvppVpcBatchCropAsync");
+        ACL_LOG_INFO("start to execute acldvppVpcBatchCropAsync.");
         auto ret = DvppVpcBatchCropResizeAsync(channelDesc, srcBatchPicDescs, roiNums, size, dstBatchPicDescs,
             cropAreas, nullptr, false, stream);
         if (ret != ACL_SUCCESS) {
@@ -936,7 +935,7 @@ namespace acl {
         aclError validateRet = ValidateParamForDvppVpcCropResizePaste(channelDesc, inputDesc, outputDesc, cropArea,
             pasteArea, true, resizeConfig, resizeConfigSwitch, resizeConfigSize);
         if (validateRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("validate params for DvppVpcCropResizePaste failed, ret = %d", validateRet);
+            ACL_LOG_ERROR("verify params for DvppVpcCropResizePaste failed, ret = %d", validateRet);
             return validateRet;
         }
         // CropAndPaste have 3 inputs
@@ -1023,7 +1022,7 @@ namespace acl {
                                                             acldvppResizeConfig *resizeConfig,
                                                             aclrtStream stream)
     {
-        ACL_LOG_INFO("start to execute acldvppVpcCropResizePasteAsync");
+        ACL_LOG_INFO("start to execute acldvppVpcCropResizePasteAsync.");
         auto ret = DvppVpcCropResizePasteAsync(channelDesc, inputDesc, outputDesc, cropArea,
             pasteArea, resizeConfig, true, stream);
         if (ret != ACL_SUCCESS) {
@@ -1041,14 +1040,14 @@ namespace acl {
                                                          acldvppRoiConfig *pasteArea,
                                                          aclrtStream stream)
     {
-        ACL_LOG_INFO("start to execute acldvppVpcCropAndPasteAsync");
+        ACL_LOG_INFO("start to execute acldvppVpcCropAndPasteAsync.");
         auto ret = DvppVpcCropResizePasteAsync(channelDesc, inputDesc, outputDesc, cropArea,
             pasteArea, nullptr, false, stream);
         if (ret != ACL_SUCCESS) {
             ACL_LOG_ERROR("execute acldvppVpcCropAndPasteAsync failed, result = %d.", ret);
             return ret;
         }
-        ACL_LOG_INFO("Launch vpc crop and paste tasks success");
+        ACL_LOG_INFO("Launch vpc crop and paste tasks success.");
         return ACL_SUCCESS;
     }
 
@@ -1097,7 +1096,7 @@ namespace acl {
                                                                   BATCH_ROI_MAX_SIZE,
                                                                   resizeConfig);
         if (validParamRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("valid batch crop and paste param failed, result = %d.", validParamRet);
+            ACL_LOG_ERROR("verify batch crop and paste param failed, result = %d.", validParamRet);
             return validParamRet;
         }
 
@@ -1175,7 +1174,7 @@ namespace acl {
                                                                  acldvppResizeConfig *resizeConfig,
                                                                  aclrtStream stream)
     {
-        ACL_LOG_INFO("start to execute acldvppVpcBatchCropResizePasteAsync");
+        ACL_LOG_INFO("start to execute acldvppVpcBatchCropResizePasteAsync.");
         auto ret = DvppVpcBatchCropResizePasteAsync(channelDesc, srcBatchPicDescs, roiNums, size, dstBatchPicDescs,
             cropAreas, pasteAreas, resizeConfig, true, stream);
         if (ret != ACL_SUCCESS) {
@@ -1196,7 +1195,7 @@ namespace acl {
                                                               aclrtStream stream)
     {
         // validate parametes
-        ACL_LOG_INFO("start to execute acldvppVpcBatchCropAndPasteAsync");
+        ACL_LOG_INFO("start to execute acldvppVpcBatchCropAndPasteAsync.");
         auto ret = DvppVpcBatchCropResizePasteAsync(channelDesc, srcBatchPicDescs, roiNums, size, dstBatchPicDescs,
             cropAreas, pasteAreas, nullptr, false, stream);
         if (ret != ACL_SUCCESS) {
@@ -1312,7 +1311,7 @@ namespace acl {
                                                     acldvppPicDesc *outputDesc,
                                                     aclrtStream stream)
     {
-        ACL_LOG_INFO("start to execute acldvppJpegDecodeAsync");
+        ACL_LOG_INFO("start to execute acldvppJpegDecodeAsync.");
         ACL_REQUIRES_NOT_NULL(channelDesc);
         ACL_REQUIRES_NOT_NULL(channelDesc->dataBuffer.data);
         ACL_REQUIRES_NOT_NULL(data);
@@ -1326,7 +1325,7 @@ namespace acl {
         aclError validOutputRet = ValidateJpegOutputFormat(
                 static_cast<acldvppPixelFormat>(outputDesc->dvppPicDesc.format));
         if (validOutputRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("output acldvppPicDesc format validate failed, result = %d, format = %u.",
+            ACL_LOG_ERROR("output acldvppPicDesc format verify failed, result = %d, format = %u.",
                           validOutputRet, outputDesc->dvppPicDesc.format);
             return validOutputRet;
         }
@@ -1371,7 +1370,7 @@ namespace acl {
             }
         }
 
-        ACL_LOG_INFO("Launch jpeg decode tasks success");
+        ACL_LOG_INFO("Launch jpeg decode tasks success.");
         return ACL_SUCCESS;
     }
 
@@ -1382,7 +1381,7 @@ namespace acl {
                                                     acldvppJpegeConfig *config,
                                                     aclrtStream stream)
     {
-        ACL_LOG_INFO("start to execute acldvppJpegEncodeAsync");
+        ACL_LOG_INFO("start to execute acldvppJpegEncodeAsync.");
         ACL_REQUIRES_NOT_NULL(channelDesc);
         ACL_REQUIRES_NOT_NULL(channelDesc->dataBuffer.data);
         ACL_REQUIRES_NOT_NULL(channelDesc->shareBuffer.data);
@@ -1399,7 +1398,7 @@ namespace acl {
         aclError validOutputRet = ValidateJpegInputFormat(
             static_cast<acldvppPixelFormat>(inputDesc->dvppPicDesc.format));
         if (validOutputRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("input acldvppPicDesc format validate failed, result = %d, format = %u.",
+            ACL_LOG_ERROR("input acldvppPicDesc format verify failed, result = %d, format = %u.",
                           validOutputRet, inputDesc->dvppPicDesc.format);
             return validOutputRet;
         }
@@ -1612,7 +1611,9 @@ namespace acl {
                                                      acldvppJpegFormat *format)
     {
         ACL_REQUIRES_NOT_NULL(data);
-        if ((width == nullptr) && (height == nullptr) && (components == nullptr)) {
+        bool noNeedGetImageInfo = (width == nullptr) && (height == nullptr) &&
+                                  (components == nullptr) && (format == nullptr);
+        if (noNeedGetImageInfo) {
             ACL_LOG_INFO("no need to get jpeg info");
             return ACL_SUCCESS;
         }
@@ -1678,7 +1679,7 @@ namespace acl {
 
         acldvppPixelFormat format = static_cast<acldvppPixelFormat>(inputDesc->dvppPicDesc.format);
         ACL_CHECK_WITH_MESSAGE_AND_RETURN(ValidateJpegInputFormat(format) == ACL_SUCCESS,
-            ACL_ERROR_FORMAT_NOT_MATCH, "input acldvppPicDesc format validate failed, format = %u.",
+            ACL_ERROR_FORMAT_NOT_MATCH, "input acldvppPicDesc format verify failed, format = %u.",
             inputDesc->dvppPicDesc.format);
 
         const uint32_t alignSize = 16;
@@ -1724,7 +1725,7 @@ namespace acl {
         ACL_REQUIRES_NOT_NULL(data);
         ACL_REQUIRES_NOT_NULL(decSize);
         ACL_CHECK_WITH_MESSAGE_AND_RETURN(ValidateJpegOutputFormat(outputPixelFormat) == ACL_SUCCESS,
-            ACL_ERROR_FORMAT_NOT_MATCH, "output acldvppPicDesc format validate failed, format = %d.",
+            ACL_ERROR_FORMAT_NOT_MATCH, "output acldvppPicDesc format verify failed, format = %d.",
             static_cast<int32_t>(outputPixelFormat));
         aclError ret = ACL_SUCCESS;
         bool needOrientation = JudgeNeedOrientation(reinterpret_cast<const unsigned char *>(data), dataSize);
@@ -1912,7 +1913,7 @@ namespace acl {
         // create acldvppRoiConfig in memory
         aclRoiConfig = new (addr)acldvppRoiConfig();
         if (aclRoiConfig == nullptr) {
-            ACL_LOG_ERROR("new aclDvppRoiConfig failed");
+            ACL_LOG_ERROR("create aclDvppRoiConfig with function new failed");
             ACL_FREE(addr);
             return nullptr;
         }
@@ -1947,7 +1948,7 @@ namespace acl {
         // create acldvppResizeConfig in memory
         aclResizeConfig = new (addr)acldvppResizeConfig();
         if (aclResizeConfig == nullptr) {
-            ACL_LOG_ERROR("new acldvppResizeConfig failed");
+            ACL_LOG_ERROR("create acldvppResizeConfig with function new failed");
             ACL_FREE(addr);
             return nullptr;
         }
@@ -1975,7 +1976,7 @@ namespace acl {
         // create acldvppResizeConfig in memory
         aclJpegeConfig = new (addr)acldvppJpegeConfig();
         if (aclJpegeConfig == nullptr) {
-            ACL_LOG_ERROR("new acldvppJpegeConfig failed");
+            ACL_LOG_ERROR("create acldvppJpegeConfig with function new failed");
             ACL_FREE(addr);
             return nullptr;
         }
@@ -2011,7 +2012,7 @@ namespace acl {
         uint32_t flags = RT_MEMORY_DEFAULT | RT_MEMORY_POLICY_DEFAULT_PAGE_ONLY;
         rtError_t ret = rtMalloc(&devPtr, size, flags);
         if (ret != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("malloc device memory for acl dvpp pic desc, runtime result = %d", ret);
+            ACL_LOG_ERROR("malloc device memory for acl dvpp pic desc failed, runtime result = %d", ret);
             ACL_ALIGN_FREE(hostAddr);
             return nullptr;
         }
@@ -2039,7 +2040,7 @@ namespace acl {
         // create acldvppPicDesc in device addr
         aclPicDesc = new (devAddr)acldvppPicDesc;
         if (aclPicDesc == nullptr) {
-            ACL_LOG_ERROR("new acldvppPicDesc failed");
+            ACL_LOG_ERROR("create acldvppPicDesc with function new failed");
             (void) rtFree(devAddr);
             devAddr = nullptr;
             return nullptr;
@@ -2126,7 +2127,7 @@ namespace acl {
         // create acldvppChannelDesc in device addr
         aclDvppChannelDesc = new (devAddr)acldvppChannelDesc;
         if (aclDvppChannelDesc == nullptr) {
-            ACL_LOG_ERROR("new acldvppChannelDesc failed");
+            ACL_LOG_ERROR("create acldvppChannelDesc with function new failed");
             (void) rtFree(devAddr);
             devAddr = nullptr;
             return nullptr;
@@ -2301,7 +2302,7 @@ namespace acl {
         // valid size
         bool validParam = (size == 0) || (srcBatchPicDescs->dvppBatchPicDescs.batchSize < size);
         if (validParam) {
-            ACL_LOG_ERROR("batchSize less than roi size or size = 0, batch size = %u, size = %u.",
+            ACL_LOG_ERROR("srcBatchPicDescs batchSize less than roiNums size or size = 0, batch size = %u, size = %u.",
                           srcBatchPicDescs->dvppBatchPicDescs.batchSize, size);
             return ACL_ERROR_INVALID_PARAM;
         }
@@ -2309,7 +2310,7 @@ namespace acl {
         if (resizeConfig != nullptr) {
             aclError validResizeConfigRet = ValidateDvppResizeConfig(resizeConfig);
             if (validResizeConfigRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("resize config acldvppResizeConfig validate failed, result = %d.", validResizeConfigRet);
+                ACL_LOG_ERROR("resize config acldvppResizeConfig verify failed, result = %d.", validResizeConfigRet);
                 return validResizeConfigRet;
             }
         }
@@ -2320,7 +2321,7 @@ namespace acl {
             validFormat = ValidateVpcInputFormat(
                 static_cast<acldvppPixelFormat>(srcBatchPicDescs->aclDvppPicDescs[index].dvppPicDesc.format));
             if (validFormat != ACL_SUCCESS) {
-                ACL_LOG_ERROR("input acldvppPicDesc format validate failed, result = %d, format = %u.",
+                ACL_LOG_ERROR("input acldvppPicDesc format verify failed, result = %d, format = %u.",
                     validFormat, srcBatchPicDescs->aclDvppPicDescs[index].dvppPicDesc.format);
                 return validFormat;
             }
@@ -2331,7 +2332,7 @@ namespace acl {
             validFormat = ValidateVpcOutputFormat(
                 static_cast<acldvppPixelFormat>(dstBatchPicDescs->aclDvppPicDescs[index].dvppPicDesc.format));
             if (validFormat != ACL_SUCCESS) {
-                ACL_LOG_ERROR("output acldvppPicDesc format validate failed, result = %d, format = %u.",
+                ACL_LOG_ERROR("output acldvppPicDesc format verify failed, result = %d, format = %u.",
                     validFormat, dstBatchPicDescs->aclDvppPicDescs[index].dvppPicDesc.format);
                 return validFormat;
             }
@@ -2364,7 +2365,7 @@ namespace acl {
         ACL_REQUIRES_NOT_NULL(batchPicDesc);
         ACL_REQUIRES_NOT_NULL(batchPicDesc->dataBuffer.data);
         if (batchPicDesc->dvppBatchPicDescs.batchSize < batchSize) {
-            ACL_LOG_ERROR("batchSize[%u] must be greater or equal roi batch size[%u].",
+            ACL_LOG_ERROR("batchSize[%u] from batchPicDesc must be greater or equal roi batch size[%u].",
                 batchSize, batchPicDesc->dvppBatchPicDescs.batchSize);
             return ACL_ERROR_INVALID_PARAM;
         }
