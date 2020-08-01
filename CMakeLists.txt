@@ -13,10 +13,10 @@ else()
     set(ASCEND_DIR /usr/local/Ascend)
 endif()
 
-if (DEFINED ENV{D_PKG_SERVER})
+if(DEFINED ENV{D_PKG_SERVER})
     set(ACL_PB_PKG $ENV{D_PKG_SERVER})
     message("Download packages from DPKG server")
-endif ()
+endif()
 
 set(TARGET_SYSTEM_NAME "Linux")
 set(HI_PYTHON python3)
