@@ -200,7 +200,7 @@ if(NOT ENABLE_OPEN_SRC)
     ${TOP_DIR}/graphengine/inc/framework
     ${TOP_DIR}/metadef/inc/external
     ${TOP_DIR}/graphengine/inc/external
-    ${TOP_DIR}/toolchain/ide/ide-daemon/external
+    ${TOP_DIR}/abl/adump/external
     ${TOP_DIR}/inc/driver
 else()
     ${BASE_DIR}/third_party/inc/
@@ -345,7 +345,7 @@ target_include_directories(ascendcl_static PRIVATE
     ${BASE_DIR}/inc/external
     ${TOP_DIR}/metadef/inc/external
     ${TOP_DIR}/graphengine/inc/external
-    ${TOP_DIR}/toolchain/ide/ide-daemon/external
+    ${TOP_DIR}/abl/adump/external
     ${TOP_DIR}/inc/driver
     ${BASE_DIR}/inc
     ${BASE_DIR}
@@ -420,7 +420,7 @@ if(NOT ENABLE_OPEN_SRC)
     ${TOP_DIR}/graphengine/inc/framework
     ${TOP_DIR}/metadef/inc/external
     ${TOP_DIR}/graphengine/inc/external
-    ${TOP_DIR}/toolchain/ide/ide-daemon/external
+    ${TOP_DIR}/abl/adump/external
     ${TOP_DIR}/inc/driver
 else()
     ${BASE_DIR}/third_party/inc
