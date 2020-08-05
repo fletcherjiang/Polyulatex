@@ -179,7 +179,7 @@ else()
 add_library(ascendcl SHARED ${SRC_LIST} ${PROTO_HDRS} $<TARGET_OBJECTS:$<IF:$<TARGET_EXISTS:msprofiler>,msprofiler,msprofiler_object>>)
 endif()
 
-if (ENABLE_OPEN_SRC)
+if(ENABLE_OPEN_SRC)
     add_library(msprofiler_object OBJECT IMPORTED GLOBAL)
     if (msprofiler_ext_LIBRARY_DIR)
         file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/msprofiler_object)
@@ -201,6 +201,7 @@ if(NOT ENABLE_OPEN_SRC)
     ${TOP_DIR}/metadef/inc/external
     ${TOP_DIR}/graphengine/inc/external
     ${TOP_DIR}/toolchain/ide/ide-daemon/external
+    ${TOP_DIR}/abl/adump/external
     ${TOP_DIR}/inc/driver
 else()
     ${BASE_DIR}/third_party/inc/
@@ -346,6 +347,7 @@ target_include_directories(ascendcl_static PRIVATE
     ${TOP_DIR}/metadef/inc/external
     ${TOP_DIR}/graphengine/inc/external
     ${TOP_DIR}/toolchain/ide/ide-daemon/external
+    ${TOP_DIR}/abl/adump/external
     ${TOP_DIR}/inc/driver
     ${BASE_DIR}/inc
     ${BASE_DIR}
@@ -421,6 +423,7 @@ if(NOT ENABLE_OPEN_SRC)
     ${TOP_DIR}/metadef/inc/external
     ${TOP_DIR}/graphengine/inc/external
     ${TOP_DIR}/toolchain/ide/ide-daemon/external
+    ${TOP_DIR}/abl/adump/external
     ${TOP_DIR}/inc/driver
 else()
     ${BASE_DIR}/third_party/inc
