@@ -131,43 +131,79 @@ generate_package()
   cd "${BASEPATH}"
 
   ACL_LIB_PATH="lib"
-  ACL_PATH="acllib/lib64"
-  FWK_PATH="fwkacllib/lib64"
-
-  COMMON_LIB=("libacl_cblas.so" "libacl_dvpp.so")
+  ACL_EXTERNAL_PATH="inc/external/acl"
+  ACL_PATH="acllib/"
+  ACL_LIB64_PATH="acllib/lib64"
+  ACL_INC_PATH="acllib/include/acl"
+  FWK_PATH="fwkacllib/"
+  FWK_LIB64_PATH="fwkacllib/lib64"
+  FWK_INC_PATH="fwkacllib/include/acl"
 
   rm -rf ${OUTPUT_PATH:?}/${FWK_PATH}/
   rm -rf ${OUTPUT_PATH:?}/${ACL_PATH}/
   
-  mk_dir "${OUTPUT_PATH}/${FWK_PATH}"
-  mk_dir "${OUTPUT_PATH}/${FWK_PATH}/stub"
-  mk_dir "${OUTPUT_PATH}/${ACL_PATH}"
-  mk_dir "${OUTPUT_PATH}/${ACL_PATH}/stub"
+  mk_dir "${OUTPUT_PATH}/${FWK_LIB64_PATH}"
+  mk_dir "${OUTPUT_PATH}/${FWK_LIB64_PATH}/stub"
+  mk_dir "${OUTPUT_PATH}/${FWK_INC_PATH}"
+  mk_dir "${OUTPUT_PATH}/${FWK_INC_PATH}/error_codes"
+  mk_dir "${OUTPUT_PATH}/${FWK_INC_PATH}/ops"
+  mk_dir "${OUTPUT_PATH}/${ACL_LIB64_PATH}"
+  mk_dir "${OUTPUT_PATH}/${ACL_LIB64_PATH}/stub"
+  mk_dir "${OUTPUT_PATH}/${ACL_INC_PATH}"
+  mk_dir "${OUTPUT_PATH}/${ACL_INC_PATH}/error_codes"
+  mk_dir "${OUTPUT_PATH}/${ACL_INC_PATH}/ops"
 
   find output/ -name acl_lib.tar -exec rm {} \;
 
   cd "${OUTPUT_PATH}"
 
+  COMMON_LIB=("libacl_cblas.so" "libacl_dvpp.so")
+
   for lib in "${COMMON_LIB[@]}";
   do
-    find ${OUTPUT_PATH}/${ACL_LIB_PATH} -maxdepth 1 -name "$lib" -exec cp -f {} ${OUTPUT_PATH}/${ACL_PATH} \;
-    find ${OUTPUT_PATH}/${ACL_LIB_PATH}/stub -maxdepth 1 -name "$lib" -exec cp -f {} ${OUTPUT_PATH}/${ACL_PATH}/stub \;
-    find ${OUTPUT_PATH}/${ACL_LIB_PATH} -maxdepth 1 -name "$lib" -exec cp -f {} ${OUTPUT_PATH}/${FWK_PATH} \;
-    find ${OUTPUT_PATH}/${ACL_LIB_PATH}/stub -maxdepth 1 -name "$lib" -exec cp -f {} ${OUTPUT_PATH}/${FWK_PATH}/stub \;
+    find ${OUTPUT_PATH}/${ACL_LIB_PATH} -maxdepth 1 -name "$lib" -exec cp -f {} ${OUTPUT_PATH}/${ACL_LIB64_PATH} \;
+    find ${OUTPUT_PATH}/${ACL_LIB_PATH}/stub -maxdepth 1 -name "$lib" -exec cp -f {} ${OUTPUT_PATH}/${ACL_LIB64_PATH}/stub \;
+    find ${OUTPUT_PATH}/${ACL_LIB_PATH} -maxdepth 1 -name "$lib" -exec cp -f {} ${OUTPUT_PATH}/${FWK_LIB64_PATH} \;
+    find ${OUTPUT_PATH}/${ACL_LIB_PATH}/stub -maxdepth 1 -name "$lib" -exec cp -f {} ${OUTPUT_PATH}/${FWK_LIB64_PATH}/stub \;
   done
 
-  find ${OUTPUT_PATH}/${ACL_LIB_PATH} -maxdepth 1 -name "libascendcl.so" -exec cp -f {} ${OUTPUT_PATH}/${ACL_PATH} \;
-  find ${OUTPUT_PATH}/${ACL_LIB_PATH} -maxdepth 1 -name "libacl_retr.so" -exec cp -f {} ${OUTPUT_PATH}/${ACL_PATH} \;
-  find ${OUTPUT_PATH}/${ACL_LIB_PATH}/stub -maxdepth 1 -name "libascendcl.so" -exec cp -f {} ${OUTPUT_PATH}/${ACL_PATH}/stub \;
-  find ${OUTPUT_PATH}/${ACL_LIB_PATH}/stub -maxdepth 1 -name "libacl_retr.so" -exec cp -f {} ${OUTPUT_PATH}/${ACL_PATH}/stub \;
+  find ${OUTPUT_PATH}/${ACL_LIB_PATH} -maxdepth 1 -name "libascendcl.so" -exec cp -f {} ${OUTPUT_PATH}/${ACL_LIB64_PATH} \;
+  find ${OUTPUT_PATH}/${ACL_LIB_PATH} -maxdepth 1 -name "libacl_retr.so" -exec cp -f {} ${OUTPUT_PATH}/${ACL_LIB64_PATH} \;
+  find ${OUTPUT_PATH}/${ACL_LIB_PATH}/stub -maxdepth 1 -name "libascendcl.so" -exec cp -f {} ${OUTPUT_PATH}/${ACL_LIB64_PATH}/stub \;
+  find ${OUTPUT_PATH}/${ACL_LIB_PATH}/stub -maxdepth 1 -name "libacl_retr.so" -exec cp -f {} ${OUTPUT_PATH}/${ACL_LIB64_PATH}/stub \;
 
   if [ "x${PRODUCT}" != "xflr2" ] && [ "x${PRODUCT}" != "xflr3" ]
   then
-    find ${OUTPUT_PATH}/${ACL_LIB_PATH}/fwkacl -maxdepth 1 -name "libascendcl.so" -exec cp -f {} ${OUTPUT_PATH}/${FWK_PATH} \;
-    find ${OUTPUT_PATH}/${ACL_LIB_PATH} -maxdepth 1 -name "libacl_op_compiler.so" -exec cp -f {} ${OUTPUT_PATH}/${FWK_PATH} \;
+    find ${OUTPUT_PATH}/${ACL_LIB_PATH}/fwkacl -maxdepth 1 -name "libascendcl.so" -exec cp -f {} ${OUTPUT_PATH}/${FWK_LIB64_PATH} \;
+    find ${OUTPUT_PATH}/${ACL_LIB_PATH} -maxdepth 1 -name "libacl_op_compiler.so" -exec cp -f {} ${OUTPUT_PATH}/${FWK_LIB64_PATH} \;
   fi
-  find ${OUTPUT_PATH}/${ACL_LIB_PATH}/stub -maxdepth 1 -name "libascendcl.so" -exec cp -f {} ${OUTPUT_PATH}/${FWK_PATH}/stub \;
-  find ${OUTPUT_PATH}/${ACL_LIB_PATH}/stub -maxdepth 1 -name "libacl_op_compiler.so" -exec cp -f {} ${OUTPUT_PATH}/${FWK_PATH}/stub \;
+  find ${OUTPUT_PATH}/${ACL_LIB_PATH}/stub -maxdepth 1 -name "libascendcl.so" -exec cp -f {} ${OUTPUT_PATH}/${FWK_LIB64_PATH}/stub \;
+  find ${OUTPUT_PATH}/${ACL_LIB_PATH}/stub -maxdepth 1 -name "libacl_op_compiler.so" -exec cp -f {} ${OUTPUT_PATH}/${FWK_LIB64_PATH}/stub \;
+
+  COMMON_INC=("acl_base.h" "acl.h" "acl_mdl.h" "acl_op.h" "acl_prof.h" "acl_rt.h")
+  for inc in "${COMMON_INC[@]}";
+  do
+    find ${BASEPATH}/${ACL_EXTERNAL_PATH} -maxdepth 1 -name "$inc" -exec cp -f {} ${OUTPUT_PATH}/${ACL_INC_PATH} \;
+    find ${BASEPATH}/${ACL_EXTERNAL_PATH} -maxdepth 1 -name "$inc" -exec cp -f {} ${OUTPUT_PATH}/${FWK_INC_PATH} \;
+  done
+
+  COMMON_INC=("ge_error_codes.h" "rt_error_codes.h")
+  for inc in "${COMMON_INC[@]}";
+  do
+    find ${BASEPATH}/${ACL_EXTERNAL_PATH}/error_codes -maxdepth 1 -name "$inc" -exec cp -f {} ${OUTPUT_PATH}/${ACL_INC_PATH}/error_codes \;
+    find ${BASEPATH}/${ACL_EXTERNAL_PATH}/error_codes -maxdepth 1 -name "$inc" -exec cp -f {} ${OUTPUT_PATH}/${FWK_INC_PATH}/error_codes \;
+  done
+
+  COMMON_INC=("acl_cblas.h" "acl_dvpp.h")
+  for inc in "${COMMON_INC[@]}";
+  do
+    find ${BASEPATH}/${ACL_EXTERNAL_PATH}/ops -maxdepth 1 -name "$inc" -exec cp -f {} ${OUTPUT_PATH}/${ACL_INC_PATH}/ops \;
+    find ${BASEPATH}/${ACL_EXTERNAL_PATH}/ops -maxdepth 1 -name "$inc" -exec cp -f {} ${OUTPUT_PATH}/${FWK_INC_PATH}/ops \;
+  done
+
+  find ${BASEPATH}/${ACL_EXTERNAL_PATH}/ops -maxdepth 1 -name "acl_fv.h" -exec cp -f {} ${OUTPUT_PATH}/${ACL_INC_PATH}/ops \;
+  find ${BASEPATH}/${ACL_EXTERNAL_PATH} -maxdepth 1 -name "acl_tdt.h" -exec cp -f {} ${OUTPUT_PATH}/${FWK_INC_PATH} \;
+  find ${BASEPATH}/${ACL_EXTERNAL_PATH} -maxdepth 1 -name "acl_op_compiler.h" -exec cp -f {} ${OUTPUT_PATH}/${FWK_INC_PATH} \;
 
   if [ "x${PLATFORM}" = "xtrain" ]
   then
