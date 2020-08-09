@@ -248,11 +248,15 @@ if (NOT ENABLE_OPEN_SRC)
         if (${PRODUCT} STREQUAL  "npuf10")
             set(linklibs )
             if (${TARGET_SYSTEM_NAME} STREQUAL  "Android")
-                list(APPEND linklibs ${TOP_DIR}/sdk/hi3796/drv_android)
-                list(APPEND linklibs ${TOP_DIR}/vendor/sdk/hi3796/drv_android)
+                target_link_directories(ascendcl PRIVATE
+                    ${TOP_DIR}/vendor/sdk/hi3796/drv_android
+                    ${TOP_DIR}/sdk/hi3796/drv_android
+                )
             else()
-                list(APPEND linklibs ${TOP_DIR}/sdk/hi3796/drv)
-                list(APPEND linklibs ${TOP_DIR}/vendor/sdk/hi3796/drv)
+                target_link_directories(ascendcl PRIVATE
+                    ${TOP_DIR}/vendor/sdk/hi3796/drv
+                    ${TOP_DIR}/sdk/hi3796/drv
+                )
             endif()
             list(APPEND linklibs drvdevdrv drv_dfx)
         else ()
