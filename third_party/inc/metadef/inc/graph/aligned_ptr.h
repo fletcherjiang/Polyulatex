@@ -25,7 +25,7 @@ class AlignedPtr {
  public:
   using Deleter = std::function<void(uint8_t *)>;
   using Allocator = std::function<void(std::unique_ptr<uint8_t[], Deleter> &base_addr)>;
-  explicit AlignedPtr(size_t buffer_size, size_t alignment = 64);
+  explicit AlignedPtr(size_t buffer_size, size_t alignment = 16);
   AlignedPtr() = default;
   ~AlignedPtr() = default;
   AlignedPtr(const AlignedPtr &) = delete;

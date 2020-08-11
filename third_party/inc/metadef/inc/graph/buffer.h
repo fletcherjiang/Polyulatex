@@ -38,7 +38,6 @@ class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY Buffer {
   ~Buffer() = default;
 
   Buffer &operator=(const Buffer &other);
-
   static Buffer CopyFrom(const std::uint8_t *data, std::size_t bufferSize);
 
   const std::uint8_t *GetData() const;
@@ -68,6 +67,16 @@ class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY Buffer {
 
   friend class GeAttrValueImp;
   friend class GeTensor;
+  friend class BufferUtils;
+};
+
+class BufferUtils {
+ public:
+  static Buffer CreateShareFrom(Buffer &other);
+  static Buffer CreateCopyFrom(const Buffer &other);  //lint !e148
+  static Buffer CreateCopyFrom(const std::uint8_t *data, std::size_t buffer_size);  //lint !e148
+  static void ShareFrom(Buffer &from, Buffer &to);
+  static void CopyFrom(const Buffer &from, Buffer &to);
 };
 }  // namespace ge
 #endif  // INC_GRAPH_BUFFER_H_
