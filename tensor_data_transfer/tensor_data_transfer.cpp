@@ -24,7 +24,7 @@ namespace {
         {"bool",     ACL_BOOL},
         {"int8",     ACL_INT8},
         {"uint8",    ACL_UINT8},
-        {"half", ACL_FLOAT16},
+        {"half",     ACL_FLOAT16},
         {"int16",    ACL_INT16},
         {"uint16",   ACL_UINT16},
         {"float",    ACL_FLOAT},
