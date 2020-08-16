@@ -249,13 +249,15 @@ if (NOT ENABLE_OPEN_SRC)
             if (${TARGET_SYSTEM_NAME} STREQUAL  "Android")
                 target_link_directories(ascendcl PRIVATE
                     ${TOP_DIR}/vendor/sdk/hi3796/drv_android
-                    ${TOP_DIR}/sdk/hi3796/drv_android
                 )
-            else()
+            elseif(${TARGET_LINUX_DISTRIBUTOR_RELEASE} STREQUAL 100)
                 target_link_directories(ascendcl PRIVATE
                     ${TOP_DIR}/vendor/sdk/hi3796/drv
-                    ${TOP_DIR}/sdk/hi3796/drv
                 )
+            elseif(${TARGET_LINUX_DISTRIBUTOR_RELEASE} STREQUAL 200)
+            target_link_directories(ascendcl PRIVATE
+                ${TOP_DIR}/vendor/sdk/hi3559dv100/drv
+            )
             endif()
             list(APPEND linklibs drvdevdrv drv_dfx)
         else ()
