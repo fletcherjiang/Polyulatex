@@ -4,3 +4,5 @@ approvers:
 - zhangfan_hq
 reviewers:
 - justin_zhao
+options:
+  no_parent_owners: true
