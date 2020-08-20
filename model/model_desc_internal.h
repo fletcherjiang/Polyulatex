@@ -11,6 +11,7 @@
 #ifndef ACL_MODEL_DESC_INTERNAL_H
 #define ACL_MODEL_DESC_INTERNAL_H
 
+#include <map>
 #include <vector>
 #include <string>
 #include <set>
@@ -49,6 +50,7 @@ struct aclmdlDesc {
     std::vector<std::vector<uint64_t>> dynamicDims;
     std::vector<std::vector<int64_t>> dynamicOutputShape;
     std::vector<std::string> dataNameOrder;
+    std::map<std::string, std::map<std::string, std::string>> opAttrValueMap;
 };
 
 struct AclModelTensor {

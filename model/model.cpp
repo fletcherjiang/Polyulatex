@@ -10,6 +10,7 @@
 
 #include "acl/acl_mdl.h"
 #include <vector>
+#include <mutex>
 #include <string>
 #include <queue>
 #include "securec.h"
@@ -41,6 +42,8 @@ constexpr const char *TENSOR_NAME_PREFIX = "acl";
 constexpr const char *TENSOR_INPUT_STR = "input";
 constexpr const char *TENSOR_OUTPUT_STR = "output";
 constexpr const char *MODEL_ID_STR = "modelId";
+
+std::mutex aclmdlGetOpAttrMutex;
 
 enum DimsType {
     DIMS_TYPE_V1 = 0,
@@ -1349,6 +1352,47 @@ static const char *aclmdlGetNameByIndex(const std::vector<aclmdlTensorDesc> &des
     }
 
     return desc[index].name.c_str();
+}
+
+const char *aclmdlGetOpAttr(aclmdlDesc *modelDesc, const char *opName, const char *attr)
+{
+    std::unique_lock<std::mutex> lock(aclmdlGetOpAttrMutex);
+    ACL_LOG_INFO("start to execute aclmdlGetOpAttr");
+    ACL_REQUIRES_NOT_NULL_RET_NULL(modelDesc);
+    ACL_REQUIRES_NOT_NULL_RET_NULL(opName);
+    ACL_REQUIRES_NOT_NULL_RET_NULL(attr);
+    
+    std::string opNameStr(opName);
+    std::string attrStr(attr);
+    if (attrStr != ACL_ATTR_NAME_DATA_DUMP_ORIGIN_OP_NAMES) {
+        ACL_LOG_ERROR("failed to execute aclmdlGetOpAttr, attr[%s] is invalid, only support "
+            "ACL_ATTR_NAME_DATA_DUMP_ORIGIN_OP_NAMES", attrStr.c_str());
+        return nullptr;
+    }
+
+    auto itOpName = modelDesc->opAttrValueMap.find(opName);
+    if (itOpName != modelDesc->opAttrValueMap.end()) {
+        auto itAttr = itOpName->second.find(attr);
+        if (itAttr != itOpName->second.end()) {
+            ACL_LOG_INFO("opName is [%s], the value of attr [%s] is %s", opName, attr, itAttr->second.c_str());
+            return itAttr->second.c_str();
+        }
+    }
+
+    ge::GeExecutor executor;
+    uint32_t modelId = modelDesc->modelId;
+    ACL_LOG_INFO("Call ge interface executor.GetOpAttr, modelId is [%u], opName is [%s], attr is [%s]",
+        modelId, opName, attr);
+    std::string attrValue;
+    ge::Status ret = executor.GetOpAttr(modelId, opNameStr, attrStr, attrValue);
+    if (ret != ge::SUCCESS) {
+        ACL_LOG_ERROR("Execute GetOpAttr failed, ge result[%u], modelId[%u]", ret, modelId);
+        return nullptr;
+    }
+    ACL_LOG_INFO("Execute aclmdlGetOpAttr successfully, opName is [%s], the value of attr[%s] is %s", opName, attr,
+        attrValue.c_str());
+    modelDesc->opAttrValueMap[opNameStr][attrStr] = attrValue;
+    return modelDesc->opAttrValueMap[opNameStr][attrStr].c_str();
 }
 
 const char *aclmdlGetInputNameByIndex(const aclmdlDesc *modelDesc, size_t index)
