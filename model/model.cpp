@@ -1356,7 +1356,6 @@ static const char *aclmdlGetNameByIndex(const std::vector<aclmdlTensorDesc> &des
 
 const char *aclmdlGetOpAttr(aclmdlDesc *modelDesc, const char *opName, const char *attr)
 {
-    std::unique_lock<std::mutex> lock(aclmdlGetOpAttrMutex);
     ACL_LOG_INFO("start to execute aclmdlGetOpAttr");
     ACL_REQUIRES_NOT_NULL_RET_NULL(modelDesc);
     ACL_REQUIRES_NOT_NULL_RET_NULL(opName);
@@ -1370,6 +1369,7 @@ const char *aclmdlGetOpAttr(aclmdlDesc *modelDesc, const char *opName, const cha
         return nullptr;
     }
 
+    std::unique_lock<std::mutex> lock(aclmdlGetOpAttrMutex);
     auto itOpName = modelDesc->opAttrValueMap.find(opName);
     if (itOpName != modelDesc->opAttrValueMap.end()) {
         auto itAttr = itOpName->second.find(attr);
