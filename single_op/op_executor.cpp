@@ -120,13 +120,18 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
             ACL_LOG_INFO("the outputTensor is const tensor, index %d", i);
             continue;
         }
-        ge::GeTensorDesc tensorDesc(ge::GeShape(aclOp.outputDesc[i]->dims));
-        tensorDesc.SetOriginShape(tensorDesc.GetShape());
+        ge::Format geFormat = ge::FORMAT_RESERVED;
+        if (aclOp.outputDesc[i]->format != ACL_FORMAT_UNDEFINED) {
+            geFormat = static_cast<::ge::Format>(aclOp.outputDesc[i]->format);
+        }
         ge::DataType geDataType = ge::DT_UNDEFINED;
         if (aclOp.outputDesc[i]->dataType != ACL_DT_UNDEFINED) {
             geDataType = static_cast<::ge::DataType>(aclOp.outputDesc[i]->dataType);
         }
-        tensorDesc.SetDataType(geDataType);
+        ge::GeTensorDesc tensorDesc(ge::GeShape(aclOp.outputDesc[i]->dims),
+                                    geFormat,
+                                    geDataType);
+        tensorDesc.SetOriginShape(tensorDesc.GetShape());
         if (aclOp.outputDesc[i]->storageFormat != ACL_FORMAT_UNDEFINED) {
             ge::AttrUtils::SetInt(tensorDesc, ge::ATTR_NAME_STORAGE_FORMAT,
                 static_cast<int64_t>(aclOp.outputDesc[i]->storageFormat));
