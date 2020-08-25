@@ -383,6 +383,7 @@ target_link_options(ascendcl_static PRIVATE
 )
 target_link_directories(ascendcl_static PRIVATE
     $<$<STREQUAL:${TARGET_SYSTEM_NAME},Android>:${TOP_DIR}/prebuilts/clang/linux-x86/aarch64/android-ndk-r21/sysroot/usr/lib/aarch64-linux-android/29>
+    $<$<STREQUAL:${TARGET_SYSTEM_NAME},Android>:${TOP_DIR}/build/clang/linux-x86/aarch64/android-ndk-r21/sysroot/usr/lib/aarch64-linux-android/29>
 )
 
 target_link_libraries(ascendcl_static PRIVATE
