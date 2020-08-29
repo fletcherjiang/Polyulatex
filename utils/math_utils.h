@@ -20,7 +20,7 @@ const int DATA_MEMORY_ALIGN_SIZE = 32;
 inline aclError CheckSizeTMultiOverflow(size_t a, size_t b, size_t &res)
 {
     if ((a != 0) && (b != 0) && ((ULONG_MAX / a) < b)) {
-        ACL_LOG_ERROR("%zu multiplies %zu overflow", a, b);
+        ACL_LOG_ERROR("[Check][Overflow]%zu multiplies %zu overflow", a, b);
         return ACL_ERROR_FAILURE;
     }
     res = a * b;
@@ -30,7 +30,7 @@ inline aclError CheckSizeTMultiOverflow(size_t a, size_t b, size_t &res)
 inline aclError CheckUint32MultiOverflow(uint32_t a, uint32_t b, uint32_t &res)
 {
     if ((a != 0) && (b != 0) && ((UINT32_MAX / a) < b)) {
-        ACL_LOG_ERROR("%u multiplies %u overflow", a, b);
+        ACL_LOG_ERROR("[Check][Overflow]%u multiplies %u overflow", a, b);
         return ACL_ERROR_FAILURE;
     }
     res = a * b;
@@ -40,7 +40,7 @@ inline aclError CheckUint32MultiOverflow(uint32_t a, uint32_t b, uint32_t &res)
 inline aclError CheckIntAddOverflow(int a, int b, int &res)
 {
     if (((b > 0) && (a > (INT_MAX - b))) || ((b < 0) && (a < (INT_MIN - b)))) {
-        ACL_LOG_ERROR("%d adds %d overflow", a, b);
+        ACL_LOG_ERROR("[Check][Overflow]%d adds %d overflow", a, b);
         return ACL_ERROR_FAILURE;
     }
     res = a + b;
@@ -50,7 +50,7 @@ inline aclError CheckIntAddOverflow(int a, int b, int &res)
 inline aclError CheckSizeTAddOverflow(size_t a, size_t b, size_t &res)
 {
     if (a > (SIZE_MAX - b)) {
-        ACL_LOG_ERROR("%zu adds %zu overflow", a, b);
+        ACL_LOG_ERROR("[Check][Overflow]%zu adds %zu overflow", a, b);
         return ACL_ERROR_FAILURE;
     }
     res = a + b;
@@ -60,7 +60,7 @@ inline aclError CheckSizeTAddOverflow(size_t a, size_t b, size_t &res)
 inline aclError CheckUint32AddOverflow(uint32_t a, uint32_t b, uint32_t &res)
 {
     if (a > (UINT32_MAX - b)) {
-        ACL_LOG_ERROR("%u adds %u overflow", a, b);
+        ACL_LOG_ERROR("[Check][Overflow]%u adds %u overflow", a, b);
         return ACL_ERROR_FAILURE;
     }
     res = a + b;

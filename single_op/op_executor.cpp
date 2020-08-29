@@ -66,7 +66,7 @@ aclError OpExecutor::DoExecuteAsync(ge::SingleOp *singleOp,
     ACL_LOG_INFO("To invoke GeExecutor::ExecuteAsync");
     ge::Status ret = ge::GeExecutor::ExecuteAsync(singleOp, inputVec, outputVec);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_ERROR("Execute op failed. ge result = %u", ret);
+        ACL_LOG_ERROR("[Exec][Op]Execute op failed. ge result = %u", ret);
         return ACL_GET_ERRCODE_GE(ret);
     }
 
@@ -140,7 +140,7 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
     ACL_LOG_INFO("To invoke GeExecutor::ExecuteAsync");
     ge::Status ret = ge::GeExecutor::ExecuteAsync(singleOp, inputDesc, inputVec, outputDesc, outputVec);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_ERROR("Execute op failed. ge result = %u", ret);
+        ACL_LOG_ERROR("[Exec][Op]Execute op failed. ge result = %u", ret);
         return ACL_GET_ERRCODE_GE(ret);
     }
 
@@ -167,7 +167,7 @@ ge::SingleOp *OpExecutor::LoadSingleOp(const OpModel &modelInfo, aclrtStream str
     ACL_LOG_INFO("call ge interface LoadSingleOp");
     auto status = ge::GeExecutor::LoadSingleOpV2(modelInfo.name, modelData, stream, &singleOp, modelInfo.opModelId);
     if (status != ge::SUCCESS) {
-        ACL_LOG_ERROR("Load operator failed. model = %s, ge result = %u", modelInfo.name.c_str(), status);
+        ACL_LOG_ERROR("[Load][Op]Load operator failed. model = %s, ge result = %u", modelInfo.name.c_str(), status);
     }
 
     return singleOp;
@@ -183,7 +183,8 @@ ge::DynamicSingleOp *OpExecutor::LoadDynamicSingleOp(const OpModel &modelInfo, a
     auto status = ge::GeExecutor::LoadDynamicSingleOpV2(modelInfo.name, modelData, stream, &singleOp,
                                                         modelInfo.opModelId);
     if (status != ge::SUCCESS) {
-        ACL_LOG_ERROR("Load dynamic operator failed. model = %s, ge result = %u", modelInfo.name.c_str(), status);
+        ACL_LOG_ERROR("[Load][Op]Load dynamic operator failed. model = %s, ge result = %u",
+            modelInfo.name.c_str(), status);
     }
 
     return singleOp;
@@ -261,7 +262,7 @@ aclError OpExecutor::ExecuteAsync(OpHandle &opHandle,
         } else {
             singleOp = LoadDynamicSingleOp(opHandle.opModel, stream);
             if (singleOp == nullptr) {
-                ACL_LOG_ERROR("LoadSingleOp failed");
+                ACL_LOG_ERROR("[Load][Op]LoadSingleOp failed");
                 return ACL_ERROR_OP_LOAD_FAILED;
             }
 
@@ -287,7 +288,7 @@ aclError OpExecutor::ExecuteAsync(OpHandle &opHandle,
         } else {
             singleOp = LoadSingleOp(opHandle.opModel, stream);
             if (singleOp == nullptr) {
-                ACL_LOG_ERROR("LoadSingleOp failed");
+                ACL_LOG_ERROR("[Load][Op]LoadSingleOp failed");
                 return ACL_ERROR_OP_LOAD_FAILED;
             }
 

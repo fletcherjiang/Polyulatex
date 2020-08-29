@@ -23,7 +23,8 @@ aclError AippInputFormatCheck(enum CceAippInputFormat inputFormat, std::string s
 {
     bool flag = false;
     if (inputFormat < CCE_YUV420SP_U8) {
-        ACL_LOG_ERROR("inputFormat must be setted, cceInputFormat = %d", static_cast<int32_t>(inputFormat));
+        ACL_LOG_ERROR("[Check][InputFormat]inputFormat must be setted, cceInputFormat = %d",
+            static_cast<int32_t>(inputFormat));
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -31,7 +32,7 @@ aclError AippInputFormatCheck(enum CceAippInputFormat inputFormat, std::string s
         flag = ((inputFormat != CCE_YUV420SP_U8) && (inputFormat != CCE_XRGB8888_U8) &&
             (inputFormat != CCE_RGB888_U8) && (inputFormat != CCE_YUV400_U8));
         if (flag) {
-            ACL_LOG_ERROR("Ascend310 Ascend910 only support YUV420SP_U8,XRGB8888_U8,"
+            ACL_LOG_ERROR("[Check][InputFormat]Ascend310 Ascend910 only support YUV420SP_U8,XRGB8888_U8,"
                           "RGB888_U8,YUV400_U8, cceInputFormat = %d", static_cast<int32_t>(inputFormat));
             return ACL_ERROR_INVALID_PARAM;
         }
@@ -39,7 +40,7 @@ aclError AippInputFormatCheck(enum CceAippInputFormat inputFormat, std::string s
         flag = ((inputFormat != CCE_YUV420SP_U8) && (inputFormat != CCE_XRGB8888_U8) &&
             (inputFormat != CCE_RGB888_U8) && (inputFormat != CCE_YUV400_U8));
         if (flag) {
-            ACL_LOG_ERROR("Ascend610 Ascend710 and Ascend615 only support YUV420SP_U8,XRGB8888_U8,"
+            ACL_LOG_ERROR("[Check][InputFormat]Ascend610 Ascend710 and Ascend615 only support YUV420SP_U8,XRGB8888_U8,"
                           "RGB888_U8,YUV400_U8, cce_inputFormat = %d", static_cast<int32_t>(inputFormat));
             return ACL_ERROR_INVALID_PARAM;
         }
@@ -47,12 +48,13 @@ aclError AippInputFormatCheck(enum CceAippInputFormat inputFormat, std::string s
         flag = ((inputFormat != CCE_YUV420SP_U8) && (inputFormat != CCE_YUV422SP_U8) &&
             (inputFormat != CCE_RGB888_U8) && (inputFormat != CCE_ARGB8888_U8));
         if (flag) {
-            ACL_LOG_ERROR("Hi3796CV300ES, Hi3796CV300CS and SD3403 only support YUV420SP_U8,YUV422SP_U8,"
-                          "RGB888_U8,ARGB8888_U8, cce_inputFormat = %d", static_cast<int32_t>(inputFormat));
+            ACL_LOG_ERROR("[Check][InputFormat]Hi3796CV300ES, Hi3796CV300CS and SD3403 "
+                "only support YUV420SP_U8,YUV422SP_U8, RGB888_U8,ARGB8888_U8, cce_inputFormat = %d",
+                static_cast<int32_t>(inputFormat));
             return ACL_ERROR_INVALID_PARAM;
         }
     } else {
-        ACL_LOG_ERROR("dynamic aipp not support %s", socVersion.c_str());
+        ACL_LOG_ERROR("[Check][Aipp]dynamic aipp not support %s", socVersion.c_str());
         return ACL_ERROR_INVALID_PARAM;
     }
     return ACL_SUCCESS;
@@ -64,7 +66,7 @@ aclError AippSrcImageSizeCheck(enum CceAippInputFormat inputFormat,
     bool flag = false;
     flag = ((srcImageSizeW == 0) || (srcImageSizeH == 0));
     if (flag) {
-        ACL_LOG_ERROR("srcImageSizeW and srcImageSizeH must be setted!");
+        ACL_LOG_ERROR("[Check][Params]srcImageSizeW and srcImageSizeH must be setted!");
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -73,14 +75,14 @@ aclError AippSrcImageSizeCheck(enum CceAippInputFormat inputFormat,
         // determine whether it is even
         flag = ((srcImageSizeW % 2 != 0) || (srcImageSizeH % 2 != 0));
         if (flag) {
-            ACL_LOG_ERROR("srcImageSizeH[%d] and srcImageSizeW[%d] must be even for YUV420SP_U8!",
+            ACL_LOG_ERROR("[Check][Params]srcImageSizeH[%d] and srcImageSizeW[%d] must be even for YUV420SP_U8!",
                 srcImageSizeH, srcImageSizeW);
             return ACL_ERROR_INVALID_PARAM;
         }
     } else if (flag) {
         // determine whether it is even
         if (srcImageSizeW % 2 != 0) {
-            ACL_LOG_ERROR("srcImageSizeW[%d] must be even for YUV422SP_U8 and YUYV_U8!", srcImageSizeW);
+            ACL_LOG_ERROR("[Check][Params]srcImageSizeW[%d] must be even for YUV422SP_U8 and YUYV_U8!", srcImageSizeW);
             return ACL_ERROR_INVALID_PARAM;
         }
     }
@@ -92,7 +94,7 @@ aclError AippSrcImageSizeCheck(enum CceAippInputFormat inputFormat,
             (inputFormat == CCE_RAW12) || (inputFormat == CCE_RAW16));
         if (flag) {
             if (srcImageSizeW % MULTIPLE != 0) {
-                ACL_LOG_ERROR("srcImageSizeW[%d] must be multiples of 16!", srcImageSizeW);
+                ACL_LOG_ERROR("[Check][Params]srcImageSizeW[%d] must be multiples of 16!", srcImageSizeW);
                 return ACL_ERROR_INVALID_PARAM;
             }
         }
@@ -101,7 +103,7 @@ aclError AippSrcImageSizeCheck(enum CceAippInputFormat inputFormat,
             (inputFormat == CCE_AYUV444_U8));
         if (flag) {
             if ((srcImageSizeW * FOUR_CHANNEL) % MULTIPLE != 0) {
-                ACL_LOG_ERROR("srcImageSizeW*4 must be multiples of 16!");
+                ACL_LOG_ERROR("[Check][Params]srcImageSizeW*4 must be multiples of 16!");
                 return ACL_ERROR_INVALID_PARAM;
             }
         }
@@ -109,7 +111,7 @@ aclError AippSrcImageSizeCheck(enum CceAippInputFormat inputFormat,
         flag = (inputFormat == CCE_RGB888_U8);
         if (flag) {
             if ((srcImageSizeW * THREE_CHANNEL) % MULTIPLE != 0) {
-                ACL_LOG_ERROR("srcImageSizeW*3 must be multiples of 16!");
+                ACL_LOG_ERROR("[Check][Params]srcImageSizeW*3 must be multiples of 16!");
                 return ACL_ERROR_INVALID_PARAM;
             }
         }
@@ -117,7 +119,7 @@ aclError AippSrcImageSizeCheck(enum CceAippInputFormat inputFormat,
         flag = (inputFormat == CCE_YUYV_U8);
         if (flag) {
             if ((srcImageSizeW * TWO_CHANNEL) % MULTIPLE != 0) {
-                ACL_LOG_ERROR("srcImageSizeW*2 must be multiples of 16!");
+                ACL_LOG_ERROR("[Check][Params]srcImageSizeW*2 must be multiples of 16!");
                 return ACL_ERROR_INVALID_PARAM;
             }
         }
@@ -129,7 +131,7 @@ aclError AippSrcImageSizeCheck(enum CceAippInputFormat inputFormat,
 aclError AippScfSizeCheck(const aclmdlAIPP *aippParmsSet, int32_t batchIndex)
 {
     if (aippParmsSet->aippBatchPara.size() == 0) {
-        ACL_LOG_ERROR("the size of aippBatchPara can't be zero");
+        ACL_LOG_ERROR("[Check][Params]the size of aippBatchPara can't be zero");
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -149,17 +151,17 @@ aclError AippScfSizeCheck(const aclmdlAIPP *aippParmsSet, int32_t batchIndex)
     if (cropSwitch == 1) {
         flag = ((scfInputSizeW != cropSizeW) || (scfInputSizeH != cropSizeH));
         if (flag) {
-            ACL_LOG_ERROR("when enable crop and scf, scfInputSizeW[%d] must be equal to cropSizeW[%d] and "
-                          "scfInputSizeH[%d] must be equal to cropSizeH[%d]!",
+            ACL_LOG_ERROR("[Check][Params]when enable crop and scf, scfInputSizeW[%d] must be "
+                          "equal to cropSizeW[%d] and scfInputSizeH[%d] must be equal to cropSizeH[%d]!",
                           scfInputSizeW, cropSizeW, scfInputSizeH, cropSizeH);
             return ACL_ERROR_INVALID_PARAM;
         }
     } else {
         flag = ((scfInputSizeW != srcImageSizeW) || (scfInputSizeH != srcImageSizeH));
         if (flag) {
-            ACL_LOG_ERROR("when disenable crop and enable scf, scfInputSizeW[%d] must be equal to srcImageSizeW[%d] "
-                          "and scfInputSizeH[%d] must be equal to srcImageSizeH[%d]!",
-                          scfInputSizeW, srcImageSizeW, scfInputSizeH, srcImageSizeH);
+            ACL_LOG_ERROR("[Check][Params]when disenable crop and enable scf, scfInputSizeW[%d] "
+                "must be equal to srcImageSizeW[%d] and scfInputSizeH[%d] must be equal to srcImageSizeH[%d]!",
+                scfInputSizeW, srcImageSizeW, scfInputSizeH, srcImageSizeH);
             return ACL_ERROR_INVALID_PARAM;
         }
     }
@@ -167,28 +169,29 @@ aclError AippScfSizeCheck(const aclmdlAIPP *aippParmsSet, int32_t batchIndex)
     // scfInputSizeH mini value is 16, scfInputSizeH max value is 4096
     flag = ((scfInputSizeH < 16) || (scfInputSizeH > 4096));
     if (flag) {
-        ACL_LOG_ERROR("resize_input_h[%d] should be within [16, 4096]!", scfInputSizeH);
+        ACL_LOG_ERROR("[Check][Params]resize_input_h[%d] should be within [16, 4096]!",
+            scfInputSizeH);
         return ACL_ERROR_INVALID_PARAM;
     }
 
     // scfInputSizeW mini value is 16, scfInputSizeW max value is 4096
     flag = ((scfInputSizeW < 16) || (scfInputSizeW > 4096));
     if (flag) {
-        ACL_LOG_ERROR("resize_input_w[%d] should be within [16, 4096]!", scfInputSizeW);
+        ACL_LOG_ERROR("[Check][Params]resize_input_w[%d] should be within [16, 4096]!", scfInputSizeW);
         return ACL_ERROR_INVALID_PARAM;
     }
 
     // scfOutputSizeW mini value is 16, scfOutputSizeW max value is 1920
     flag = ((scfOutputSizeW < 16) || (scfOutputSizeW > 1920));
     if (flag) {
-        ACL_LOG_ERROR("resize_output_w[%d] should be within [16, 1920]!", scfOutputSizeW);
+        ACL_LOG_ERROR("[Check][Params]resize_output_w[%d] should be within [16, 1920]!", scfOutputSizeW);
         return ACL_ERROR_INVALID_PARAM;
     }
 
     // scfOutputSizeH mini value is 16, scfOutputSizeH max value is 4096
     flag = ((scfOutputSizeH < 16) || (scfOutputSizeH > 4096));
     if (flag) {
-        ACL_LOG_ERROR("resize_output_h[%d] should be within [16, 4096]!", scfOutputSizeH);
+        ACL_LOG_ERROR("[Check][Params]resize_output_h[%d] should be within [16, 4096]!", scfOutputSizeH);
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -196,7 +199,7 @@ aclError AippScfSizeCheck(const aclmdlAIPP *aippParmsSet, int32_t batchIndex)
     // scf factor is within [1/16, 16]
     flag = ((scfRatio < (1.0 / 16)) || (scfRatio > 16));
     if (flag) {
-        ACL_LOG_ERROR("resize_output_w/resize_input_w[%f] should be within [1/16, 16]!", scfRatio);
+        ACL_LOG_ERROR("[Check][Params]resize_output_w/resize_input_w[%f] should be within [1/16, 16]!", scfRatio);
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -204,7 +207,7 @@ aclError AippScfSizeCheck(const aclmdlAIPP *aippParmsSet, int32_t batchIndex)
     // scf factor is within [1/16, 16]
     flag = ((scfRatio < (1.0 / 16)) || (scfRatio > 16));
     if (flag) {
-        ACL_LOG_ERROR("resize_output_h/resize_input_h[%f] should be within [1/16, 16]!", scfRatio);
+        ACL_LOG_ERROR("[Check][Params]resize_output_h/resize_input_h[%f] should be within [1/16, 16]!", scfRatio);
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -214,7 +217,7 @@ aclError AippScfSizeCheck(const aclmdlAIPP *aippParmsSet, int32_t batchIndex)
 aclError AippCropSizeCheck(const aclmdlAIPP *aippParmsSet, std::string &socVersion, int32_t batchIndex)
 {
     if (aippParmsSet->aippBatchPara.size() == 0) {
-        ACL_LOG_ERROR("the size of aippBatchPara can't be zero");
+        ACL_LOG_ERROR("[Check][Params]the size of aippBatchPara can't be zero");
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -227,14 +230,14 @@ aclError AippCropSizeCheck(const aclmdlAIPP *aippParmsSet, std::string &socVersi
     int32_t cropSizeH = aippParmsSet->aippBatchPara[batchIndex].cropSizeH;
 
     if (cropStartPosW + cropSizeW > srcImageSizeW) {
-        ACL_LOG_ERROR("the sum of cropStartPosW[%d] and cropSizeW[%d] is larger than srcImageSizeW[%d]",
-            cropStartPosW, cropSizeW, srcImageSizeW);
+        ACL_LOG_ERROR("[Check][Params]the sum of cropStartPosW[%d] and cropSizeW[%d] is larger than "
+            "srcImageSizeW[%d]", cropStartPosW, cropSizeW, srcImageSizeW);
         return ACL_ERROR_INVALID_PARAM;
     }
 
     if (cropStartPosH + cropSizeH > srcImageSizeH) {
-        ACL_LOG_ERROR("the sum of cropStartPosH[%d] and cropSizeH[%d] is larger than or equal to srcImageSizeH[%d]",
-            cropStartPosH, cropSizeH, srcImageSizeH);
+        ACL_LOG_ERROR("[Check][Params]the sum of cropStartPosH[%d] and cropSizeH[%d] is "
+            "larger than or equal to srcImageSizeH[%d]", cropStartPosH, cropSizeH, srcImageSizeH);
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -245,25 +248,26 @@ aclError AippCropSizeCheck(const aclmdlAIPP *aippParmsSet, std::string &socVersi
         // determine whether it is even
         flag = ((cropStartPosW % 2 != 0) || (cropStartPosH % 2 != 0));
         if (flag) {
-            ACL_LOG_ERROR("cropStartPosW[%d], cropStartPosH[%d] must be even for YUV420SP_U8!",
-                          cropStartPosW, cropStartPosH);
+            ACL_LOG_ERROR("[Check][Params]cropStartPosW[%d], cropStartPosH[%d] must be even for YUV420SP_U8!",
+                cropStartPosW, cropStartPosH);
             return ACL_ERROR_INVALID_PARAM;
         }
         flag = isLhisi && ((cropSizeW % 2 != 0) || (cropSizeH % 2 != 0));
         if (flag) {
-            ACL_LOG_ERROR("cropSizeW[%d] and cropSizeH[%d] must be even for YUV420SP_U8!", cropSizeW, cropSizeH);
+            ACL_LOG_ERROR("[Check][Params]cropSizeW[%d] and cropSizeH[%d] must be even for YUV420SP_U8!",
+                cropSizeW, cropSizeH);
             return ACL_ERROR_INVALID_PARAM;
         }
     } else if ((inputFormat == CCE_YUV422SP_U8) || (inputFormat == CCE_YUYV_U8)) {
         // determine whether it is even
         flag = (cropStartPosW % 2 != 0);
         if (flag) {
-            ACL_LOG_ERROR("cropStartPosW[%d] must be even for YUV422SP_U8 and YUYV_U8!", cropStartPosW);
+            ACL_LOG_ERROR("[Check][Params]cropStartPosW[%d] must be even for YUV422SP_U8 and YUYV_U8!", cropStartPosW);
             return ACL_ERROR_INVALID_PARAM;
         }
         flag = isLhisi && (cropSizeW % 2 != 0);
         if (flag) {
-            ACL_LOG_ERROR("cropSizeW[%d] must be even for YUV422SP_U8 and YUYV_U8!", cropSizeW);
+            ACL_LOG_ERROR("[Check][Params]cropSizeW[%d] must be even for YUV422SP_U8 and YUYV_U8!", cropSizeW);
             return ACL_ERROR_INVALID_PARAM;
         }
     }
@@ -276,7 +280,7 @@ aclError GetAippOutputHW(const aclmdlAIPP *aippParmsSet, int32_t batchIndex, std
                          int32_t &aippOutputW, int32_t &aippOutputH)
 {
     if (aippParmsSet->aippBatchPara.size() == 0) {
-        ACL_LOG_ERROR("aippParmsSet->aippBatchPara is empty!");
+        ACL_LOG_ERROR("[Check][Params]aippParmsSet->aippBatchPara is empty!");
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -320,13 +324,13 @@ aclError GetAippOutputHW(const aclmdlAIPP *aippParmsSet, int32_t batchIndex, std
         if ((socVersion == "Ascend310") || (socVersion == "Ascend610") || (socVersion == "Ascend710") ||
             (socVersion == "Ascend615") || (strncmp(socVersion.c_str(), "Ascend910", strlen("Ascend910")) == 0)) {
             if (aippOutputW > 1080) {
-                ACL_LOG_ERROR("after padding, aipp output W[%d] should be less than or equal to 1080 "
+                ACL_LOG_ERROR("[Check][Params]after padding, aipp output W[%d] should be less than or equal to 1080 "
                               "for Ascend310, Ascend610, Ascend710, Ascend615, Ascend910", aippOutputW);
                 return ACL_ERROR_INVALID_PARAM;
             }
         } else if (socVersionForLhisi.find(socVersion) != socVersionForLhisi.end()) {
             if (aippOutputW > 4096) {
-                ACL_LOG_ERROR("after padding, aipp output W[%d] should be less than or equal to 4096 "
+                ACL_LOG_ERROR("[Check][Params]after padding, aipp output W[%d] should be less than or equal to 4096 "
                               "for Hi3796CV300ES, Hi3796CV300CS, SD3403", aippOutputW);
                 return ACL_ERROR_INVALID_PARAM;
             }
@@ -358,7 +362,7 @@ aclError AippDynamicBatchParaCheck(const aclmdlAIPP *aippParmsSet, std::string s
         if (scfSwitch == 1) {
             flag = (socVersionForLhisi.find(socVersion) == socVersionForLhisi.end());
             if (flag) {
-                ACL_LOG_ERROR("Only Hi3796CV300ES, Hi3796CV300CS and SD3403 support scf!");
+                ACL_LOG_ERROR("[Check][Params]Only Hi3796CV300ES, Hi3796CV300CS and SD3403 support scf!");
                 return ACL_ERROR_INVALID_PARAM;
             }
 
@@ -383,9 +387,10 @@ aclError AippDynamicBatchParaCheck(const aclmdlAIPP *aippParmsSet, std::string s
 
         flag = ((aippBatchOutputW != aippFirstOutputW) || (aippBatchOutputH != aippFirstOutputH));
         if (flag) {
-            ACL_LOG_ERROR("the %d batch output size must be equal to the first batch aipp output size! "
-                "aippBatchOutputW = %d, aippBatchOutputH = %d, aippFirstOutputW = %d, aippFirstOutputH = %d.",
-                (i + 1), aippBatchOutputW, aippBatchOutputH, aippFirstOutputW, aippFirstOutputH);
+            ACL_LOG_ERROR("[Check][Params]the %d batch output size must be equal to the first "
+                "batch aipp output size! aippBatchOutputW = %d, aippBatchOutputH = %d, aippFirstOutputW = %d, "
+                "aippFirstOutputH = %d.", (i + 1), aippBatchOutputW, aippBatchOutputH, aippFirstOutputW,
+                aippFirstOutputH);
             return ACL_ERROR_INVALID_PARAM;
         }
     }
@@ -393,13 +398,13 @@ aclError AippDynamicBatchParaCheck(const aclmdlAIPP *aippParmsSet, std::string s
     if (isNewModel) {
         flag = ((aippFirstOutputW != aippOutputW) || (aippFirstOutputH != aippOutputH));
         if (flag) {
-            ACL_LOG_ERROR("aipp output size by ACL must be equal to aipp output size in the model! "
-                "AclAippOutputW = %d, AclAippOutputH = %d, ModelAippOutputW = %d, ModelAippOutputH = %d.",
-                aippFirstOutputW, aippFirstOutputH, aippOutputW, aippOutputH);
+            ACL_LOG_ERROR("[Check][Params]aipp output size by ACL must be equal to aipp output "
+                "size in the model! AclAippOutputW = %d, AclAippOutputH = %d, ModelAippOutputW = %d, "
+                "ModelAippOutputH = %d.", aippFirstOutputW, aippFirstOutputH, aippOutputW, aippOutputH);
             return ACL_ERROR_INVALID_PARAM;
         }
     } else {
-        ACL_LOG_INFO("isNewModel= %d, current used model is old, user needs to ensure that "
+        ACL_LOG_INFO("[Check][Params]isNewModel= %d, current used model is old, user needs to ensure that "
             "aipp output H and W in the model are equal to aipp output H[%d] and W[%d] by acl configure!",
             isNewModel, aippBatchOutputH, aippBatchOutputW);
     }
@@ -425,7 +430,7 @@ aclError AippParamsCheck(const aclmdlAIPP *aippParmsSet, std::string socVersion,
         (inputFormat == CCE_RAW12) || (inputFormat == CCE_RAW16));
     if (flag == 1) {
         if (cscSwitch == 1) {
-            ACL_LOG_ERROR("YUV400 or raw not support csc switch!");
+            ACL_LOG_ERROR("[Check][Params]YUV400 or raw not support csc switch!");
             return ACL_ERROR_INVALID_PARAM;
         }
     }

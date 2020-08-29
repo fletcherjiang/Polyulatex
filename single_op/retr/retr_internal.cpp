@@ -25,7 +25,7 @@ aclError aclCreateNotify(rtNotify_t &notify, uint32_t &notifyId, aclrtStream &st
     rtEvent_t event = nullptr;
     auto rtRet = rtEventCreateWithFlag(&event, RT_EVENT_WITH_FLAG);
     if (rtRet != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("fail to create notify event, ret = %d", rtRet);
+        ACL_LOG_ERROR("[Create][Notify]fail to create notify event, ret = %d", rtRet);
         return ACL_ERROR_RT_FAILURE;
     }
     notify = static_cast<rtNotify_t>(event);
@@ -34,7 +34,7 @@ aclError aclCreateNotify(rtNotify_t &notify, uint32_t &notifyId, aclrtStream &st
     uint32_t eventId = 0;
     rtRet = rtGetEventID(event, &eventId);
     if (rtRet != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("fail to get notify eventId, ret = %d", rtRet);
+        ACL_LOG_ERROR("[Get][Notify]fail to get notify eventId, ret = %d", rtRet);
         (void)rtEventDestroy(event);
         return ACL_ERROR_RT_FAILURE;
     }
@@ -57,12 +57,12 @@ aclError aclFvNotifyWait(rtNotify_t &notify, aclrtStream &stream)
     rtEvent_t event = static_cast<rtEvent_t>(notify);
     auto rtRet = rtStreamWaitEvent(stream, event);
     if (rtRet != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("wait for a event to stream failed, result = %d", rtRet);
+        ACL_LOG_ERROR("[Wait][Event]wait for a event to stream failed, result = %d", rtRet);
         return ACL_ERROR_RT_FAILURE;
     }
     rtRet = rtEventReset(event, stream);
     if (rtRet != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("reset a event to stream failed, result = %d", rtRet);
+        ACL_LOG_ERROR("[Reset][Event]reset a event to stream failed, result = %d", rtRet);
         return ACL_ERROR_RT_FAILURE;
     }
     ACL_LOG_INFO("aclFvNotifyWait success.");
@@ -86,7 +86,7 @@ aclError aclCheckResult(const void *retCode)
     if (runMode == ACL_HOST) {
         ret = aclrtMemcpy(&result, sizeof(int32_t), retCode, sizeof(int32_t), ACL_MEMCPY_DEVICE_TO_HOST);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("memcpy retCode to host failed, result = %d", ret);
+            ACL_LOG_ERROR("[Copy][Mem]memcpy retCode to host failed, result = %d", ret);
             return ret;
         }
     } else {
@@ -94,7 +94,7 @@ aclError aclCheckResult(const void *retCode)
     }
 
     if (result != 0) {
-        ACL_LOG_ERROR("execute aclCheckResult failed, result = %d", result);
+        ACL_LOG_ERROR("[Check][Result]execute aclCheckResult failed, result = %d", result);
         return ACL_ERROR_FAILURE;
     }
     ACL_LOG_INFO("aclCheckResult success.");

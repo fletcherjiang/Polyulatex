@@ -115,7 +115,6 @@ aclError aclFinalize()
         ACL_LOG_WARN("finalize device's log failed");
     }
     acl::ResourceStatistics::GetInstance().TraverseStatistics();
-
     MsprofCtrlCallback callback = acl::AclProfilingManager::GetInstance().GetProfCtrlCallback();
     if (callback != nullptr) {
         int32_t profRet = callback(MSPROF_CTRL_FINALIZE, nullptr, 0);

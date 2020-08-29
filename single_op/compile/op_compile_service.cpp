@@ -43,13 +43,13 @@ aclError OpCompileService::SetCompileStrategy(CompileStrategy strategy,
     }
 
     if (strategy != NATIVE_COMPILER && strategy != REMOTE_COMPILER) {
-        ACL_LOG_ERROR("The current compile strategy[%d] is invalid.", static_cast<int32_t>(strategy));
+        ACL_LOG_ERROR("[Check][Strategy]The current compile strategy[%d] is invalid.", static_cast<int32_t>(strategy));
         return ACL_ERROR_INVALID_PARAM;
     }
 
     auto it = creators_.find(strategy);
     if (it == creators_.end()) {
-        ACL_LOG_ERROR("Unsupported compile strategy, compile strategy is %d.",
+        ACL_LOG_ERROR("[Find][Strategy]Unsupported compile strategy, compile strategy is %d.",
             static_cast<int32_t>(strategy));
         return ACL_ERROR_COMPILER_NOT_REGISTERED;
     }
@@ -59,7 +59,7 @@ aclError OpCompileService::SetCompileStrategy(CompileStrategy strategy,
 
     auto ret = newCompiler->Init(options);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("Init compiler failed");
+        ACL_LOG_ERROR("[Init][Compiler]Init compiler failed");
         ACL_DELETE_AND_SET_NULL(newCompiler);
         return ret;
     }

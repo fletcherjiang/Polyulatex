@@ -85,7 +85,8 @@ aclError _aclprofRegisterSetDeviceCallback(MsprofSetDeviceCallback callback)
     // register setdevice callback to rts
     rtError_t rtErr = rtRegDeviceStateCallback(ACL_PROFILING_REG_NAME, static_cast<rtDeviceStateCallback>(callback));
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("register device state callback failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        ACL_LOG_ERROR("[Register][Device]register device state callback failed, runtime result = %d",
+            static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     ACL_LOG_INFO("successfully register setdevice callback");
@@ -128,7 +129,7 @@ static aclError aclprofInnerInit()
     command.module_index = ACL_PROF_MODEL_LOAD;
     ge::Status geRet = geExecutor.CommandHandle(command);
     if (geRet != ge::SUCCESS) {
-        ACL_LOG_ERROR("handle profiling command failed, ge result = %d", geRet);
+        ACL_LOG_ERROR("[Handle][Prof]handle profiling command failed, ge result = %d", geRet);
         return ACL_GET_ERRCODE_GE(geRet);
     }
     ACL_LOG_INFO("successfully execute aclprofInnerInit");
@@ -139,7 +140,7 @@ static aclError aclprofInnerInit()
 static bool TransAclProfConfigToStrArr(const AclprofCommandHandle *profilerConfig, vector<string> &profConfigStrArr)
 {
     if (profilerConfig == nullptr) {
-        ACL_LOG_ERROR("profilerConfig is nullptr");
+        ACL_LOG_ERROR("[Check][ProfilerConfig]profilerConfig is nullptr");
         return false;
     }
 
@@ -166,7 +167,7 @@ static aclError aclprofInnerStart(void *data, uint32_t len)
     ACL_REQUIRES_NOT_NULL(data);
     size_t commandLen = sizeof(AclprofCommandHandle);
     if ((len == 0) || (len != commandLen)) {
-        ACL_LOG_ERROR("len[%u] is invalid, it should be %zu", len, commandLen);
+        ACL_LOG_ERROR("[Check][Len]len[%u] is invalid, it should be %zu", len, commandLen);
         return ACL_ERROR_INVALID_PARAM;
     }
     ge::GeExecutor geExecutor;
@@ -176,14 +177,14 @@ static aclError aclprofInnerStart(void *data, uint32_t len)
     AclprofCommandHandle *profilerConfig = static_cast<AclprofCommandHandle *>(data);
     vector<string> profConfigStrArr;
     if (!TransAclProfConfigToStrArr(profilerConfig, profConfigStrArr)) {
-        ACL_LOG_ERROR("transfer profilerConfig to string vector failed");
+        ACL_LOG_ERROR("[Transfer][Config]transfer profilerConfig to string vector failed");
         return ACL_ERROR_INVALID_PARAM;
     }
     command.cmd_params = profConfigStrArr;
     command.module_index = profilerConfig->profSwitch;
     ge::Status geRet = geExecutor.CommandHandle(command);
     if (geRet != ge::SUCCESS) {
-        ACL_LOG_ERROR("handle profiling command failed");
+        ACL_LOG_ERROR("[Handle][Prof]handle profiling command failed");
         return ACL_GET_ERRCODE_GE(geRet);
     }
     ACL_LOG_INFO("GE has been allocated start profiling config");
@@ -192,7 +193,8 @@ static aclError aclprofInnerStart(void *data, uint32_t len)
         if (!AclProfilingManager::GetInstance().AclProfilingIsRun()) {
             aclError ret = AclProfilingManager::GetInstance().Init();
             if (ret != ACL_SUCCESS) {
-                ACL_LOG_ERROR("start acl profiling module failed, result = %d", ret);
+                ACL_LOG_ERROR("[Init][ProfilingManager]start acl profiling module failed,"
+                    " result = %d", ret);
                 return ret;
             }
         }
@@ -210,7 +212,7 @@ static aclError aclprofInnerStop(void *data, uint32_t len)
     ACL_REQUIRES_NOT_NULL(data);
     size_t requiredLen = sizeof(AclprofCommandHandle);
     if ((len == 0) || (len != requiredLen)) {
-        ACL_LOG_ERROR("data len[%u] is invalid, it should be %zu", len, requiredLen);
+        ACL_LOG_ERROR("[Check][Len]data len[%u] is invalid, it should be %zu", len, requiredLen);
         return ACL_ERROR_INVALID_PARAM;
     }
     ge::GeExecutor geExecutor;
@@ -221,13 +223,13 @@ static aclError aclprofInnerStop(void *data, uint32_t len)
     command.module_index = profilerConfig->profSwitch;
     vector<string> profConfigStrArr;
     if (!TransAclProfConfigToStrArr(profilerConfig, profConfigStrArr)) {
-        ACL_LOG_ERROR("transfer profilerConfig to string vector failed");
+        ACL_LOG_ERROR("[Trans][ProfilerConfig]transfer profilerConfig to string vector failed");
         return ACL_ERROR_INVALID_PARAM;
     }
     command.cmd_params = profConfigStrArr;
     ge::Status geRet = geExecutor.CommandHandle(command);
     if (geRet != ge::SUCCESS) {
-        ACL_LOG_ERROR("handle profiling command failed, ge result = %u", geRet);
+        ACL_LOG_ERROR("[Handle][Command]handle profiling command failed, ge result = %u", geRet);
         return ACL_GET_ERRCODE_GE(geRet);
     }
 
@@ -239,7 +241,7 @@ static aclError aclprofInnerStop(void *data, uint32_t len)
         (AclProfilingManager::GetInstance().AclProfilingIsRun())) {
         aclError ret = AclProfilingManager::GetInstance().UnInit();
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("stop acl failed, result = %d", ret);
+            ACL_LOG_ERROR("[Uninit][ProfilingManager]stop acl failed, result = %d", ret);
             return ret;
         }
     }
@@ -258,14 +260,15 @@ static aclError aclprofInnerFinalize()
     command.cmd_type = ACL_PROFILING_FINALIZE;
     ge::Status geRet = geExecutor.CommandHandle(command);
     if (geRet != ge::SUCCESS) {
-        ACL_LOG_ERROR("handle profiling command failed, ge result = %u", geRet);
+        ACL_LOG_ERROR("[Handle][Command]handle profiling command failed, ge result = %u", geRet);
         return ACL_GET_ERRCODE_GE(geRet);
     }
 
     if (AclProfilingManager::GetInstance().AclProfilingIsRun()) {
         aclError ret = AclProfilingManager::GetInstance().UnInit();
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("stop acl profiling module failed, result = %d", ret);
+            ACL_LOG_ERROR("[UnInit][ProfilingManager]stop acl profiling module failed, "
+                "result = %d", ret);
             return ret;
         }
         AclProfilingManager::GetInstance().RemoveAllDeviceList();
@@ -282,7 +285,7 @@ static aclError aclprofInnerModelSubscribe(void *data, uint32_t len)
     ACL_REQUIRES_NOT_NULL(data);
     size_t requiredLen = sizeof(AclprofCommandHandle);
     if ((len == 0) || (len != requiredLen)) {
-        ACL_LOG_ERROR("data len[%u] is invalid, it should be %zu", len, requiredLen);
+        ACL_LOG_ERROR("[Check][Len]data len[%u] is invalid, it should be %zu", len, requiredLen);
         return ACL_ERROR_INVALID_PARAM;
     }
     AclprofCommandHandle *profilerConfig = static_cast<AclprofCommandHandle *>(data);
@@ -295,7 +298,7 @@ static aclError aclprofInnerModelSubscribe(void *data, uint32_t len)
     command.cmd_params.push_back(std::to_string(profilerConfig->modelId));
     ge::Status geRet = geExecutor.CommandHandle(command);
     if (geRet != ge::SUCCESS) {
-        ACL_LOG_ERROR("handle profiling command failed, ge result = %u", geRet);
+        ACL_LOG_ERROR("[Handle][Command]handle profiling command failed, ge result = %u", geRet);
         return ACL_GET_ERRCODE_GE(geRet);
     }
     ACL_LOG_INFO("successfully execute aclprofInnerModelSubscribe");
@@ -310,7 +313,7 @@ static aclError aclprofInnerModelUnSubscribe(void *data, uint32_t len)
     ACL_REQUIRES_NOT_NULL(data);
     uint32_t requiredLen = sizeof(AclprofCommandHandle);
     if ((len == 0) || (len != requiredLen)) {
-        ACL_LOG_ERROR("data len[%u] is invalid, it should be %u", len, requiredLen);
+        ACL_LOG_ERROR("[Check][Len]data len[%u] is invalid, it should be %u", len, requiredLen);
         return ACL_ERROR_INVALID_PARAM;
     }
     AclprofCommandHandle *profilerConfig = static_cast<AclprofCommandHandle *>(data);
@@ -322,7 +325,7 @@ static aclError aclprofInnerModelUnSubscribe(void *data, uint32_t len)
     command.cmd_params.push_back(std::to_string(profilerConfig->modelId));
     ge::Status geRet = geExecutor.CommandHandle(command);
     if (geRet != ge::SUCCESS) {
-        ACL_LOG_ERROR("handle profiling command failed, ge result = %u", geRet);
+        ACL_LOG_ERROR("[Hanlde][Command]handle profiling command failed, ge result = %u", geRet);
         return ACL_GET_ERRCODE_GE(geRet);
     }
     ACL_LOG_INFO("successfully execute aclprofInnerModelUnSubscribe");
@@ -353,7 +356,7 @@ aclError _aclprofCommandHandle(uint32_t type, void *data, uint32_t len)
             ret = aclprofInnerModelUnSubscribe(data, len);
             break;
         default:
-            ACL_LOG_ERROR("command type[%u] is invalid, it should be between in [%u, %u]", type,
+            ACL_LOG_ERROR("[Handle][Command]command type[%u] is invalid, it should be between in [%u, %u]", type,
                 PROF_COMMANDHANDLE_INIT, PROF_COMMANDHANDLE_MODEL_UNSUB);
             ret = ACL_ERROR_INVALID_PARAM;
             return ret;
@@ -368,7 +371,7 @@ aclError _aclprofGetDeviceByModelId(uint32_t modelId, uint32_t &deviceId)
     ge::GeExecutor geExecutor;
     ge::Status geRet = geExecutor.GetDeviceIdByModelId(modelId, deviceId);
     if (geRet != ge::SUCCESS) {
-        ACL_LOG_ERROR("model id[%u] has not been loaded", modelId);
+        ACL_LOG_ERROR("[Check][ModelId]model id[%u] has not been loaded", modelId);
         return ACL_GET_ERRCODE_GE(geRet);
     }
     ACL_LOG_INFO("successfully execute _aclprofGetDeviceByModelId");

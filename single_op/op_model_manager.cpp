@@ -43,7 +43,8 @@ aclError OpModelManager::HandleMaxOpQueueConfig(const char *configPath)
     acl::JsonParser jsonParser;
     aclError ret = jsonParser.ParseJsonFromFile(configPath, js, nullptr, nullptr);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("parse max_opqueue_num config from file[%s] failed, result = %d", configPath, ret);
+        ACL_LOG_ERROR("[Parse][Config]parse max_opqueue_num config from file[%s] failed, result = %d",
+            configPath, ret);
         return ret;
     }
     try {
@@ -52,8 +53,8 @@ aclError OpModelManager::HandleMaxOpQueueConfig(const char *configPath)
             long maxOpNum = strtol(maxOpNumStr.c_str(), nullptr, DECIMAL);
             ACL_LOG_EVENT("max_opqueue_num is set [%ld].", maxOpNum);
             if (maxOpNum <= 0) {
-                ACL_LOG_ERROR("max_opqueue_num [%s] is invalid from file[%s], it should be larger than 0.",
-                    maxOpNumStr.c_str(), configPath);
+                ACL_LOG_ERROR("[Check][MaxOpNum]max_opqueue_num [%s] is invalid from file[%s], "
+                    "it should be larger than 0.", maxOpNumStr.c_str(), configPath);
                 return ACL_ERROR_INVALID_PARAM;
             }
             if (static_cast<uint64_t>(maxOpNum) < DEFAULT_MAX_OPQUEUE_NUM) {
@@ -67,7 +68,7 @@ aclError OpModelManager::HandleMaxOpQueueConfig(const char *configPath)
                 DEFAULT_MAX_OPQUEUE_NUM);
         }
     } catch (const nlohmann::json::exception &e) {
-        ACL_LOG_ERROR("parse json for max_opqueue_num config failed, exception:%s.", e.what());
+        ACL_LOG_ERROR("[Parse][Json]parse json for max_opqueue_num config failed, exception:%s.", e.what());
         return ACL_ERROR_INVALID_MAX_OPQUEUE_NUM_CONFIG;
     }
     ACL_LOG_INFO("HandleMaxOpQueueConfig end in HandleMaxOpQueueConfig");
@@ -156,7 +157,7 @@ aclError OpModelManager::LoadModelFromMem(const void *model, size_t modelSize, b
     std::shared_ptr<void> modelData;
     modelData.reset(aclModelData, [](const char *p) { delete[]p; });
     if (memcpy_s(aclModelData, modelSize, model, modelSize) != EOK) {
-        ACL_LOG_ERROR("Copy model data failed. size = %zu", modelSize);
+        ACL_LOG_ERROR("[Copy][Data]Copy model data failed. size = %zu", modelSize);
         return ACL_ERROR_FAILURE;
     }
     return LoadModelFromSharedMem(modelData, modelSize, isStatic);
@@ -441,7 +442,12 @@ aclError OpModelManager::SetTensorConst(aclTensorDesc *desc, const aclDataBuffer
         return ACL_SUCCESS;
     }
     if (length < 0) {
-        ACL_LOG_ERROR("The length of const hostMem is invalid. size = %zu", length);
+        ACL_LOG_ERROR("[Check][Length]The length of const hostMem is invalid. size = %zu",
+            length);
+        REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
+            std::vector<std::string>({"param", "value", "reason"}),
+            std::vector<std::string>({"length of const hostMem",
+            std::to_string(length), "length < 0"}));
         return ACL_ERROR_INVALID_PARAM;
     }
     desc->isConst = true;
@@ -449,7 +455,7 @@ aclError OpModelManager::SetTensorConst(aclTensorDesc *desc, const aclDataBuffer
     auto *constData = new (std::nothrow) char[length];
     ACL_REQUIRES_NOT_NULL(constData);
     if (memcpy_s(constData, length, hostMem, length) != EOK) {
-        ACL_LOG_ERROR("Copy const data failed. size = %zu", length);
+        ACL_LOG_ERROR("[Copy][Mem]Copy const data failed. size = %zu", length);
         ACL_DELETE_ARRAY_AND_SET_NULL(constData);
         return ACL_ERROR_FAILURE;
     }
@@ -495,7 +501,7 @@ aclError OpModelManager::GetOpModel(const AclOp &aclOp)
 
     auto compileRet = BuildOpModel(aclOp);
     if (compileRet != ACL_SUCCESS) {
-        ACL_LOG_ERROR("Fail to build op model");
+        ACL_LOG_ERROR("[Build][Op]Fail to build op model");
         return compileRet;
     }
 
@@ -675,7 +681,7 @@ static bool BackAclOp(int tensorNum,
             continue;
         }
         if (tensorDims[tensorStatusIndex].size() != tensorDesc[tensorIndex]->dims.size()) {
-            ACL_LOG_ERROR("Fail to BackAclopMatch");
+            ACL_LOG_ERROR("[Back][Op]Fail to BackAclopMatch");
             return false;
         }
         for (dimIndex = 0; dimIndex < tensorDesc[tensorIndex]->dims.size(); ++dimIndex) {
@@ -709,14 +715,14 @@ bool OpModelManager::BackAclopMatch(AclOp &aclOpMatch,
     bool ret = BackAclOp(aclOpMatch.numInputs, aclOpMatch.inputDesc, tensorShapeStatus,
                          tensorDims, storageTensorDims, oriStoDimsIndex, tensorStatusIndex);
     if (!ret) {
-        ACL_LOG_ERROR("Fail to inputDesc back aclOp");
+        ACL_LOG_ERROR("[Back][Op]Fail to inputDesc back aclOp");
         return false;
     }
     ACL_LOG_INFO("InputDesc BackAclopMatch success");
     ret = BackAclOp(aclOpMatch.numOutputs, aclOpMatch.outputDesc, tensorShapeStatus,
                     tensorDims, storageTensorDims, oriStoDimsIndex, tensorStatusIndex);
     if (!ret) {
-        ACL_LOG_ERROR("Fail to inputDesc back aclOp");
+        ACL_LOG_ERROR("[Back][Op]Fail to inputDesc back aclOp");
         return false;
     }
     return true;
@@ -752,7 +758,8 @@ aclError OpModelManager::MatchOpModel(const AclOp &aclOp, OpModel &opModel, bool
     // check the input shape must be static when executing
     if (!aclOp.isCompile) {
         if (IsDynamicOpModel(aclOp)) {
-            ACL_LOG_ERROR("TensorDesc must be static when executing, tensorDesc is %s", aclOp.DebugString().c_str());
+            ACL_LOG_ERROR("[Check][Op]TensorDesc must be static when executing, "
+                "tensorDesc is %s", aclOp.DebugString().c_str());
             return ACL_ERROR_INVALID_PARAM;
         }
     }
@@ -891,7 +898,7 @@ aclError OpModelManager::BuildOpModel(const AclOp &aclOp)
     // it is dynamic load
     ret = LoadModelFromSharedMem(modelData, modelSize, false);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("load model from mem failed.");
+        ACL_LOG_ERROR("[Load][Model]load model from mem failed.");
         return ret;
     }
 
