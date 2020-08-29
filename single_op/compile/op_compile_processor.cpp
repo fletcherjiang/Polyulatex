@@ -33,7 +33,7 @@ aclError OpCompileProcessor::Init()
     }
     aclError ret = SetOption();
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("OpCompileProcessor init failed!");
+        ACL_LOG_ERROR("[Set][Options]OpCompileProcessor init failed!");
         return ret;
     }
 
@@ -46,7 +46,8 @@ aclError OpCompileProcessor::SetOption()
     char socVersion[SOC_VERSION_LEN] = {0};
     auto ret = rtGetSocVersion(socVersion, sizeof(socVersion));
     if (ret != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("get soc version failed, runtime result = %d", static_cast<int32_t>(ret));
+        ACL_LOG_ERROR("[Get][SocVersion]get soc version failed, runtime result = %d",
+            static_cast<int32_t>(ret));
         return ACL_GET_ERRCODE_RTS(ret);
     }
 
@@ -61,7 +62,7 @@ aclError OpCompileProcessor::SetOption()
 aclError OpCompileProcessor::OpCompile(AclOp &aclOp)
 {
     if (!isInit_) {
-        ACL_LOG_ERROR("init env failed!");
+        ACL_LOG_ERROR("[Init][Env]init env failed!");
         return ACL_ERROR_FAILURE;
     }
 

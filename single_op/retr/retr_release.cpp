@@ -36,13 +36,14 @@ aclError AclFvRelease::PrepareInput(char *args, uint32_t argsSize)
 {
     rtError_t rtRet = rtStreamCreate(&stream_, RT_STREAM_PRIORITY_DEFAULT);
     if (rtRet != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("AclFvRelease create stream failed, runtime result = %d.", rtRet);
+        ACL_LOG_ERROR("[Create][Stream]AclFvRelease create stream failed, runtime result = %d.", rtRet);
         return ACL_ERROR_RT_FAILURE;
     }
 
     aclError ret = aclrtMalloc(&retCode_, sizeof(int32_t), ACL_MEM_MALLOC_NORMAL_ONLY);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("AclFvRelease alloc device buffer failed, size = %zu, result = %d.", sizeof(int32_t), ret);
+        ACL_LOG_ERROR("[Malloc][Mem]AclFvRelease alloc device buffer failed, "
+            "size = %zu, result = %d.", sizeof(int32_t), ret);
         (void)rtStreamDestroy(stream_);
         return ret;
     }
@@ -80,7 +81,7 @@ aclError AclFvRelease::Release()
         nullptr,  // no need smDesc
         stream_);
     if (rtRet != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("retr release call rtCpuKernelLaunch failed, runtime result = %d.", rtRet);
+        ACL_LOG_ERROR("[Release][Retr]retr release call rtCpuKernelLaunch failed, runtime result = %d.", rtRet);
         (void)aclrtFree(retCode_);
         (void)rtStreamDestroy(stream_);
         return ACL_ERROR_RT_FAILURE;
@@ -89,7 +90,7 @@ aclError AclFvRelease::Release()
 
     rtRet = rtStreamSynchronize(stream_);
     if (rtRet != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("synchronize stream failed, runtime result = %d.", rtRet);
+        ACL_LOG_ERROR("[Sync][Stream]synchronize stream failed, runtime result = %d.", rtRet);
         (void)aclrtFree(retCode_);
         (void)rtStreamDestroy(stream_);
         return ACL_ERROR_RT_FAILURE;

@@ -15,8 +15,8 @@
 #include <cstdarg>
 #include <cstdio>
 #include "toolchain/slog.h"
-#include "common/util/error_manager/error_manager.h"
 #include "mmpa/mmpa_api.h"
+#include "common/util/error_manager/error_manager.h"
 #include "acl/acl_base.h"
 
 #define ACL_MODE_ID ASCENDCL
@@ -25,6 +25,13 @@
 constexpr int MAX_LOG_STRING = 1024;
 
 namespace acl {
+const char *const INVALID_PARAM_MSG = "EH0001";
+const char *const INVALID_NULL_POINTER_MSG = "EH0002";
+const char *const INVALID_PATH_MSG = "EH0003";
+const char *const INVALID_FILE_MSG = "EH0004";
+const char *const INVALID_AIPP_MSG = "EH0005";
+const char *const UNSUPPORTED_FEATURE_MSG = "EH0006";
+
 class ACL_FUNC_VISIBILITY AclLog {
 public:
     static bool IsLogOutputEnable(aclLogLevel logLevel);
@@ -40,10 +47,8 @@ class ACL_FUNC_VISIBILITY AclErrorLogManager {
 public:
     AclErrorLogManager(const std::string &firstStage, const std::string &secondStage);
     virtual ~AclErrorLogManager();
-    static const std::string &GetStagesHeader();
-    // typename T must be basic data type
-    template<typename T>
-    static std::string CombineLogStr(const std::vector<std::string> keys, const std::vector<T> values);
+    static const std::string GetStagesHeader();
+    static std::string FormatStr(const char *fmt, ...);
 };
 } // namespace acl
 

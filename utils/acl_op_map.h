@@ -56,7 +56,7 @@ template<typename T>
 std::string AclOpMap<T>::TensorDescArr2Str(int num, const aclTensorDesc *const descArr[])
 {
     if ((num > 0) && (descArr == nullptr)) {
-        ACL_LOG_ERROR("param descArr must not be null");
+        ACL_LOG_ERROR("[Check][Params]param descArr must not be null");
         return "";
     }
     string descStr;
@@ -167,7 +167,7 @@ void AclOpMap<T>::Insert(const AclOp &aclOp, const T &entry, T &agingT)
     string outputDescStr = TensorDescArr2Str(aclOp.numOutputs, aclOp.outputDesc);
     if (aclOp.opAttr != nullptr) {
         if (!attr_utils::SaveConstToAttr(aclOp, const_cast<aclopAttr *>(aclOp.opAttr))) {
-            ACL_LOG_ERROR("save const data buffer to attr fail");
+            ACL_LOG_ERROR("[Save][ConstData]save const data buffer to attr fail");
             return;
         }
         size_t digest = attr_utils::AttrMapToDigest(aclOp.opAttr->Attrs());
@@ -189,7 +189,7 @@ void AclOpMap<T>::Insert(const AclOp &aclOp, const T &entry, T &agingT)
     } else {
         aclopAttr emptyAttr;
         if (!attr_utils::SaveConstToAttr(aclOp, &emptyAttr)) {
-            ACL_LOG_ERROR("save const data buffer to attr fail");
+            ACL_LOG_ERROR("[Save][ConstData]save const data buffer to attr fail");
             return;
         }
         size_t digest = attr_utils::AttrMapToDigest(emptyAttr.Attrs());
@@ -217,12 +217,12 @@ aclError AclOpMap<T>::Get(const AclOp &aclOp, T &entry, bool needUpdateTimestamp
     if (opAttr != nullptr) {
         digest = aclOp.opAttr->GetDigest();
         if (!attr_utils::SaveConstToAttr(aclOp, const_cast<aclopAttr *>(opAttr))) {
-            ACL_LOG_ERROR("save const data buffer to attr fail");
+            ACL_LOG_ERROR("[Save][ConstData]save const data buffer to attr fail");
             return ACL_ERROR_INVALID_PARAM;
         }
     } else {
         if (!attr_utils::SaveConstToAttr(aclOp, &emptyAttr)) {
-            ACL_LOG_ERROR("save const data buffer to attr fail");
+            ACL_LOG_ERROR("[Save][ConstData]save const data buffer to attr fail");
             return ACL_ERROR_INVALID_PARAM;
         }
         opAttr = &emptyAttr;

@@ -42,13 +42,13 @@ aclError AclProfilingManager::Init()
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (reporterCallback_ == nullptr) {
-        ACL_LOG_ERROR("prof reporter hasn't registered yet");
+        ACL_LOG_ERROR("[Check][ReporterCallback]prof reporter hasn't registered yet");
         return ACL_ERROR_PROFILING_FAILURE;
     }
 
     int32_t result = reporterCallback_(MSPROF_MODULE_ACL, MSPROF_REPORTER_INIT, nullptr, 0);
     if (result != 0) {
-        ACL_LOG_ERROR("init acl profiling engine failed, result = %d", result);
+        ACL_LOG_ERROR("[Init][ProfEngine]init acl profiling engine failed, result = %d", result);
         return ACL_ERROR_PROFILING_FAILURE;
     }
     isProfiling_ = true;
@@ -59,13 +59,13 @@ aclError AclProfilingManager::UnInit()
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (reporterCallback_ == nullptr) {
-        ACL_LOG_ERROR("prof reporter hasn't registered yet");
+        ACL_LOG_ERROR("[Check][ReporterCallback]prof reporter hasn't registered yet");
         return ACL_ERROR_PROFILING_FAILURE;
     }
 
     int32_t result = reporterCallback_(MSPROF_MODULE_ACL, MSPROF_REPORTER_UNINIT, nullptr, 0);
     if (result != MSPROF_ERROR_NONE) {
-        ACL_LOG_ERROR("Uninit profiling engine failed, result = %d", result);
+        ACL_LOG_ERROR("[Uninit][ProfEngine]Uninit profiling engine failed, result = %d", result);
         return ACL_ERROR_PROFILING_FAILURE;
     }
     isProfiling_ = false;
@@ -197,7 +197,7 @@ AclProfilingReporter::~AclProfilingReporter()
         err = memcpy_s(reporter_data.tag, MSPROF_ENGINE_MAX_TAG_LEN,
             tag_name.c_str(), tag_name.size());
         if (err != EOK) {
-            ACL_LOG_ERROR("memcpy_s failed, err = %d", err);
+            ACL_LOG_ERROR("[Copy][Mem]memcpy_s failed, err = %d", err);
             return;
         }
 

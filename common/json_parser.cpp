@@ -27,7 +27,7 @@ namespace acl {
     void GetMaxNestedLayers(const char *fileName, size_t length, size_t &maxObjDepth, size_t &maxArrayDepth)
     {
         if (length <= 0) {
-            ACL_LOG_ERROR("the length of file %s must be larger than 0.", fileName);
+            ACL_LOG_ERROR("[Check][Length]the length of file %s must be larger than 0.", fileName);
             return;
         }
 
@@ -37,7 +37,7 @@ namespace acl {
 
         std::ifstream fin(fileName);
         if (!fin.is_open()) {
-            ACL_LOG_ERROR("read file %s failed.", fileName);
+            ACL_LOG_ERROR("[Open][File]read file %s failed.", fileName);
             return;
         }
         fin.seekg(0, fin.beg);
@@ -93,25 +93,26 @@ namespace acl {
         char trustedPath[MMPA_MAX_PATH] = {'\0'};
         int32_t ret = mmRealPath(fileName, trustedPath, sizeof(trustedPath));
         if (ret != EN_OK) {
-            ACL_LOG_ERROR("the file path %s is not like a real path, mmRealPath return %d, errcode is %d",
-                          fileName, ret, mmGetErrorCode());
+            ACL_LOG_ERROR("[Trans][RealPath]the file path %s is not like a real path, mmRealPath return %d, "
+                "errcode is %d", fileName, ret, mmGetErrorCode());
             return false;
         }
 
         mmStat_t stat = {0};
         ret = mmStatGet(trustedPath, &stat);
         if (ret != EN_OK) {
-            ACL_LOG_ERROR("cannot get config file status, which path is %s, maybe not exist, return %d, errcode %d",
-                          trustedPath, ret, mmGetErrorCode());
+            ACL_LOG_ERROR("[Get][FileStatus]cannot get config file status, which path is %s, "
+                "maybe not exist, return %d, errcode %d", trustedPath, ret, mmGetErrorCode());
             return false;
         }
         if ((stat.st_mode & S_IFMT) != S_IFREG) {
-            ACL_LOG_ERROR("config file is not a common file, which path is %s, mode is %u", trustedPath, stat.st_mode);
+            ACL_LOG_ERROR("[Config][ConfigFile]config file is not a common file, which path is %s, "
+                "mode is %u", trustedPath, stat.st_mode);
             return false;
         }
         if (stat.st_size > MAX_CONFIG_FILE_BYTE) {
-            ACL_LOG_ERROR("config file %s size[%ld] is larger than max config file Bytes[%u]",
-                          trustedPath, stat.st_size, MAX_CONFIG_FILE_BYTE);
+            ACL_LOG_ERROR("[Check][FileSize]config file %s size[%ld] is larger than "
+                "max config file Bytes[%u]", trustedPath, stat.st_size, MAX_CONFIG_FILE_BYTE);
             return false;
         }
         return true;
@@ -121,7 +122,7 @@ namespace acl {
     {
         std::ifstream fin(fileName);
         if (!fin.is_open()) {
-            ACL_LOG_ERROR("read file %s failed.", fileName);
+            ACL_LOG_ERROR("[Read][File]read file %s failed.", fileName);
             return false;
         }
 
@@ -130,7 +131,7 @@ namespace acl {
         size_t maxArrayDepth = 0;
         GetMaxNestedLayers(fileName, fileLength, maxObjDepth, maxArrayDepth);
         if ((maxObjDepth > MAX_CONFIG_OBJ_DEPTH) || (maxArrayDepth > MAX_CONFIG_ARRAY_DEPTH)) {
-            ACL_LOG_ERROR("invalid json file, the object's depth[%zu] is larger than %zu, or "
+            ACL_LOG_ERROR("[Check][MaxArrayDepth]invalid json file, the object's depth[%zu] is larger than %zu, or "
                           "the array's depth[%zu] is larger than %zu.",
                           maxObjDepth, MAX_CONFIG_OBJ_DEPTH, maxArrayDepth, MAX_CONFIG_ARRAY_DEPTH);
             fin.close();
@@ -141,7 +142,7 @@ namespace acl {
         try {
             fin >> js;
         } catch (const nlohmann::json::exception &e) {
-            ACL_LOG_ERROR("invalid json file, exception:%s.", e.what());
+            ACL_LOG_ERROR("[Check][JsonFile]invalid json file, exception:%s.", e.what());
             fin.close();
             return false;
         }
@@ -157,7 +158,7 @@ namespace acl {
             oss << fin.rdbuf();
             *strConfig = oss.str();
         } catch (...) {
-            ACL_LOG_ERROR("get json string failed, errno =%d!", errno);
+            ACL_LOG_ERROR("[Get][JsonStr]get json string failed, errno =%d!", errno);
             fin.close();
             return false;
         }
@@ -175,12 +176,12 @@ namespace acl {
         }
         ACL_LOG_INFO("before ParseJsonFromFile in ParseJsonFromFile");
         if (!IsValidFileName(fileName)) {
-            ACL_LOG_ERROR("invalid config file[%s]", fileName);
+            ACL_LOG_ERROR("[Check][File]invalid config file[%s]", fileName);
             return ACL_ERROR_INVALID_FILE;
         }
         std::ifstream fin(fileName);
         if (!fin.is_open()) {
-            ACL_LOG_ERROR("read file %s failed.", fileName);
+            ACL_LOG_ERROR("[Read][File]read file %s failed.", fileName);
             return ACL_ERROR_INVALID_FILE;
         }
         fin.seekg(0, std::ios::end);
@@ -192,7 +193,7 @@ namespace acl {
         }
         fin.close();
         if (!ParseJson(fileName, js, strJsonCtx, static_cast<size_t>(fp))) {
-            ACL_LOG_ERROR("parse config file[%s] to json failed.", fileName);
+            ACL_LOG_ERROR("[Parse][File]parse config file[%s] to json failed.", fileName);
             return ACL_ERROR_PARSE_FILE;
         }
         if (subStrKey != nullptr) {

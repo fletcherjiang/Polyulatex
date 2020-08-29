@@ -36,6 +36,8 @@ aclError aclrtMalloc(void **devPtr, size_t size, aclrtMemMallocPolicy policy)
     // size must be greater than zero
     if (size == 0) {
         ACL_LOG_ERROR("malloc size must be greater than zero");
+        REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG, std::vector<std::string>({"param", "value", "reason"}),
+            std::vector<std::string>({"size", std::to_string(size), "size must be greater than zero"}));
         return ACL_ERROR_INVALID_PARAM;
     }
     size_t alignedSize;

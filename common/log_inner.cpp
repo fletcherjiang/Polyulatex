@@ -89,24 +89,26 @@ AclErrorLogManager::~AclErrorLogManager()
     ErrorManager::GetInstance().SetStage("", "");
 };
 
-const std::string &AclErrorLogManager::GetStagesHeader()
+const std::string AclErrorLogManager::GetStagesHeader()
 {
     return ErrorManager::GetInstance().GetLogHeader();
 }
 
-template<typename T>
-std::string AclErrorLogManager::CombineLogStr(const std::vector<std::string> keys, const std::vector<T> values)
+std::string AclErrorLogManager::FormatStr(const char *fmt, ...)
 {
-    std::string res;
-    if (keys.size() != values.size()) {
+    if (fmt == nullptr) {
         return "";
     }
-    for (size_t index = 0; index < keys.size(); ++index) {
-        res += (keys[index] + "[" + std::to_string(values[index]) + "]");
-        if (index != (keys.size() - 1)) {
-            res += " or ";
-        }
+
+    va_list ap;
+    va_start(ap, fmt);
+    char str[MAX_LOG_STRING] = { '\0' };
+    int32_t printRet = vsnprintf_s(str, MAX_LOG_STRING, MAX_LOG_STRING - 1, fmt, ap);
+    if (printRet == -1) {
+        va_end(ap);
+        return "";
     }
-    return res;
+    va_end(ap);
+    return str;
 }
 }

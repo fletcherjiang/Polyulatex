@@ -233,7 +233,7 @@ acltdtTensorType acltdtGetTensorTypeFromItem(const acltdtDataItem *dataItem)
 {
     if (dataItem == nullptr) {
         ACL_LOG_ERROR("param [dataItem] must not be null.");
-        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}),
+        REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG, std::vector<std::string>({"param"}),
             std::vector<std::string>({"dataItem"}));
         return ACL_TENSOR_DATA_UNDEFINED;
     }
@@ -244,7 +244,8 @@ aclDataType acltdtGetDataTypeFromItem(const acltdtDataItem *dataItem)
 {
     if (dataItem == nullptr) {
         ACL_LOG_ERROR("param [dataItem] must not be null.");
-        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}), std::vector<std::string>({"dataItem"}));
+        REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG, std::vector<std::string>({"param"}),
+            std::vector<std::string>({"dataItem"}));
         return ACL_DT_UNDEFINED;
     }
     return dataItem->dataType;
@@ -260,7 +261,8 @@ size_t acltdtGetDataSizeFromItem(const acltdtDataItem *dataItem)
 {
     if (dataItem == nullptr) {
         ACL_LOG_ERROR("param [dataItem] must not be null.");
-        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}), std::vector<std::string>({"dataItem"}));
+        REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG, std::vector<std::string>({"param"}),
+            std::vector<std::string>({"dataItem"}));
         return 0;
     }
     return dataItem->dataLen;
@@ -270,7 +272,8 @@ size_t acltdtGetDimNumFromItem(const acltdtDataItem *dataItem)
 {
     if (dataItem == nullptr) {
         ACL_LOG_ERROR("param [dataItem] must not be null.");
-        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}), std::vector<std::string>({"dataItem"}));
+        REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG, std::vector<std::string>({"param"}),
+            std::vector<std::string>({"dataItem"}));
         return 0;
     }
     return dataItem->dims.size();
@@ -383,7 +386,8 @@ size_t acltdtGetDatasetSize(const acltdtDataset *dataset)
 {
     if (dataset == nullptr) {
         ACL_LOG_ERROR("dataset is null.");
-        REPORT_INPUT_ERROR("EH0002", std::vector<std::string>({"param"}), std::vector<std::string>({"dataset"}));
+        REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG, std::vector<std::string>({"param"}),
+            std::vector<std::string>({"dataset"}));
         return 0;
     }
     return dataset->blobs.size();
@@ -457,6 +461,10 @@ aclError acltdtSendTensor(const acltdtChannelHandle *handle, const acltdtDataset
     // -1 represents infinite wait, it is must be -1 now
     if (timeout != -1) {
         ACL_LOG_ERROR("only infinite wait is supported, it can only be set to -1, timeout[%d].", timeout);
+        std::string &&errMsg = acl::AclErrorLogManager::FormatStr("it can only be set to -1, timeout[%d].", timeout);
+        REPORT_INPUT_ERROR(acl::UNSUPPORTED_FEATURE_MSG,
+            std::vector<std::string>({"feature", "reason"}), std::vector<std::string>({"timeout",
+            errMsg}));
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -490,12 +498,19 @@ aclError acltdtReceiveTensor(const acltdtChannelHandle *handle, acltdtDataset *d
     // -1 represents infinite wait, it is must be -1 now
     if (timeout != -1) {
         ACL_LOG_ERROR("only infinite wait is supported, it can only be set to -1, timeout[%d]", timeout);
+        std::string &&errMsg = acl::AclErrorLogManager::FormatStr("it can only be set to -1, timeout[%d].", timeout);
+        REPORT_INPUT_ERROR(acl::UNSUPPORTED_FEATURE_MSG,
+            std::vector<std::string>({"feature", "reason"}), std::vector<std::string>({"timeout", errMsg}));
         return ACL_ERROR_INVALID_PARAM;
     }
 
     if (handle->recvName.empty()) {
         ACL_LOG_ERROR("it is not a receive channel, failed to receive, device is %u, name is %s",
             handle->devId, handle->name.c_str());
+        std::string &&errMsg = acl::AclErrorLogManager::FormatStr("failed to receive, device is %u, name is %s",
+            handle->devId, handle->name.c_str());
+        REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG, std::vector<std::string>({"param", "value", "reason"}),
+            std::vector<std::string>({"receive channel", "", errMsg}));
         return ACL_ERROR_INVALID_PARAM;
     }
 

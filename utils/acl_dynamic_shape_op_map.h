@@ -58,7 +58,7 @@ template<typename T>
 std::string AclShapeRangeMap<T>::TensorDescArr2Str(int num, const aclTensorDesc *const descArr[])
 {
     if ((num > 0) && (descArr == nullptr)) {
-        ACL_LOG_ERROR("param descArr must not be null");
+        ACL_LOG_ERROR("[Check][Param]param descArr must not be null");
         return "";
     }
     string descStr;
@@ -77,7 +77,7 @@ template<typename T>
 std::string AclShapeRangeMap<T>::ShapeRangeArr2Str(int num, const aclTensorDesc *const descArr[])
 {
     if ((num > 0) && (descArr == nullptr)) {
-        ACL_LOG_ERROR("param descArr must not be null");
+        ACL_LOG_ERROR("[Check][Param]param descArr must not be null");
         return "";
     }
     string descStr;
@@ -205,7 +205,7 @@ void AclShapeRangeMap<T>::Insert(const AclOp &aclOp, const T &entry, T &agingT)
         outputRangeStr.c_str(), rangeKeyStr.c_str());
     if (aclOp.opAttr != nullptr) {
         if (!attr_utils::SaveConstToAttr(aclOp, const_cast<aclopAttr *>(aclOp.opAttr))) {
-            ACL_LOG_ERROR("save const data buffer to attr fail");
+            ACL_LOG_ERROR("[Check][ConstData]save const data buffer to attr fail");
             return;
         }
         size_t digest = attr_utils::AttrMapToDigest(aclOp.opAttr->Attrs());
@@ -216,7 +216,7 @@ void AclShapeRangeMap<T>::Insert(const AclOp &aclOp, const T &entry, T &agingT)
     } else {
         aclopAttr emptyAttr;
         if (!attr_utils::SaveConstToAttr(aclOp, &emptyAttr)) {
-            ACL_LOG_ERROR("save const data buffer to attr fail");
+            ACL_LOG_ERROR("[Check][ConstData]save const data buffer to attr fail");
             return;
         }
         size_t digest = attr_utils::AttrMapToDigest(emptyAttr.Attrs());
