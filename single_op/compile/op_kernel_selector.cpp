@@ -50,7 +50,7 @@ aclError OpKernelSelector::SelectOpKernel(const AclOp &aclOp)
     ACL_LOG_DEBUG("selecting kernel succeeded. kernelId = %s", desc->kernelId.c_str());
     desc->stubFunc = OpKernelRegistry::GetInstance().GetStubFunc(aclOp.opType, desc->kernelId);
     if (desc->stubFunc == nullptr) {
-        ACL_LOG_ERROR("[Check][StubFunc]Stub function not registered. kernelId = %s", desc->kernelId.c_str());
+        ACL_LOG_ERROR("Stub function not registered. kernelId = %s", desc->kernelId.c_str());
         return ACL_ERROR_KERNEL_NOT_FOUND;
     }
     std::shared_ptr<OpKernelDesc> agingDesc = nullptr;

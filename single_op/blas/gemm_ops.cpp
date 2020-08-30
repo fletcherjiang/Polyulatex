@@ -229,7 +229,7 @@ aclError aclblasCreateHandleForGemmEx(aclTransType transA,
     if (m <= 0 || n <= 0 || k <= 0) {
         ACL_LOG_ERROR("[Check][Params]The value of m,n,k must be larger than zero.m = %d, n = %d, k = %d",
             m, n, k);
-        std::string &&errMsg = acl::AclErrorLogManager::FormatStr("m = %d, n = %d, k = %d", m, n, k);
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("m = %d, n = %d, k = %d", m, n, k);
         REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG, std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"m, n, k", errMsg, "mnk must > 0"}));
         return ACL_ERROR_INVALID_PARAM;

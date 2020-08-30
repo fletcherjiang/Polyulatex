@@ -79,7 +79,7 @@ aclError aclopLoad(const void *model, size_t modelSize)
     if (modelSize == 0) {
         ACL_LOG_ERROR("[Check][ModelSize]the value of modelSize[%zu] can't be zero", modelSize);
         REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
-            std::vector<std::string>({"param", "value", "reason"}), 
+            std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"modelSize", std::to_string(modelSize), "can't be zero"}));
         return ACL_ERROR_INVALID_PARAM;
     }
@@ -172,7 +172,7 @@ aclError aclopExecWithHandle(aclopHandle *handle,
     auto &opHandle = *handle->opHandle;
     if (numInputs != opHandle.numInputs) {
         ACL_LOG_ERROR("[Check][NumInputs]input num mismatch: expect %d, but %d", opHandle.numInputs, numInputs);
-        std::string &&errMsg = acl::AclErrorLogManager::FormatStr("input num mismatch: expect %d", opHandle.numInputs);
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("input num mismatch: expect %d", opHandle.numInputs);
         REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"input num", std::to_string(numInputs),
@@ -182,7 +182,7 @@ aclError aclopExecWithHandle(aclopHandle *handle,
 
     if (numOutputs != opHandle.numOutputs) {
         ACL_LOG_ERROR("[Check][NumOutputs]output num mismatch: expect %d, but %d", opHandle.numOutputs, numOutputs);
-        std::string &&errMsg = acl::AclErrorLogManager::FormatStr("input num mismatch: expect %d", opHandle.numOutputs);
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("input num mismatch: expect %d", opHandle.numOutputs);
         REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"output num", std::to_string(numOutputs), errMsg}));

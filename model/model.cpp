@@ -561,7 +561,7 @@ aclDataBuffer *aclmdlGetDatasetBuffer(const aclmdlDataset *dataset, size_t index
 {
     if ((dataset == nullptr) || (index >= dataset->blobs.size())) {
         ACL_LOG_ERROR("[Check][Params]input param is invalid, dataset[%p], index[%zu]", dataset, index);
-        std::string &&errMsg = acl::AclErrorLogManager::FormatStr("dataset[%p], index[%zu]", dataset, index);
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("dataset[%p], index[%zu]", dataset, index);
         REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG, std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"input param", errMsg, "check failed"}));
         return nullptr;
@@ -985,7 +985,7 @@ aclError aclmdlSetInputDynamicDims(uint32_t modelId, aclmdlDataset *dataset, siz
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dims);
     if (dims->dimCount == 0) {
         ACL_LOG_ERROR("[Check][dimCount]dimCount[%u] is invalid, can't be zero.", dims->dimCount);
-        std::string &&errMsg = acl::AclErrorLogManager::FormatStr("dimCount[%u] can't be zero", dims->dimCount);
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("dimCount[%u] can't be zero", dims->dimCount);
         REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG, std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"dimCount", "0", errMsg}));
         return ACL_ERROR_INVALID_PARAM;
@@ -1364,7 +1364,7 @@ static const char *aclmdlGetNameByIndex(const std::vector<aclmdlTensorDesc> &des
     if (index >= desc.size()) {
         ACL_LOG_ERROR("[Check][index]get name by index failed, index[%zu] is larger than or equal to desc size[%zu]",
             index, desc.size());
-        std::string &&errMsg = acl::AclErrorLogManager::FormatStr("cannot larger than or equal to desc size[%zu]",
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("cannot larger than or equal to desc size[%zu]",
             desc.size());
         REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG, std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"index", std::to_string(index), errMsg}));
@@ -1565,7 +1565,7 @@ aclError aclmdlGetDynamicBatch(const aclmdlDesc *modelDesc, aclmdlBatch *batch)
     if (batchCnt > ACL_MAX_BATCH_NUM) {
         ACL_LOG_ERROR("[Check][batchCnt]aclmdlGetBatch failed, batch count[%zu] is larger than max batch num[%d]",
             batchCnt, ACL_MAX_BATCH_NUM);
-        std::string &&errMsg = acl::AclErrorLogManager::FormatStr("batch count[%zu] is larger than max batch num[%d]",
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("batch count[%zu] is larger than max batch num[%d]",
             batchCnt, ACL_MAX_BATCH_NUM);
         REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG, std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"batch count", std::to_string(batchCnt), errMsg}));
