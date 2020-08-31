@@ -381,7 +381,7 @@ aclError aclmdlSetAIPPScfParams(aclmdlAIPP *aippParmsSet, int8_t scfSwitch,
     if (batchIndex >= aippBatchParaSize) {
         ACL_LOG_ERROR("[Check][Param]Set batch parameter Failed, batch_index (%lu) is greater than or "
             "equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
-        std::string &&errMsg = acl::AclErrorLogManager::FormatStr("batch_index (%lu) is greater than or "
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("batch_index (%lu) is greater than or "
             "equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
         REPORT_INPUT_ERROR(acl::INVALID_AIPP_MSG, std::vector<std::string>({"param", "reason"}),
             std::vector<std::string>({"batch_index", errMsg}));
@@ -417,7 +417,7 @@ aclError aclmdlSetAIPPCropParams(aclmdlAIPP *aippParmsSet, int8_t cropSwitch,
     if (batchIndex >= aippBatchParaSize) {
         ACL_LOG_ERROR("[Check][Param]Set batch parameter Failed, batch_index (%lu) is greater than or "
             "equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
-        std::string &&errMsg = acl::AclErrorLogManager::FormatStr("batch_index (%lu) is greater than or "
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("batch_index (%lu) is greater than or "
             "equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
         REPORT_INPUT_ERROR(acl::INVALID_AIPP_MSG, std::vector<std::string>({"param", "reason"}),
             std::vector<std::string>({"batch_index", errMsg}));
@@ -453,7 +453,7 @@ aclError aclmdlSetAIPPPaddingParams(aclmdlAIPP *aippParmsSet, int8_t paddingSwit
     if (batchIndex >= aippBatchParaSize) {
         ACL_LOG_ERROR("[Check][Param]Set batch parameter Failed, batch_index (%lu) is greater "
             "than or equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
-        std::string &&errMsg = acl::AclErrorLogManager::FormatStr("batch_index (%lu) is greater "
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("batch_index (%lu) is greater "
             "than or equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
         REPORT_INPUT_ERROR(acl::INVALID_AIPP_MSG, std::vector<std::string>({"param",
             "reason"}), std::vector<std::string>({"batch_index", errMsg}));
@@ -521,7 +521,7 @@ aclError aclmdlSetAIPPDtcPixelMin(aclmdlAIPP *aippParmsSet,
     if (batchIndex >= aippBatchParaSize) {
         ACL_LOG_ERROR("[Check][Param]Set batch parameter Failed, batch_index (%lu) is greater than or "
             "equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
-        std::string &&errMsg = acl::AclErrorLogManager::FormatStr("batch_index (%lu) is greater than or "
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("batch_index (%lu) is greater than or "
             "equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
         REPORT_INPUT_ERROR(acl::INVALID_AIPP_MSG, std::vector<std::string>({"param", "reason"}),
             std::vector<std::string>({"batch_index", errMsg}));
@@ -554,7 +554,7 @@ aclError aclmdlSetAIPPPixelVarReci(aclmdlAIPP *aippParmsSet,
     if (batchIndex >= aippBatchParaSize) {
         ACL_LOG_ERROR("[Check][Param]Set batch parameter Failed, batch_index (%lu) is greater than or "
         "equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
-        std::string &&errMsg = acl::AclErrorLogManager::FormatStr("batch_index (%lu) is greater than or "
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("batch_index (%lu) is greater than or "
             "equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
         REPORT_INPUT_ERROR(acl::INVALID_AIPP_MSG, std::vector<std::string>({"param", "reason"}),
             std::vector<std::string>({"batch_index", errMsg}));
@@ -752,7 +752,7 @@ static aclError GetAndCheckAippParams(uint32_t modelId, size_t index, const aclm
         if (size > maxSrcImageSize) {
             ACL_LOG_ERROR("[Check][Size]the dynamic aipp size[%lu] is bigger than max_src_image_size[%lu]",
                 size, maxSrcImageSize);
-            std::string &&errMsg = acl::AclErrorLogManager::FormatStr("bigger than max_src_image_size[%lu]",
+            std::string errMsg = acl::AclErrorLogManager::FormatStr("bigger than max_src_image_size[%lu]",
                 maxSrcImageSize);
             REPORT_INPUT_ERROR(acl::INVALID_AIPP_MSG, std::vector<std::string>({"param", "reason"}),
                 std::vector<std::string>({"dynamic aipp size", errMsg}));
@@ -773,7 +773,7 @@ static aclError GetAndCheckAippParams(uint32_t modelId, size_t index, const aclm
             if (mdlOriN != static_cast<int64_t>(aippParmsSet->batchSize)) {
                 ACL_LOG_ERROR("[Check][mdlOriN]the dynamic aipp batchSize[%lu] is not equal to model origin batch[%ld]",
                     aippParmsSet->batchSize, mdlOriN);
-                std::string &&errMsg = acl::AclErrorLogManager::FormatStr("batchSize[%lu] is not equal to "
+                std::string errMsg = acl::AclErrorLogManager::FormatStr("batchSize[%lu] is not equal to "
                     "model origin batch[%ld]", aippParmsSet->batchSize, mdlOriN);
                 REPORT_INPUT_ERROR(acl::INVALID_AIPP_MSG, std::vector<std::string>({"param", "reason"}),
                     std::vector<std::string>({"dynamic aipp batchSize", errMsg}));
@@ -841,7 +841,7 @@ aclError aclmdlSetInputAIPP(uint32_t modelId,
     mdlRet = CheckAippDataIndex(modelId, index, &modelDesc);
     if (mdlRet != ACL_SUCCESS) {
         ACL_LOG_ERROR("[Check][AippData]Dynamic AIPP data index %zu is invalid, parameters verification failed", index);
-        std::string &&errMsg = acl::AclErrorLogManager::FormatStr("index %zu is invalid", index);
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("index %zu is invalid", index);
         REPORT_INPUT_ERROR(acl::INVALID_AIPP_MSG, std::vector<std::string>({"param", "reason"}),
             std::vector<std::string>({"Dynamic AIPP data index", errMsg}));
         return mdlRet;
@@ -910,7 +910,7 @@ aclError aclmdlSetAIPPByInputIndex(uint32_t modelId,
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
     if ((dataset == nullptr) || (index >= dataset->blobs.size())) {
         ACL_LOG_ERROR("[Check][Dataset]input param is invalid, dataset[%p], index[%zu]", dataset, index);
-        std::string &&errMsg = acl::AclErrorLogManager::FormatStr("dataset[%p], index[%zu]", dataset, index);
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("dataset[%p], index[%zu]", dataset, index);
         REPORT_INPUT_ERROR(acl::INVALID_AIPP_MSG, std::vector<std::string>({"param", "reason"}),
             std::vector<std::string>({"params", errMsg}));
         return ACL_ERROR_INVALID_PARAM;

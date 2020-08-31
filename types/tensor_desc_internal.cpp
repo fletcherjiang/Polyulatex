@@ -355,7 +355,7 @@ aclError aclGetTensorDescDimRange(const aclTensorDesc* desc,
     if (index >= desc->shapeRange.size()) {
         ACL_LOG_ERROR("[Check][Index]index out of range. index = %zu, numDims = %zu",
             index, desc->shapeRange.size());
-        std::string &&errMsg = acl::AclErrorLogManager::FormatStr("index out of range. numDims = %zu",
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("index out of range. numDims = %zu",
             desc->shapeRange.size());
         REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
@@ -389,7 +389,7 @@ int64_t aclGetTensorDescDim(const aclTensorDesc *desc, size_t index)
     if (index >= desc->dims.size()) {
         ACL_LOG_ERROR("[Check][Index]index out of range. index = %zu, numDims = %zu",
             index, desc->dims.size());
-        std::string &&errMsg = acl::AclErrorLogManager::FormatStr("index out of range. "
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("index out of range. "
             "numDims = %zu", desc->dims.size());
         REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
@@ -412,7 +412,7 @@ aclError aclGetTensorDescDimV2(const aclTensorDesc *desc, size_t index, int64_t 
     if (index >= desc->dims.size()) {
         ACL_LOG_ERROR("[Check][Index]index out of range. index = %zu, numDims = %zu",
             index, desc->dims.size());
-        std::string &&errMsg = acl::AclErrorLogManager::FormatStr("index out of range. numDims = %zu",
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("index out of range. numDims = %zu",
             desc->dims.size());
         REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),

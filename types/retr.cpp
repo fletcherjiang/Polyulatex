@@ -49,7 +49,7 @@ aclfvInitPara *aclfvCreateInitPara(uint64_t fsNum)
     if (fsNum == 0 || fsNum > INIT_MAX_NUM) {
         ACL_LOG_ERROR("[Check][FsNum]fsNum:%llu error, should not be equal 0 or greater than %llu.",
             fsNum, INIT_MAX_NUM);
-        std::string &&errMsg = acl::AclErrorLogManager::FormatStr("should not be equal 0 or greater than %llu.",
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("should not be equal 0 or greater than %llu.",
             INIT_MAX_NUM);
         REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG, std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"fsNum", std::to_string(fsNum), errMsg}));
@@ -213,7 +213,7 @@ aclfvRepoRange *aclfvCreateRepoRange(uint32_t id0Min, uint32_t id0Max, uint32_t 
     if (id0Min > id0Max || id0Max > RETR_REPO_RANGE_MAX) {
         ACL_LOG_ERROR("[Check][Id]id0Min:%u or id0Max:%u of repoRange is not in range[0-%u] or "
             "id0Min is greater than id0Max.", id0Min, id0Max, RETR_REPO_RANGE_MAX);
-        std::string &&errMsg = acl::AclErrorLogManager::FormatStr("%u, %u", id0Min, id0Max);
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("%u, %u", id0Min, id0Max);
         REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG, std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"id0Min, id0Max", errMsg,
             "repoRange is not in range or id0Min is greater than id0Max"}));
@@ -223,7 +223,7 @@ aclfvRepoRange *aclfvCreateRepoRange(uint32_t id0Min, uint32_t id0Max, uint32_t 
     if (id1Min > id1Max || id1Max > RETR_REPO_RANGE_MAX) {
         ACL_LOG_ERROR("[Check][Ids]id1Min:%u or id1Max:%u of repoRange is not in range[0-%u] or "
             "id1Min is greater than id1Max.", id1Min, id1Max, RETR_REPO_RANGE_MAX);
-        std::string &&errMsg = acl::AclErrorLogManager::FormatStr("%u, %u", id0Min, id0Max);
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("%u, %u", id0Min, id0Max);
         REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"id0Min, id0Max", errMsg,
@@ -286,7 +286,7 @@ aclfvQueryTable *aclfvCreateQueryTable(uint32_t queryCnt, uint32_t tableLen, uin
     if (tableLen != RETR_QUERY_TABLE_LEN) {
         ACL_LOG_ERROR("[Check][TableLen]tableLen:%u of query table should be 32K(%u).",
             tableLen, RETR_QUERY_TABLE_LEN);
-        std::string &&errMsg = acl::AclErrorLogManager::FormatStr("should be 32K(%u)",
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("should be 32K(%u)",
             RETR_QUERY_TABLE_LEN);
         REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
@@ -297,7 +297,7 @@ aclfvQueryTable *aclfvCreateQueryTable(uint32_t queryCnt, uint32_t tableLen, uin
     if (queryCnt > RETR_QUERY_COUNT_MAX) {
         ACL_LOG_ERROR("[Check][QueryCnt]queryCnt[%u] can't be larger than RETR_QUERY_COUNT_MAX[%u].",
             queryCnt, RETR_QUERY_COUNT_MAX);
-        std::string &&errMsg = acl::AclErrorLogManager::FormatStr("can't be larger than RETR_QUERY_COUNT_MAX[%u]",
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("can't be larger than RETR_QUERY_COUNT_MAX[%u]",
             RETR_QUERY_COUNT_MAX);
         REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
@@ -308,7 +308,7 @@ aclfvQueryTable *aclfvCreateQueryTable(uint32_t queryCnt, uint32_t tableLen, uin
     if (tableDataLen != queryCnt * tableLen) {
         ACL_LOG_ERROR("[Check][TableDataLen]tableDataLen:%u of query table should be equal to "
             "queryCnt:%u * tableLen:%u.", tableDataLen, queryCnt, tableLen);
-        std::string &&errMsg = acl::AclErrorLogManager::FormatStr("should be equal to queryCnt:%u * tableLen:%u",
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("should be equal to queryCnt:%u * tableLen:%u",
             queryCnt, tableLen);
         REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
@@ -347,7 +347,7 @@ aclfvSearchInput *aclfvCreateSearchInput(aclfvQueryTable *queryTable, aclfvRepoR
 
     if (topK > RETR_TOPK_MAX) {
         ACL_LOG_ERROR("[Check][TopK]topK[%u] can't be larger than RETR_TOPK_MAX[%u].", topK, RETR_TOPK_MAX);
-        std::string &&errMsg = acl::AclErrorLogManager::FormatStr("can't be larger than RETR_TOPK_MAX[%u]",
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("can't be larger than RETR_TOPK_MAX[%u]",
             RETR_TOPK_MAX);
         REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
@@ -423,7 +423,7 @@ aclfvSearchResult *aclfvCreateSearchResult(uint32_t queryCnt, uint32_t *resultNu
     if (queryCnt > RETR_QUERY_COUNT_MAX) {
         ACL_LOG_ERROR("[Check][queryCnt]queryCnt[%u] can't be larger than RETR_QUERY_COUNT_MAX[%u].",
             queryCnt, RETR_QUERY_COUNT_MAX);
-        std::string &&errMsg = acl::AclErrorLogManager::FormatStr("can't be larger than RETR_QUERY_COUNT_MAX[%u]",
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("can't be larger than RETR_QUERY_COUNT_MAX[%u]",
             RETR_QUERY_COUNT_MAX);
         REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
@@ -434,7 +434,7 @@ aclfvSearchResult *aclfvCreateSearchResult(uint32_t queryCnt, uint32_t *resultNu
     if (resultNumDataLen != queryCnt * sizeof(uint32_t)) {
         ACL_LOG_ERROR("[Check][ResultNumDataLen]resultNumDataLen:%u of search result should be equal to "
             "queryCnt:%u * sizeof(uint32_t).", resultNumDataLen, queryCnt);
-        std::string &&errMsg = acl::AclErrorLogManager::FormatStr("earch result should be equal to "
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("earch result should be equal to "
             "queryCnt:%u * sizeof(uint32_t)", queryCnt);
         REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),

@@ -178,7 +178,7 @@ namespace acl {
                 pathWhiteList.find(dumpPath[i]) == std::string::npos) {
                 ACL_LOG_ERROR("[Check][PathWhiteList]invalid dump_path [%s] in dump config at "
                     "location %zu", dumpPath.c_str(), i);
-                std::string &&errMsg = acl::AclErrorLogManager::FormatStr("dump config at location %zu", i);
+                std::string errMsg = acl::AclErrorLogManager::FormatStr("dump config at location %zu", i);
                 REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
                     std::vector<std::string>({"param", "value", "reason"}),
                     std::vector<std::string>({"dump_path", dumpPath.c_str(), errMsg}));
@@ -232,7 +232,7 @@ namespace acl {
         if (config.dumpPath.length() > MAX_DUMP_PATH_LENGTH) {
             ACL_LOG_ERROR("[Check][dumpPath]the length[%d] of dump_path is larger than "
                 "MAX_DUMP_PATH_LENGTH[%d]", config.dumpPath.length(), MAX_DUMP_PATH_LENGTH);
-            std::string &&errMsg = acl::AclErrorLogManager::FormatStr(
+            std::string errMsg = acl::AclErrorLogManager::FormatStr(
                 "dump_path is larger than MAX_DUMP_PATH_LENGTH[%d]", MAX_DUMP_PATH_LENGTH);
             REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
                 std::vector<std::string>({"param", "value", "reason"}),
