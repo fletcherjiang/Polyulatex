@@ -1,0 +1,18 @@
+{
+    "dump":{
+            "dump_list":[
+                    {
+                            "model_name":"ResNet-50",
+                            "layer":[
+                                    "res5c",
+                                    "res4d_branch2c",
+                                    "res2a_branch2c",
+                                    "res3b_branch2a"
+                            ]
+                    }
+
+            ],
+            "dump_path":"/home/jc/aclInit/../jc/project",
+            "dump_mode":"output"
+    }
+}

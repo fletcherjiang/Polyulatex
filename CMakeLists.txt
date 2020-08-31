@@ -27,6 +27,7 @@ include(${BASE_DIR}/cmake/external_libs/protoc.cmake)
 include(${BASE_DIR}/cmake/external_libs/json.cmake)
 include(${BASE_DIR}/cmake/external_libs/securec.cmake)
 include(${BASE_DIR}/cmake/external_libs/jpeg.cmake)
+include(${BASE_DIR}/cmake/external_libs/gtest.cmake)
 
 if(DEFINED ENV{D_LINK_PATH})
     # D_LINK_PATH is set
@@ -59,6 +60,8 @@ if(DEFINED ENV{D_LINK_PATH})
     find_module(error_manager liberror_manager.so ${ACL_LIB_PATH})
     find_module(msprofiler_ext libmsprofiler.a ${ACL_LIB_PATH})
     find_module(msprofiler_fwkacl_ext libmsprofiler_fwkacl.a ${ACL_LIB_PATH})
+elseif(ENABLE_ACL_COV OR ENABLE_ACL_UT)
+    add_subdirectory(tests)
 else()
     set(ASCEND_ACL_DIR ${ASCEND_DIR}/acllib/lib64)
     set(ASCEND_RUNTIME_DIR ${ASCEND_DIR}/fwkacllib/lib64)
@@ -544,7 +547,6 @@ target_include_directories(stub_ascendcl PRIVATE
     ${BASE_DIR}
     ${BASE_DIR}/common
 )
-
 
 target_link_libraries(stub_ascendcl PRIVATE
     $<BUILD_INTERFACE:intf_pub>
