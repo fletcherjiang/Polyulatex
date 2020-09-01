@@ -1,0 +1,8 @@
+{
+	"dump":{
+		"dump_list":[],
+        "dump_path":"/myproject",
+        "dump_op_switch":"1",
+        "dump_mode":"input"
+	}
+}

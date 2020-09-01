@@ -1,0 +1,30 @@
+# Copyright 2019-2020 Huawei Technologies Co., Ltd
+#
+# Licensed under the Apache License, Version 2.0 (the "License")
+# you may not use this file except in compliance with the license
+# you may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# =============================================================================
+
+project(tests CXX C)
+
+find_package(Threads)
+
+add_subdirectory(depends/ge)
+add_subdirectory(depends/slog)
+add_subdirectory(depends/mmpa)
+add_subdirectory(depends/runtime)
+add_subdirectory(depends/tdt)
+add_subdirectory(depends/profiling)
+add_subdirectory(depends/toolchain)
+
+if (ENABLE_ACL_COV OR ENABLE_ACL_UT)
+    add_subdirectory(ut)
+endif()

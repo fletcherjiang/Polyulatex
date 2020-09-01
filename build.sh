@@ -28,6 +28,8 @@ usage()
   echo "Options:"
   echo "    -h Print usage"
   echo "    -j[n] Set the number of threads used for building ACL, default is 8"
+  echo "    -t Build and execute ut"
+  echo "    -c Build ut with coverage tag"
   echo "    -p Build inference or train"
   echo "    -v Display build command"
   echo "    -S Enable enable download cmake compile dependency from gitee , default off"
@@ -51,6 +53,8 @@ checkopts()
   VERBOSE=""
   THREAD_NUM=8
   PLATFORM="all"
+  ENABLE_ACL_UT="off"
+  ENABLE_ACL_COV="off"
   PRODUCT="normal"
   ENABLE_GITEE="off"
   # Process the options
@@ -58,6 +62,12 @@ checkopts()
   do
     OPTARG=$(echo ${OPTARG} | tr '[A-Z]' '[a-z]')
     case "${opt}" in
+      u)
+        ENABLE_ACL_UT="on"
+        ;;
+      t)
+        ENABLE_ACL_COV="on"
+        ;;
       h)
         usage
         exit 0
@@ -102,11 +112,18 @@ build_acl()
   cd "${BUILD_PATH}"
   CMAKE_ARGS="-DBUILD_PATH=$BUILD_PATH"
 
+  if [[ "X$ENABLE_ACL_COV" = "Xon" ]]; then
+    CMAKE_ARGS="${CMAKE_ARGS} -DENABLE_ACL_COV=ON"
+  fi
+
+  if [[ "X$ENABLE_ACL_UT" = "Xon" ]]; then
+    CMAKE_ARGS="${CMAKE_ARGS} -DENABLE_ACL_UT=ON"
+  fi
 
   if [[ "X$ENABLE_GITEE" = "Xon" ]]; then
     CMAKE_ARGS="${CMAKE_ARGS} -DENABLE_GITEE=ON"
   fi
-  
+
   CMAKE_ARGS="${CMAKE_ARGS} -DENABLE_OPEN_SRC=True -DCMAKE_INSTALL_PREFIX=${OUTPUT_PATH} -DPLATFORM=${PLATFORM} -DPRODUCT=${PRODUCT}"
   echo "${CMAKE_ARGS}"
   cmake ${CMAKE_ARGS} ..
@@ -116,7 +133,11 @@ build_acl()
     return 1
   fi
 
-  make ${VERBOSE} -j${THREAD_NUM} && make install
+  if [[ "X$ENABLE_ACL_UT" = "Xon" || "X$ENABLE_ACL_COV" = "Xon" ]]; then
+    make ascendcl_utest -j8
+  else
+    make ${VERBOSE} -j${THREAD_NUM} && make install
+  fi
   if [ 0 -ne $? ]
   then
     echo "execute command: make ${VERBOSE} -j${THREAD_NUM} && make install failed."
@@ -228,11 +249,37 @@ main()
   build_acl || { echo "ACL build failed."; return; }
   echo "---------------- ACL build finished ----------------"
 
+  rm -f ${OUTPUT_PATH}/libgmock*.so
+  rm -f ${OUTPUT_PATH}/libgtest*.so
+  rm -f ${OUTPUT_PATH}/lib*_stub.so
+
   chmod -R 750 ${OUTPUT_PATH}
   find ${OUTPUT_PATH} -name "*.so*" -print0 | xargs -0 chmod 500
 
   echo "---------------- ACL output generated ----------------"
-  generate_package
+
+  if [[ "X$ENABLE_ACL_UT" = "Xon" || "X$ENABLE_ACL_COV" = "Xon" ]]; then
+    cp ${BUILD_PATH}/tests/ut/acl/ascendcl_utest ${OUTPUT_PATH}
+
+    RUN_TEST_CASE=${OUTPUT_PATH}/ascendcl_utest && ${RUN_TEST_CASE}
+    if [[ "$?" -ne 0 ]]; then
+      echo "!!! UT FAILED, PLEASE CHECK YOUR CHANGES !!!"
+      echo -e "\033[31m${RUN_TEST_CASE}\033[0m"
+      exit 1;
+    fi
+    echo "Generated coverage statistics, please wait..."
+    cd ${BASEPATH}
+    rm -rf ${BASEPATH}/cov
+    mkdir ${BASEPATH}/cov
+    lcov -c -d build/tests/ut/acl -o cov/tmp.info
+    lcov -r cov/tmp.info '*/output/*' '*/build/opensrc/*' '*/build/proto/*' '*/third_party/*' '*/tests/*' '/usr/local/*' '/usr/include/*' -o cov/coverage.info
+    cd ${BASEPATH}/cov
+    genhtml coverage.info
+  fi
+
+  if [[ "X$ENABLE_ACL_COV" = "Xoff" ]]; then
+    generate_package
+  fi
   echo "---------------- ACL package archive generated ----------------"
 }
 

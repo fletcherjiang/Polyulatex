@@ -1,0 +1,19 @@
+{
+    "dump":{
+        "dump_list":[
+            {
+                "model_name":"",
+                "layer":[
+                    "res5c",
+                    "res4d_branch2c"
+                ]
+            },
+            {
+                "model_name":"ResNet-18",
+                "layer":[]
+            }
+        ],
+        "dump_path":"/myproject",
+        "dump_mode":"input"
+    }
+}
