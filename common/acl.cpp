@@ -16,6 +16,7 @@
 #include "framework/executor/ge_executor.h"
 #include "runtime/dev.h"
 #include "adx_datadump_server.h"
+#include "common/util/error_manager/error_manager.h"
 
 #include "log_inner.h"
 #include "toolchain/plog.h"

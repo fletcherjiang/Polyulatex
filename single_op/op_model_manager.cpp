@@ -444,7 +444,7 @@ aclError OpModelManager::SetTensorConst(aclTensorDesc *desc, const aclDataBuffer
     if (length < 0) {
         ACL_LOG_ERROR("[Check][Length]The length of const hostMem is invalid. size = %zu",
             length);
-        REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"length of const hostMem",
             std::to_string(length), "length < 0"}));
