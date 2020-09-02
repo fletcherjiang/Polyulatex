@@ -125,7 +125,7 @@ namespace acl {
             (dumpOpSwitch != ACL_DUMP_OP_SWITCH_OFF)) {
             ACL_LOG_ERROR("[Check][DumpOpSwitch]dump_op_switch value[%s] is invalid in config, "
                 "only supports on/off", dumpOpSwitch.c_str());
-            REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
+            acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
                 std::vector<std::string>({"param", "value", "reason"}),
                 std::vector<std::string>({"dump_op_switch value", dumpOpSwitch, "only supports on/off"}));
             return false;
@@ -135,7 +135,7 @@ namespace acl {
         if ((dumpList.empty()) && (dumpOpSwitch == ACL_DUMP_OP_SWITCH_OFF)) {
             ACL_LOG_ERROR("[Check][DumpConfig]dump_list field is null and dump_op_switch is off in config, "
                 "dump config is invalid");
-            REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
+            acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
                 std::vector<std::string>({"param", "value", "reason"}),
                 std::vector<std::string>({"dump config", "", "dump_list field is null and "
                 "dump_op_switch is off in config"}));            
@@ -179,7 +179,7 @@ namespace acl {
                 ACL_LOG_ERROR("[Check][PathWhiteList]invalid dump_path [%s] in dump config at "
                     "location %zu", dumpPath.c_str(), i);
                 std::string errMsg = acl::AclErrorLogManager::FormatStr("dump config at location %zu", i);
-                REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
+                acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
                     std::vector<std::string>({"param", "value", "reason"}),
                     std::vector<std::string>({"dump_path", dumpPath.c_str(), errMsg}));
                 return false;
@@ -199,7 +199,7 @@ namespace acl {
             ACL_LOG_INFO("dump_path field contains ip address");
             if (colonPos + 1 == config.dumpPath.size()) {
                 ACL_LOG_ERROR("[Check][colonPos]dump_path field is invalid");
-                REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
+                acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
                     std::vector<std::string>({"param", "value", "reason"}),
                     std::vector<std::string>({"dump_path", config.dumpPath, "format is illegal"}));
                 return false;
@@ -234,7 +234,7 @@ namespace acl {
                 "MAX_DUMP_PATH_LENGTH[%d]", config.dumpPath.length(), MAX_DUMP_PATH_LENGTH);
             std::string errMsg = acl::AclErrorLogManager::FormatStr(
                 "dump_path is larger than MAX_DUMP_PATH_LENGTH[%d]", MAX_DUMP_PATH_LENGTH);
-            REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
+            acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
                 std::vector<std::string>({"param", "value", "reason"}),
                 std::vector<std::string>({"dump_path",
                 std::to_string(config.dumpPath.length()), errMsg}));
@@ -248,7 +248,7 @@ namespace acl {
             if (!IsValidDirStr(config.dumpPath)) {
                 ACL_LOG_ERROR("[Check][ValidDirStr]dump_path[%s] is invalid in dump config",
                     config.dumpPath.c_str());
-                REPORT_INPUT_ERROR(acl::INVALID_PATH_MSG,
+                acl::AclErrorLogManager::ReportInputError(acl::INVALID_PATH_MSG,
                     std::vector<std::string>({"path", "reason"}),
                     std::vector<std::string>({"dump_path",
                     "is invalid directory"}));
@@ -261,7 +261,7 @@ namespace acl {
             if (ret != EN_OK) {
                 ACL_LOG_ERROR("[Get][RealPath]the dump_path %s is not like a real path, "
                     "mmRealPath return %d", config.dumpPath.c_str(), ret);
-                REPORT_INPUT_ERROR(acl::INVALID_PATH_MSG,
+                acl::AclErrorLogManager::ReportInputError(acl::INVALID_PATH_MSG,
                     std::vector<std::string>({"path", "reason"}),
                     std::vector<std::string>({config.dumpPath,
                     "cannot convert to realpath"}));
@@ -271,7 +271,7 @@ namespace acl {
             if (mmAccess2(trustedPath, M_R_OK | M_W_OK) != EN_OK) {
                 ACL_LOG_ERROR("[Check][Permisssion]the dump result path[%s] does't have read and "
                     "write permisssion", trustedPath);
-                REPORT_INPUT_ERROR(acl::INVALID_PATH_MSG,
+                acl::AclErrorLogManager::ReportInputError(acl::INVALID_PATH_MSG,
                     std::vector<std::string>({"path", "reason"}),
                     std::vector<std::string>({trustedPath, "does't have read and write permisssion"}));
                 return false;
@@ -299,7 +299,7 @@ namespace acl {
             jsDumpConfig.find(ACL_DUMP_LIST) == jsDumpConfig.end()) {
             ACL_LOG_ERROR("[Check][jsDumpConfig]dump_path or dump_list field in dump config file "
                 "is not exist");
-            REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
+            acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
                 std::vector<std::string>({"param", "value", "reason"}),
                 std::vector<std::string>({"dump_path or dump_list", "",
                 "field is not exist"}));
@@ -329,7 +329,7 @@ namespace acl {
             (dumpMode != ACL_DUMP_MODE_ALL)) {
             ACL_LOG_ERROR("[Check][dumpMode]dump_mode value[%s] error in config, only supports "
                 "input/output/all", dumpMode.c_str());
-            REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
+            acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
                 std::vector<std::string>({"param", "value", "reason"}),
                 std::vector<std::string>({"dump_mode", dumpMode,
                 "only supports input/output/all"}));

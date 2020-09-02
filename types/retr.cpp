@@ -51,7 +51,7 @@ aclfvInitPara *aclfvCreateInitPara(uint64_t fsNum)
             fsNum, INIT_MAX_NUM);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("should not be equal 0 or greater than %llu.",
             INIT_MAX_NUM);
-        REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG, std::vector<std::string>({"param", "value", "reason"}),
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG, std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"fsNum", std::to_string(fsNum), errMsg}));
         return nullptr;
     }
@@ -93,7 +93,7 @@ aclError aclfvSet1NTopNum(aclfvInitPara *initPara, uint32_t maxTopNumFor1N)
     // maxTopNumFor1N need in [2, 4800]
     if (maxTopNumFor1N < 2 || maxTopNumFor1N > 4800) {
         ACL_LOG_ERROR("[Check][MaxTopNumFor1N]maxTopNumFor1N[%u] should be between in [2, 4800].", maxTopNumFor1N);
-        REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG, std::vector<std::string>({"param", "value", "reason"}),
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG, std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"maxTopNumFor1N", std::to_string(maxTopNumFor1N),
             "should be between in [2, 4800]"}));
         return ACL_ERROR_INVALID_PARAM;
@@ -110,7 +110,7 @@ aclError aclfvSetNMTopNum(aclfvInitPara *initPara, uint32_t maxTopNumForNM)
     // maxTopNumForNM need in [500, 4800]
     if (maxTopNumForNM < 500 || maxTopNumForNM > 4800) {
         ACL_LOG_ERROR("[Check][MaxTopNumForNM]maxTopNumForNM[%u] should be between in [500, 4800].", maxTopNumForNM);
-        REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG, std::vector<std::string>({"param", "value", "reason"}),
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG, std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"maxTopNumForNM", std::to_string(maxTopNumForNM),
             "should be between in [500, 4800]"}));
         return ACL_ERROR_INVALID_PARAM;
@@ -126,14 +126,15 @@ aclfvFeatureInfo *aclfvCreateFeatureInfo(uint32_t id0, uint32_t id1, uint32_t of
     ACL_LOG_INFO("aclfvCreateFeatureInfo start.");
     if (featureData == nullptr) {
         ACL_LOG_ERROR("[Check][FeatureData]create acl retr feature info failed, featureData is null.");
-        REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG, std::vector<std::string>({"param"}),
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
+            std::vector<std::string>({"param"}),
             std::vector<std::string>({"featureData"}));
         return nullptr;
     }
 
     if (id0 > RETR_REPO_RANGE_MAX || id1 > RETR_REPO_RANGE_MAX) {
         ACL_LOG_ERROR("[Check][Id]id0:%u or id1:%u is not in range[0-%u].", id0, id1, RETR_REPO_RANGE_MAX);
-        REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG, std::vector<std::string>({"param", "value", "reason"}),
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG, std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"id0", std::to_string(id0), "should be between in [500, 4800]"}));
         return nullptr;
     }
@@ -141,7 +142,7 @@ aclfvFeatureInfo *aclfvCreateFeatureInfo(uint32_t id0, uint32_t id1, uint32_t of
     if (featureLen != RETR_SHORT_FEATURE_LENGTH_36_B) {
         ACL_LOG_ERROR("[Check][featureLen]featureLen:%u should be %u.", featureLen,
             RETR_SHORT_FEATURE_LENGTH_36_B);
-        REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG, std::vector<std::string>({"param", "value", "reason"}),
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG, std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"featureLen", std::to_string(featureLen), "should be between in [500, 4800]"}));
         return nullptr;
     }
@@ -214,7 +215,7 @@ aclfvRepoRange *aclfvCreateRepoRange(uint32_t id0Min, uint32_t id0Max, uint32_t 
         ACL_LOG_ERROR("[Check][Id]id0Min:%u or id0Max:%u of repoRange is not in range[0-%u] or "
             "id0Min is greater than id0Max.", id0Min, id0Max, RETR_REPO_RANGE_MAX);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("%u, %u", id0Min, id0Max);
-        REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG, std::vector<std::string>({"param", "value", "reason"}),
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG, std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"id0Min, id0Max", errMsg,
             "repoRange is not in range or id0Min is greater than id0Max"}));
         return nullptr;
@@ -224,7 +225,7 @@ aclfvRepoRange *aclfvCreateRepoRange(uint32_t id0Min, uint32_t id0Max, uint32_t 
         ACL_LOG_ERROR("[Check][Ids]id1Min:%u or id1Max:%u of repoRange is not in range[0-%u] or "
             "id1Min is greater than id1Max.", id1Min, id1Max, RETR_REPO_RANGE_MAX);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("%u, %u", id0Min, id0Max);
-        REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"id0Min, id0Max", errMsg,
             "repoRange is not in range or id1Min is greater than id1Max"}));
@@ -278,7 +279,8 @@ aclfvQueryTable *aclfvCreateQueryTable(uint32_t queryCnt, uint32_t tableLen, uin
 {
     if (tableData == nullptr) {
         ACL_LOG_ERROR("[Check][TableData]create acl retr query table failed, table data is nullptr.");
-        REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG, std::vector<std::string>({"param"}),
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
+            std::vector<std::string>({"param"}),
             std::vector<std::string>({"tableData"}));
         return nullptr;
     }
@@ -288,7 +290,7 @@ aclfvQueryTable *aclfvCreateQueryTable(uint32_t queryCnt, uint32_t tableLen, uin
             tableLen, RETR_QUERY_TABLE_LEN);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("should be 32K(%u)",
             RETR_QUERY_TABLE_LEN);
-        REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"tableLen", std::to_string(tableLen), errMsg}));
         return nullptr;
@@ -299,7 +301,7 @@ aclfvQueryTable *aclfvCreateQueryTable(uint32_t queryCnt, uint32_t tableLen, uin
             queryCnt, RETR_QUERY_COUNT_MAX);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("can't be larger than RETR_QUERY_COUNT_MAX[%u]",
             RETR_QUERY_COUNT_MAX);
-        REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"queryCnt", std::to_string(queryCnt), errMsg}));
         return nullptr;
@@ -310,7 +312,7 @@ aclfvQueryTable *aclfvCreateQueryTable(uint32_t queryCnt, uint32_t tableLen, uin
             "queryCnt:%u * tableLen:%u.", tableDataLen, queryCnt, tableLen);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("should be equal to queryCnt:%u * tableLen:%u",
             queryCnt, tableLen);
-        REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"tableDataLen", std::to_string(tableDataLen), errMsg}));
         return nullptr;
@@ -333,15 +335,16 @@ aclfvSearchInput *aclfvCreateSearchInput(aclfvQueryTable *queryTable, aclfvRepoR
 {
     if (queryTable == nullptr) {
         ACL_LOG_ERROR("[Check][QueryTable]create acl retr search input failed, query table is nullptr.");
-        REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG, std::vector<std::string>({"param"}),
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
+            std::vector<std::string>({"param"}),
             std::vector<std::string>({"queryTable"}));
         return nullptr;
     }
 
     if (repoRange == nullptr) {
         ACL_LOG_ERROR("[Check][RepoRange]create acl retr search input failed, repo range is nullptr.");
-        REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG, std::vector<std::string>({"param"}),
-            std::vector<std::string>({"repoRange"}));
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
+            std::vector<std::string>({"param"}), std::vector<std::string>({"repoRange"}));
         return nullptr;
     }
 
@@ -349,7 +352,7 @@ aclfvSearchInput *aclfvCreateSearchInput(aclfvQueryTable *queryTable, aclfvRepoR
         ACL_LOG_ERROR("[Check][TopK]topK[%u] can't be larger than RETR_TOPK_MAX[%u].", topK, RETR_TOPK_MAX);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("can't be larger than RETR_TOPK_MAX[%u]",
             RETR_TOPK_MAX);
-        REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"topK", std::to_string(topK), errMsg}));
         return nullptr;
@@ -383,38 +386,43 @@ aclfvSearchResult *aclfvCreateSearchResult(uint32_t queryCnt, uint32_t *resultNu
     uint32_t *id0, uint32_t *id1, uint32_t *resultOffset, float *resultDistance, uint32_t dataLen)
 {
     if (resultNum == nullptr) {
-        ACL_LOG_ERROR("[Check][Mem]create acl retr search result failed, resultNum is nullptr.");
-        REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG,
+        ACL_LOG_ERROR("[Check][Mem]create acl retr search result failed, "
+            "resultNum is nullptr.");
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}),
             std::vector<std::string>({"resultNum"}));
         return nullptr;
     }
 
     if (id0 == nullptr) {
-        ACL_LOG_ERROR("[Check][id0]create acl retr search result failed, id0 is nullptr.");
-        REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG,
-            std::vector<std::string>({"param"}), std::vector<std::string>({"id0"}));
+        ACL_LOG_ERROR("[Create][id0]create acl retr search result failed, "
+            "id0 is nullptr.");
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
+            std::vector<std::string>({"param"}),
+            std::vector<std::string>({"id0"}));
         return nullptr;
     }
 
     if (id1 == nullptr) {
-        ACL_LOG_ERROR("[Check][id1]create acl retr search result failed, id1 is nullptr.");
-        REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG,
+        ACL_LOG_ERROR("[Check][id1]create acl retr search result failed, "
+            "id1 is nullptr.");
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}), std::vector<std::string>({"id1"}));
         return nullptr;
     }
 
     if (resultOffset == nullptr) {
-        ACL_LOG_ERROR("[Check][resultOffset]create acl retr search result failed, resultOffset is nullptr.");
-        REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG,
+        ACL_LOG_ERROR("[Check][resultDistance]create acl retr search result failed, "
+            "resultOffset is nullptr.");
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}),
             std::vector<std::string>({"resultOffset"}));
         return nullptr;
     }
 
     if (resultDistance == nullptr) {
-        ACL_LOG_ERROR("[Check][resultDistance]create acl retr search result failed, resultDistance is nullptr.");
-        REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG,
+        ACL_LOG_ERROR("create acl retr search result failed, resultDistance is nullptr.");
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}),
             std::vector<std::string>({"resultDistance"}));
         return nullptr;
@@ -425,7 +433,7 @@ aclfvSearchResult *aclfvCreateSearchResult(uint32_t queryCnt, uint32_t *resultNu
             queryCnt, RETR_QUERY_COUNT_MAX);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("can't be larger than RETR_QUERY_COUNT_MAX[%u]",
             RETR_QUERY_COUNT_MAX);
-        REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"queryCnt", std::to_string(queryCnt), errMsg}));
         return nullptr;
@@ -436,7 +444,7 @@ aclfvSearchResult *aclfvCreateSearchResult(uint32_t queryCnt, uint32_t *resultNu
             "queryCnt:%u * sizeof(uint32_t).", resultNumDataLen, queryCnt);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("earch result should be equal to "
             "queryCnt:%u * sizeof(uint32_t)", queryCnt);
-        REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"resultNumDataLen", std::to_string(resultNumDataLen), errMsg}));
         return nullptr;

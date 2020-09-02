@@ -716,7 +716,6 @@ target_link_libraries(acl_dvpp PRIVATE
     alog
     c_sec
     ascendcl
-    error_manager
     -Wl,--as-needed
     $<$<NOT:$<STREQUAL:${TARGET_SYSTEM_NAME},Android>>:-lrt>
     -ldl
@@ -779,7 +778,6 @@ target_link_libraries(acl_cblas PRIVATE
     c_sec
     ascendcl
     alog
-    error_manager
     -Wl,--as-needed
     $<$<NOT:$<STREQUAL:${TARGET_SYSTEM_NAME},Android>>:-lrt>
     -ldl
@@ -843,7 +841,6 @@ target_link_libraries(acl_retr PRIVATE
     alog
     runtime
     c_sec
-    error_manager
     -Wl,--as-needed
     -ldl
 )
@@ -915,7 +912,6 @@ target_link_libraries(acl_op_compiler PRIVATE
     runtime
     c_sec
     ge_runner
-    error_manager
     ascend_protobuf
     -Wl,--as-needed
     -ldl

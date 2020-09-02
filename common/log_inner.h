@@ -14,9 +14,10 @@
 #include <cstdint>
 #include <cstdarg>
 #include <cstdio>
+#include <string>
+#include <vector>
 #include "toolchain/slog.h"
 #include "mmpa/mmpa_api.h"
-#include "common/util/error_manager/error_manager.h"
 #include "acl/acl_base.h"
 
 #define ACL_MODE_ID ASCENDCL
@@ -49,6 +50,8 @@ public:
     virtual ~AclErrorLogManager();
     static const std::string GetStagesHeader();
     static std::string FormatStr(const char *fmt, ...);
+    static void ReportInputError(std::string errorCode, const std::vector<std::string> &key = {},
+        const std::vector<std::string> &value = {});
 };
 } // namespace acl
 
@@ -160,7 +163,7 @@ inline bool IsInfoLogEnabled()
     do { \
     if ((val) == nullptr) { \
         ACL_LOG_ERROR("param [%s] must not be null.", #val); \
-        REPORT_INPUT_ERROR("EH0002", {"param"}, {#val}); \
+        acl::AclErrorLogManager::ReportInputError("EH0002", {"param"}, {#val}); \
         return ACL_ERROR_INVALID_PARAM; } \
     } \
     while (0)
@@ -185,7 +188,7 @@ inline bool IsInfoLogEnabled()
     do { \
         if ((val) == nullptr) { \
             ACL_LOG_ERROR("param [%s] must not be null.", #val); \
-            REPORT_INPUT_ERROR("EH0002", {"param"}, {#val}); \
+            acl::AclErrorLogManager::ReportInputError("EH0002", {"param"}, {#val}); \
             return nullptr; } \
         } \
     while (0)
@@ -250,7 +253,7 @@ inline bool IsInfoLogEnabled()
     do { \
         if ((val) < 0) { \
             ACL_LOG_ERROR("param [%s] must be non-negative.", #val); \
-            REPORT_INPUT_ERROR("EH0001", std::vector<string>({"param", "value", "reason"}), \
+            acl::AclErrorLogManager::ReportInputError("EH0001", std::vector<string>({"param", "value", "reason"}), \
             std::vector<string>({#val, std::to_string(val), "must be non-negative"})); \
             return ACL_ERROR_INVALID_PARAM; } \
         } \
@@ -268,7 +271,7 @@ inline bool IsInfoLogEnabled()
     do { \
         if ((val) <= 0) { \
             ACL_LOG_ERROR("param [%s] must be positive.", #val); \
-            REPORT_INPUT_ERROR("EH0001", std::vector<string>({"param", "value", "reason"}), \
+            acl::AclErrorLogManager::ReportInputError("EH0001", std::vector<string>({"param", "value", "reason"}), \
             std::vector<string>({#val, std::to_string(val), "must be positive"})); \
             return ACL_ERROR_INVALID_PARAM; } \
         } \

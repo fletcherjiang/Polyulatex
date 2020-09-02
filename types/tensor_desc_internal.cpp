@@ -226,7 +226,7 @@ aclTensorDesc *aclCreateTensorDesc(aclDataType dataType,
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_TENSOR_DESC);
     if (numDims < 0) {
         ACL_LOG_ERROR("[Check][NumDims]numDims[%d] is smaller than 0", numDims);
-        REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"numDims", std::to_string(numDims),
             "can't smaller than 0"}));
@@ -234,7 +234,7 @@ aclTensorDesc *aclCreateTensorDesc(aclDataType dataType,
     }
     if ((numDims > 0) && (dims == nullptr)) {
         ACL_LOG_ERROR("[Check][Dims]dims is null while numDims[%d] > 0", numDims);
-        REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"numDims", std::to_string(numDims),
             "dims is null while numDims > 0"}));
@@ -268,8 +268,8 @@ aclDataType aclGetTensorDescType(const aclTensorDesc *desc)
 {
     if (desc == nullptr) {
         ACL_LOG_ERROR("[Check][Desc]desc is null");
-        REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG, std::vector<std::string>({"param"}),
-            std::vector<std::string>({"desc"}));
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
+            std::vector<std::string>({"param"}), std::vector<std::string>({"desc"}));
         return ACL_DT_UNDEFINED;
     }
 
@@ -280,8 +280,8 @@ aclFormat aclGetTensorDescFormat(const aclTensorDesc *desc)
 {
     if (desc == nullptr) {
         ACL_LOG_ERROR("[Check][Desc]desc is null");
-        REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG, std::vector<std::string>({"param"}),
-            std::vector<std::string>({"desc"}));
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
+            std::vector<std::string>({"param"}), std::vector<std::string>({"desc"}));
         return ACL_FORMAT_UNDEFINED;
     }
 
@@ -292,8 +292,8 @@ size_t aclGetTensorDescSize(const aclTensorDesc *desc)
 {
     if (desc == nullptr) {
         ACL_LOG_ERROR("[Check][Desc]desc is null");
-        REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG, std::vector<std::string>({"param"}),
-            std::vector<std::string>({"desc"}));
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
+            std::vector<std::string>({"param"}), std::vector<std::string>({"desc"}));
         return 0;
     }
     size_t size = 0;
@@ -307,8 +307,8 @@ size_t aclGetTensorDescElementCount(const aclTensorDesc *desc)
 {
     if (desc == nullptr) {
         ACL_LOG_ERROR("[Check][Desc]desc is null");
-        REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG, std::vector<std::string>({"param"}),
-            std::vector<std::string>({"desc"}));
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
+            std::vector<std::string>({"param"}), std::vector<std::string>({"desc"}));
         return 0;
     }
 
@@ -335,8 +335,8 @@ size_t aclGetTensorDescNumDims(const aclTensorDesc *desc)
 {
     if (desc == nullptr) {
         ACL_LOG_ERROR("[Check][Desc]desc is null");
-        REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG, std::vector<std::string>({"param"}),
-            std::vector<std::string>({"desc"}));
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
+            std::vector<std::string>({"param"}), std::vector<std::string>({"desc"}));
         return 0;
     }
     if ((desc->dims.size() > 0) && (desc->dims[0] == UNKNOW_RANK)) {
@@ -357,7 +357,7 @@ aclError aclGetTensorDescDimRange(const aclTensorDesc* desc,
             index, desc->shapeRange.size());
         std::string errMsg = acl::AclErrorLogManager::FormatStr("index out of range. numDims = %zu",
             desc->shapeRange.size());
-        REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"index", std::to_string(index), errMsg}));
         return ACL_ERROR_INVALID_PARAM;
@@ -365,7 +365,7 @@ aclError aclGetTensorDescDimRange(const aclTensorDesc* desc,
     if (dimRangeNum < ACL_TENSOR_SHAPE_RANGE_NUM) {
         ACL_LOG_ERROR("[Check][DimRangeNum]dimRangeNum cannot be less than 2. dimRangeNum = %zu",
             dimRangeNum);
-        REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"dimRangeNum", std::to_string(dimRangeNum),
             "cannot be less than 2"}));
@@ -381,8 +381,8 @@ int64_t aclGetTensorDescDim(const aclTensorDesc *desc, size_t index)
 {
     if (desc == nullptr) {
         ACL_LOG_ERROR("[Check][Desc]desc is null");
-        REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG, std::vector<std::string>({"param"}),
-            std::vector<std::string>({"desc"}));
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
+            std::vector<std::string>({"param"}), std::vector<std::string>({"desc"}));
         return -1;
     }
 
@@ -391,7 +391,7 @@ int64_t aclGetTensorDescDim(const aclTensorDesc *desc, size_t index)
             index, desc->dims.size());
         std::string errMsg = acl::AclErrorLogManager::FormatStr("index out of range. "
             "numDims = %zu", desc->dims.size());
-        REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"index", std::to_string(index), errMsg}));
         return -1;
@@ -404,7 +404,7 @@ aclError aclGetTensorDescDimV2(const aclTensorDesc *desc, size_t index, int64_t 
 {
     if (desc == nullptr) {
         ACL_LOG_ERROR("[Check][Desc]desc is null");
-        REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG,
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}),
             std::vector<std::string>({"desc"}));
         return ACL_ERROR_INVALID_PARAM;
@@ -414,7 +414,7 @@ aclError aclGetTensorDescDimV2(const aclTensorDesc *desc, size_t index, int64_t 
             index, desc->dims.size());
         std::string errMsg = acl::AclErrorLogManager::FormatStr("index out of range. numDims = %zu",
             desc->dims.size());
-        REPORT_INPUT_ERROR(acl::INVALID_PARAM_MSG,
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"index", std::to_string(index), errMsg}));
         return ACL_ERROR_INVALID_PARAM;
@@ -448,9 +448,9 @@ aclError aclUpdateDataBuffer(aclDataBuffer *dataBuffer, void *data, size_t size)
     if (dataBuffer == nullptr) {
         ACL_LOG_ERROR("[Check][DataBuffer]invalid input pointer of dataBuffer, please use aclCreateDataBuffer "
             "interface to create.");
-        REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG,
-            std::vector<std::string>({"param", "value", "reason"}),
-            std::vector<std::string>({"dataBuffer", "", "please use aclCreateDataBuffer interface to create"}));
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
+            std::vector<std::string>({"param"}),
+            std::vector<std::string>({"dataBuffer"}));
         return ACL_ERROR_INVALID_PARAM;
     }
     dataBuffer->data = data;
@@ -489,8 +489,8 @@ void aclSetTensorDescName(aclTensorDesc *desc, const char *name)
 {
     if (desc == nullptr) {
         ACL_LOG_ERROR("[Check][Desc]desc is null");
-        REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG, std::vector<std::string>({"param"}),
-            std::vector<std::string>({"desc"}));
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
+            std::vector<std::string>({"param"}), std::vector<std::string>({"desc"}));
         return;
     }
 
@@ -606,7 +606,7 @@ aclError aclSetTensorConst(aclTensorDesc *desc, void *dataBuffer, size_t length)
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataBuffer);
     if (length <= 0) {
         ACL_LOG_ERROR("[Check][Length]The length of const dataBuffer is invalid. size = %zu", length);
-        REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG,
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}),
             std::vector<std::string>({"desc"}));
         return ACL_ERROR_INVALID_PARAM;

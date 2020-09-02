@@ -10,6 +10,8 @@
 
 #include "log_inner.h"
 
+#include "common/util/error_manager/error_manager.h"
+
 namespace acl {
 bool AclLog::isEnableEvent_ = false;
 
@@ -111,4 +113,10 @@ std::string AclErrorLogManager::FormatStr(const char *fmt, ...)
     va_end(ap);
     return str;
 }
+
+void AclErrorLogManager::ReportInputError(std::string errorCode, const std::vector<std::string> &key,
+    const std::vector<std::string> &value)
+{
+    REPORT_INPUT_ERROR(errorCode, key, value);
 }
+} // namespace acl

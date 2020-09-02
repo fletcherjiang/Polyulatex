@@ -51,7 +51,7 @@ aclError aclopCompile(const char *opType,
     if (compileFlag != ACL_COMPILE_SYS && compileFlag != ACL_COMPILE_UNREGISTERED) {
         ACL_LOG_ERROR("[Check][CompileFlag]aclopCompile compile type[%d] not support",
             static_cast<int32_t>(compileFlag));
-        REPORT_INPUT_ERROR(acl::UNSUPPORTED_FEATURE_MSG,
+        acl::AclErrorLogManager::ReportInputError(acl::UNSUPPORTED_FEATURE_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"compile type", std::to_string(compileFlag),
             "not in range"}));
@@ -87,7 +87,8 @@ aclError aclopCompile(const char *opType,
         if (opPath == nullptr) {
             ACL_LOG_ERROR("[Check][CompileFlag]opPath cannot be null while compileFlag is %d",
                 static_cast<int32_t>(compileFlag));
-            REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG, std::vector<std::string>({"param"}),
+            acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
+                std::vector<std::string>({"param"}),
                 std::vector<std::string>({"opPath"}));
             return ACL_ERROR_INVALID_PARAM;
         }
@@ -110,7 +111,7 @@ aclError aclopCompileAndExecute(const char *opType,
     if (compileFlag != ACL_COMPILE_SYS && compileFlag != ACL_COMPILE_UNREGISTERED) {
         ACL_LOG_ERROR("[Check][Type]aclopCompile compile type[%d] not support",
             static_cast<int32_t>(compileFlag));
-        REPORT_INPUT_ERROR(acl::UNSUPPORTED_FEATURE_MSG,
+        acl::AclErrorLogManager::ReportInputError(acl::UNSUPPORTED_FEATURE_MSG,
             std::vector<std::string>({"feature", "reason"}),
             std::vector<std::string>({"compile type",
             "must be equal to ACL_COMPILE_SYS or ACL_COMPILE_UNREGISTERED"}));
@@ -146,7 +147,8 @@ aclError aclopCompileAndExecute(const char *opType,
         if (opPath == nullptr) {
             ACL_LOG_ERROR("[Check][OpPath]opPath cannot be null while compileFlag is %d",
                 static_cast<int32_t>(compileFlag));
-            REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG, std::vector<std::string>({"param"}),
+            acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
+                std::vector<std::string>({"param"}),
                 std::vector<std::string>({"opPath"}));
             return ACL_ERROR_INVALID_PARAM;
         }
