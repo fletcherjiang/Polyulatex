@@ -63,7 +63,7 @@ aclError aclrtSetDevice(int32_t deviceId)
     ACL_LOG_INFO("start to execute aclrtSetDevice, deviceId = %d.", deviceId);
     rtError_t rtErr = rtSetDevice(deviceId);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("open device %d failed, runtime result = %d.", deviceId, static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("open device %d failed, runtime result = %d.", deviceId, static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     IncDeviceCounter(deviceId);
@@ -84,7 +84,7 @@ aclError aclrtSetDeviceWithoutTsdVXX(int32_t deviceId)
     }
     rtError_t rtErr = rtSetDeviceWithoutTsd(deviceId);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("open device %d failed, runtime result = %d.", deviceId, static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("open device %d failed, runtime result = %d.", deviceId, static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     IncDeviceCounter(deviceId);
@@ -110,7 +110,7 @@ aclError aclrtResetDevice(int32_t deviceId)
     }
     rtError_t rtErr = rtDeviceReset(deviceId);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("reset device %d failed, runtime result = %d.", deviceId, static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("reset device %d failed, runtime result = %d.", deviceId, static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     ACL_LOG_INFO("successfully execute aclrtResetDevice, reset device %d.", deviceId);
@@ -125,7 +125,7 @@ aclError aclrtResetDeviceWithoutTsdVXX(int32_t deviceId)
     ACL_LOG_INFO("start to execute aclrtResetDeviceWithoutTsdVXX, deviceId = %d.", deviceId);
     std::string socVersion = GetSocVersion();
     if (0 != strncmp(socVersion.c_str(), "Ascend910", strlen("Ascend910"))) {
-        ACL_LOG_ERROR("The soc version is not Ascend910, not support");
+        ACL_LOG_INNER_ERROR("The soc version is not Ascend910, not support");
         return ACL_ERROR_API_NOT_SUPPORT;
     }
     if (DecDeviceCounter(deviceId)) {
@@ -140,7 +140,7 @@ aclError aclrtResetDeviceWithoutTsdVXX(int32_t deviceId)
     }
     rtError_t rtErr = rtDeviceResetWithoutTsd(deviceId);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("reset device %d failed, runtime result = %d.", deviceId, static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("reset device %d failed, runtime result = %d.", deviceId, static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     ACL_LOG_INFO("successfully execute aclrtResetDeviceWithoutTsdVXX, reset device %d", deviceId);
@@ -168,7 +168,7 @@ aclError aclrtGetRunMode(aclrtRunMode *runMode)
     rtRunMode rtMode;
     rtError_t rtErr = rtGetRunMode(&rtMode);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("get runMode failed, runtime result = %d.", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("get runMode failed, runtime result = %d.", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     if (rtMode == RT_RUN_MODE_OFFLINE) {
@@ -186,7 +186,7 @@ aclError aclrtSynchronizeDevice()
     ACL_LOG_INFO("start to execute aclrtSynchronizeDevice");
     rtError_t rtErr = rtDeviceSynchronize();
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("wait for compute device to finish failed, runtime result = %d.", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("wait for compute device to finish failed, runtime result = %d.", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     ACL_LOG_INFO("device synchronize successfully.");
@@ -198,12 +198,12 @@ aclError aclrtSetTsDevice(aclrtTsId tsId)
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_LOG_INFO("start to execute aclrtSetTsDevice, tsId = %d.", static_cast<int32_t>(tsId));
     if ((tsId != ACL_TS_ID_AICORE) && (tsId != ACL_TS_ID_AIVECTOR)) {
-        ACL_LOG_ERROR("invalid tsId, tsID is %d.", static_cast<int32_t>(tsId));
+        ACL_LOG_INNER_ERROR("invalid tsId, tsID is %d.", static_cast<int32_t>(tsId));
         return ACL_ERROR_INVALID_PARAM;
     }
     rtError_t rtErr = rtSetTSDevice(static_cast<uint32_t>(tsId));
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("set device ts %d failed, runtime result = %d.", static_cast<int32_t>(tsId), rtErr);
+        ACL_LOG_CALL_ERROR("set device ts %d failed, runtime result = %d.", static_cast<int32_t>(tsId), rtErr);
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     ACL_LOG_INFO("successfully execute aclrtSetTsDevice, set device ts %d", static_cast<int32_t>(tsId));
@@ -217,7 +217,7 @@ aclError aclrtGetDeviceCount(uint32_t *count)
 
     rtError_t rtErr = rtGetDeviceCount(reinterpret_cast<int32_t *>(count));
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("get device count failed, runtime result = %d.", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("get device count failed, runtime result = %d.", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     ACL_LOG_INFO("successfully execute aclrtGetDeviceCount, get device count is %u.", *count);

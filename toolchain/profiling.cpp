@@ -29,13 +29,13 @@ namespace acl {
         if (configFileFlag) {
             int32_t ret = callback(MSPROF_CTRL_INIT_ACL_JSON, const_cast<char *>(config.c_str()), config.size());
             if (ret != 0) {
-                ACL_LOG_ERROR("[Handle][Json]handle json config of profiling failed, profiling result = %d", ret);
+                ACL_LOG_INNER_ERROR("[Handle][Json]handle json config of profiling failed, profiling result = %d", ret);
                 return ACL_ERROR_INVALID_PARAM;
             }
         } else {
             int32_t ret = callback(MSPROF_CTRL_INIT_ACL_ENV, const_cast<char *>(config.c_str()), config.size());
             if (ret != 0) {
-                ACL_LOG_ERROR("[Handle][Env]handle env config of profiling failed, profiling result = %d", ret);
+                ACL_LOG_INNER_ERROR("[Handle][Env]handle env config of profiling failed, profiling result = %d", ret);
                 return ACL_ERROR_INVALID_PARAM;
             }
         }
@@ -94,7 +94,7 @@ namespace acl {
         ACL_LOG_INFO("ParseJsonFromFile ok in HandleProfilingConfig");
         ret = HandleProfilingCommand(strConfig, configFileFlag);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("[Handle][Command]handle profiling command failed, result = %d", ret);
+            ACL_LOG_INNER_ERROR("[Handle][Command]handle profiling command failed, result = %d", ret);
             return ret;
         }
 

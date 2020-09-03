@@ -30,7 +30,7 @@ aclError OpModelCache::GetOpModel(const OpModelDef &modelDef, OpModel &opModel)
             return ACL_SUCCESS;
         }
     }
-    ACL_LOG_ERROR("[Get][OpModel]GetOpModel fail, modelPath = %s", modelDef.modelPath.c_str());
+    ACL_LOG_INNER_ERROR("[Get][OpModel]GetOpModel fail, modelPath = %s", modelDef.modelPath.c_str());
     return ACL_ERROR_FAILURE;
 }
 

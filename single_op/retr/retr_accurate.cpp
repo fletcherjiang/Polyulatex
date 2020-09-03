@@ -40,7 +40,7 @@ aclError AclFvAccurate::PrepareInput(aclAccurateType typeAccurate, aclfvFeatureI
     size_t hostSize = sizeof(featureInfo->retrFeatureInfo);
     size_t devSize = featureInfo->dataBuffer.length;
     if (hostSize != devSize) {
-        ACL_LOG_ERROR("memory size between host [%u] and device [%u] not equal", hostSize, devSize);
+        ACL_LOG_INNER_ERROR("memory size between host [%u] and device [%u] not equal", hostSize, devSize);
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -51,7 +51,7 @@ aclError AclFvAccurate::PrepareInput(aclAccurateType typeAccurate, aclfvFeatureI
 
     ret = acl::retr::aclCreateNotify(notify_, notifyId_, stream);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("execute aclCreateNotify failed, result = %d.", ret);
+        ACL_LOG_INNER_ERROR("execute aclCreateNotify failed, result = %d.", ret);
         return ret;
     }
 
@@ -65,14 +65,14 @@ aclError AclFvAccurate::PrepareInput(aclAccurateType typeAccurate, aclfvFeatureI
     uint32_t configOffset = sizeof(aicpu::AicpuParamHead) + ioAddrNum * sizeof(uint64_t);
     auto memcpyRet = memcpy_s(args + configOffset, argsSize - configOffset, &(typeAccurate), sizeof(aclAccurateType));
     if (memcpyRet != EOK) {
-        ACL_LOG_ERROR("copy aclAccurateType to args failed, result = %d.", memcpyRet);
+        ACL_LOG_INNER_ERROR("copy aclAccurateType to args failed, result = %d.", memcpyRet);
         (void)rtEventDestroy(static_cast<rtEvent_t>(notify_));
         return ACL_ERROR_RT_FAILURE;
     }
     configOffset += sizeof(aclAccurateType);
     memcpyRet = memcpy_s(args + configOffset, argsSize - configOffset, &(notifyId_), sizeof(uint32_t));
     if (memcpyRet != EOK) {
-        ACL_LOG_ERROR("copy notifyId to args failed, result = %d.", memcpyRet);
+        ACL_LOG_INNER_ERROR("copy notifyId to args failed, result = %d.", memcpyRet);
         (void)rtEventDestroy(static_cast<rtEvent_t>(notify_));
         return ACL_ERROR_RT_FAILURE;
     }
@@ -93,7 +93,7 @@ aclError AclFvAccurate::ExecAccurateDelOrModify(aclfvFeatureInfo *featureInfo, a
     aclError ret = aclrtMemcpyAsync(featureInfo->dataBuffer.data, featureInfo->dataBuffer.length,
         &(featureInfo->retrFeatureInfo), sizeof(featureInfo->retrFeatureInfo), copyKind, stream);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("memcpy from host to device failed, kind=%d, result = %d", copyKind, ret);
+        ACL_LOG_INNER_ERROR("memcpy from host to device failed, kind=%d, result = %d", copyKind, ret);
         return ret;
     }
 
@@ -104,14 +104,14 @@ aclError AclFvAccurate::ExecAccurateDelOrModify(aclfvFeatureInfo *featureInfo, a
         nullptr, // no need smDesc
         stream);
     if (rtRet != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("rtCpuKernelLaunch failed, runtime result = %d.", rtRet);
+        ACL_LOG_CALL_ERROR("rtCpuKernelLaunch failed, runtime result = %d.", rtRet);
         return ACL_ERROR_RT_FAILURE;
     }
     ACL_LOG_INFO("rtCpuKernelLaunch %s success.", RETR_KERNELNAME_REPO_ACCURATE_DEL_OR_MODIFY);
 
     ret = aclFvNotifyWait(notify_, stream);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("wait for a notify to stream failed, runtime result = %d.", ret);
+        ACL_LOG_INNER_ERROR("wait for a notify to stream failed, runtime result = %d.", ret);
         return ret;
     }
 
@@ -121,7 +121,7 @@ aclError AclFvAccurate::ExecAccurateDelOrModify(aclfvFeatureInfo *featureInfo, a
     ret = aclrtMemcpyAsync(&(featureInfo->retrFeatureInfo), sizeof(featureInfo->retrFeatureInfo),
         featureInfo->dataBuffer.data, featureInfo->dataBuffer.length, copyKind, stream);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("copy featureInfo from device to host failed, result = %d.", ret);
+        ACL_LOG_INNER_ERROR("copy featureInfo from device to host failed, result = %d.", ret);
         return ret;
     }
     return ACL_SUCCESS;
@@ -153,12 +153,12 @@ aclError AclFvAccurate::AccurateDelOrModify(aclAccurateType typeAccurate, aclfvF
 
     rtError_t rtRet = rtStreamSynchronize(stream);
     if (rtRet != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("synchronize stream failed, runtime result = %d.", rtRet);
+        ACL_LOG_CALL_ERROR("synchronize stream failed, runtime result = %d.", rtRet);
         (void)rtEventDestroy(static_cast<rtEvent_t>(notify_));
         return ACL_ERROR_RT_FAILURE;
     }
     if (featureInfo->retrFeatureInfo.retCode != 0) {
-        ACL_LOG_ERROR("execute aclfvAccurateDelOrModify failed, result = %d.", featureInfo->retrFeatureInfo.retCode);
+        ACL_LOG_INNER_ERROR("execute aclfvAccurateDelOrModify failed, result = %d.", featureInfo->retrFeatureInfo.retCode);
         (void)rtEventDestroy(static_cast<rtEvent_t>(notify_));
         return ACL_ERROR_FAILURE;
     }
@@ -177,7 +177,7 @@ aclError AclFvAccurate::Delete(aclfvFeatureInfo *featureInfo, aclrtStream stream
     ACL_LOG_INFO("start to execute aclfvDel.");
     aclError ret = AccurateDelOrModify(acl::retr::ACCURATE_DELETE, featureInfo, stream);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("execute aclfvDel failed, result = %d.", ret);
+        ACL_LOG_INNER_ERROR("execute aclfvDel failed, result = %d.", ret);
         return ACL_ERROR_FAILURE;
     }
     ACL_LOG_INFO("execute aclfvDel success.");
@@ -193,7 +193,7 @@ aclError AclFvAccurate::Modify(aclfvFeatureInfo *featureInfo, aclrtStream stream
     ACL_LOG_INFO("start to execute aclfvModify.");
     aclError ret = AccurateDelOrModify(acl::retr::ACCURATE_MODFILY, featureInfo, stream);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("execute aclfvModify failed, result = %d.", ret);
+        ACL_LOG_INNER_ERROR("execute aclfvModify failed, result = %d.", ret);
         return ACL_ERROR_FAILURE;
     }
     ACL_LOG_INFO("execute aclfvModify success.");

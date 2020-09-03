@@ -43,14 +43,14 @@ aclError OpKernelSelector::SelectOpKernel(const AclOp &aclOp)
     ACL_LOG_DEBUG("To invoke select func, opType = %s", aclOp.opType.c_str());
     auto ret = func(aclOp.numInputs, aclOp.inputDesc, aclOp.numOutputs, aclOp.outputDesc, aclOp.opAttr, desc.get());
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Call][Compile]Failed to call op compile, result = %d", ret);
+        ACL_LOG_INNER_ERROR("[Call][Compile]Failed to call op compile, result = %d", ret);
         return ret;
     }
 
     ACL_LOG_DEBUG("selecting kernel succeeded. kernelId = %s", desc->kernelId.c_str());
     desc->stubFunc = OpKernelRegistry::GetInstance().GetStubFunc(aclOp.opType, desc->kernelId);
     if (desc->stubFunc == nullptr) {
-        ACL_LOG_ERROR("Stub function not registered. kernelId = %s", desc->kernelId.c_str());
+        ACL_LOG_INNER_ERROR("Stub function not registered. kernelId = %s", desc->kernelId.c_str());
         return ACL_ERROR_KERNEL_NOT_FOUND;
     }
     std::shared_ptr<OpKernelDesc> agingDesc = nullptr;

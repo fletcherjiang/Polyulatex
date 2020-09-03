@@ -43,7 +43,7 @@ namespace acl {
         // change "[32,224,224,3]" => "32,224,224,3"
         // tensor_shape.size() - 2 is the second to last
         if (dimsStr.size() < 2) {
-            ACL_LOG_ERROR("Invalid shape string: %s", dimsStr.c_str());
+            ACL_LOG_INNER_ERROR("Invalid shape string: %s", dimsStr.c_str());
             return false;
         }
 
@@ -61,7 +61,7 @@ namespace acl {
             try {
                 dims.push_back(std::stoll(str.substr(pos1, pos2 - pos1)));
             } catch (...) {
-                ACL_LOG_ERROR("Invalid shape string: %s", dimsStr.c_str());
+                ACL_LOG_INNER_ERROR("Invalid shape string: %s", dimsStr.c_str());
                 return false;
             }
             // string::size_type can store the length of any string object
@@ -72,7 +72,7 @@ namespace acl {
             try {
                 dims.push_back(std::stoll(str.substr(pos1)));
             } catch (...) {
-                ACL_LOG_ERROR("Invalid shape string: %s", dimsStr.c_str());
+                ACL_LOG_INNER_ERROR("Invalid shape string: %s", dimsStr.c_str());
                 return false;
             }
         }
@@ -95,7 +95,7 @@ namespace acl {
                 break;
             }
             default: {
-                ACL_LOG_ERROR("unkown acltdtTensorType %d.", aclType);
+                ACL_LOG_INNER_ERROR("unkown acltdtTensorType %d.", aclType);
                 return ACL_ERROR_INVALID_PARAM;
             }
         }
@@ -118,7 +118,7 @@ namespace acl {
                 break;
             }
             default: {
-                ACL_LOG_ERROR("unkown TdtDataType %d.", tdtDataType);
+                ACL_LOG_INNER_ERROR("unkown TdtDataType %d.", tdtDataType);
                 return ACL_ERROR_UNSUPPORTED_DATA_TYPE;
             }
         }
@@ -134,7 +134,7 @@ namespace acl {
             tdt::TdtDataType tdtDataType;
             auto ret = GetTdtDataTypeByAclDataType(dataset->blobs[i]->tdtType, tdtDataType);
             if (ret != ACL_SUCCESS) {
-                ACL_LOG_ERROR("TensorDatasetSerializes failed, invalid tdt type %d", dataset->blobs[i]->tdtType);
+                ACL_LOG_INNER_ERROR("TensorDatasetSerializes failed, invalid tdt type %d", dataset->blobs[i]->tdtType);
                 itemVec.clear();
                 return ret;
             }
@@ -153,7 +153,7 @@ namespace acl {
     {
         ACL_REQUIRES_NOT_NULL(dataset);
         if (dataset->blobs.size() != 0) {
-            ACL_LOG_ERROR("Dataset size[%zu] is not empty", dataset->blobs.size());
+            ACL_LOG_INNER_ERROR("Dataset size[%zu] is not empty", dataset->blobs.size());
             return ACL_ERROR_INVALID_PARAM;
         }
         aclError ret = ACL_SUCCESS;
@@ -161,7 +161,7 @@ namespace acl {
             acltdtTensorType aclType;
             ret = GetAclTypeByTdtDataType(itemVec[i].dataType_, aclType);
             if (ret != ACL_SUCCESS) {
-                ACL_LOG_ERROR("TensorDatasetDeserializes failed, invalid data type %d",
+                ACL_LOG_INNER_ERROR("TensorDatasetDeserializes failed, invalid data type %d",
                     itemVec[i].dataType_);
                 break;
             }
@@ -169,7 +169,7 @@ namespace acl {
             if (aclType == ACL_TENSOR_DATA_TENSOR) {
                 std::vector<int64_t> dims;
                 if (!GetTensorShape(itemVec[i].tensorShape_, dims)) {
-                    ACL_LOG_ERROR("TensorDatasetDeserializes failed, invalid tensor shape[%s]",
+                    ACL_LOG_INNER_ERROR("TensorDatasetDeserializes failed, invalid tensor shape[%s]",
                         itemVec[i].tensorShape_.c_str());
                     ret = ACL_ERROR_INTERNAL_ERROR;
                     break;
@@ -177,7 +177,7 @@ namespace acl {
 
                 auto iter = aclDataTypeStrMap.find(itemVec[i].tensorType_);
                 if (iter == aclDataTypeStrMap.end()) {
-                    ACL_LOG_ERROR("TensorDatasetDeserializes failed, unkown data type[%s]",
+                    ACL_LOG_INNER_ERROR("TensorDatasetDeserializes failed, unkown data type[%s]",
                         itemVec[i].tensorType_.c_str());
                     ret = ACL_ERROR_INTERNAL_ERROR;
                     break;
@@ -188,7 +188,7 @@ namespace acl {
                     dataType, itemVec[i].tensorType_,
                     itemVec[i].dataPtr_, itemVec[i].dataLen_);
                 if (item == nullptr) {
-                    ACL_LOG_ERROR("TensorDatasetDeserializes alloc failed");
+                    ACL_LOG_INNER_ERROR("TensorDatasetDeserializes alloc failed");
                     ret = ACL_ERROR_BAD_ALLOC;
                     break;
                 }
@@ -198,7 +198,7 @@ namespace acl {
                     nullptr, 0, itemVec[i].tensorShape_, ACL_DT_UNDEFINED,
                     itemVec[i].tensorType_, itemVec[i].dataPtr_, itemVec[i].dataLen_);
                 if (item == nullptr) {
-                    ACL_LOG_ERROR("TensorDatasetDeserializes alloc failed");
+                    ACL_LOG_INNER_ERROR("TensorDatasetDeserializes alloc failed");
                     ret = ACL_ERROR_BAD_ALLOC;
                     break;
                 }
@@ -232,7 +232,7 @@ namespace acl {
 acltdtTensorType acltdtGetTensorTypeFromItem(const acltdtDataItem *dataItem)
 {
     if (dataItem == nullptr) {
-        ACL_LOG_ERROR("param [dataItem] must not be null.");
+        ACL_LOG_INNER_ERROR("param [dataItem] must not be null.");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}),
             std::vector<std::string>({"dataItem"}));
@@ -244,7 +244,7 @@ acltdtTensorType acltdtGetTensorTypeFromItem(const acltdtDataItem *dataItem)
 aclDataType acltdtGetDataTypeFromItem(const acltdtDataItem *dataItem)
 {
     if (dataItem == nullptr) {
-        ACL_LOG_ERROR("param [dataItem] must not be null.");
+        ACL_LOG_INNER_ERROR("param [dataItem] must not be null.");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}),
             std::vector<std::string>({"dataItem"}));
@@ -262,7 +262,7 @@ void *acltdtGetDataAddrFromItem(const acltdtDataItem *dataItem)
 size_t acltdtGetDataSizeFromItem(const acltdtDataItem *dataItem)
 {
     if (dataItem == nullptr) {
-        ACL_LOG_ERROR("param [dataItem] must not be null.");
+        ACL_LOG_INNER_ERROR("param [dataItem] must not be null.");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}),
             std::vector<std::string>({"dataItem"}));
@@ -274,7 +274,7 @@ size_t acltdtGetDataSizeFromItem(const acltdtDataItem *dataItem)
 size_t acltdtGetDimNumFromItem(const acltdtDataItem *dataItem)
 {
     if (dataItem == nullptr) {
-        ACL_LOG_ERROR("param [dataItem] must not be null.");
+        ACL_LOG_INNER_ERROR("param [dataItem] must not be null.");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}),
             std::vector<std::string>({"dataItem"}));
@@ -288,12 +288,12 @@ aclError acltdtGetDimsFromItem(const acltdtDataItem *dataItem, int64_t *dims, si
     ACL_REQUIRES_NOT_NULL(dataItem);
     // check dims and dimNum
     if ((dims == nullptr && dimNum != 0) || (dims != nullptr && dimNum == 0)) {
-        ACL_LOG_ERROR("acltdtGetDimsFromItem failed, invalid dims and dimNum[%zu]", dimNum);
+        ACL_LOG_INNER_ERROR("acltdtGetDimsFromItem failed, invalid dims and dimNum[%zu]", dimNum);
         return ACL_ERROR_INVALID_PARAM;
     }
 
     if (dimNum < dataItem->dims.size()) {
-        ACL_LOG_ERROR("output dimNum[%zu] cannot be less than dims number[%zu]", dimNum, dataItem->dims.size());
+        ACL_LOG_INNER_ERROR("output dimNum[%zu] cannot be less than dims number[%zu]", dimNum, dataItem->dims.size());
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -308,18 +308,18 @@ acltdtDataItem *acltdtCreateDataItem(acltdtTensorType tdtType,
     const int64_t *dims, size_t dimNum, aclDataType dataType, void *data, size_t size)
 {
     if ((dims == nullptr && dimNum != 0) || (dims != nullptr && dimNum == 0)) {
-        ACL_LOG_ERROR("acltdtCreateDataItem failed, invalid dims and dimNum[%zu]", dimNum);
+        ACL_LOG_INNER_ERROR("acltdtCreateDataItem failed, invalid dims and dimNum[%zu]", dimNum);
         return nullptr;
     }
     if (dimNum > ACL_MAX_DIM_CNT) {
-        ACL_LOG_ERROR("acltdtCreateDataItem failed, dimNum[%zu] can't be larger than ACL_MAX_DIM_CNT[%d]",
+        ACL_LOG_INNER_ERROR("acltdtCreateDataItem failed, dimNum[%zu] can't be larger than ACL_MAX_DIM_CNT[%d]",
             dimNum, ACL_MAX_DIM_CNT);
         return nullptr;
     }
 
     if (tdtType != ACL_TENSOR_DATA_TENSOR) {
         if (dims != nullptr) {
-            ACL_LOG_ERROR("acltdtCreateDataItem failed, dims must be nullptr. tdtType is %d", tdtType);
+            ACL_LOG_INNER_ERROR("acltdtCreateDataItem failed, dims must be nullptr. tdtType is %d", tdtType);
             return nullptr;
         }
         return new(std::nothrow) acltdtDataItem(tdtType, dims, dimNum, "[]", ACL_DT_UNDEFINED, "", nullptr, 0);
@@ -337,7 +337,7 @@ acltdtDataItem *acltdtCreateDataItem(acltdtTensorType tdtType,
         }
     }
     if (typeStr.empty()) {
-        ACL_LOG_ERROR("acltdtCreateDataItem failed, unspported datatype: %d", dataType);
+        ACL_LOG_INNER_ERROR("acltdtCreateDataItem failed, unspported datatype: %d", dataType);
         return nullptr;
     }
     std::shared_ptr<void> dataPtr;
@@ -369,7 +369,7 @@ aclError acltdtAddDataItem(acltdtDataset *dataset, acltdtDataItem *dataItem)
     ACL_REQUIRES_NOT_NULL(dataset);
     ACL_REQUIRES_NOT_NULL(dataItem);
     if (dataset->freeSelf) {
-        ACL_LOG_ERROR("item cannot be added, because internal item already exists");
+        ACL_LOG_INNER_ERROR("item cannot be added, because internal item already exists");
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
     dataset->blobs.push_back(dataItem);
@@ -379,7 +379,7 @@ aclError acltdtAddDataItem(acltdtDataset *dataset, acltdtDataItem *dataItem)
 acltdtDataItem *acltdtGetDataItem(const acltdtDataset *dataset, size_t index)
 {
     if ((dataset == nullptr) || (index >= dataset->blobs.size())) {
-        ACL_LOG_ERROR("input param is invalid, index[%zu]", index);
+        ACL_LOG_INNER_ERROR("input param is invalid, index[%zu]", index);
         return nullptr;
     }
 
@@ -389,7 +389,7 @@ acltdtDataItem *acltdtGetDataItem(const acltdtDataset *dataset, size_t index)
 size_t acltdtGetDatasetSize(const acltdtDataset *dataset)
 {
     if (dataset == nullptr) {
-        ACL_LOG_ERROR("dataset is null.");
+        ACL_LOG_INNER_ERROR("dataset is null.");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}), std::vector<std::string>({"dataset"}));
         return 0;
@@ -402,7 +402,7 @@ acltdtChannelHandle *acltdtCreateChannel(uint32_t deviceId, const char *name)
     ACL_REQUIRES_NOT_NULL_RET_NULL(name);
     auto ret = tdt::TdtHostInit(deviceId);
     if (ret != 0) {
-        ACL_LOG_ERROR("tdt host init failed, tdt result = %d", ret);
+        ACL_LOG_INNER_ERROR("tdt host init failed, tdt result = %d", ret);
         return nullptr;
     }
     acltdtChannelHandle *handle = new(std::nothrow) acltdtChannelHandle(deviceId, name);
@@ -426,7 +426,7 @@ aclError acltdtStopChannel(acltdtChannelHandle *handle)
     if (!handle->recvName.empty()) {
         auto ret = tdt::TdtHostStop(handle->recvName);
         if (ret != 0) {
-            ACL_LOG_ERROR("tdt host stop failed for channel %s, tdt result = %d",
+            ACL_LOG_INNER_ERROR("tdt host stop failed for channel %s, tdt result = %d",
                 handle->name.c_str(), ret);
             return ACL_ERROR_FAILURE;
         }
@@ -448,7 +448,7 @@ aclError acltdtDestroyChannel(acltdtChannelHandle *handle)
     if (aclChannleMap.size() == 0) {
         auto ret = tdt::TdtHostDestroy();
         if (ret != 0) {
-            ACL_LOG_ERROR("TdtHostDestroy failed, tdt result = %d", ret);
+            ACL_LOG_INNER_ERROR("TdtHostDestroy failed, tdt result = %d", ret);
         }
     }
 
@@ -464,7 +464,7 @@ aclError acltdtSendTensor(const acltdtChannelHandle *handle, const acltdtDataset
 
     // -1 represents infinite wait, it is must be -1 now
     if (timeout != -1) {
-        ACL_LOG_ERROR("only infinite wait is supported, it can only be set to -1, timeout[%d].", timeout);
+        ACL_LOG_INNER_ERROR("only infinite wait is supported, it can only be set to -1, timeout[%d].", timeout);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("it can only be set to -1, timeout[%d].", timeout);
         acl::AclErrorLogManager::ReportInputError(acl::UNSUPPORTED_FEATURE_MSG,
             std::vector<std::string>({"feature", "reason"}), std::vector<std::string>({"timeout",
@@ -475,7 +475,7 @@ aclError acltdtSendTensor(const acltdtChannelHandle *handle, const acltdtDataset
     std::vector<tdt::DataItem> itemVec;
     auto ret = acl::TensorDatasetSerializes(dataset, itemVec);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("failed to TensorDatasetSerializes, device is %u, name is %s",
+        ACL_LOG_INNER_ERROR("failed to TensorDatasetSerializes, device is %u, name is %s",
             handle->devId, handle->name.c_str());
         itemVec.clear();
         return ret;
@@ -483,7 +483,7 @@ aclError acltdtSendTensor(const acltdtChannelHandle *handle, const acltdtDataset
 
     int32_t sendRet = tdt::TdtHostPushData(handle->name, itemVec);
     if (sendRet != 0) {
-        ACL_LOG_ERROR("failed to send, tdt result = %d, device is %u, name is %s",
+        ACL_LOG_INNER_ERROR("failed to send, tdt result = %d, device is %u, name is %s",
             sendRet, handle->devId, handle->name.c_str());
         return ACL_ERROR_FAILURE;
     }
@@ -501,7 +501,7 @@ aclError acltdtReceiveTensor(const acltdtChannelHandle *handle, acltdtDataset *d
 
     // -1 represents infinite wait, it is must be -1 now
     if (timeout != -1) {
-        ACL_LOG_ERROR("only infinite wait is supported, it can only be set to -1, timeout[%d]", timeout);
+        ACL_LOG_INNER_ERROR("only infinite wait is supported, it can only be set to -1, timeout[%d]", timeout);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("it can only be set to -1, timeout[%d].", timeout);
         acl::AclErrorLogManager::ReportInputError(acl::UNSUPPORTED_FEATURE_MSG,
             std::vector<std::string>({"feature", "reason"}), std::vector<std::string>({"timeout", errMsg}));
@@ -509,7 +509,7 @@ aclError acltdtReceiveTensor(const acltdtChannelHandle *handle, acltdtDataset *d
     }
 
     if (handle->recvName.empty()) {
-        ACL_LOG_ERROR("it is not a receive channel, failed to receive, device is %u, name is %s",
+        ACL_LOG_INNER_ERROR("it is not a receive channel, failed to receive, device is %u, name is %s",
             handle->devId, handle->name.c_str());
         std::string errMsg = acl::AclErrorLogManager::FormatStr("failed to receive, device is %u, name is %s",
             handle->devId, handle->name.c_str());
@@ -522,14 +522,14 @@ aclError acltdtReceiveTensor(const acltdtChannelHandle *handle, acltdtDataset *d
     std::vector<tdt::DataItem> itemVec;
     int32_t recvRet = tdt::TdtHostPopData(handle->recvName, itemVec);
     if (recvRet != 0) {
-        ACL_LOG_ERROR("failed to receive, tdt result = %d, device is %u, name is %s",
+        ACL_LOG_INNER_ERROR("failed to receive, tdt result = %d, device is %u, name is %s",
             recvRet, handle->devId, handle->name.c_str());
         return ACL_ERROR_FAILURE;
     }
 
     auto ret = acl::TensorDatasetDeserializes(itemVec, dataset);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("failed to TensorDatasetDeserializes, device is %u, name is %s",
+        ACL_LOG_INNER_ERROR("failed to TensorDatasetDeserializes, device is %u, name is %s",
             handle->devId, handle->name.c_str());
         return ret;
     }

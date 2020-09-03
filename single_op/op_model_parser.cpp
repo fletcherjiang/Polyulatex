@@ -56,7 +56,7 @@ aclError OpModelParser::DeserializeModel(const OpModel &opModel, ge::Model &mode
     OmFileLoadHelper helper;
     auto geRet = helper.Init(modelData, modelSize);
     if (geRet != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Init][OmFileLoadHelper]Init OmFileLoadHelper failed. modelSize = %u, ge result = %u",
+        ACL_LOG_CALL_ERROR("[Init][OmFileLoadHelper]Init OmFileLoadHelper failed. modelSize = %u, ge result = %u",
             modelSize, geRet);
         return ACL_ERROR_DESERIALIZE_MODEL;
     }
@@ -64,13 +64,13 @@ aclError OpModelParser::DeserializeModel(const OpModel &opModel, ge::Model &mode
     ModelPartition modelPartition;
     geRet = helper.GetModelPartition(ModelPartitionType::MODEL_DEF, modelPartition);
     if (geRet != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Get][Model]Get MODEL_DEF Partition failed. modelSize = %u, ge result = %u", modelSize, geRet);
+        ACL_LOG_CALL_ERROR("[Get][Model]Get MODEL_DEF Partition failed. modelSize = %u, ge result = %u", modelSize, geRet);
         return ACL_ERROR_DESERIALIZE_MODEL;
     }
 
     auto ret = ge::Model::Load(modelPartition.data, modelPartition.size, model);
     if (ret != ge::GRAPH_SUCCESS) {
-        ACL_LOG_ERROR("[Load][Model]Load model failed. ge result = %u", ret);
+        ACL_LOG_CALL_ERROR("[Load][Model]Load model failed. ge result = %u", ret);
         return ACL_ERROR_DESERIALIZE_MODEL;
     }
 
@@ -80,7 +80,7 @@ aclError OpModelParser::DeserializeModel(const OpModel &opModel, ge::Model &mode
 aclError OpModelParser::ParseModelContent(const OpModel &opModel, uint32_t &modelSize, uint8_t *&modelData)
 {
     if (opModel.size <= sizeof(ModelFileHeader)) {
-        ACL_LOG_ERROR("[Check][Size]invalid model. length[%zu] is smaller than or equal to ModelFileHeader size[%zu]",
+        ACL_LOG_INNER_ERROR("[Check][Size]invalid model. length[%zu] is smaller than or equal to ModelFileHeader size[%zu]",
             opModel.size, sizeof(ModelFileHeader));
         return ACL_ERROR_PARSE_MODEL;
     }
@@ -88,7 +88,7 @@ aclError OpModelParser::ParseModelContent(const OpModel &opModel, uint32_t &mode
     auto *file_header = reinterpret_cast<ModelFileHeader *>(opModel.data.get());
     modelSize = file_header->length;
     if (file_header->length + sizeof(ModelFileHeader) != opModel.size) {
-        ACL_LOG_ERROR("[Check][Length]invalid model. header size = %u, model size = %u,"
+        ACL_LOG_INNER_ERROR("[Check][Length]invalid model. header size = %u, model size = %u,"
             "file size = %u", sizeof(ModelFileHeader), modelSize, opModel.size);
         return ACL_ERROR_PARSE_MODEL;
     }
@@ -129,7 +129,7 @@ static aclError UpdateTensorAttrs(std::vector<aclTensorDesc> &tensorDescs,
     }
     ACL_LOG_INFO("tensorSupportAttrs size is %zu, tensorDesc size is %zu", tensorNum, tensorDescs.size());
     if (tensorNum != tensorDescs.size()) {
-        ACL_LOG_ERROR("[Check][Size]The size [%zu] of attrs is not equal to size [%zu] of inputs.",
+        ACL_LOG_INNER_ERROR("[Check][Size]The size [%zu] of attrs is not equal to size [%zu] of inputs.",
             tensorNum, tensorDescs.size());
         return ACL_ERROR_PARSE_MODEL;
     }
@@ -147,7 +147,7 @@ static aclError UpdateTensorAttrs(std::vector<aclTensorDesc> &tensorDescs,
             std::string shape_range_key_name = "shapeRange";
             // shape item must be existed
             if (tensorAttr.GetItem(shape_key_name).GetValue<ge::GeAttrValue::LIST_INT>(shape) != ge::SUCCESS) {
-                ACL_LOG_ERROR("[Get][Item]Can not find attr of shape.");
+                ACL_LOG_INNER_ERROR("[Get][Item]Can not find attr of shape.");
                 return ACL_ERROR_PARSE_MODEL;
             }
             // change LIST_INT to vector<int64>
@@ -175,7 +175,7 @@ static aclError UpdateTensorAttrs(std::vector<aclTensorDesc> &tensorDescs,
             }
 
             if (needCheckRange && (shapeRange.size() != shape.size())) {
-                ACL_LOG_ERROR("[Check][Range]the number[%zu] of shape is not equal to number[%zu] of "
+                ACL_LOG_INNER_ERROR("[Check][Range]the number[%zu] of shape is not equal to number[%zu] of "
                     "shapeRange in model.", shape.size(), shapeRange.size());
                 return ACL_ERROR_PARSE_MODEL;
             }
@@ -213,7 +213,7 @@ aclError OpModelParser::ToModelConfig(ge::Model &model, OpModelDef &modelDef)
     int32_t buildMode = 0; // 0:ACL_OP_COMPILE_DEFAULT ACL_OP_COMPILE_FUZZ
     (void)ge::AttrUtils::GetInt(model, ge::ATTR_NAME_BUILD_MODE, buildMode);
     if ((!supportDynamic) && (buildMode == 0)) {
-        ACL_LOG_ERROR("[Check][SupportDynamic]model[%s] does't support dynamic shape",
+        ACL_LOG_INNER_ERROR("[Check][SupportDynamic]model[%s] does't support dynamic shape",
             modelDef.opType.c_str());
         return ACL_ERROR_OP_UNSUPPORTED_DYNAMIC;
     }
@@ -273,7 +273,7 @@ static aclError ParseConstTensor(const ge::GeTensorDesc &tensorDesc, aclTensorDe
 {
     ge::ConstGeTensorPtr constTensor;
     if (!ge::AttrUtils::GetTensor(tensorDesc, ge::ATTR_NAME_WEIGHTS, constTensor)) {
-        ACL_LOG_ERROR("[Get][Tensor]get const tensor failed");
+        ACL_LOG_INNER_ERROR("[Get][Tensor]get const tensor failed");
         return ACL_ERROR_PARSE_MODEL;
     }
     size_t constDataLen = constTensor->GetData().GetSize();
@@ -285,14 +285,14 @@ static aclError ParseConstTensor(const ge::GeTensorDesc &tensorDesc, aclTensorDe
     const uint8_t *constDataBuf = constTensor->GetData().GetData();
     ACL_CHECK_MALLOC_RESULT(constDataBuf);
     if (constDataLen < 0) {
-        ACL_LOG_ERROR("[Get][Data]get const dataLen failed, constDataLen:[%zu] <= 0", constDataLen);
+        ACL_LOG_INNER_ERROR("[Get][Data]get const dataLen failed, constDataLen:[%zu] <= 0", constDataLen);
         return ACL_ERROR_PARSE_MODEL;
     }
 
     auto *constData = new (std::nothrow) char[constDataLen];
     ACL_CHECK_MALLOC_RESULT(constData);
     if (memcpy_s(constData, constDataLen, constDataBuf, constDataLen) != EOK) {
-        ACL_LOG_ERROR("[Copy][Mem]Copy const data failed. size = %zu", constDataLen);
+        ACL_LOG_INNER_ERROR("[Copy][Mem]Copy const data failed. size = %zu", constDataLen);
         ACL_DELETE_ARRAY_AND_SET_NULL(constData);
         return ACL_ERROR_PARSE_MODEL;
     }

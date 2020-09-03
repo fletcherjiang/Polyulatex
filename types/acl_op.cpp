@@ -83,7 +83,7 @@ void AclOp::Init(const AclOp& aclOp)
         aclTensorDesc **desc = static_cast<aclTensorDesc **>(malloc(len));
         ACL_REQUIRES_NOT_NULL_RET_VOID(desc);
         if (memset_s(desc, len, 0, len) != EOK) {
-            ACL_LOG_ERROR("memset failed");
+            ACL_LOG_INNER_ERROR("memset failed");
             ACL_FREE(desc);
             return;
         }
@@ -102,7 +102,7 @@ void AclOp::Init(const AclOp& aclOp)
         aclTensorDesc **desc = static_cast<aclTensorDesc **>(malloc(len));
         ACL_REQUIRES_NOT_NULL_RET_VOID(desc);
         if (memset_s(desc, len, 0, len) != EOK) {
-            ACL_LOG_ERROR("memset failed");
+            ACL_LOG_INNER_ERROR("memset failed");
             ACL_FREE(desc);
             return;
         }

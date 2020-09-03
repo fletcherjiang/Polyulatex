@@ -23,7 +23,7 @@ aclError aclrtSetGroup(int32_t groupId)
     ACL_LOG_INFO("start to execute aclrtSetGroup, groupId is %d.", groupId);
     rtError_t rtErr = rtSetGroup(groupId);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("set group failed, runtime result = %d, groupId = %d",
+        ACL_LOG_CALL_ERROR("set group failed, runtime result = %d, groupId = %d",
             static_cast<int32_t>(rtErr), groupId);
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
@@ -39,7 +39,7 @@ aclError aclrtGetGroupCount(uint32_t *count)
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(count);
     rtError_t rtErr = rtGetGroupCount(count);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("get group number failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("get group number failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     ACL_LOG_INFO("successfully execute aclrtGetGroupCount, group number is %u.", *count);
@@ -54,7 +54,7 @@ aclrtGroupInfo *aclrtCreateGroupInfo()
     uint32_t count = 0;
     rtError_t rtErr = rtGetGroupCount(&count);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("get group number failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("get group number failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return nullptr;
     }
     if (count == 0) { // 0 represents that no group
@@ -64,7 +64,7 @@ aclrtGroupInfo *aclrtCreateGroupInfo()
 
     aclrtGroupInfo *groupInfo = new(std::nothrow) aclrtGroupInfo[count];
     if (groupInfo == nullptr) {
-        ACL_LOG_ERROR("fail to new group info");
+        ACL_LOG_INNER_ERROR("fail to new group info");
         return nullptr;
     }
 
@@ -94,14 +94,14 @@ aclError aclrtGetAllGroupInfo(aclrtGroupInfo *groupInfo)
     uint32_t count = 0;
     rtError_t rtErr = rtGetGroupCount(&count);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("get group number failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("get group number failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
 
     // -1 represents that get all group information
     rtErr = rtGetGroupInfo(-1, static_cast<rtGroupInfo_t *>(groupInfo), count);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("get group info failed, runtime result = %d, group number = %u",
+        ACL_LOG_CALL_ERROR("get group info failed, runtime result = %d, group number = %u",
             static_cast<int32_t>(rtErr), count);
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
@@ -116,12 +116,12 @@ static aclError FillAttrValue(const void *src, size_t srcLen, void *dst, size_t 
     ACL_REQUIRES_NOT_NULL(src);
     ACL_REQUIRES_NOT_NULL(dst);
     if (srcLen > dstLen) {
-        ACL_LOG_ERROR("attr real length = %zu is larger than input length = %zu", srcLen, dstLen);
+        ACL_LOG_INNER_ERROR("attr real length = %zu is larger than input length = %zu", srcLen, dstLen);
         return ACL_ERROR_INVALID_PARAM;
     }
     auto ret = memcpy_s(dst, dstLen, src, srcLen);
     if (ret != EOK) {
-        ACL_LOG_ERROR("call memcpy_s failed, result = %d, srcLen = %zu, dstLen = %zu", ret, srcLen, dstLen);
+        ACL_LOG_INNER_ERROR("call memcpy_s failed, result = %d, srcLen = %zu, dstLen = %zu", ret, srcLen, dstLen);
         return ACL_ERROR_FAILURE;
     }
     *paramRetSize = srcLen;
@@ -140,11 +140,11 @@ aclError aclrtGetGroupInfoDetail(const aclrtGroupInfo *groupInfo, int32_t groupI
     uint32_t count = 0;
     rtError_t rtErr = rtGetGroupCount(&count);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("get group number failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("get group number failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     if ((groupIndex < 0) || (static_cast<uint32_t>(groupIndex) >= count)) {
-        ACL_LOG_ERROR("the index value of group is invalid, groupIndex = %d, not in range [0, %u)", groupIndex, count);
+        ACL_LOG_INNER_ERROR("the index value of group is invalid, groupIndex = %d, not in range [0, %u)", groupIndex, count);
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -175,7 +175,7 @@ aclError aclrtGetGroupInfoDetail(const aclrtGroupInfo *groupInfo, int32_t groupI
                 sizeof(groupInfo[groupIndex].groupId), attrValue, valueLen, paramRetSize);
             break;
         default:
-            ACL_LOG_ERROR("invalid group attribute, attribute = %d", static_cast<int32_t>(attr));
+            ACL_LOG_INNER_ERROR("invalid group attribute, attribute = %d", static_cast<int32_t>(attr));
             return ACL_ERROR_INVALID_PARAM;
     }
 

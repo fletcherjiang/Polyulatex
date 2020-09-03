@@ -127,7 +127,7 @@ aclError IsHostMemTensorDesc(int size, const aclTensorDesc *const *arr)
     ACL_REQUIRES_NOT_NULL(arr);
     for (int idx = 0; idx < size; ++idx) {
         if ((!arr[idx]->IsConstTensor()) && (arr[idx]->IsHostMemTensor())) {
-            ACL_LOG_ERROR("[Check][HostMemTensorDesc]PlaceMent of element at index %d is hostMem", idx);;
+            ACL_LOG_INNER_ERROR("[Check][HostMemTensorDesc]PlaceMent of element at index %d is hostMem", idx);;
             return ACL_ERROR_INVALID_PARAM;
         }
     }

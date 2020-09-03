@@ -34,7 +34,7 @@ aclError GetFormatName(aclFormat format, const char **name)
 {
     auto it = FORMAT_DICT.find(format);
     if (it == FORMAT_DICT.end()) {
-        ACL_LOG_ERROR("Invalid format: %d", format);
+        ACL_LOG_INNER_ERROR("Invalid format: %d", format);
         return ACL_ERROR_INVALID_PARAM;
     }
 

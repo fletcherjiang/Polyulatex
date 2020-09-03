@@ -60,7 +60,7 @@ aclError aclopSetModelDir(const char *modelDir)
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelDir);
     std::unique_lock<std::mutex> lk(g_aclInitMutex);
     if (g_aclInitFlag) {
-        ACL_LOG_ERROR("[Check][InitFlag]repeatedly set model dir.");
+        ACL_LOG_INNER_ERROR("[Check][InitFlag]repeatedly set model dir.");
         return ACL_ERROR_REPEAT_INITIALIZE;
     }
 
@@ -77,7 +77,7 @@ aclError aclopLoad(const void *model, size_t modelSize)
     ACL_LOG_INFO("start to execute aclopLoad");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(model);
     if (modelSize == 0) {
-        ACL_LOG_ERROR("[Check][ModelSize]the value of modelSize[%zu] can't be zero", modelSize);
+        ACL_LOG_INNER_ERROR("[Check][ModelSize]the value of modelSize[%zu] can't be zero", modelSize);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"modelSize", std::to_string(modelSize), "can't be zero"}));
@@ -89,7 +89,7 @@ aclError aclopLoad(const void *model, size_t modelSize)
         ACL_LOG_INFO("load opModels from memory successfully");
         return ret;
     }
-    ACL_LOG_ERROR("[Load][opModels]fail to load opModels from memory, result = %d", ret);
+    ACL_LOG_INNER_ERROR("[Load][opModels]fail to load opModels from memory, result = %d", ret);
     return ret;
 }
 
@@ -111,12 +111,12 @@ aclError aclopCreateHandle(const char *opType,
     ACL_REQUIRES_OK(array_utils::CheckPtrArray(numInputs, inputDesc));
     ACL_REQUIRES_OK(array_utils::CheckPtrArray(numOutputs, outputDesc));
     if (array_utils::IsHostMemTensorDesc(numInputs, inputDesc) != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Check][HostMemTensorDesc]aclopCreateHandle ACL_MEMTYPE_HOST "
+        ACL_LOG_INNER_ERROR("[Check][HostMemTensorDesc]aclopCreateHandle ACL_MEMTYPE_HOST "
             "placeMent in inputDesc not support");
         return ACL_ERROR_API_NOT_SUPPORT;
     }
     if (array_utils::IsHostMemTensorDesc(numOutputs, outputDesc) != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Check][HostMemTensorDesc]aclopCreateHandle ACL_MEMTYPE_HOST "
+        ACL_LOG_INNER_ERROR("[Check][HostMemTensorDesc]aclopCreateHandle ACL_MEMTYPE_HOST "
             "placeMent in outputDesc not support");
         return ACL_ERROR_API_NOT_SUPPORT;
     }
@@ -171,7 +171,7 @@ aclError aclopExecWithHandle(aclopHandle *handle,
 
     auto &opHandle = *handle->opHandle;
     if (numInputs != opHandle.numInputs) {
-        ACL_LOG_ERROR("[Check][NumInputs]input num mismatch: expect %d, but %d", opHandle.numInputs, numInputs);
+        ACL_LOG_INNER_ERROR("[Check][NumInputs]input num mismatch: expect %d, but %d", opHandle.numInputs, numInputs);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("input num mismatch: expect %d", opHandle.numInputs);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
@@ -181,7 +181,7 @@ aclError aclopExecWithHandle(aclopHandle *handle,
     }
 
     if (numOutputs != opHandle.numOutputs) {
-        ACL_LOG_ERROR("[Check][NumOutputs]output num mismatch: expect %d, but %d", opHandle.numOutputs, numOutputs);
+        ACL_LOG_INNER_ERROR("[Check][NumOutputs]output num mismatch: expect %d, but %d", opHandle.numOutputs, numOutputs);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("input num mismatch: expect %d", opHandle.numOutputs);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
@@ -285,14 +285,14 @@ aclError aclTransTensorDescFormat(const aclTensorDesc *srcDesc, aclFormat dstFor
     std::vector<int64_t> dstShape;
     auto geRet = ge::GeFormatUtil::TransShape(desc, static_cast<ge::Format>(dstFormat), dstShape);
     if (geRet != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Call][TransShape]invoke TransShape failed. ge result = %u",
+        ACL_LOG_CALL_ERROR("[Call][TransShape]invoke TransShape failed. ge result = %u",
             geRet);
         return ACL_GET_ERRCODE_GE(geRet);
     }
 
     *dstDesc = aclCreateTensorDesc(srcDesc->dataType, dstShape.size(), dstShape.data(), srcDesc->format);
     if (*dstDesc == nullptr) {
-        ACL_LOG_ERROR("[Create][Desc]aclCreateTensorDesc failed.");
+        ACL_LOG_INNER_ERROR("[Create][Desc]aclCreateTensorDesc failed.");
         return ACL_ERROR_BAD_ALLOC;
     }
 
@@ -410,7 +410,7 @@ aclError aclopRegisterCompileFunc(const char *opType, aclopCompileFunc func)
         ACL_LOG_INFO("Registering compile function successfully. op type = %s", opType);
         return ACL_SUCCESS;
     } else {
-        ACL_LOG_ERROR("[Register][Function]Failed to register compile function due to repeat registration. "
+        ACL_LOG_INNER_ERROR("[Register][Function]Failed to register compile function due to repeat registration. "
             "op type = %s", opType);
         return ACL_ERROR_BIN_SELECTOR_ALREADY_REGISTERED;
     }
@@ -423,12 +423,12 @@ static bool GetOpsProtoPath(std::string &opsProtoPath)
     if (pathEnv != nullptr) {
         std::string path = pathEnv;
         if (path.empty()) {
-            ACL_LOG_ERROR("[Check][Path]File path is empty string.");
+            ACL_LOG_INNER_ERROR("[Check][Path]File path is empty string.");
             return false;
         }
         std::string filePath = ge::RealPath(path.c_str());
         if (filePath.empty()) {
-            ACL_LOG_ERROR("[Check][Path]File path %s is invalid.", path.c_str());
+            ACL_LOG_INNER_ERROR("[Check][Path]File path %s is invalid.", path.c_str());
             return false;
         }
         opsProtoPath = (filePath + "/op_proto/custom/" + ":") + (filePath + "/op_proto/built-in/");
@@ -443,7 +443,7 @@ static aclError LoadOpsProto()
     ACL_LOG_INFO("LoadOpsProtoLib begin");
     string opsprotoPath;
     if (!GetOpsProtoPath(opsprotoPath)) {
-        ACL_LOG_ERROR("[Check][ProtoPath]The environment variable(ASCEND_OPP_PATH) is not set or path is invalid.");
+        ACL_LOG_INNER_ERROR("[Check][ProtoPath]The environment variable(ASCEND_OPP_PATH) is not set or path is invalid.");
         return ACL_ERROR_INVALID_OPP_PATH;
     }
     ge::OpsProtoManager *manager = ge::OpsProtoManager::Instance();
@@ -451,7 +451,7 @@ static aclError LoadOpsProto()
     optionTmp.emplace(std::pair<std::string, std::string>(string("ge.opsProtoLibPath"), opsprotoPath));
     bool isProtoInit = manager->Initialize(optionTmp);
     if (!isProtoInit) {
-        ACL_LOG_ERROR("[Init][Manager]Load ops_proto lib failed, ops proto path[%s] is invalid.",
+        ACL_LOG_INNER_ERROR("[Init][Manager]Load ops_proto lib failed, ops proto path[%s] is invalid.",
             opsprotoPath.c_str());
         return ACL_ERROR_FAILURE;
     }
@@ -460,7 +460,7 @@ static aclError LoadOpsProto()
     std::vector<ge::AscendString> allOp;
     ge::graphStatus ret = ge::OperatorFactory::GetOpsTypeList(allOp);
     if (ret != ge::GRAPH_SUCCESS) {
-        ACL_LOG_ERROR("[Get][OpsType]GetOpsTypeList failed.");
+        ACL_LOG_CALL_ERROR("[Get][OpsType]GetOpsTypeList failed.");
         return ACL_GET_ERRCODE_GE(ret);
     }
     ACL_LOG_INFO("OpsTypeListSize is %zu", allOp.size());
@@ -480,7 +480,7 @@ static aclError UpdateOutPutDesc(ge::Operator inferOp, int numOutputs, aclTensor
         ge::DataType outputDType = inferOutputDesc.GetDataType();
         auto ret = inferOutputDesc.GetName(ascendString);
         if (ret != ge::GRAPH_SUCCESS) {
-            ACL_LOG_ERROR("[Get][Name]the %d tensor GetName failed.", i);
+            ACL_LOG_CALL_ERROR("[Get][Name]the %d tensor GetName failed.", i);
             return ACL_GET_ERRCODE_GE(ret);
         }
         std::string outputName;
@@ -491,7 +491,7 @@ static aclError UpdateOutPutDesc(ge::Operator inferOp, int numOutputs, aclTensor
         std::vector<std::pair<int64_t, int64_t>> outputRange;
         ret = inferOutputDesc.GetShapeRange(outputRange);
         if (ret != ge::GRAPH_SUCCESS) {
-            ACL_LOG_ERROR("[Get][ShapeRange]the %d tensor GetShapeRange failed.", i);
+            ACL_LOG_CALL_ERROR("[Get][ShapeRange]the %d tensor GetShapeRange failed.", i);
             return ACL_GET_ERRCODE_GE(ret);
         }
 
@@ -568,7 +568,7 @@ static aclError AddDataInput(aclTensorDesc *inputDesc,
                              static_cast<::ge::DataType >(inputDesc->dataType));
     size_t tensorSize = inputs->length;
     if (tensorSize <= 0) {
-        ACL_LOG_ERROR("[Check][TensorSize]tensorSize must be positive, tensorSize = %zu", tensorSize);
+        ACL_LOG_INNER_ERROR("[Check][TensorSize]tensorSize must be positive, tensorSize = %zu", tensorSize);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"tensorSize", std::to_string(tensorSize),
@@ -577,12 +577,12 @@ static aclError AddDataInput(aclTensorDesc *inputDesc,
     }
     auto args = std::unique_ptr<uint8_t[]>(new(std::nothrow) uint8_t[tensorSize]);
     if (args == nullptr) {
-        ACL_LOG_ERROR("[Allocate][Mem]Allocate memory failed.");
+        ACL_LOG_INNER_ERROR("[Allocate][Mem]Allocate memory failed.");
         return ACL_ERROR_BAD_ALLOC;
     }
     constData = std::move(args);
     if (memcpy_s(constData.get(), tensorSize, inputs->data, tensorSize) != EOK) {
-        ACL_LOG_ERROR("[Copy][Mem]Copy input data failed. size = %zu", tensorSize);
+        ACL_LOG_INNER_ERROR("[Copy][Mem]Copy input data failed. size = %zu", tensorSize);
         return ACL_ERROR_FAILURE;
     }
     ge::Tensor constTensor(constDesc, constData.get(), tensorSize);
@@ -590,7 +590,7 @@ static aclError AddDataInput(aclTensorDesc *inputDesc,
     (void)constOp.SetAttr(valueName.c_str(), constTensor);
     auto retConstInfer = constOp.InferShapeAndType();
     if (retConstInfer != ge::GRAPH_SUCCESS) {
-        ACL_LOG_ERROR("the constOp inferShape failed. ge result = %u", retConstInfer);
+        ACL_LOG_CALL_ERROR("the constOp inferShape failed. ge result = %u", retConstInfer);
         return ACL_GET_ERRCODE_GE(retConstInfer);
     }
     return ACL_SUCCESS;
@@ -616,7 +616,7 @@ aclError aclopInferShape(const char *opType,
         if (!aclLoadOpsProtoFlag) {
             aclError ret = LoadOpsProto();
             if (ret != ACL_SUCCESS) {
-                ACL_LOG_ERROR("[Load][OpsProto]Load opsProto lib fail.");
+                ACL_LOG_INNER_ERROR("[Load][OpsProto]Load opsProto lib fail.");
                 return ret;
             }
             aclLoadOpsProtoFlag = true;
@@ -657,7 +657,7 @@ aclError aclopInferShape(const char *opType,
         ge::Operator constOp = constOps.back();
         aclError ret = AddDataInput(inputDesc[i], inputs[i], constData[i], constOp);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("[Add][Data]add data fail, index = %d", i);
+            ACL_LOG_INNER_ERROR("[Add][Data]add data fail, index = %d", i);
             ACL_DELETE_ARRAY_AND_SET_NULL(constData);
             return ret;
         }
@@ -669,7 +669,7 @@ aclError aclopInferShape(const char *opType,
     ACL_LOG_INFO("create constData success");
     ge::graphStatus retInfer = inferOp.InferShapeAndType();
     if (retInfer != ge::GRAPH_SUCCESS) {
-        ACL_LOG_ERROR("[Infer][ShapeAndType]the op:%s inferShape failed. ge result = %u",
+        ACL_LOG_CALL_ERROR("[Infer][ShapeAndType]the op:%s inferShape failed. ge result = %u",
             opType, retInfer);
         ACL_DELETE_ARRAY_AND_SET_NULL(constData);
         return ACL_GET_ERRCODE_GE(retInfer);
@@ -680,7 +680,7 @@ aclError aclopInferShape(const char *opType,
     ACL_LOG_INFO("the op:%s inferShape success", opType);
     aclError ret = UpdateOutPutDesc(inferOp, numOutputs, outputDesc);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Update][OutPutDesc]the op:%s update outputDesc failed", opType);
+        ACL_LOG_INNER_ERROR("[Update][OutPutDesc]the op:%s update outputDesc failed", opType);
         ACL_DELETE_ARRAY_AND_SET_NULL(constData);
         return ret;
     }

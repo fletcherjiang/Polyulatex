@@ -34,7 +34,7 @@ aclError StreamExecutor::ExecuteAsync(const AclOp &aclOp,
     std::shared_ptr<OpKernelDesc> desc;
     auto ret = OpKernelSelector::GetInstance().GetOpKernelDesc(aclOp, desc);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Get][OpKernelDesc]Op with the given shape was not compiled. aclOp = %s",
+        ACL_LOG_INNER_ERROR("[Get][OpKernelDesc]Op with the given shape was not compiled. aclOp = %s",
             aclOp.DebugString().c_str());
         return ret;
     }
@@ -62,7 +62,7 @@ aclError StreamExecutor::InitTbeTask(const OpKernelDesc &desc, int numInputs, in
     // create new op task
     size_t numWorkSpaces = desc.workspaceSizes.size();
     if (numWorkSpaces > MAX_WORKSPACES) {
-        ACL_LOG_ERROR("[Check][numWorkSpaces]numWorkSpaces invalid, "
+        ACL_LOG_INNER_ERROR("[Check][numWorkSpaces]numWorkSpaces invalid, "
             "numWorkSpace[%zu] is larger than MAX_WORKSPACES[%zu]",
             numWorkSpaces, MAX_WORKSPACES);
         return ACL_ERROR_INVALID_PARAM;
@@ -98,7 +98,7 @@ aclError StreamExecutor::InitTbeTask(const OpKernelDesc &desc, int numInputs, in
         void *tilingStart = argBase + numArgs * sizeof(void *);
         ACL_LOG_DEBUG("tiling desc size = %zu", tilingDesc.size());
         if (memcpy_s(tilingStart, tilingDesc.size(), tilingDesc.data(), tilingDesc.size()) != EOK) {
-            ACL_LOG_ERROR("[Check][Memcpy]Invoking memcpy_s failed");
+            ACL_LOG_INNER_ERROR("[Check][Memcpy]Invoking memcpy_s failed");
             return ACL_ERROR_FAILURE;
         }
     }
@@ -111,7 +111,7 @@ aclError StreamExecutor::AllocateWorkspaces(const std::vector<size_t> &workspace
 {
     auto numWs = workspaceSizes.size();
     if (numWs > MAX_WORKSPACES) {
-        ACL_LOG_ERROR("[Check][numWs]numWs invalid, numWs[%zu] is larger than MAX_WORKSPACES[%zu]",
+        ACL_LOG_INNER_ERROR("[Check][numWs]numWs invalid, numWs[%zu] is larger than MAX_WORKSPACES[%zu]",
             numWs, MAX_WORKSPACES);
         return ACL_ERROR_INVALID_PARAM;
     }

@@ -181,7 +181,7 @@ static aclError SetIODims(const ge::InputOutputDims oriDims, aclmdlIODims &dstDi
     ACL_LOG_DEBUG("start to execute SetIODims");
     dstDims.dimCount = oriDims.dim_num;
     if (oriDims.dims.size() > ACL_MAX_DIM_CNT) {
-        ACL_LOG_ERROR("[Check][Params]size of dims[%zu] must be smaller than ACL_MAX_DIM_CNT(128)",
+        ACL_LOG_INNER_ERROR("[Check][Params]size of dims[%zu] must be smaller than ACL_MAX_DIM_CNT(128)",
             oriDims.dims.size());
         return ACL_ERROR_GE_FAILURE;
     }
@@ -194,7 +194,7 @@ static aclError SetIODims(const ge::InputOutputDims oriDims, aclmdlIODims &dstDi
     }
     auto ret = strncpy_s(dstDims.name, sizeof(dstDims.name), oriDims.name.c_str(), oriDims.name.size());
     if (ret != EOK) {
-        ACL_LOG_ERROR("[Copy][Str]call strncpy_s failed");
+        ACL_LOG_INNER_ERROR("[Copy][Str]call strncpy_s failed");
         return ACL_ERROR_FAILURE;
     }
     return ACL_SUCCESS;
@@ -207,18 +207,18 @@ aclmdlAIPP *aclmdlCreateAIPP(uint64_t batchSize)
         ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_AIPP);
         ACL_LOG_INFO("start to execute aclmdlCreateAIPP, batchSize[%lu]", batchSize);
         if (batchSize == 0) {
-            ACL_LOG_ERROR("[Check][BatchSize]the batchSize can't be zero");
+            ACL_LOG_INNER_ERROR("[Check][BatchSize]the batchSize can't be zero");
             return nullptr;
         }
         aippParmsSet = new(std::nothrow) aclmdlAIPP();
         if (aippParmsSet == nullptr) {
-            ACL_LOG_ERROR("[Check][ParmsSet]new aclmdlAIPP fail");
+            ACL_LOG_INNER_ERROR("[Check][ParmsSet]new aclmdlAIPP fail");
             return nullptr;
         }
 
         auto ret = memset_s(aippParmsSet, sizeof(aclmdlAIPP), 0, sizeof(aclmdlAIPP));
         if (ret != EOK) {
-            ACL_LOG_ERROR("[Set][Mem]memset failed, result[%d]", ret);
+            ACL_LOG_INNER_ERROR("[Set][Mem]memset failed, result[%d]", ret);
             ACL_DELETE(aippParmsSet);
             return nullptr;
         }
@@ -236,9 +236,9 @@ aclmdlAIPP *aclmdlCreateAIPP(uint64_t batchSize)
         ACL_ADD_APPLY_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_AIPP);
         return aippParmsSet;
     } catch (std::bad_alloc &) {
-        ACL_LOG_ERROR("[Create][AIPP]aclmdlCreateAIPP fail, bad memory allocation, batchSize[%lu]", batchSize);
+        ACL_LOG_INNER_ERROR("[Create][AIPP]aclmdlCreateAIPP fail, bad memory allocation, batchSize[%lu]", batchSize);
     } catch (std::length_error &) {
-        ACL_LOG_ERROR("[Create][AIPP]aclmdlCreateAIPP fail with length error, batchSize[%lu]", batchSize);
+        ACL_LOG_INNER_ERROR("[Create][AIPP]aclmdlCreateAIPP fail with length error, batchSize[%lu]", batchSize);
     }
 
     ACL_DELETE(aippParmsSet);
@@ -278,7 +278,7 @@ aclError aclmdlSetAIPPInputFormat(aclmdlAIPP *aippParmsSet, aclAippInputFormat i
 
     auto it = inputFormatMap.find(inputFormat);
     if (it == inputFormatMap.end()) {
-        ACL_LOG_ERROR("[Unsupported][Format]unsupported inputFormat[%d]", static_cast<int32_t>(inputFormat));
+        ACL_LOG_INNER_ERROR("[Unsupported][Format]unsupported inputFormat[%d]", static_cast<int32_t>(inputFormat));
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -379,7 +379,7 @@ aclError aclmdlSetAIPPScfParams(aclmdlAIPP *aippParmsSet, int8_t scfSwitch,
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
     uint64_t aippBatchParaSize = static_cast<uint64_t>(aippParmsSet->aippBatchPara.size());
     if (batchIndex >= aippBatchParaSize) {
-        ACL_LOG_ERROR("[Check][Param]Set batch parameter Failed, batch_index (%lu) is greater than or "
+        ACL_LOG_INNER_ERROR("[Check][Param]Set batch parameter Failed, batch_index (%lu) is greater than or "
             "equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("batch_index (%lu) is greater than or "
             "equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
@@ -415,7 +415,7 @@ aclError aclmdlSetAIPPCropParams(aclmdlAIPP *aippParmsSet, int8_t cropSwitch,
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
     uint64_t aippBatchParaSize = static_cast<uint64_t>(aippParmsSet->aippBatchPara.size());
     if (batchIndex >= aippBatchParaSize) {
-        ACL_LOG_ERROR("[Check][Param]Set batch parameter Failed, batch_index (%lu) is greater than or "
+        ACL_LOG_INNER_ERROR("[Check][Param]Set batch parameter Failed, batch_index (%lu) is greater than or "
             "equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("batch_index (%lu) is greater than or "
             "equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
@@ -451,7 +451,7 @@ aclError aclmdlSetAIPPPaddingParams(aclmdlAIPP *aippParmsSet, int8_t paddingSwit
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
     uint64_t aippBatchParaSize = static_cast<uint64_t>(aippParmsSet->aippBatchPara.size());
     if (batchIndex >= aippBatchParaSize) {
-        ACL_LOG_ERROR("[Check][Param]Set batch parameter Failed, batch_index (%lu) is greater "
+        ACL_LOG_INNER_ERROR("[Check][Param]Set batch parameter Failed, batch_index (%lu) is greater "
             "than or equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("batch_index (%lu) is greater "
             "than or equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
@@ -489,7 +489,7 @@ aclError aclmdlSetAIPPDtcPixelMean(aclmdlAIPP *aippParmsSet,
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
     uint64_t aippBatchParaSize = static_cast<uint64_t>(aippParmsSet->aippBatchPara.size());
     if (batchIndex >= aippBatchParaSize) {
-        ACL_LOG_ERROR("[Check][Param]Set batch parameter Failed, batch_index (%lu) is greater than or "
+        ACL_LOG_INNER_ERROR("[Check][Param]Set batch parameter Failed, batch_index (%lu) is greater than or "
             "equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_AIPP_MSG, std::vector<std::string>({"param", "reason"}),
             std::vector<std::string>({"InputAIPP", "parameters verification failed"}));
@@ -519,7 +519,7 @@ aclError aclmdlSetAIPPDtcPixelMin(aclmdlAIPP *aippParmsSet,
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
     uint64_t aippBatchParaSize = static_cast<uint64_t>(aippParmsSet->aippBatchPara.size());
     if (batchIndex >= aippBatchParaSize) {
-        ACL_LOG_ERROR("[Check][Param]Set batch parameter Failed, batch_index (%lu) is greater than or "
+        ACL_LOG_INNER_ERROR("[Check][Param]Set batch parameter Failed, batch_index (%lu) is greater than or "
             "equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("batch_index (%lu) is greater than or "
             "equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
@@ -552,7 +552,7 @@ aclError aclmdlSetAIPPPixelVarReci(aclmdlAIPP *aippParmsSet,
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
     uint64_t aippBatchParaSize = static_cast<uint64_t>(aippParmsSet->aippBatchPara.size());
     if (batchIndex >= aippBatchParaSize) {
-        ACL_LOG_ERROR("[Check][Param]Set batch parameter Failed, batch_index (%lu) is greater than or "
+        ACL_LOG_INNER_ERROR("[Check][Param]Set batch parameter Failed, batch_index (%lu) is greater than or "
         "equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("batch_index (%lu) is greater than or "
             "equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
@@ -679,7 +679,7 @@ static aclError GetModelOriDims(uint32_t modelId, uint32_t relatedInputRank, boo
     ACL_LOG_DEBUG("call ge interface executor.GetOrigInputInfo");
     auto ret = executor.GetOrigInputInfo(modelId, relatedInputRank, inputInfo);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Get][OrigInputInfo]GetOrigInputInfo failed, modelId[%u], index[%zu], "
+        ACL_LOG_CALL_ERROR("[Get][OrigInputInfo]GetOrigInputInfo failed, modelId[%u], index[%zu], "
                                        "ge result[%u]", modelId, relatedInputRank, ret);
         return ACL_GET_ERRCODE_GE(ret);
     }
@@ -691,14 +691,14 @@ static aclError GetModelOriDims(uint32_t modelId, uint32_t relatedInputRank, boo
     ACL_LOG_DEBUG("call ge interface executor.GetAllAippInputOutputDims");
     ret = executor.GetAllAippInputOutputDims(modelId, relatedInputRank, inputDims, outputDims);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Get][AllAippInputOutputDims]GetAllAippInputOutputDims failed, modelId[%u], "
+        ACL_LOG_CALL_ERROR("[Get][AllAippInputOutputDims]GetAllAippInputOutputDims failed, modelId[%u], "
             "index[%zu], ge result[%u]", modelId, relatedInputRank, ret);
         return ACL_GET_ERRCODE_GE(ret);
     }
 
     // Parse NHW from input Dims when inputDims is not empty
     if (inputDims.empty()) {
-        ACL_LOG_ERROR("[Check][InputDims]get model origin input dims fail, origin input dims is empty");
+        ACL_LOG_INNER_ERROR("[Check][InputDims]get model origin input dims fail, origin input dims is empty");
         return ACL_ERROR_GE_FAILURE;
     }
     // Get the index of the maximum gear
@@ -706,7 +706,7 @@ static aclError GetModelOriDims(uint32_t modelId, uint32_t relatedInputRank, boo
     aclmdlIODims srcDims;
     aclError ioRet = SetIODims(inputDims[maxShapeIndex], srcDims);
     if (ioRet != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Set][IODims]srcDims SetIODims failed, modelId[%u], result[%d]", modelId, ioRet);
+        ACL_LOG_INNER_ERROR("[Set][IODims]srcDims SetIODims failed, modelId[%u], result[%d]", modelId, ioRet);
         return ioRet;
     }
     switch (srcFormat) {
@@ -750,7 +750,7 @@ static aclError GetAndCheckAippParams(uint32_t modelId, size_t index, const aclm
         uint64_t size = GetSrcImageSize(aippParmsSet);
         ACL_LOG_INFO("Input SrcImageSize = %lu", size);
         if (size > maxSrcImageSize) {
-            ACL_LOG_ERROR("[Check][Size]the dynamic aipp size[%lu] is bigger than max_src_image_size[%lu]",
+            ACL_LOG_INNER_ERROR("[Check][Size]the dynamic aipp size[%lu] is bigger than max_src_image_size[%lu]",
                 size, maxSrcImageSize);
             std::string errMsg = acl::AclErrorLogManager::FormatStr("bigger than max_src_image_size[%lu]",
                 maxSrcImageSize);
@@ -763,7 +763,7 @@ static aclError GetAndCheckAippParams(uint32_t modelId, size_t index, const aclm
         bool isGetDim = false;
         aclError mdlRet = GetModelOriDims(modelId, relatedInputRank, isGetDim, mdlOriH, mdlOriW, mdlOriN);
         if (mdlRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("[Get][ModelOriDims]get model original dims fail");
+            ACL_LOG_INNER_ERROR("[Get][ModelOriDims]get model original dims fail");
             return mdlRet;
         }
 
@@ -772,7 +772,7 @@ static aclError GetAndCheckAippParams(uint32_t modelId, size_t index, const aclm
                 relatedInputRank, maxSrcImageSize, mdlOriH, mdlOriW, mdlOriN);
             // check batchSize
             if (mdlOriN != static_cast<int64_t>(aippParmsSet->batchSize)) {
-                ACL_LOG_ERROR("[Check][mdlOriN]the dynamic aipp batchSize[%lu] is not equal to model origin batch[%ld]",
+                ACL_LOG_INNER_ERROR("[Check][mdlOriN]the dynamic aipp batchSize[%lu] is not equal to model origin batch[%ld]",
                     aippParmsSet->batchSize, mdlOriN);
                 std::string errMsg = acl::AclErrorLogManager::FormatStr("batchSize[%lu] is not equal to "
                     "model origin batch[%ld]", aippParmsSet->batchSize, mdlOriN);
@@ -798,7 +798,7 @@ static aclError CheckAippDataIndex(uint32_t modelId, size_t index, aclmdlDesc* m
     size_t aippIndex = 0;
     auto ret = executor.GetAippType(modelId, index, type, aippIndex);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Get][AippType]Get aipp type failed, ge result[%u]", ret);
+        ACL_LOG_CALL_ERROR("[Get][AippType]Get aipp type failed, ge result[%u]", ret);
         return ACL_GET_ERRCODE_GE(ret);
     }
     if (type == ge::DYNAMIC_AIPP_NODE) {
@@ -809,17 +809,17 @@ static aclError CheckAippDataIndex(uint32_t modelId, size_t index, aclmdlDesc* m
         size_t indexInModel;
         auto mdlRet = aclmdlGetInputIndexByName(modelDesc, ACL_DYNAMIC_AIPP_NAME, &indexInModel);
         if (mdlRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("[Get][InputIndex]the model is not a dynamic aipp model, there is no dynamic aipp node");
+            ACL_LOG_INNER_ERROR("[Get][InputIndex]the model is not a dynamic aipp model, there is no dynamic aipp node");
             return mdlRet;
         }
         if (indexInModel != index) {
-            ACL_LOG_ERROR("[Check][indexInModel]index[%zu] entered by the user is not dynamic aipp index[%zu]",
+            ACL_LOG_INNER_ERROR("[Check][indexInModel]index[%zu] entered by the user is not dynamic aipp index[%zu]",
                 index, indexInModel);
             return ACL_ERROR_INVALID_PARAM;
         }
         return ACL_SUCCESS;
     } else {
-        ACL_LOG_ERROR("[Check][Index]index[%zu] entered by the user is not dynamic aipp data index.", index);
+        ACL_LOG_INNER_ERROR("[Check][Index]index[%zu] entered by the user is not dynamic aipp data index.", index);
         return ACL_ERROR_INVALID_PARAM;
     }
 }
@@ -837,12 +837,12 @@ aclError aclmdlSetInputAIPP(uint32_t modelId,
     aclmdlDesc modelDesc;
     aclError mdlRet = aclmdlGetDesc(&modelDesc, modelId);
     if (mdlRet != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Get][ModelDesc]get modelDesc fail, modelId[%u]", modelId);
+        ACL_LOG_INNER_ERROR("[Get][ModelDesc]get modelDesc fail, modelId[%u]", modelId);
         return mdlRet;
     }
     mdlRet = CheckAippDataIndex(modelId, index, &modelDesc);
     if (mdlRet != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Check][AippData]Dynamic AIPP data index %zu is invalid, parameters verification failed", index);
+        ACL_LOG_INNER_ERROR("[Check][AippData]Dynamic AIPP data index %zu is invalid, parameters verification failed", index);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("index %zu is invalid", index);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_AIPP_MSG, std::vector<std::string>({"param", "reason"}),
             std::vector<std::string>({"Dynamic AIPP data index", errMsg}));
@@ -851,7 +851,7 @@ aclError aclmdlSetInputAIPP(uint32_t modelId,
 
     mdlRet = GetAndCheckAippParams(modelId, index, aippParmsSet);
     if (mdlRet != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Check][AippParams]Dynamic AIPP parameters is invalid, parameters verification failed");
+        ACL_LOG_INNER_ERROR("[Check][AippParams]Dynamic AIPP parameters is invalid, parameters verification failed");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_AIPP_MSG, std::vector<std::string>({"param", "reason"}),
             std::vector<std::string>({"parameters", "parameters verification failed"}));
         return mdlRet;
@@ -859,13 +859,13 @@ aclError aclmdlSetInputAIPP(uint32_t modelId,
 
     aclDataBuffer *buff = aclmdlGetDatasetBuffer(dataset, index);
     if (buff == nullptr) {
-        ACL_LOG_ERROR("[Check][Buff]failed to get data buffer by index[%zu]", index);
+        ACL_LOG_INNER_ERROR("[Check][Buff]failed to get data buffer by index[%zu]", index);
         return ACL_ERROR_INVALID_PARAM;
     }
 
     void *devPtr = aclGetDataBufferAddr(buff);
     if (devPtr == nullptr) {
-        ACL_LOG_ERROR("[Check][DevPtr]failed to get addr by index[%zu]", index);
+        ACL_LOG_INNER_ERROR("[Check][DevPtr]failed to get addr by index[%zu]", index);
         return ACL_ERROR_INVALID_PARAM;
     }
     uint64_t memSize = aclGetDataBufferSizeV2(buff);
@@ -880,7 +880,7 @@ aclError aclmdlSetInputAIPP(uint32_t modelId,
     auto ret = executor.SetDynamicAippData(modelId, devPtr, memSize,
         aippParmsSet->aippBatchPara, aippParmsSet->aippParms);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Set][DynamicAippData]SetDynamicImageSize failed, ge result[%u]", ret);
+        ACL_LOG_CALL_ERROR("[Set][DynamicAippData]SetDynamicImageSize failed, ge result[%u]", ret);
         return ACL_GET_ERRCODE_GE(ret);
     }
     return ACL_SUCCESS;
@@ -894,7 +894,7 @@ aclError aclmdlGetAippType(uint32_t modelId, size_t index, aclmdlInputAippType *
     ge::InputAippType typeTmp;
     auto ret = executor.GetAippType(modelId, index, typeTmp, *dynamicAttachedDataIndex);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Get][AippType]Get aipp type failed, ge result[%u]", ret);
+        ACL_LOG_CALL_ERROR("[Get][AippType]Get aipp type failed, ge result[%u]", ret);
         return ACL_GET_ERRCODE_GE(ret);
     }
     *type = (aclmdlInputAippType)typeTmp;
@@ -911,7 +911,7 @@ aclError aclmdlSetAIPPByInputIndex(uint32_t modelId,
     ACL_LOG_INFO("start to execute aclmdlSetAIPPByInputIndex, modelId[%u], index[%zu]", modelId, index);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
     if ((dataset == nullptr) || (index >= dataset->blobs.size())) {
-        ACL_LOG_ERROR("[Check][Dataset]input param is invalid, dataset[%p], index[%zu]", dataset, index);
+        ACL_LOG_INNER_ERROR("[Check][Dataset]input param is invalid, dataset[%p], index[%zu]", dataset, index);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("dataset[%p], index[%zu]", dataset, index);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_AIPP_MSG, std::vector<std::string>({"param", "reason"}),
             std::vector<std::string>({"params", errMsg}));
@@ -924,7 +924,7 @@ aclError aclmdlSetAIPPByInputIndex(uint32_t modelId,
         return ret;
     }
     if (type != ACL_DATA_WITH_DYNAMIC_AIPP) {
-        ACL_LOG_ERROR("[Check][Type]This %zu input has no dynamic aipp linked, modelId[%u]", index, modelId);
+        ACL_LOG_INNER_ERROR("[Check][Type]This %zu input has no dynamic aipp linked, modelId[%u]", index, modelId);
         return ACL_ERROR_FAILURE;
     }
     ACL_LOG_INFO("successfully execute aclmdlSetAIPPByInputIndex, modelId[%u], index[%zu]", modelId, index);
@@ -934,7 +934,7 @@ aclError aclmdlSetAIPPByInputIndex(uint32_t modelId,
 static std::string AippInfoDebugString(aclAippInfo *aippInfo)
 {
     if (aippInfo == nullptr) {
-        ACL_LOG_ERROR("[Check][aippInfo]param aippInfo must not be null");
+        ACL_LOG_INNER_ERROR("[Check][aippInfo]param aippInfo must not be null");
         return "";
     }
     std::stringstream ss;
@@ -1032,7 +1032,7 @@ static void SetAippInfo(aclAippInfo *aippInfo, const ge::AippConfigInfo &aippPar
 {
     ACL_LOG_DEBUG("start to execute SetAippInfo");
     if (aippInfo == nullptr) {
-        ACL_LOG_ERROR("[Check][AippInfo]param aippInfo must not be null");
+        ACL_LOG_INNER_ERROR("[Check][AippInfo]param aippInfo must not be null");
         return;
     }
     aippInfo->inputFormat = static_cast<aclAippInputFormat>(aippParams.input_format);
@@ -1106,7 +1106,7 @@ aclError aclmdlGetFirstAippInfo(uint32_t modelId, size_t index, aclAippInfo *aip
             index, modelId, index, ret);
         return ACL_GET_ERRCODE_GE(ret);
     } else if (ret != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Get][AIPPInfo]GetAIPPInfo failed, modelId[%u], index[%zu], ge result[%u]",
+        ACL_LOG_CALL_ERROR("[Get][AIPPInfo]GetAIPPInfo failed, modelId[%u], index[%zu], ge result[%u]",
             modelId, index, ret);
         return ACL_GET_ERRCODE_GE(ret);
     }
@@ -1116,7 +1116,7 @@ aclError aclmdlGetFirstAippInfo(uint32_t modelId, size_t index, aclAippInfo *aip
     ACL_LOG_DEBUG("call ge interface executor.GetBatchInfoSize");
     ret = executor.GetBatchInfoSize(modelId, shapeCount);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Get][BatchInfo]GetBatchInfoSize failed, modelId[%u], index[%zu], ge result[%u]",
+        ACL_LOG_CALL_ERROR("[Get][BatchInfo]GetBatchInfoSize failed, modelId[%u], index[%zu], ge result[%u]",
             modelId, index, ret);
         return ACL_GET_ERRCODE_GE(ret);
     }
@@ -1127,7 +1127,7 @@ aclError aclmdlGetFirstAippInfo(uint32_t modelId, size_t index, aclAippInfo *aip
     ACL_LOG_DEBUG("call ge interface executor.GetOrigInputInfo");
     ret = executor.GetOrigInputInfo(modelId, index, inputInfo);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Get][OrigInputInfo]GetOrigInputInfo failed, modelId[%u], index[%zu], ge result[%u]",
+        ACL_LOG_CALL_ERROR("[Get][OrigInputInfo]GetOrigInputInfo failed, modelId[%u], index[%zu], ge result[%u]",
             modelId, index, ret);
         return ACL_GET_ERRCODE_GE(ret);
     }
@@ -1141,14 +1141,14 @@ aclError aclmdlGetFirstAippInfo(uint32_t modelId, size_t index, aclAippInfo *aip
     ACL_LOG_DEBUG("call ge interface executor.GetAllAippInputOutputDims");
     ret = executor.GetAllAippInputOutputDims(modelId, index, inputDims, outputDims);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Get][AllAippInputOutputDims]GetAllAippInputOutputDims failed, modelId[%u], index[%zu], "
+        ACL_LOG_CALL_ERROR("[Get][AllAippInputOutputDims]GetAllAippInputOutputDims failed, modelId[%u], index[%zu], "
             "ge result[%u]", modelId, index, ret);
         return ACL_GET_ERRCODE_GE(ret);
     }
 
     ACL_LOG_DEBUG("GetAllAippInputOutputDims success");
     if ((shapeCount > ACL_MAX_SHAPE_COUNT) || (shapeCount != inputDims.size()) || (shapeCount != outputDims.size())) {
-        ACL_LOG_ERROR("[Check][Params]shapeCount[%zu] should be smaller than ACL_MAX_SHAPE_COUNT(128) and it should "
+        ACL_LOG_INNER_ERROR("[Check][Params]shapeCount[%zu] should be smaller than ACL_MAX_SHAPE_COUNT(128) and it should "
                       "be equal to size of inputDims[%zu], size of outputDims[%zu]",
                       shapeCount, inputDims.size(), outputDims.size());
         return ACL_ERROR_GE_FAILURE;
@@ -1156,14 +1156,14 @@ aclError aclmdlGetFirstAippInfo(uint32_t modelId, size_t index, aclAippInfo *aip
     for (size_t i = 0 ; i < shapeCount; i++) {
         aclError ioRet = SetIODims(inputDims[i], aippInfo->outDims[i].srcDims);
         if (ioRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("[Set][IODims]srcDims SetIODims failed, modelId[%u], index[%zu], result[%d]",
+            ACL_LOG_INNER_ERROR("[Set][IODims]srcDims SetIODims failed, modelId[%u], index[%zu], result[%d]",
                 modelId, index, ioRet);
             return ioRet;
         }
         aippInfo->outDims[i].srcSize = inputDims[i].size;
         ioRet = SetIODims(outputDims[i], aippInfo->outDims[i].aippOutdims);
         if (ioRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("[Set][IODims]aippOutdims SetIODims failed, modelId[%u], index[%zu], result[%d]",
+            ACL_LOG_INNER_ERROR("[Set][IODims]aippOutdims SetIODims failed, modelId[%u], index[%zu], result[%d]",
                 modelId, index, ioRet);
             return ioRet;
         }

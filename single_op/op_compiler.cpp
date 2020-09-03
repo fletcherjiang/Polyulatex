@@ -49,7 +49,7 @@ aclError aclopCompile(const char *opType,
     ACL_REQUIRES_NON_NEGATIVE(numInputs);
     ACL_REQUIRES_NON_NEGATIVE(numOutputs);
     if (compileFlag != ACL_COMPILE_SYS && compileFlag != ACL_COMPILE_UNREGISTERED) {
-        ACL_LOG_ERROR("[Check][CompileFlag]aclopCompile compile type[%d] not support",
+        ACL_LOG_INNER_ERROR("[Check][CompileFlag]aclopCompile compile type[%d] not support",
             static_cast<int32_t>(compileFlag));
         acl::AclErrorLogManager::ReportInputError(acl::UNSUPPORTED_FEATURE_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
@@ -61,11 +61,11 @@ aclError aclopCompile(const char *opType,
     ACL_REQUIRES_OK(array_utils::CheckPtrArray(numInputs, inputDesc));
     ACL_REQUIRES_OK(array_utils::CheckPtrArray(numOutputs, outputDesc));
     if (array_utils::IsHostMemTensorDesc(numInputs, inputDesc) != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Check][TensorDesc]aclopCompile ACL_MEMTYPE_HOST placeMent in inputDesc not support");
+        ACL_LOG_INNER_ERROR("[Check][TensorDesc]aclopCompile ACL_MEMTYPE_HOST placeMent in inputDesc not support");
         return ACL_ERROR_API_NOT_SUPPORT;
     }
     if (array_utils::IsHostMemTensorDesc(numOutputs, outputDesc) != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Check][TensorDesc]aclopCompile ACL_MEMTYPE_HOST placeMent in outputDesc not support");
+        ACL_LOG_INNER_ERROR("[Check][TensorDesc]aclopCompile ACL_MEMTYPE_HOST placeMent in outputDesc not support");
         return ACL_ERROR_API_NOT_SUPPORT;
     }
 
@@ -85,7 +85,7 @@ aclError aclopCompile(const char *opType,
     aclOp.compileType = static_cast<OpCompileType>(compileFlag);
     if (compileFlag == ACL_COMPILE_UNREGISTERED) {
         if (opPath == nullptr) {
-            ACL_LOG_ERROR("[Check][CompileFlag]opPath cannot be null while compileFlag is %d",
+            ACL_LOG_INNER_ERROR("[Check][CompileFlag]opPath cannot be null while compileFlag is %d",
                 static_cast<int32_t>(compileFlag));
             acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
                 std::vector<std::string>({"param"}),
@@ -109,7 +109,7 @@ aclError aclopCompileAndExecute(const char *opType,
     ACL_REQUIRES_NON_NEGATIVE(numInputs);
     ACL_REQUIRES_NON_NEGATIVE(numOutputs);
     if (compileFlag != ACL_COMPILE_SYS && compileFlag != ACL_COMPILE_UNREGISTERED) {
-        ACL_LOG_ERROR("[Check][Type]aclopCompile compile type[%d] not support",
+        ACL_LOG_INNER_ERROR("[Check][Type]aclopCompile compile type[%d] not support",
             static_cast<int32_t>(compileFlag));
         acl::AclErrorLogManager::ReportInputError(acl::UNSUPPORTED_FEATURE_MSG,
             std::vector<std::string>({"feature", "reason"}),
@@ -145,7 +145,7 @@ aclError aclopCompileAndExecute(const char *opType,
     aclOp.compileType = static_cast<OpCompileType>(compileFlag);
     if (compileFlag == ACL_COMPILE_UNREGISTERED) {
         if (opPath == nullptr) {
-            ACL_LOG_ERROR("[Check][OpPath]opPath cannot be null while compileFlag is %d",
+            ACL_LOG_INNER_ERROR("[Check][OpPath]opPath cannot be null while compileFlag is %d",
                 static_cast<int32_t>(compileFlag));
             acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
                 std::vector<std::string>({"param"}),
@@ -157,7 +157,7 @@ aclError aclopCompileAndExecute(const char *opType,
     ACL_LOG_INFO("aclopCompile::aclOp = %s", aclOp.DebugString().c_str());
     auto ret = OpCompileProcessor::GetInstance().OpCompile(aclOp);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("build op model failed, result = %d", ret);
+        ACL_LOG_INNER_ERROR("build op model failed, result = %d", ret);
         return ret;
     }
     ACL_LOG_INFO("ExecuteAsync::aclOp = %s", aclOp.DebugString().c_str());
@@ -171,7 +171,7 @@ aclError aclSetCompileopt(aclCompileOpt opt, const char *value)
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(value);
     std::string optStr = compileOptMap.find(opt) != compileOptMap.end() ? compileOptMap[opt] : "";
     if (optStr.empty()) {
-        ACL_LOG_ERROR("[Check][Opt]Can not find any options[%d] valid in enum aclCompileOpt, "
+        ACL_LOG_INNER_ERROR("[Check][Opt]Can not find any options[%d] valid in enum aclCompileOpt, "
             "please check input option.", opt);
         return ACL_ERROR_INTERNAL_ERROR;
     }

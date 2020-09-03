@@ -113,7 +113,7 @@ static aclError MakeInputCompileParam(const AclOp &aclOp, CompileParam &param,
     for (int i = 0; i < aclOp.numInputs; ++i) {
         const aclTensorDesc *desc = aclOp.inputDesc[i];
         if (!desc->CheckShapeRange()) {
-            ACL_LOG_ERROR("the number of shapeRange is not equal to number of dims");
+            ACL_LOG_INNER_ERROR("the number of shapeRange is not equal to number of dims");
             return ACL_ERROR_INVALID_PARAM;
         }
         ge::Format geFormat = ge::FORMAT_RESERVED;
@@ -140,7 +140,7 @@ static aclError MakeInputCompileParam(const AclOp &aclOp, CompileParam &param,
             }
         }
         if (geTensorDesc.SetShapeRange(desc->shapeRange) != ge::GRAPH_SUCCESS) {
-            ACL_LOG_ERROR("set shape range fail, opType: %s", aclOp.opType.c_str());
+            ACL_LOG_INNER_ERROR("set shape range fail, opType: %s", aclOp.opType.c_str());
             return ACL_ERROR_GE_FAILURE;
         }
         AttrUtils::SetInt(geTensorDesc, ge::ATTR_NAME_PLACEMENT, static_cast<int64_t>(desc->memtype));
@@ -198,7 +198,7 @@ static aclError MakeOutputCompileParam(const AclOp &aclOp, CompileParam &param,
             }
         }
         if (geTensorDesc.SetShapeRange(desc->shapeRange) != ge::GRAPH_SUCCESS) {
-            ACL_LOG_ERROR("set shape range fail, opType: %s", aclOp.opType.c_str());
+            ACL_LOG_INNER_ERROR("set shape range fail, opType: %s", aclOp.opType.c_str());
             return ACL_ERROR_GE_FAILURE;
         }
 
@@ -241,13 +241,13 @@ aclError OpCompiler::MakeCompileParam(const AclOp &aclOp, CompileParam &param, i
 
     aclError inputRet = MakeInputCompileParam(aclOp, param, opDesc.get(), compileFlag);
     if (inputRet != ACL_SUCCESS) {
-        ACL_LOG_ERROR("make input compile param failed, result = %d", inputRet);
+        ACL_LOG_INNER_ERROR("make input compile param failed, result = %d", inputRet);
         return inputRet;
     }
 
     aclError outputRet = MakeOutputCompileParam(aclOp, param, opDesc.get(), compileFlag);
     if (outputRet != ACL_SUCCESS) {
-        ACL_LOG_ERROR("make output compile param failed, result = %d", outputRet);
+        ACL_LOG_INNER_ERROR("make output compile param failed, result = %d", outputRet);
         return outputRet;
     }
 
@@ -259,7 +259,7 @@ aclError OpCompiler::MakeCompileParam(const AclOp &aclOp, CompileParam &param, i
                 GeAttrValue::ValueType valType = it.second.GetValueType();
                 auto valTypeIt = ATTR_TYPES_MAP.find(valType);
                 if (valTypeIt == ATTR_TYPES_MAP.end()) {
-                    ACL_LOG_ERROR("Invalid attr value type, valType: %d", static_cast<int32_t>(valType));
+                    ACL_LOG_INNER_ERROR("Invalid attr value type, valType: %d", static_cast<int32_t>(valType));
                     return ACL_ERROR_INVALID_PARAM;
                 }
                 attrTypeList.append(it.first).append(":")
