@@ -63,7 +63,7 @@ aclError aclInit(const char *configPath)
         ACL_LOG_INFO("set DumpConfig in aclInit");
         ret = acl::AclDump::GetInstance().HandleDumpConfig(configPath);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("process HandleDumpConfig failed");
+            ACL_LOG_INNER_ERROR("process HandleDumpConfig failed");
             return ret;
         }
         ACL_LOG_INFO("set HandleDumpConfig success in aclInit");
@@ -71,7 +71,7 @@ aclError aclInit(const char *configPath)
         ACL_LOG_INFO("set max_opqueue_num in aclInit");
         ret = acl::OpModelManager::GetInstance().HandleMaxOpQueueConfig(configPath);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("process HandleMaxOpQueueConfig failed");
+            ACL_LOG_INNER_ERROR("process HandleMaxOpQueueConfig failed");
             return ret;
         }
         ACL_LOG_INFO("set HandleMaxOpQueueConfig success in aclInit");
@@ -81,7 +81,7 @@ aclError aclInit(const char *configPath)
     acl::AclProfiling aclProf;
     ret = aclProf.HandleProfilingConfig(configPath);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("process HandleProfilingConfig failed");
+        ACL_LOG_INNER_ERROR("process HandleProfilingConfig failed");
         return ret;
     }
 
@@ -90,13 +90,13 @@ aclError aclInit(const char *configPath)
     ACL_LOG_INFO("call ge interface executor.Initialize");
     geRet = executor.Initialize();
     if (geRet != ge::SUCCESS) {
-        ACL_LOG_ERROR("init ge executor failed, ge result = %u", geRet);
+        ACL_LOG_CALL_ERROR("init ge executor failed, ge result = %u", geRet);
         return ACL_GET_ERRCODE_GE(geRet);
     }
     // get socVersion
     ret = InitSocVersion();
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("init soc version failed, ret = %d", ret);
+        ACL_LOG_INNER_ERROR("init soc version failed, ret = %d", ret);
         return ret;
     }
     aclInitFlag = true;
@@ -109,7 +109,7 @@ aclError aclFinalize()
     ACL_LOG_INFO("start to execute aclFinalize");
     std::unique_lock<std::mutex> lk(aclInitMutex);
     if (aclFinalizeFlag) {
-        ACL_LOG_ERROR("repeatedly finalized");
+        ACL_LOG_INNER_ERROR("repeatedly finalized");
         return ACL_ERROR_REPEAT_FINALIZE;
     }
     if (DlogReportFinalize() != 0) {
@@ -120,7 +120,7 @@ aclError aclFinalize()
     if (callback != nullptr) {
         int32_t profRet = callback(MSPROF_CTRL_FINALIZE, nullptr, 0);
         if (profRet != MSPROF_ERROR_NONE) {
-            ACL_LOG_ERROR("handle json config of profiling failed, prof result = %d",
+            ACL_LOG_CALL_ERROR("handle json config of profiling failed, prof result = %d",
                 static_cast<int32_t>(profRet));
         }
     }
@@ -128,7 +128,7 @@ aclError aclFinalize()
     if (aclGeFinalizeCallback != nullptr) {
         auto ret = aclGeFinalizeCallback();
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("ge finalize failed, result = %d", static_cast<int32_t>(ret));
+            ACL_LOG_INNER_ERROR("ge finalize failed, result = %d", static_cast<int32_t>(ret));
         }
     }
 
@@ -136,14 +136,14 @@ aclError aclFinalize()
     ge::GeExecutor executor;
     ge::Status geRet = executor.Finalize();
     if (geRet != ge::SUCCESS) {
-        ACL_LOG_ERROR("finalize ge executor failed, ge result = %u", geRet);
+        ACL_LOG_CALL_ERROR("finalize ge executor failed, ge result = %u", geRet);
         return ACL_GET_ERRCODE_GE(geRet);
     }
 
     if (acl::AclDump::GetInstance().GetAclDumpFlag()) {
         int adxRet = AdxDataDumpServerUnInit();
         if (adxRet != ADX_ERROR_NONE) {
-            ACL_LOG_ERROR("generate dump file failed in disk, adx result = %d", adxRet);
+            ACL_LOG_CALL_ERROR("generate dump file failed in disk, adx result = %d", adxRet);
             return ACL_ERROR_INTERNAL_ERROR;
         }
     }
@@ -161,7 +161,7 @@ aclError InitSocVersion()
         char socVersion[SOC_VERSION_LEN] = { '\0' };
         auto rtErr = rtGetSocVersion(socVersion, sizeof(socVersion));
         if (rtErr != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("get soc version failed, runtime result is %d", static_cast<int32_t>(rtErr));
+            ACL_LOG_CALL_ERROR("get soc version failed, runtime result is %d", static_cast<int32_t>(rtErr));
             return ACL_GET_ERRCODE_RTS(rtErr);
         }
         aclSocVersion = std::string(socVersion);
@@ -224,7 +224,7 @@ const char *aclrtGetSocName()
     // get socVersion
     auto ret = InitSocVersion();
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("init soc version failed, ret = %d", ret);
+        ACL_LOG_INNER_ERROR("init soc version failed, ret = %d", ret);
         return nullptr;
     }
     ACL_LOG_INFO("execute aclrtGetSocName successfully");
@@ -237,7 +237,7 @@ const char *aclGetRecentErrMsg()
     thread_local static std::string aclRecentErrMsg;
     aclRecentErrMsg = ErrorManager::GetInstance().GetErrorMessage();
     if (aclRecentErrMsg.empty()) {
-        ACL_LOG_ERROR("get error message failed");
+        ACL_LOG_INNER_ERROR("get error message failed");
         return nullptr;
     }
     ACL_LOG_INFO("execute aclGetRecentErrMsg successfully.");

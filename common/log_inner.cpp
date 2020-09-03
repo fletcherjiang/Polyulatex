@@ -119,4 +119,20 @@ void AclErrorLogManager::ReportInputError(std::string errorCode, const std::vect
 {
     REPORT_INPUT_ERROR(errorCode, key, value);
 }
+
+void AclErrorLogManager::ReportInnerError(const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    REPORT_INNER_ERROR("EH9999", fmt, ap);
+    va_end(ap);
+}
+void AclErrorLogManager::ReportCallError(const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    REPORT_CALL_ERROR("EH9999", fmt, ap);
+    va_end(ap);
+}
+
 } // namespace acl

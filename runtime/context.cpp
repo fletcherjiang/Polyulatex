@@ -31,7 +31,7 @@ aclError aclrtCreateContext(aclrtContext *context, int32_t deviceId)
     rtContext_t rtCtx = nullptr;
     rtError_t rtErr = rtCtxCreateEx(&rtCtx, RT_CTX_NORMAL_MODE, deviceId);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("create context failed, device is %d, runtime result is %d",
+        ACL_LOG_CALL_ERROR("create context failed, device is %d, runtime result is %d",
             deviceId, static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
@@ -53,7 +53,7 @@ aclError aclrtDestroyContext(aclrtContext context)
 
     rtError_t rtErr = rtCtxDestroyEx(static_cast<rtContext_t>(context));
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("destory context failed, runtime result is %d", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("destory context failed, runtime result is %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     ACL_LOG_INFO("successfully execute aclrtDestroyContext");
@@ -69,7 +69,7 @@ aclError aclrtSetCurrentContext(aclrtContext context)
 
     rtError_t rtErr = rtCtxSetCurrent(static_cast<rtContext_t>(context));
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("set current context failed, runtime result is %d", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("set current context failed, runtime result is %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     ACL_LOG_INFO("successfully execute aclrtSetCurrentContext");

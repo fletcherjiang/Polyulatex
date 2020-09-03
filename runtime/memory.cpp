@@ -35,7 +35,7 @@ aclError aclrtMalloc(void **devPtr, size_t size, aclrtMemMallocPolicy policy)
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(devPtr);
     // size must be greater than zero
     if (size == 0) {
-        ACL_LOG_ERROR("malloc size must be greater than zero");
+        ACL_LOG_INNER_ERROR("malloc size must be greater than zero");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"size", std::to_string(size),
@@ -60,7 +60,7 @@ aclError aclrtMalloc(void **devPtr, size_t size, aclrtMemMallocPolicy policy)
     }
     rtError_t rtErr = rtMalloc(devPtr, alignedSize, flags);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("alloc device memory failed, runtime result = %d", rtErr);
+        ACL_LOG_CALL_ERROR("alloc device memory failed, runtime result = %d", rtErr);
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     ACL_ADD_APPLY_SUCCESS_COUNT(ACL_STATISTICS_MALLOC_FREE);
@@ -75,7 +75,7 @@ aclError aclrtMallocCached(void **devPtr, size_t size, aclrtMemMallocPolicy poli
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(devPtr);
 
     if (size == 0) {
-        ACL_LOG_ERROR("malloc size must be greater than zero");
+        ACL_LOG_INNER_ERROR("malloc size must be greater than zero");
         return ACL_ERROR_INVALID_PARAM;
     }
     size_t alignedSize;
@@ -90,7 +90,7 @@ aclError aclrtMallocCached(void **devPtr, size_t size, aclrtMemMallocPolicy poli
     }
     rtError_t rtErr = rtMallocCached(devPtr, alignedSize, cacheFlags);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("alloc device memory with cache failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("alloc device memory with cache failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     ACL_ADD_APPLY_SUCCESS_COUNT(ACL_STATISTICS_MALLOC_FREE);
@@ -104,12 +104,12 @@ aclError aclrtMemFlush(void *devPtr, size_t size)
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(devPtr);
 
     if (size == 0) {
-        ACL_LOG_ERROR("flush cache size must be greater than zero");
+        ACL_LOG_INNER_ERROR("flush cache size must be greater than zero");
         return ACL_ERROR_INVALID_PARAM;
     }
     rtError_t rtErr = rtFlushCache(devPtr, size);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("flush cache data to ddr failed, runtime result = %d, size = %zu",
+        ACL_LOG_CALL_ERROR("flush cache data to ddr failed, runtime result = %d, size = %zu",
             static_cast<int32_t>(rtErr), size);
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
@@ -123,12 +123,12 @@ aclError aclrtMemInvalidate(void *devPtr, size_t size)
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(devPtr);
 
     if (size == 0) {
-        ACL_LOG_ERROR("invalidate cache size must be greater than zero");
+        ACL_LOG_INNER_ERROR("invalidate cache size must be greater than zero");
         return ACL_ERROR_INVALID_PARAM;
     }
     rtError_t rtErr = rtInvalidCache(devPtr, size);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("invalidate cache data failed, runtime result = %d, size = %zu",
+        ACL_LOG_CALL_ERROR("invalidate cache data failed, runtime result = %d, size = %zu",
             static_cast<int32_t>(rtErr), size);
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
@@ -144,7 +144,7 @@ aclError aclrtFree(void *devPtr)
 
     rtError_t rtErr = rtFree(devPtr);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("free device memory failed, runtime result = %d", rtErr);
+        ACL_LOG_CALL_ERROR("free device memory failed, runtime result = %d", rtErr);
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     ACL_ADD_RELEASE_SUCCESS_COUNT(ACL_STATISTICS_MALLOC_FREE);
@@ -159,12 +159,12 @@ aclError aclrtMallocHost(void **hostPtr, size_t size)
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(hostPtr);
     // size must be greater than zero
     if (size == 0) {
-        ACL_LOG_ERROR("malloc size must be greater than zero");
+        ACL_LOG_INNER_ERROR("malloc size must be greater than zero");
         return ACL_ERROR_INVALID_PARAM;
     }
     rtError_t rtErr = rtMallocHost(hostPtr, size);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("alloc host memory failed, runtime result = %d", rtErr);
+        ACL_LOG_CALL_ERROR("alloc host memory failed, runtime result = %d", rtErr);
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     ACL_ADD_APPLY_SUCCESS_COUNT(ACL_STATISTICS_MALLOC_FREE_HOST);
@@ -179,7 +179,7 @@ aclError aclrtFreeHost(void *hostPtr)
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(hostPtr);
     rtError_t rtErr = rtFreeHost(hostPtr);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("free host memory failed, runtime result = %d", rtErr);
+        ACL_LOG_CALL_ERROR("free host memory failed, runtime result = %d", rtErr);
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     ACL_ADD_RELEASE_SUCCESS_COUNT(ACL_STATISTICS_MALLOC_FREE_HOST);
@@ -206,7 +206,7 @@ static aclError MemcpyKindTranslate(aclrtMemcpyKind kind, rtMemcpyKind_t &rtKind
             break;
         }
         default: {
-            ACL_LOG_ERROR("invalid kind of memcpy, kind = %d", static_cast<int32_t>(kind));
+            ACL_LOG_INNER_ERROR("invalid kind of memcpy, kind = %d", static_cast<int32_t>(kind));
             return ACL_ERROR_INVALID_PARAM;
         }
     }
@@ -228,13 +228,13 @@ aclError aclrtMemcpy(void *dst,
     rtMemcpyKind_t rtKind = RT_MEMCPY_RESERVED;
     aclError ret = MemcpyKindTranslate(kind, rtKind);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("invalid kind of memcpy, kind = %d", static_cast<int32_t>(kind));
+        ACL_LOG_INNER_ERROR("invalid kind of memcpy, kind = %d", static_cast<int32_t>(kind));
         return ret;
     }
 
     rtError_t rtErr = rtMemcpy(dst, destMax, src, count, rtKind);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("synchronized memcpy failed, kind = %d, runtime result = %d",
+        ACL_LOG_CALL_ERROR("synchronized memcpy failed, kind = %d, runtime result = %d",
             static_cast<int32_t>(kind), static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
@@ -250,7 +250,7 @@ aclError aclrtMemset(void *devPtr, size_t maxCount, int32_t value, size_t count)
 
     rtError_t rtErr = rtMemset(devPtr, maxCount, value, count);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("set memory failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("set memory failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     return ACL_SUCCESS;
@@ -271,13 +271,13 @@ aclError aclrtMemcpyAsync(void *dst,
     rtMemcpyKind_t rtKindVal = RT_MEMCPY_RESERVED;
     aclError ret = MemcpyKindTranslate(kind, rtKindVal);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("invalid kind of memcpy, kind = %d", static_cast<int32_t>(kind));
+        ACL_LOG_INNER_ERROR("invalid kind of memcpy, kind = %d", static_cast<int32_t>(kind));
         return ret;
     }
 
     rtError_t rtErr = rtMemcpyAsync(dst, destMax, src, count, rtKindVal, static_cast<rtStream_t>(stream));
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("asynchronized memcpy failed, kind = %d, runtime result = %d",
+        ACL_LOG_CALL_ERROR("asynchronized memcpy failed, kind = %d, runtime result = %d",
             static_cast<int32_t>(kind), static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
@@ -293,7 +293,7 @@ aclError aclrtMemsetAsync(void *devPtr, size_t maxCount, int32_t value, size_t c
 
     rtError_t rtErr = rtMemsetAsync(devPtr, maxCount, value, count, stream);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("asynchronized memset failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("asynchronized memset failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     return ACL_SUCCESS;
@@ -305,21 +305,21 @@ aclError aclrtDeviceCanAccessPeer(int32_t *canAccessPeer, int32_t deviceId, int3
     ACL_LOG_INFO("start to execute aclrtDeviceCanAccessPeer");
 
     if (deviceId == peerDeviceId) {
-        ACL_LOG_ERROR("deviceId shouldn't be equal to peeerDeviceId");
+        ACL_LOG_INNER_ERROR("deviceId shouldn't be equal to peeerDeviceId");
         return ACL_ERROR_INVALID_PARAM;
     }
 
     uint32_t peerPhyId = 0;
     rtError_t rtErr = rtGetDevicePhyIdByIndex(static_cast<uint32_t>(peerDeviceId), &peerPhyId);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("call rtGetDevicePhyIdByIndex failed, deviceId = %d, peerDeviceId = %d, "
+        ACL_LOG_CALL_ERROR("call rtGetDevicePhyIdByIndex failed, deviceId = %d, peerDeviceId = %d, "
                        "runtime result = %d", deviceId, peerDeviceId, static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
 
     rtErr = rtDeviceCanAccessPeer(canAccessPeer, static_cast<uint32_t>(deviceId), peerPhyId);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("call rtDeviceCanAccessPeer failed, deviceId = %d, peerPhyId = %u, "
+        ACL_LOG_CALL_ERROR("call rtDeviceCanAccessPeer failed, deviceId = %d, peerPhyId = %u, "
                       "runtime result = %d", deviceId, peerPhyId, static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
@@ -333,19 +333,19 @@ aclError aclrtDeviceEnablePeerAccess(int32_t peerDeviceId, uint32_t flags)
     ACL_LOG_INFO("start to execute aclrtDeviceEnablePeerAccess");
 
     if (flags != 0) {
-        ACL_LOG_ERROR("the flags must be 0, but current is %u", flags);
+        ACL_LOG_INNER_ERROR("the flags must be 0, but current is %u", flags);
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
 
     int32_t deviceId = 0;
     rtError_t rtErr = rtGetDevice(&deviceId);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("call rtGetDevice failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("call rtGetDevice failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
 
     if (deviceId == peerDeviceId) {
-        ACL_LOG_ERROR("deviceId shouldn't be equal to peeerDeviceId, deviceId = %d, peerDeviceId = %d",
+        ACL_LOG_INNER_ERROR("deviceId shouldn't be equal to peeerDeviceId, deviceId = %d, peerDeviceId = %d",
                       deviceId, peerDeviceId);
         return ACL_ERROR_INVALID_PARAM;
     }
@@ -353,14 +353,14 @@ aclError aclrtDeviceEnablePeerAccess(int32_t peerDeviceId, uint32_t flags)
     uint32_t peerPhyId = 0;
     rtErr = rtGetDevicePhyIdByIndex(static_cast<uint32_t>(peerDeviceId), &peerPhyId);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("call rtGetDevicePhyIdByIndex failed, peerDeviceId = %d, runtime result = %d",
+        ACL_LOG_CALL_ERROR("call rtGetDevicePhyIdByIndex failed, peerDeviceId = %d, runtime result = %d",
                       peerDeviceId, static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
 
     rtErr = rtEnableP2P(static_cast<uint32_t>(deviceId), peerPhyId, flags);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("call rtEnableP2P failed, deviceId = %d, peerPhyId = %u, runtime result = %d",
+        ACL_LOG_CALL_ERROR("call rtEnableP2P failed, deviceId = %d, peerPhyId = %u, runtime result = %d",
                       deviceId, peerPhyId, static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
@@ -376,12 +376,12 @@ aclError aclrtDeviceDisablePeerAccess(int32_t peerDeviceId)
     int32_t deviceId = 0;
     rtError_t rtErr = rtGetDevice(&deviceId);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("call rtGetDevice failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("call rtGetDevice failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
 
     if (deviceId == peerDeviceId) {
-        ACL_LOG_ERROR("deviceId shouldn't be equal to peeerDeviceId, deviceId = %d, peerDeviceId = %d",
+        ACL_LOG_INNER_ERROR("deviceId shouldn't be equal to peeerDeviceId, deviceId = %d, peerDeviceId = %d",
                       deviceId, peerDeviceId);
         return ACL_ERROR_INVALID_PARAM;
     }
@@ -389,14 +389,14 @@ aclError aclrtDeviceDisablePeerAccess(int32_t peerDeviceId)
     uint32_t peerPhyId = 0;
     rtErr = rtGetDevicePhyIdByIndex(static_cast<uint32_t>(peerDeviceId), &peerPhyId);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("call rtGetDevicePhyIdByIndex failed, peerDeviceId = %u, runtime result = %d",
+        ACL_LOG_CALL_ERROR("call rtGetDevicePhyIdByIndex failed, peerDeviceId = %u, runtime result = %d",
                       peerDeviceId, static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
 
     rtErr = rtDisableP2P(static_cast<uint32_t>(deviceId), peerPhyId);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("call rtDisableP2P failed, deviceId = %d, peerPhyId = %u, runtime result = %d",
+        ACL_LOG_CALL_ERROR("call rtDisableP2P failed, deviceId = %d, peerPhyId = %u, runtime result = %d",
                       deviceId, peerPhyId, static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
@@ -413,7 +413,7 @@ aclError aclrtGetMemInfo(aclrtMemAttr attr, size_t *free, size_t *total)
 
     rtError_t rtErr = rtMemGetInfoEx(static_cast<rtMemInfoType_t>(attr), free, total);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("get memory information failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("get memory information failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
 

@@ -365,7 +365,7 @@ bool AttrValueEquals(const ge::GeAttrValue &lhs, const ge::GeAttrValue &rhs)
         case ge::GeAttrValue::VT_LIST_LIST_INT:
             return AttrListListValueEquals<int64_t>(lhs, rhs);
         default:
-            ACL_LOG_ERROR("[Check][Type]Unknown type %d", static_cast<int32_t>(type));
+            ACL_LOG_INNER_ERROR("[Check][Type]Unknown type %d", static_cast<int32_t>(type));
             return false;
     }
 }
@@ -446,11 +446,11 @@ static bool ConstToAttr(int tensorNum,
         const aclTensorDesc *desc = tensorDesc[i];
         if (desc->isConst) {
             if ((desc->constDataBuf != nullptr) && (desc->constDataLen <= 0)) {
-                ACL_LOG_ERROR("[Check][constDataBuf]constDataBuf is not nullptr and dataLen is <= 0");
+                ACL_LOG_INNER_ERROR("[Check][constDataBuf]constDataBuf is not nullptr and dataLen is <= 0");
                 return false;
             }
             if ((desc->constDataBuf == nullptr) && (desc->constDataLen > 0)) {
-                ACL_LOG_ERROR("[Check][constDataBuf]constDataBuf is nullptr and dataLen is > 0");
+                ACL_LOG_INNER_ERROR("[Check][constDataBuf]constDataBuf is nullptr and dataLen is > 0");
                 return false;
             }
             std::string constBufStr =
@@ -468,12 +468,12 @@ bool SaveConstToAttr(const AclOp &aclOp, aclopAttr *opAttr)
     ACL_LOG_INFO("begin to inset constDataBuf in aclopAttr");
     bool ret = ConstToAttr(aclOp.numInputs, aclOp.inputDesc, constStr);
     if (!ret) {
-        ACL_LOG_ERROR("[Check][InputTenspr]inputTenspr get const dataLen failed");
+        ACL_LOG_INNER_ERROR("[Check][InputTenspr]inputTenspr get const dataLen failed");
         return false;
     }
     ret = ConstToAttr(aclOp.numOutputs, aclOp.outputDesc, constStr);
     if (!ret) {
-        ACL_LOG_ERROR("[Check][OutputTensor]outputTensor get const dataLen failed");
+        ACL_LOG_INNER_ERROR("[Check][OutputTensor]outputTensor get const dataLen failed");
         return false;
     }
     // opAttr is not nullptr

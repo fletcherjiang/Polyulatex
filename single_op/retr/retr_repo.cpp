@@ -53,14 +53,14 @@ aclError AclFvRepo::PrepareInput(aclfvSearchType type, void *devData, uint32_t i
     uint32_t configOffset = sizeof(aicpu::AicpuParamHead) + ioAddrNum * sizeof(uint64_t);
     auto memcpyRet = memcpy_s(args + configOffset, argsSize - configOffset, &(type), sizeof(aclfvSearchType));
     if (memcpyRet != EOK) {
-        ACL_LOG_ERROR("[Copy][Type]copy aclfvSearchType to args failed, result = %d.", memcpyRet);
+        ACL_LOG_INNER_ERROR("[Copy][Type]copy aclfvSearchType to args failed, result = %d.", memcpyRet);
         (void)rtEventDestroy(static_cast<rtEvent_t>(notify_));
         return ACL_ERROR_RT_FAILURE;
     }
     configOffset += sizeof(aclfvSearchType);
     memcpyRet = memcpy_s(args + configOffset, argsSize - configOffset, &(notifyId_), sizeof(uint32_t));
     if (memcpyRet != EOK) {
-        ACL_LOG_ERROR("[Copy][NotifyId]copy notifyId to args failed, result = %d.", memcpyRet);
+        ACL_LOG_INNER_ERROR("[Copy][NotifyId]copy notifyId to args failed, result = %d.", memcpyRet);
         (void)rtEventDestroy(static_cast<rtEvent_t>(notify_));
         return ACL_ERROR_RT_FAILURE;
     }
@@ -79,7 +79,7 @@ aclError AclFvRepo::Add1vN(aclfvArgs &retrArgs, aclfvFeatureInfo *featureInfo, a
     uint32_t addFeatureCount = 0;
     aclError ret = AddTask(retrArgs, addFeatureNum, addFeatureCount, stream, notify);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Add][Task]execute aclfvRepoAddTask failed, result = %d.", ret);
+        ACL_LOG_INNER_ERROR("[Add][Task]execute aclfvRepoAddTask failed, result = %d.", ret);
         return ret;
     }
     ACL_LOG_INFO("aclfvRepoAdd1vN success.");
@@ -109,7 +109,7 @@ aclError AclFvRepo::AddNvM(aclfvArgs &retrArgs, aclfvFeatureInfo *featureInfo, a
             (currentNum > acl::retr::FPGA_DRV_CRASH_FEAT_ADD_MAX) ? acl::retr::FPGA_DRV_CRASH_FEAT_ADD_MAX : currentNum;
         aclError ret = AddTask(retrArgs, addFeatureNum, addFeatureCount, stream, notify);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("[Add[Task]execute aclfvRepoAddTask failed, result = %d.", ret);
+            ACL_LOG_INNER_ERROR("[Add[Task]execute aclfvRepoAddTask failed, result = %d.", ret);
             return ret;
         }
         addFeatureCount += addFeatureNum;
@@ -129,13 +129,13 @@ aclError AclFvRepo::AddTask(aclfvArgs &retrArgs, uint32_t &addFeatureNum, uint32
     auto memcpyRet = memcpy_s(retrArgs.args + retrArgs.configOffset, retrArgs.argsSize - retrArgs.configOffset,
         &addFeatureNum, sizeof(uint32_t));
     if (memcpyRet != EOK) {
-        ACL_LOG_ERROR("[Copy][AddFeatureNum]copy addFeatureNum to args failed, result = %d.", memcpyRet);
+        ACL_LOG_INNER_ERROR("[Copy][AddFeatureNum]copy addFeatureNum to args failed, result = %d.", memcpyRet);
         return ACL_ERROR_RT_FAILURE;
     }
     memcpyRet = memcpy_s(retrArgs.args + retrArgs.configOffset + sizeof(uint32_t),
         retrArgs.argsSize - retrArgs.configOffset - sizeof(uint32_t), &addFeatureCount, sizeof(uint32_t));
     if (memcpyRet != EOK) {
-        ACL_LOG_ERROR("[Copy][AddFeatureCount]copy addFeatureCount to args failed, result = %d.", memcpyRet);
+        ACL_LOG_INNER_ERROR("[Copy][AddFeatureCount]copy addFeatureCount to args failed, result = %d.", memcpyRet);
         return ACL_ERROR_RT_FAILURE;
     }
     ACL_LOG_INFO("start to execute aclfvRepoAdd::rtCpuKernelLaunch.");
@@ -146,13 +146,13 @@ aclError AclFvRepo::AddTask(aclfvArgs &retrArgs, uint32_t &addFeatureNum, uint32
         stream);
     ACL_LOG_INFO("end to execute aclfvRepoAdd::rtCpuKernelLaunch.");
     if (rtRet != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("[Call][rtCpuKernelLaunch]retr repo add call rtCpuKernelLaunch failed, "
+        ACL_LOG_CALL_ERROR("[Call][rtCpuKernelLaunch]retr repo add call rtCpuKernelLaunch failed, "
             "runtime result = %d.", rtRet);
         return ACL_ERROR_RT_FAILURE;
     }
     auto ret = aclFvNotifyWait(notify, stream);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Wait][Notify]wait for a notify to stream failed, runtime result = %d.", ret);
+        ACL_LOG_INNER_ERROR("[Wait][Notify]wait for a notify to stream failed, runtime result = %d.", ret);
         return ret;
     }
     ACL_LOG_INFO("aclfvRepoAddTask success.");
@@ -172,7 +172,7 @@ aclError AclFvRepo::AddCheck(aclfvFeatureInfo *featureInfo, aclrtStream stream)
     size_t hostSize = sizeof(featureInfo->retrFeatureInfo);
     size_t devSize = featureInfo->dataBuffer.length;
     if (hostSize != devSize) {
-        ACL_LOG_ERROR("[Check][HostSize]memory size between host [%u] and device [%u] not equal",
+        ACL_LOG_INNER_ERROR("[Check][HostSize]memory size between host [%u] and device [%u] not equal",
             hostSize, devSize);
         return ACL_ERROR_INVALID_PARAM;
     }
@@ -193,7 +193,7 @@ aclError AclFvRepo::AddExecute(aclfvSearchType type, aclfvFeatureInfo *featureIn
     aclError ret = aclrtMemcpyAsync(featureInfo->dataBuffer.data, featureInfo->dataBuffer.length,
         &(featureInfo->retrFeatureInfo), sizeof(featureInfo->retrFeatureInfo), memcpyKind, stream);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Copy][Mem]memcpy between host and device failed, kind = %d, result = %d",
+        ACL_LOG_INNER_ERROR("[Copy][Mem]memcpy between host and device failed, kind = %d, result = %d",
             static_cast<int32_t>(memcpyKind), ret);
         return ret;
     }
@@ -207,17 +207,17 @@ aclError AclFvRepo::AddExecute(aclfvSearchType type, aclfvFeatureInfo *featureIn
     if (type == SEARCH_1_N) {
         ret = Add1vN(retrArgs, featureInfo, stream, notify_);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("[Exec][Add1vN]execute aclfvRepoAdd1vN failed, result = %d.", ret);
+            ACL_LOG_INNER_ERROR("[Exec][Add1vN]execute aclfvRepoAdd1vN failed, result = %d.", ret);
             return ret;
         }
     } else if (type == SEARCH_N_M) {
         ret = AddNvM(retrArgs, featureInfo, stream, notify_);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("[Exec][AddNvM]execute aclfvRepoAddNvM failed, result = %d.", ret);
+            ACL_LOG_INNER_ERROR("[Exec][AddNvM]execute aclfvRepoAddNvM failed, result = %d.", ret);
             return ret;
         }
     } else {
-        ACL_LOG_ERROR("[Check][Type]type must be SEARCH_1_N or SEARCH_N_M, the current type = %d",
+        ACL_LOG_INNER_ERROR("[Check][Type]type must be SEARCH_1_N or SEARCH_N_M, the current type = %d",
             static_cast<int32_t>(type));
         return ACL_ERROR_INVALID_PARAM;
     }
@@ -228,7 +228,7 @@ aclError AclFvRepo::AddExecute(aclfvSearchType type, aclfvFeatureInfo *featureIn
     ret = aclrtMemcpyAsync(&(featureInfo->retrFeatureInfo), sizeof(featureInfo->retrFeatureInfo),
         featureInfo->dataBuffer.data, featureInfo->dataBuffer.length, memcpyKind, stream);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Copy][Mem]memcpy between host and device failed, kind = %d, result = %d",
+        ACL_LOG_INNER_ERROR("[Copy][Mem]memcpy between host and device failed, kind = %d, result = %d",
             static_cast<int32_t>(memcpyKind), ret);
         return ret;
     }
@@ -267,12 +267,12 @@ aclError AclFvRepo::Add(aclfvSearchType type, aclfvFeatureInfo *featureInfo, acl
 
     rtError_t rtRetCode = rtStreamSynchronize(stream);
     if (rtRetCode != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("[Sync][Stream]synchronize stream failed, runtime result = %d.", rtRetCode);
+        ACL_LOG_CALL_ERROR("[Sync][Stream]synchronize stream failed, runtime result = %d.", rtRetCode);
         (void)rtEventDestroy(static_cast<rtEvent_t>(notify_));
         return ACL_ERROR_RT_FAILURE;
     }
     if (featureInfo->retrFeatureInfo.retCode != 0) {
-        ACL_LOG_ERROR("[Exec][RepoAdd]execute aclfvRepoAdd failed, result = %d.", featureInfo->retrFeatureInfo.retCode);
+        ACL_LOG_INNER_ERROR("[Exec][RepoAdd]execute aclfvRepoAdd failed, result = %d.", featureInfo->retrFeatureInfo.retCode);
         (void)rtEventDestroy(static_cast<rtEvent_t>(notify_));
         return ACL_ERROR_FAILURE;
     }
@@ -295,7 +295,7 @@ aclError AclFvRepo::DelCheck(aclfvRepoRange *repoRange, aclrtStream stream)
     size_t hostSize = sizeof(repoRange->retrRepoRange);
     size_t devSize = repoRange->dataBuffer.length;
     if (hostSize != devSize) {
-        ACL_LOG_ERROR("[Check][Size]memory size between host [%u] and device [%u] not equal",
+        ACL_LOG_INNER_ERROR("[Check][Size]memory size between host [%u] and device [%u] not equal",
             hostSize, devSize);
         return ACL_ERROR_INVALID_PARAM;
     }
@@ -319,7 +319,7 @@ aclError AclFvRepo::DelExecute(aclfvRepoRange *repoRange, aclrtStream stream, co
                                     memcpyKind,
                                     stream);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Copy][Mem]memcpy between host and device failed, kind = %d, result = %d",
+        ACL_LOG_INNER_ERROR("[Copy][Mem]memcpy between host and device failed, kind = %d, result = %d",
             static_cast<int32_t>(memcpyKind), ret);
         return ret;
     }
@@ -331,14 +331,14 @@ aclError AclFvRepo::DelExecute(aclfvRepoRange *repoRange, aclrtStream stream, co
         nullptr, // no need smDesc
         stream);
     if (rtRet != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("[Check][Retr]retr aclfvRepoDel call rtCpuKernelLaunch failed, runtime result = %d.", rtRet);
+        ACL_LOG_CALL_ERROR("[Check][Retr]retr aclfvRepoDel call rtCpuKernelLaunch failed, runtime result = %d.", rtRet);
         return ACL_ERROR_RT_FAILURE;
     }
     ACL_LOG_INFO("rtCpuKernelLaunch %s success.", RETR_KERNELNAME_REPO_DEL);
 
     ret = aclFvNotifyWait(notify_, stream);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Wait][Notify]wait for a notify to stream failed, runtime result = %d.", ret);
+        ACL_LOG_INNER_ERROR("[Wait][Notify]wait for a notify to stream failed, runtime result = %d.", ret);
         return ret;
     }
 
@@ -348,7 +348,7 @@ aclError AclFvRepo::DelExecute(aclfvRepoRange *repoRange, aclrtStream stream, co
     ret = aclrtMemcpyAsync(&(repoRange->retrRepoRange), sizeof(repoRange->retrRepoRange), repoRange->dataBuffer.data,
         repoRange->dataBuffer.length, memcpyKind, stream);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Copy][RetrRepoRange]copy retrRepoRange from device to host failed, result = %d.",
+        ACL_LOG_INNER_ERROR("[Copy][RetrRepoRange]copy retrRepoRange from device to host failed, result = %d.",
             ret);
         return ret;
     }
@@ -385,12 +385,12 @@ aclError AclFvRepo::Del(aclfvSearchType type, aclfvRepoRange *repoRange, aclrtSt
 
     rtError_t rtStreamRet = rtStreamSynchronize(stream);
     if (rtStreamRet != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("[Sync][Stream]synchronize stream failed, runtime result = %d.", rtStreamRet);
+        ACL_LOG_CALL_ERROR("[Sync][Stream]synchronize stream failed, runtime result = %d.", rtStreamRet);
         (void)rtEventDestroy(static_cast<rtEvent_t>(notify_));
         return ACL_ERROR_RT_FAILURE;
     }
     if (repoRange->retrRepoRange.retCode != 0) {
-        ACL_LOG_ERROR("[Exec][RepoDel]execute aclfvRepoDel failed, result = %d.", repoRange->retrRepoRange.retCode);
+        ACL_LOG_INNER_ERROR("[Exec][RepoDel]execute aclfvRepoDel failed, result = %d.", repoRange->retrRepoRange.retCode);
         (void)rtEventDestroy(static_cast<rtEvent_t>(notify_));
         return ACL_ERROR_FAILURE;
     }

@@ -36,7 +36,7 @@ aclError AclFvInit::PrepareInput(aclfvInitPara *initPara, char *args, uint32_t a
 {
     aclError ret = aclrtGetRunMode(&runMode_);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Get][RunMode]aclrtGetRunMode failed, ret = %d", ret);
+        ACL_LOG_INNER_ERROR("[Get][RunMode]aclrtGetRunMode failed, ret = %d", ret);
         return ret;
     }
 
@@ -49,7 +49,7 @@ aclError AclFvInit::PrepareInput(aclfvInitPara *initPara, char *args, uint32_t a
     ACL_REQUIRES_NOT_NULL(initPara->dataBuffer.data);
     rtError_t rtRet = rtStreamCreate(&stream_, RT_STREAM_PRIORITY_DEFAULT);
     if (rtRet != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("[Create][Stream]AclFvInit create stream failed, runtime result = %d", rtRet);
+        ACL_LOG_CALL_ERROR("[Create][Stream]AclFvInit create stream failed, runtime result = %d", rtRet);
         return ACL_ERROR_RT_FAILURE;
     }
 
@@ -62,7 +62,7 @@ aclError AclFvInit::PrepareInput(aclfvInitPara *initPara, char *args, uint32_t a
     ret = aclrtMemcpyAsync(initPara->dataBuffer.data, initPara->dataBuffer.length,
         &(initPara->initPara), sizeof(initPara->initPara), memcpyKind, stream_);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Copy][Mem]memcpy between host and device failed, kind = %d, result = %d",
+        ACL_LOG_INNER_ERROR("[Copy][Mem]memcpy between host and device failed, kind = %d, result = %d",
             static_cast<int32_t>(memcpyKind), ret);
         (void)rtStreamDestroy(stream_);
         return ret;
@@ -96,7 +96,7 @@ aclError AclFvInit::Init(aclfvInitPara *initPara)
         nullptr,  // no need smDesc
         stream_);
     if (rtRet != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("[Initialize][Repr]retr initialize call rtCpuKernelLaunch failed, "
+        ACL_LOG_CALL_ERROR("[Initialize][Repr]retr initialize call rtCpuKernelLaunch failed, "
             "runtime result = %d", rtRet);
         (void)rtStreamDestroy(stream_);
         return ACL_ERROR_RT_FAILURE;
@@ -110,7 +110,7 @@ aclError AclFvInit::Init(aclfvInitPara *initPara)
     ret = aclrtMemcpyAsync(&(initPara->initPara), sizeof(initPara->initPara),
         initPara->dataBuffer.data, initPara->dataBuffer.length, memcpyKind, stream_);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Copy][Mem]memcpy between host and device failed, kind = %d, result = %d",
+        ACL_LOG_INNER_ERROR("[Copy][Mem]memcpy between host and device failed, kind = %d, result = %d",
             static_cast<int32_t>(memcpyKind), ret);
         (void)rtStreamDestroy(stream_);
         return ret;
@@ -118,14 +118,14 @@ aclError AclFvInit::Init(aclfvInitPara *initPara)
 
     rtRet = rtStreamSynchronize(stream_);
     if (rtRet != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("[Sync][Mem]synchronize stream failed, runtime result = %d", rtRet);
+        ACL_LOG_CALL_ERROR("[Sync][Mem]synchronize stream failed, runtime result = %d", rtRet);
         (void)rtStreamDestroy(stream_);
         return ACL_ERROR_RT_FAILURE;
     }
     (void)rtStreamDestroy(stream_);
 
     if (initPara->initPara.retCode != 0) {
-        ACL_LOG_ERROR("[Init][Fv]aclfvInit failed, ret = %d", initPara->initPara.retCode);
+        ACL_LOG_INNER_ERROR("[Init][Fv]aclfvInit failed, ret = %d", initPara->initPara.retCode);
         return ACL_ERROR_FAILURE;
     }
     ACL_LOG_INFO("execute aclfvInit success.");

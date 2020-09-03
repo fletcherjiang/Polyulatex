@@ -21,7 +21,7 @@ aclopAttr *aclopCreateAttr()
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_ATTR);
     auto *attr = new(std::nothrow) aclopAttr();
     if (attr == nullptr) {
-        ACL_LOG_ERROR("[Check][Attr]opAttr memory apply failed");
+        ACL_LOG_INNER_ERROR("[Check][Attr]opAttr memory apply failed");
         return nullptr;
     }
     ACL_ADD_APPLY_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_ATTR);
@@ -141,7 +141,7 @@ aclError aclopAttr::SetAttrByType(const char *attrName, aclDataType type, const 
         case ACL_INT32:
             return SetAttr(attrName, static_cast<int64_t >(*reinterpret_cast<const int32_t *>(value)));
         default:
-            ACL_LOG_ERROR("[Check][Type]unsupported type: %d", static_cast<int32_t>(type));
+            ACL_LOG_INNER_ERROR("[Check][Type]unsupported type: %d", static_cast<int32_t>(type));
             return ACL_ERROR_UNSUPPORTED_DATA_TYPE;
     }
 }

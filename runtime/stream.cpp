@@ -30,7 +30,7 @@ aclError aclrtCreateStream(aclrtStream *stream)
     rtStream_t rtStream = nullptr;
     rtError_t rtErr = rtStreamCreate(&rtStream, RT_STREAM_PRIORITY_DEFAULT);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("create stream failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("create stream failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
 
@@ -51,7 +51,7 @@ aclError aclrtDestroyStream(aclrtStream stream)
     ACL_LOG_INFO("release singleop success");
     rtError_t rtErr = rtStreamDestroy(static_cast<rtStream_t>(stream));
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("destroy stream failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("destroy stream failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     ACL_LOG_INFO("aclrtDestroyStream success");
@@ -66,7 +66,7 @@ aclError aclrtSynchronizeStream(aclrtStream stream)
 
     rtError_t rtErr = rtStreamSynchronize(static_cast<rtStream_t>(stream));
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("synchronize stream failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("synchronize stream failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
 
@@ -82,7 +82,7 @@ aclError aclrtStreamWaitEvent(aclrtStream stream, aclrtEvent event)
 
     rtError_t rtErr = rtStreamWaitEvent(static_cast<rtStream_t>(stream), static_cast<rtEvent_t>(event));
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("stream wait event failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("stream wait event failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
 

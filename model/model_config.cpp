@@ -33,7 +33,7 @@ namespace {
     {
         ACL_LOG_INFO("start to execute CheckMdlLoadPriority.");
         if (valueSize != sizeof(int32_t)) {
-            ACL_LOG_ERROR("[Check][File]valueSize[%zu] is invalid, it should be %zu", valueSize,
+            ACL_LOG_INNER_ERROR("[Check][File]valueSize[%zu] is invalid, it should be %zu", valueSize,
                 sizeof(int32_t));
             return ACL_ERROR_INVALID_PARAM;
         }
@@ -44,7 +44,7 @@ namespace {
         if (!mdlLoadPriorityFlag) {
             rtError_t rtErr = rtDeviceGetStreamPriorityRange(&leastPriority, &greatestPriority);
             if (rtErr != RT_ERROR_NONE) {
-                ACL_LOG_ERROR("[Get][PriorityRange]get range of stream priority failed, "
+                ACL_LOG_CALL_ERROR("[Get][PriorityRange]get range of stream priority failed, "
                     "runtime result = %d", static_cast<int32_t>(rtErr));
                 return ACL_GET_ERRCODE_RTS(rtErr);
             }
@@ -71,13 +71,13 @@ namespace {
     {
         ACL_LOG_INFO("start to execute CheckMdlLoadType.");
         if (valueSize != sizeof(size_t)) {
-            ACL_LOG_ERROR("[Check][ValueSize]valueSize[%zu] is invalid, it should be %zu",
+            ACL_LOG_INNER_ERROR("[Check][ValueSize]valueSize[%zu] is invalid, it should be %zu",
                 valueSize, sizeof(size_t));
             return ACL_ERROR_INVALID_PARAM;
         }
         size_t type = *static_cast<size_t *>(attrValue);
         if ((type < ACL_MDL_LOAD_FROM_FILE) || (type > ACL_MDL_LOAD_FROM_MEM_WITH_Q)) {
-            ACL_LOG_ERROR("[Check][Type]type[%zu] is invalid, it should be in [%d, %d]",
+            ACL_LOG_INNER_ERROR("[Check][Type]type[%zu] is invalid, it should be in [%d, %d]",
                 type, ACL_MDL_LOAD_FROM_FILE, ACL_MDL_LOAD_FROM_MEM_WITH_Q);
         }
         ACL_LOG_INFO("successfully execute CheckMdlLoadType to check aclmdlLoadType[%zu]", type);
@@ -100,7 +100,7 @@ namespace {
     {
         ACL_LOG_INFO("start to execute CheckMdlLoadPtrAttrEx.");
         if (valueSize != sizeof(void *)) {
-            ACL_LOG_ERROR("[Check][ValueSize]valueSize[%zu] is invalid, it should be %zu",
+            ACL_LOG_INNER_ERROR("[Check][ValueSize]valueSize[%zu] is invalid, it should be %zu",
                 valueSize, sizeof(void *));
             return ACL_ERROR_INVALID_PARAM;
         }
@@ -155,7 +155,7 @@ namespace {
     {
         ACL_LOG_INFO("start to execute CheckMdlLoadSizeAttr");
         if (valueSize != sizeof(size_t)) {
-            ACL_LOG_ERROR("[Check][ValueSize]valueSize[%zu] is invalid, it should be %zu", valueSize, sizeof(size_t));
+            ACL_LOG_INNER_ERROR("[Check][ValueSize]valueSize[%zu] is invalid, it should be %zu", valueSize, sizeof(size_t));
             return ACL_ERROR_INVALID_PARAM;
         }
         ACL_LOG_INFO("successfully execute CheckMdlLoadSizeAttr");
@@ -214,7 +214,7 @@ namespace {
     {
         ACL_LOG_INFO("start to execute CheckMdlLoadPtrAttr");
         if (valueSize != sizeof(void *)) {
-            ACL_LOG_ERROR("[Check][ValueSize]valueSize[%zu] is invalid, it should be %zu", valueSize, sizeof(void *));
+            ACL_LOG_INNER_ERROR("[Check][ValueSize]valueSize[%zu] is invalid, it should be %zu", valueSize, sizeof(void *));
             return ACL_ERROR_INVALID_PARAM;
         }
         ACL_LOG_INFO("successfully execute CheckMdlLoadPtrAttr");
@@ -260,7 +260,7 @@ namespace {
 static bool CheckMdlLoadConfigFromFile(const aclmdlConfigHandle *handle)
 {
     if (handle->attrState.find(ACL_MDL_PATH_PTR) == handle->attrState.end()) {
-        ACL_LOG_ERROR("[Check][Type]model load type[%zu]: model path is not set in aclmdlConfigHandle",
+        ACL_LOG_INNER_ERROR("[Check][Type]model load type[%zu]: model path is not set in aclmdlConfigHandle",
             handle->mdlLoadType);
         return false;
     }
@@ -270,13 +270,13 @@ static bool CheckMdlLoadConfigFromFile(const aclmdlConfigHandle *handle)
 static bool CheckMdlLoadConfigFromMem(const aclmdlConfigHandle *handle)
 {
     if (handle->attrState.find(ACL_MDL_MEM_ADDR_PTR) == handle->attrState.end()) {
-        ACL_LOG_ERROR("[Check][Type]model load type[%zu]: model memory ptr is not set in aclmdlConfigHandle",
+        ACL_LOG_INNER_ERROR("[Check][Type]model load type[%zu]: model memory ptr is not set in aclmdlConfigHandle",
             handle->mdlLoadType);
         return false;
     }
 
     if (handle->attrState.find(ACL_MDL_MEM_SIZET) == handle->attrState.end()) {
-        ACL_LOG_ERROR("[Check][Type]model load type[%zu]: model memory size is not set in aclmdlConfigHandle",
+        ACL_LOG_INNER_ERROR("[Check][Type]model load type[%zu]: model memory size is not set in aclmdlConfigHandle",
             handle->mdlLoadType);
         return false;
     }
@@ -286,25 +286,25 @@ static bool CheckMdlLoadConfigFromMem(const aclmdlConfigHandle *handle)
 static bool CheckMdlLoadConfigWithQ(const aclmdlConfigHandle *handle)
 {
         if (handle->attrState.find(ACL_MDL_INPUTQ_ADDR_PTR) == handle->attrState.end()) {
-            ACL_LOG_ERROR("[Check][Type]model load type[%zu]: inputQ ptr is not set in aclmdlConfigHandle",
+            ACL_LOG_INNER_ERROR("[Check][Type]model load type[%zu]: inputQ ptr is not set in aclmdlConfigHandle",
                 handle->mdlLoadType);
             return false;
         }
 
         if (handle->attrState.find(ACL_MDL_INPUTQ_NUM_SIZET) == handle->attrState.end()) {
-            ACL_LOG_ERROR("[Check][Type]model load type[%zu]: inputQ num is not set in aclmdlConfigHandle",
+            ACL_LOG_INNER_ERROR("[Check][Type]model load type[%zu]: inputQ num is not set in aclmdlConfigHandle",
                 handle->mdlLoadType);
             return false;
         }
 
         if (handle->attrState.find(ACL_MDL_OUTPUTQ_ADDR_PTR) == handle->attrState.end()) {
-            ACL_LOG_ERROR("[Check][Type]model load type[%zu]: outputQ ptr is not set in aclmdlConfigHandle",
+            ACL_LOG_INNER_ERROR("[Check][Type]model load type[%zu]: outputQ ptr is not set in aclmdlConfigHandle",
                 handle->mdlLoadType);
             return false;
         }
 
         if (handle->attrState.find(ACL_MDL_OUTPUTQ_NUM_SIZET) == handle->attrState.end()) {
-            ACL_LOG_ERROR("[Check][Type]model load type[%zu]: outputQ num is not set in aclmdlConfigHandle",
+            ACL_LOG_INNER_ERROR("[Check][Type]model load type[%zu]: outputQ num is not set in aclmdlConfigHandle",
                 handle->mdlLoadType);
             return false;
         }
@@ -315,7 +315,7 @@ static bool CheckMdlLoadConfigWithQ(const aclmdlConfigHandle *handle)
 bool CheckMdlConfigHandle(const aclmdlConfigHandle *handle)
 {
     if (handle->attrState.find(ACL_MDL_LOAD_TYPE_SIZET) == handle->attrState.end()) {
-        ACL_LOG_ERROR("[Find][Type]model load type is not set in aclmdlConfigHandle");
+        ACL_LOG_INNER_ERROR("[Find][Type]model load type is not set in aclmdlConfigHandle");
         return false;
     }
 
@@ -355,21 +355,21 @@ aclError aclmdlSetConfigOpt(aclmdlConfigHandle *handle, aclmdlConfigAttr attr,
     if (g_setMdlConfigMap.find(attr) != g_setMdlConfigMap.end()) {
         paramFunc = g_setMdlConfigMap[attr];
     } else {
-        ACL_LOG_ERROR("[Find][Attr]attr[%d] is invalid. it should be [%d, %d]", static_cast<int32_t>(attr),
+        ACL_LOG_INNER_ERROR("[Find][Attr]attr[%d] is invalid. it should be [%d, %d]", static_cast<int32_t>(attr),
             static_cast<int32_t>(ACL_MDL_PRIORITY_INT32), static_cast<int32_t>(ACL_MDL_OUTPUTQ_ADDR_PTR));
         return ACL_ERROR_INVALID_PARAM;
     }
     void *value = const_cast<void *>(attrValue);
     aclError ret = paramFunc.checkFunc(handle, value, valueSize);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Check][Params]check params by aclmdlSetConfigOpt error, result[%d], attr[%d], "
+        ACL_LOG_INNER_ERROR("[Check][Params]check params by aclmdlSetConfigOpt error, result[%d], attr[%d], "
             "valueSize[%zu]", ret, static_cast<int32_t>(attr), valueSize);
         return ret;
     }
 
     ret = paramFunc.setFunc(handle, value);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Set][Params]set params by aclmdlSetConfigOpt error, result[%d], attr[%d]", ret,
+        ACL_LOG_INNER_ERROR("[Set][Params]set params by aclmdlSetConfigOpt error, result[%d], attr[%d]", ret,
             static_cast<int32_t>(attr));
         return ret;
     }

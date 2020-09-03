@@ -52,6 +52,8 @@ public:
     static std::string FormatStr(const char *fmt, ...);
     static void ReportInputError(std::string errorCode, const std::vector<std::string> &key = {},
         const std::vector<std::string> &value = {});
+    static void ReportInnerError(const char *fmt, ...);
+    static void ReportCallError(const char *fmt, ...);
 };
 } // namespace acl
 
@@ -115,6 +117,18 @@ public:
     do {                                                                                            \
             dlog_error(ACL_MODE_ID, "%d %s: " fmt, acl::AclLog::GetTid(), __FUNCTION__,             \
                 ##__VA_ARGS__);                                                                     \
+    } while (0)
+#define ACL_LOG_INNER_ERROR(fmt, ...)                                                                     \
+    do {                                                                                            \
+            dlog_error(ACL_MODE_ID, "%d %s: " fmt, acl::AclLog::GetTid(), __FUNCTION__,             \
+                ##__VA_ARGS__);                                                                     \
+            acl::AclErrorLogManager::ReportInnerError(fmt, ##__VA_ARGS__);                \
+    } while (0)
+#define ACL_LOG_CALL_ERROR(fmt, ...)                                                                     \
+    do {                                                                                            \
+            dlog_error(ACL_MODE_ID, "%d %s: " fmt, acl::AclLog::GetTid(), __FUNCTION__,             \
+                ##__VA_ARGS__);                                                                     \
+            acl::AclErrorLogManager::ReportCallError(fmt, ##__VA_ARGS__);                \
     } while (0)
 #define ACL_LOG_EVENT(fmt, ...)                                                                     \
     do {                                                                                            \

@@ -33,7 +33,7 @@ aclError aclrtCreateEvent(aclrtEvent *event)
     rtEvent_t rtEvent = nullptr;
     rtError_t rtErr = rtEventCreate(&rtEvent);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("create event failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("create event failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
 
@@ -52,7 +52,7 @@ aclError aclrtCreateEventWithFlag(aclrtEvent *event, uint32_t flag)
     rtEvent_t rtEvent = nullptr;
     rtError_t rtErr = rtEventCreateWithFlag(&rtEvent, flag);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("create event flag failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("create event flag failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     *event = static_cast<aclrtEvent>(rtEvent);
@@ -70,7 +70,7 @@ aclError aclrtDestroyEvent(aclrtEvent event)
 
     rtError_t rtErr = rtEventDestroy(static_cast<rtEvent_t>(event));
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("destroy event failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("destroy event failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     ACL_LOG_INFO("successfully execute aclrtDestroyEvent");
@@ -87,7 +87,7 @@ aclError aclrtRecordEvent(aclrtEvent event, aclrtStream stream)
 
     rtError_t rtErr = rtEventRecord(static_cast<rtEvent_t>(event), static_cast<rtStream_t>(stream));
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("record event failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("record event failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     ACL_LOG_INFO("successfully execute aclrtRecordEvent");
@@ -104,7 +104,7 @@ aclError aclrtResetEvent(aclrtEvent event, aclrtStream stream)
 
     rtError_t rtErr = rtEventReset(static_cast<rtEvent_t>(event), static_cast<rtStream_t>(stream));
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("reset event failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("reset event failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     ACL_LOG_INFO("reset event successfully.");
@@ -125,7 +125,7 @@ aclError aclrtQueryEvent(aclrtEvent event, aclrtEventStatus *status)
     } else if (rtErr == ACL_ERROR_RT_EVENT_NOT_COMPLETE) {
         *status = ACL_EVENT_STATUS_NOT_READY;
     } else {
-        ACL_LOG_ERROR("query event status failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        ACL_LOG_INNER_ERROR("query event status failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     ACL_LOG_INFO("successfully execute aclrtQueryEvent");
@@ -140,7 +140,7 @@ aclError aclrtSynchronizeEvent(aclrtEvent event)
 
     rtError_t rtErr = rtEventSynchronize(static_cast<rtEvent_t>(event));
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("wait event to be complete failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("wait event to be complete failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     ACL_LOG_INFO("successfully execute aclrtSynchronizeEvent");
@@ -156,7 +156,7 @@ aclError aclrtEventElapsedTime(float *ms, aclrtEvent start, aclrtEvent end)
 
     rtError_t rtErr = rtEventElapsedTime(ms, start, end);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("computes events elapsed time failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("computes events elapsed time failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     ACL_LOG_INFO("successfully execute aclrtEventElapsedTime");
@@ -171,7 +171,7 @@ aclError aclrtCreateNotify(int32_t deviceId, aclrtNotify *notify)
     rtNotify_t rtNotify = nullptr;
     rtError_t rtErr = rtNotifyCreate(deviceId, &rtNotify);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("create notify for device %d failed, runtime result = %d", deviceId, static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("create notify for device %d failed, runtime result = %d", deviceId, static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
 
@@ -187,7 +187,7 @@ aclError aclrtDestroyNotify(aclrtNotify notify)
 
     rtError_t rtErr = rtNotifyDestroy(static_cast<rtNotify_t>(notify));
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("destory notify failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("destory notify failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     ACL_LOG_INFO("successfully execute aclrtDestroyNotify");
@@ -201,7 +201,7 @@ aclError aclrtRecordNotify(aclrtNotify notify, aclrtStream stream)
 
     rtError_t rtErr = rtNotifyRecord(static_cast<rtNotify_t>(notify), static_cast<rtStream_t>(stream));
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("record notify failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("record notify failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     ACL_LOG_INFO("successfully execute aclrtRecordNotify");
@@ -215,7 +215,7 @@ aclError aclrtWaitNotify(aclrtNotify notify, aclrtStream stream)
 
     rtError_t rtErr = rtNotifyWait(static_cast<rtNotify_t>(notify), static_cast<rtStream_t>(stream));
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("wait for a notify failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("wait for a notify failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     ACL_LOG_INFO("successfully execute aclrtWaitNotify");
@@ -229,7 +229,7 @@ aclError aclrtSetOpWaitTimeout(uint32_t timeout)
 
     rtError_t rtErr = rtSetOpWaitTimeOut(timeout);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("set wait timeout failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("set wait timeout failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
 

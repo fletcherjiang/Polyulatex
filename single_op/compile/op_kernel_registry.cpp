@@ -14,14 +14,14 @@ const void *OpKernelRegistry::GetStubFunc(const std::string &opType, const std::
     std::lock_guard<std::mutex> lk(mu_);
     auto kernelsIter = kernels_.find(opType);
     if (kernelsIter == kernels_.end()) {
-        ACL_LOG_ERROR("[Find][OpType]No kernel was compiled for op = %s", opType.c_str());
+        ACL_LOG_INNER_ERROR("[Find][OpType]No kernel was compiled for op = %s", opType.c_str());
         return nullptr;
     }
 
     auto &kernelsOfOp = kernelsIter->second;
     auto it = kernelsOfOp.find(kernelId);
     if (it == kernelsOfOp.end()) {
-        ACL_LOG_ERROR("[Find][KernelId]Kernel not compiled for opType = %s and kernelId = %s",
+        ACL_LOG_INNER_ERROR("[Find][KernelId]Kernel not compiled for opType = %s and kernelId = %s",
             opType.c_str(), kernelId.c_str());
         return nullptr;
     }
@@ -49,7 +49,7 @@ aclError OpKernelRegistry::Register(std::unique_ptr<OpKernelRegistration> &&regi
     registration->deallocator = nullptr;
     auto iter = kernels_.find(registration->opType);
     if (iter != kernels_.end() && iter->second.count(registration->kernelId) > 0) {
-        ACL_LOG_ERROR("[Find][Kernel]Kernel already registered. kernelId = %s",
+        ACL_LOG_INNER_ERROR("[Find][Kernel]Kernel already registered. kernelId = %s",
             registration->kernelId.c_str());
         return ACL_ERROR_KERNEL_ALREADY_REGISTERED;
     }
@@ -70,7 +70,7 @@ aclError OpKernelRegistry::Register(std::unique_ptr<OpKernelRegistration> &&regi
     void *binHandle = nullptr;
     auto ret = rtDevBinaryRegister(&binary, &binHandle);
     if (ret != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("[Register][Dev]rtDevBinaryRegister failed, runtime result = %d", static_cast<int32_t>(ret));
+        ACL_LOG_CALL_ERROR("[Register][Dev]rtDevBinaryRegister failed, runtime result = %d", static_cast<int32_t>(ret));
         return ACL_GET_ERRCODE_RTS(ret);
     }
 
@@ -78,7 +78,7 @@ aclError OpKernelRegistry::Register(std::unique_ptr<OpKernelRegistration> &&regi
         registration->kernelName.c_str(), FUNC_MODE_NORMAL);
     if (rtRet != RT_ERROR_NONE) {
         rtDevBinaryUnRegister(binHandle);
-        ACL_LOG_ERROR("[Register][Dev]rtFunctionRegister failed. bin key = %s, kernel name = %s, runtime result = %d",
+        ACL_LOG_CALL_ERROR("[Register][Dev]rtFunctionRegister failed. bin key = %s, kernel name = %s, runtime result = %d",
                       registration->stubName.c_str(),
                       registration->kernelName.c_str(),
                       static_cast<int32_t>(rtRet));

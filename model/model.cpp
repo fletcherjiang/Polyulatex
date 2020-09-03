@@ -79,7 +79,7 @@ static aclError ParseBatchInfo(aclmdlDesc *modelDesc, int32_t dynamicType, const
         size_t dimCount = batchInfo[0].size();
         for (size_t i = 0; i < batchInfo.size(); ++i) {
             if (batchInfo[i].size() != dimCount) {
-                ACL_LOG_ERROR("[Check][Size]Get dynamic model info invalid, model id[%u], one dim count is %zu "
+                ACL_LOG_INNER_ERROR("[Check][Size]Get dynamic model info invalid, model id[%u], one dim count is %zu "
                     "while another is %zu", modelId, dimCount, batchInfo[i].size());
                 modelDesc->dynamicDims.clear();
                 return ACL_ERROR_GE_FAILURE;
@@ -93,7 +93,7 @@ static aclError ParseBatchInfo(aclmdlDesc *modelDesc, int32_t dynamicType, const
     } else if (batchInfo[0].size() == DYNAMIC_BATCH_SIZE) { // dynamic batch,size is 1
         for (size_t i = 0; i < batchInfo.size(); ++i) {
             if (batchInfo[i].size() != DYNAMIC_BATCH_SIZE) {
-                ACL_LOG_ERROR("[Check][Size]get dynamic model info invalid, model id[%u]", modelId);
+                ACL_LOG_INNER_ERROR("[Check][Size]get dynamic model info invalid, model id[%u]", modelId);
                 modelDesc->dynamicBatch.clear();
                 return ACL_ERROR_GE_FAILURE;
             }
@@ -102,7 +102,7 @@ static aclError ParseBatchInfo(aclmdlDesc *modelDesc, int32_t dynamicType, const
     } else if (batchInfo[0].size() == DYNAMIC_HW_SIZE) { // dynamic hw,size is 2
         for (size_t i = 0; i < batchInfo.size(); ++i) {
             if (batchInfo[i].size() != DYNAMIC_HW_SIZE) { // dynamic hw,size is 2
-                ACL_LOG_ERROR("[Check][Size]get dynamic model info invalid, model id[%u]", modelId);
+                ACL_LOG_INNER_ERROR("[Check][Size]get dynamic model info invalid, model id[%u]", modelId);
                 modelDesc->dynamicHW.clear();
                 return ACL_ERROR_GE_FAILURE;
             }
@@ -110,7 +110,7 @@ static aclError ParseBatchInfo(aclmdlDesc *modelDesc, int32_t dynamicType, const
                                             static_cast<uint64_t>(batchInfo[i][1])});
         }
     } else {
-        ACL_LOG_ERROR("[Get][DynamicModel]get dynamic model info invalid, model id[%u]", modelId);
+        ACL_LOG_INNER_ERROR("[Get][DynamicModel]get dynamic model info invalid, model id[%u]", modelId);
         return ACL_ERROR_GE_FAILURE;
     }
 
@@ -143,7 +143,7 @@ static aclError GetDynamicTensorInfo(aclmdlDesc *modelDesc)
     ACL_LOG_INFO("model is dynamic, modelId[%u]", modelId);
     aclError retVal = ParseBatchInfo(modelDesc, dynamicType, batchInfo);
     if (retVal != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Parse][BatchInfo]get model dynamic info failed, result[%d], model id[%u]", retVal, modelId);
+        ACL_LOG_INNER_ERROR("[Parse][BatchInfo]get model dynamic info failed, result[%d], model id[%u]", retVal, modelId);
         return retVal;
     }
 
@@ -158,7 +158,7 @@ static aclError GetModelOutputShapeInfo(aclmdlDesc *modelDesc)
     uint32_t modelId = modelDesc->modelId;
     ge::Status ret = executor.GetModelAttr(modelId, geDynamicOutputShape);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Get][ModelAttr]get model attribute failed, ge result[%u], model id[%u]", ret, modelId);
+        ACL_LOG_CALL_ERROR("[Get][ModelAttr]get model attribute failed, ge result[%u], model id[%u]", ret, modelId);
         return ACL_GET_ERRCODE_GE(ret);
     }
 
@@ -211,7 +211,7 @@ static aclError ModelLoadFromFileWithMem(const char *modelPath, uint32_t *modelI
         workSize, weightSize);
     ge::Status ret = executor.LoadDataFromFile(path, data);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Model][FromFile]load model from file[%s] failed, ge result[%u]", modelPath, ret);
+        ACL_LOG_CALL_ERROR("[Model][FromFile]load model from file[%s] failed, ge result[%u]", modelPath, ret);
         ACL_DELETE_ARRAY(data.model_data);
         return ACL_GET_ERRCODE_GE(ret);
     }
@@ -220,7 +220,7 @@ static aclError ModelLoadFromFileWithMem(const char *modelPath, uint32_t *modelI
         workSize, weightSize);
     ret = executor.LoadModelFromData(id, data, workPtr, workSize, weightPtr, weightSize);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Model][FromData]load model from data failed, ge result[%u]", ret);
+        ACL_LOG_CALL_ERROR("[Model][FromData]load model from data failed, ge result[%u]", ret);
         ACL_DELETE_ARRAY(data.model_data);
         return ACL_GET_ERRCODE_GE(ret);
     }
@@ -240,7 +240,7 @@ static aclError ModelLoadFromMemWithMem(const void *model, size_t modelSize, uin
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(model);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelId);
     if (modelSize == 0) {
-        ACL_LOG_ERROR("[Check][ModelSize]modelSize[%zu] is invalid, should not be zero", modelSize);
+        ACL_LOG_INNER_ERROR("[Check][ModelSize]modelSize[%zu] is invalid, should not be zero", modelSize);
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -254,7 +254,7 @@ static aclError ModelLoadFromMemWithMem(const void *model, size_t modelSize, uin
         modelSize, workSize, weightSize);
     ge::Status ret = geExecutor.LoadModelFromData(id, modelData, workPtr, workSize, weightPtr, weightSize);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Model][FromData]load model from data failed, ge result[%u]", ret);
+        ACL_LOG_CALL_ERROR("[Model][FromData]load model from data failed, ge result[%u]", ret);
         return ACL_GET_ERRCODE_GE(ret);
     }
 
@@ -275,7 +275,7 @@ static aclError ModelLoadFromFileWithQ(const char *modelPath, uint32_t *modelId,
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(outputQ);
 
     if ((inputQNum == 0) || (outputQNum == 0)) {
-        ACL_LOG_ERROR("[Check][QNum]inputQNum[%zu] or outputQNum[%zu] is invalid, can't be zero",
+        ACL_LOG_INNER_ERROR("[Check][QNum]inputQNum[%zu] or outputQNum[%zu] is invalid, can't be zero",
             inputQNum, outputQNum);
         return ACL_ERROR_INVALID_PARAM;
     }
@@ -287,7 +287,7 @@ static aclError ModelLoadFromFileWithQ(const char *modelPath, uint32_t *modelId,
     ACL_LOG_INFO("call ge interface executor.LoadDataFromFile");
     ge::Status ret = geExecutor.LoadDataFromFile(path, modelData);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Model][FromFile]load model from file[%s], ge result[%u], failed", modelPath, ret);
+        ACL_LOG_CALL_ERROR("[Model][FromFile]load model from file[%s], ge result[%u], failed", modelPath, ret);
         ACL_DELETE_ARRAY(modelData.model_data);
         return ACL_GET_ERRCODE_GE(ret);
     }
@@ -298,7 +298,7 @@ static aclError ModelLoadFromFileWithQ(const char *modelPath, uint32_t *modelId,
     ACL_LOG_INFO("call ge interface executor.LoadModelWithQ");
     ret = geExecutor.LoadModelWithQ(id, modelData, inputQVec, outputQVec);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Model][WithQ]execute LoadModelWithQ failed, ge result[%u]", ret);
+        ACL_LOG_CALL_ERROR("[Model][WithQ]execute LoadModelWithQ failed, ge result[%u]", ret);
         ACL_DELETE_ARRAY(modelData.model_data);
         return ACL_GET_ERRCODE_GE(ret);
     }
@@ -321,7 +321,7 @@ static aclError ModelLoadFromMemWithQ(const void *model, size_t modelSize, uint3
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(inputQ);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(outputQ);
     if ((modelSize == 0) || (inputQNum == 0) || (outputQNum == 0)) {
-        ACL_LOG_ERROR("[Check][Params]modelSize[%zu] or inputQNum[%zu] or outputQNum[%zu] is invalid, can't be zero",
+        ACL_LOG_INNER_ERROR("[Check][Params]modelSize[%zu] or inputQNum[%zu] or outputQNum[%zu] is invalid, can't be zero",
             modelSize, inputQNum, outputQNum);
         return ACL_ERROR_INVALID_PARAM;
     }
@@ -340,7 +340,7 @@ static aclError ModelLoadFromMemWithQ(const void *model, size_t modelSize, uint3
     ACL_LOG_INFO("call ge interface executor.LoadModelWithQ, modelSize[%zu]", modelSize);
     ge::Status ret = executor.LoadModelWithQ(id, data, inputQVec, outputQVec);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Model][WithQ]load model with Q, ge result[%u], failed", ret);
+        ACL_LOG_CALL_ERROR("[Model][WithQ]load model with Q, ge result[%u], failed", ret);
         return ACL_GET_ERRCODE_GE(ret);
     }
 
@@ -363,7 +363,7 @@ aclError aclmdlGetDesc(aclmdlDesc *modelDesc, uint32_t modelId)
     ge::GeExecutor executor;
     ge::Status ret = executor.GetModelDescInfo(modelId, inputDesc, outputDesc);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Get][ModelDescInfo]get model description failed, ge result[%u], model id[%u]", ret, modelId);
+        ACL_LOG_CALL_ERROR("[Get][ModelDescInfo]get model description failed, ge result[%u], model id[%u]", ret, modelId);
         return ACL_GET_ERRCODE_GE(ret);
     }
 
@@ -371,7 +371,7 @@ aclError aclmdlGetDesc(aclmdlDesc *modelDesc, uint32_t modelId)
     std::vector<ge::TensorDesc> outputDescV2;
     ret = executor.GetModelDescInfo(modelId, inputDescV2, outputDescV2, true);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Get][ModelDescInfo]get model description v2 failed, ge result[%u], model id[%u]", ret, modelId);
+        ACL_LOG_CALL_ERROR("[Get][ModelDescInfo]get model description v2 failed, ge result[%u], model id[%u]", ret, modelId);
         return ACL_GET_ERRCODE_GE(ret);
     }
 
@@ -426,14 +426,14 @@ aclError aclmdlGetDesc(aclmdlDesc *modelDesc, uint32_t modelId)
     modelDesc->modelId = modelId;
     aclError retVal = GetDynamicTensorInfo(modelDesc);
     if (retVal != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Get][DynamicTensorInfo]get model dynamic info failed, result[%d], model id[%u]",
+        ACL_LOG_INNER_ERROR("[Get][DynamicTensorInfo]get model dynamic info failed, result[%d], model id[%u]",
             retVal, modelId);
         return retVal;
     }
 
     retVal = GetModelOutputShapeInfo(modelDesc);
     if (retVal != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Get][ModelOutputShapeInfo]get model output shape info failed, result[%d], model id[%u]",
+        ACL_LOG_INNER_ERROR("[Get][ModelOutputShapeInfo]get model output shape info failed, result[%d], model id[%u]",
             retVal, modelId);
         return retVal;
     }
@@ -499,7 +499,7 @@ static size_t aclmdlGetTensorSize(aclmdlTensorDesc &tensorDesc, size_t index)
 size_t aclmdlGetInputSizeByIndex(aclmdlDesc *modelDesc, size_t index)
 {
     if ((modelDesc == nullptr) || (index >= modelDesc->inputDesc.size())) {
-        ACL_LOG_ERROR("input param is invalid, modelDesc[%p], index[%zu]", modelDesc, index);
+        ACL_LOG_INNER_ERROR("input param is invalid, modelDesc[%p], index[%zu]", modelDesc, index);
         return 0;
     }
 
@@ -510,7 +510,7 @@ size_t aclmdlGetInputSizeByIndex(aclmdlDesc *modelDesc, size_t index)
 size_t aclmdlGetOutputSizeByIndex(aclmdlDesc *modelDesc, size_t index)
 {
     if ((modelDesc == nullptr) || (index >= modelDesc->outputDesc.size())) {
-        ACL_LOG_ERROR("input param is invalid, index[%zu]", index);
+        ACL_LOG_INNER_ERROR("input param is invalid, index[%zu]", index);
         return 0;
     }
     aclmdlTensorDesc &tensorDesc = modelDesc->outputDesc[index];
@@ -548,7 +548,7 @@ aclError aclmdlAddDatasetBuffer(aclmdlDataset *dataset, aclDataBuffer *dataBuffe
 size_t aclmdlGetDatasetNumBuffers(const aclmdlDataset *dataset)
 {
     if (dataset == nullptr) {
-        ACL_LOG_ERROR("[Check][Dataset]input param[dataset] is null");
+        ACL_LOG_INNER_ERROR("[Check][Dataset]input param[dataset] is null");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}),
             std::vector<std::string>({"dataset"}));
@@ -561,7 +561,7 @@ size_t aclmdlGetDatasetNumBuffers(const aclmdlDataset *dataset)
 aclDataBuffer *aclmdlGetDatasetBuffer(const aclmdlDataset *dataset, size_t index)
 {
     if ((dataset == nullptr) || (index >= dataset->blobs.size())) {
-        ACL_LOG_ERROR("[Check][Params]input param is invalid, dataset[%p], index[%zu]", dataset, index);
+        ACL_LOG_INNER_ERROR("[Check][Params]input param is invalid, dataset[%p], index[%zu]", dataset, index);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("dataset[%p], index[%zu]", dataset, index);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
@@ -576,7 +576,7 @@ aclError aclmdlSetDatasetTensorDesc(aclmdlDataset *dataset, aclTensorDesc *tenso
 {
     ACL_REQUIRES_NOT_NULL(dataset);
     if (index >= dataset->blobs.size()) {
-        ACL_LOG_ERROR("[Check][Index]input param index[%zu] must be smaller than input databuf size[%zu]",
+        ACL_LOG_INNER_ERROR("[Check][Index]input param index[%zu] must be smaller than input databuf size[%zu]",
                       index, dataset->blobs.size());
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
@@ -746,7 +746,7 @@ aclError ModelExecute(uint32_t modelId, const aclmdlDataset *input,
         ge::DataBuffer inputBuffer;
         auto dataBuffer = input->blobs[i].dataBuf;
         if (dataBuffer == nullptr) {
-            ACL_LOG_ERROR("[Check][dataBuffer]input dataset blobs is null, "
+            ACL_LOG_INNER_ERROR("[Check][dataBuffer]input dataset blobs is null, "
                 "modelId[%d], index[%zu]", modelId, i);
             acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
                 std::vector<std::string>({"param"}),
@@ -768,7 +768,7 @@ aclError ModelExecute(uint32_t modelId, const aclmdlDataset *input,
         ge::DataBuffer outputBuffer;
         auto dataBuffer = output->blobs[i].dataBuf;
         if (dataBuffer == nullptr) {
-            ACL_LOG_ERROR("[Check][Databuffer]output dataset blobs is null, modelId[%d], index[%zu]",
+            ACL_LOG_INNER_ERROR("[Check][Databuffer]output dataset blobs is null, modelId[%d], index[%zu]",
                 modelId, i);
             acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
                 std::vector<std::string>({"param"}),
@@ -787,7 +787,7 @@ aclError ModelExecute(uint32_t modelId, const aclmdlDataset *input,
     vector<ge::GeTensorDesc> outputGeDesc;
     ge::Status ret = executor.ExecModel(modelId, stream, inputData, inputGeDesc, outputData, outputGeDesc, async);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Exec][Model]Execute model failed, ge result[%u], modelId[%u]", ret, modelId);
+        ACL_LOG_CALL_ERROR("[Exec][Model]Execute model failed, ge result[%u], modelId[%u]", ret, modelId);
         return ACL_GET_ERRCODE_GE(ret);
     }
     for (size_t i = 0; i < outputGeDesc.size(); ++i) {
@@ -813,7 +813,7 @@ aclError aclmdlExecute(uint32_t modelId, const aclmdlDataset *input,
     if (ret == ACL_SUCCESS) {
         ACL_LOG_INFO("aclmdlExecute success, modelId[%u]", modelId);
     } else {
-        ACL_LOG_ERROR("[Exec][Model]modelId[%u] execute failed, result[%d]", modelId, ret);
+        ACL_LOG_INNER_ERROR("[Exec][Model]modelId[%u] execute failed, result[%d]", modelId, ret);
     }
     return ret;
 }
@@ -827,7 +827,7 @@ aclError aclmdlExecuteAsync(uint32_t modelId, const aclmdlDataset *input,
     if (ret == ACL_SUCCESS) {
         ACL_LOG_INFO("aclmdlExecuteAsync success, modelId[%u]", modelId);
     } else {
-        ACL_LOG_ERROR("[Exec][Model]aclmdlExecuteAsync failed, result[%d], modelId[%u]", ret, modelId);
+        ACL_LOG_INNER_ERROR("[Exec][Model]aclmdlExecuteAsync failed, result[%d], modelId[%u]", ret, modelId);
     }
     return ret;
 }
@@ -841,7 +841,7 @@ aclError aclmdlUnload(uint32_t modelId)
     ACL_LOG_INFO("call ge interface executor.UnloadModel, modelId[%u]", modelId);
     ge::Status ret = executor.UnloadModel(modelId);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Model][Unload]model unload failed, ge result[%u], modelId[%u]", ret, modelId);
+        ACL_LOG_CALL_ERROR("[Model][Unload]model unload failed, ge result[%u], modelId[%u]", ret, modelId);
         return ACL_GET_ERRCODE_GE(ret);
     }
 
@@ -865,7 +865,7 @@ aclError aclmdlQuerySize(const char *fileName, size_t *workSize, size_t *weightS
     ACL_LOG_DEBUG("call ge interface executor.GetMemAndWeightSize");
     ge::Status ret = executor.GetMemAndWeightSize(path, work, weight);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Get][MemAndWeightSize]query size failed, ge result[%u]", ret);
+        ACL_LOG_CALL_ERROR("[Get][MemAndWeightSize]query size failed, ge result[%u]", ret);
         return ACL_GET_ERRCODE_GE(ret);
     }
 
@@ -891,7 +891,7 @@ aclError aclmdlQuerySizeFromMem(const void *model, size_t modelSize, size_t *wor
     ACL_LOG_DEBUG("call ge interface executor.GetMemAndWeightSize, modelSize[%zu]", modelSize);
     ge::Status ret = executor.GetMemAndWeightSize(model, modelSize, work, weight);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Get][MemAndWeightSize]query size from mem failed, ge result[%u]", ret);
+        ACL_LOG_CALL_ERROR("[Get][MemAndWeightSize]query size from mem failed, ge result[%u]", ret);
         return ACL_GET_ERRCODE_GE(ret);
     }
 
@@ -910,19 +910,19 @@ aclError aclmdlSetDynamicBatchSize(uint32_t modelId, aclmdlDataset *dataset, siz
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataset);
 
     if (batchSize == 0) {
-        ACL_LOG_ERROR("[Check][Batchsize]input param[batchSize] invalid, batchSize can't be zero");
+        ACL_LOG_INNER_ERROR("[Check][Batchsize]input param[batchSize] invalid, batchSize can't be zero");
         return ACL_ERROR_INVALID_PARAM;
     }
 
     aclDataBuffer *buf = aclmdlGetDatasetBuffer(dataset, index);
     if (buf == nullptr) {
-        ACL_LOG_ERROR("[Check][buf]failed to get data buffer by index[%zu], dataset buffer is null", index);
+        ACL_LOG_INNER_ERROR("[Check][buf]failed to get data buffer by index[%zu], dataset buffer is null", index);
         return ACL_ERROR_INVALID_PARAM;
     }
 
     void *devPtr = aclGetDataBufferAddr(buf);
     if (devPtr == nullptr) {
-        ACL_LOG_ERROR("[Check][devPtr]get addr by index[%zu] failed, data buffer addr can not be null", index);
+        ACL_LOG_INNER_ERROR("[Check][devPtr]get addr by index[%zu] failed, data buffer addr can not be null", index);
         return ACL_ERROR_INVALID_PARAM;
     }
     uint64_t memSize = aclGetDataBufferSizeV2(buf);
@@ -934,7 +934,7 @@ aclError aclmdlSetDynamicBatchSize(uint32_t modelId, aclmdlDataset *dataset, siz
     ge::GeExecutor executor;
     ge::Status ret = executor.SetDynamicBatchSize(modelId, devPtr, memSize, batchSize);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Set][DynamicBatchSize]set DynamicBatchSize failed, ge result[%u]", ret);
+        ACL_LOG_CALL_ERROR("[Set][DynamicBatchSize]set DynamicBatchSize failed, ge result[%u]", ret);
         return ACL_GET_ERRCODE_GE(ret);
     }
 
@@ -952,19 +952,19 @@ aclError aclmdlSetDynamicHWSize(uint32_t modelId, aclmdlDataset *dataset, size_t
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataset);
 
     if ((height == 0) || (width == 0)) {
-        ACL_LOG_ERROR("[Check][Params]height[%lu] or width[%lu] is invalid, can't be zero.", height, width);
+        ACL_LOG_INNER_ERROR("[Check][Params]height[%lu] or width[%lu] is invalid, can't be zero.", height, width);
         return ACL_ERROR_INVALID_PARAM;
     }
 
     aclDataBuffer *buffer = aclmdlGetDatasetBuffer(dataset, index);
     if (buffer == nullptr) {
-        ACL_LOG_ERROR("[Check][buffer]get data buffer by index[%zu] failed, dataset buffer can not be null", index);
+        ACL_LOG_INNER_ERROR("[Check][buffer]get data buffer by index[%zu] failed, dataset buffer can not be null", index);
         return ACL_ERROR_INVALID_PARAM;
     }
 
     void *devPtr = aclGetDataBufferAddr(buffer);
     if (devPtr == nullptr) {
-        ACL_LOG_ERROR("[Check][devPtr]get addr by index[%zu] failed, data buffer addr can not be nullptr", index);
+        ACL_LOG_INNER_ERROR("[Check][devPtr]get addr by index[%zu] failed, data buffer addr can not be nullptr", index);
         return ACL_ERROR_INVALID_PARAM;
     }
     uint64_t memSize = aclGetDataBufferSizeV2(buffer);
@@ -976,7 +976,7 @@ aclError aclmdlSetDynamicHWSize(uint32_t modelId, aclmdlDataset *dataset, size_t
     ge::GeExecutor executor;
     ge::Status ret = executor.SetDynamicImageSize(modelId, devPtr, memSize, height, width);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Set][DynamicImageSize]Set dynamic image size, ge result[%u]", index);
+        ACL_LOG_CALL_ERROR("[Set][DynamicImageSize]Set dynamic image size, ge result[%u]", index);
         return ACL_GET_ERRCODE_GE(ret);
     }
 
@@ -991,7 +991,7 @@ aclError aclmdlSetInputDynamicDims(uint32_t modelId, aclmdlDataset *dataset, siz
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataset);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dims);
     if (dims->dimCount == 0) {
-        ACL_LOG_ERROR("[Check][dimCount]dimCount[%u] is invalid, can't be zero.", dims->dimCount);
+        ACL_LOG_INNER_ERROR("[Check][dimCount]dimCount[%u] is invalid, can't be zero.", dims->dimCount);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("dimCount[%u] can't be zero", dims->dimCount);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
@@ -1003,13 +1003,13 @@ aclError aclmdlSetInputDynamicDims(uint32_t modelId, aclmdlDataset *dataset, siz
                  modelId, index, dims->dimCount);
     aclDataBuffer *buffer = aclmdlGetDatasetBuffer(dataset, index);
     if (buffer == nullptr) {
-        ACL_LOG_ERROR("[Check][buffer]get data buffer by index[%zu] failed, dataset buffer can not be null", index);
+        ACL_LOG_INNER_ERROR("[Check][buffer]get data buffer by index[%zu] failed, dataset buffer can not be null", index);
         return ACL_ERROR_INVALID_PARAM;
     }
 
     void *devPtr = aclGetDataBufferAddr(buffer);
     if (devPtr == nullptr) {
-        ACL_LOG_ERROR("[Get][devPtr]get addr by index[%zu] failed, data buffer addr can not be null", index);
+        ACL_LOG_INNER_ERROR("[Get][devPtr]get addr by index[%zu] failed, data buffer addr can not be null", index);
         return ACL_ERROR_INVALID_PARAM;
     }
     uint64_t memSize = aclGetDataBufferSizeV2(buffer);
@@ -1027,14 +1027,14 @@ aclError aclmdlSetInputDynamicDims(uint32_t modelId, aclmdlDataset *dataset, siz
     ge::GeExecutor executor;
     ge::Status ret = executor.SetDynamicDims(modelId, devPtr, memSize, curAllDims);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Set][DynamicDims]set dynamic dims failed, ge result[%u]", ret);
+        ACL_LOG_CALL_ERROR("[Set][DynamicDims]set dynamic dims failed, ge result[%u]", ret);
         return ACL_GET_ERRCODE_GE(ret);
     }
 
     vector<uint64_t> curDynmaicDims;
     ret = executor.GetCurDynamicDims(modelId, curAllDims, curDynmaicDims);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Get][CurDynamicDims]get current dynamic dims failed, ge result[%u]", ret);
+        ACL_LOG_CALL_ERROR("[Get][CurDynamicDims]get current dynamic dims failed, ge result[%u]", ret);
         return ACL_GET_ERRCODE_GE(ret);
     }
     ACL_LOG_DEBUG("current dynamic dims size %zu", curDynmaicDims.size());
@@ -1135,7 +1135,7 @@ static aclError GetTensorDescNameToDims(const aclmdlDesc *modelDesc, const strin
 
     auto ret = strncpy_s(dims->name, dimsNameLen, tensorName.c_str(), tensorName.size());
     if (ret != EOK) {
-        ACL_LOG_ERROR("[Copy][Str]call strncpy_s failed, result = %d", ret);
+        ACL_LOG_INNER_ERROR("[Copy][Str]call strncpy_s failed, result = %d", ret);
         return ACL_ERROR_FAILURE;
     }
     return ACL_SUCCESS;
@@ -1154,7 +1154,7 @@ static aclError GetDims(const aclmdlDesc *modelDesc, TensorType tensorType, Dims
 
     size_t descSize = desc.size();
     if (index >= descSize) {
-        ACL_LOG_ERROR("[Check][Params]GetDims failed, index[%zu] can not greater than or equal to tensor size[%zu]",
+        ACL_LOG_INNER_ERROR("[Check][Params]GetDims failed, index[%zu] can not greater than or equal to tensor size[%zu]",
             index, descSize);
         return ACL_ERROR_INVALID_PARAM;
     }
@@ -1162,7 +1162,7 @@ static aclError GetDims(const aclmdlDesc *modelDesc, TensorType tensorType, Dims
     const aclmdlTensorDesc &tensorDesc = desc[index];
     auto ret = GetTensorDescNameToDims(modelDesc, tensorDesc.name, tensorType, index, dims);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Get][TensorDescName]get tensor desc name to dims failed, result = %d", ret);
+        ACL_LOG_INNER_ERROR("[Get][TensorDescName]get tensor desc name to dims failed, result = %d", ret);
         return ret;
     }
     std::vector<int64_t> tensorDims;
@@ -1171,13 +1171,13 @@ static aclError GetDims(const aclmdlDesc *modelDesc, TensorType tensorType, Dims
     } else if (dimsType == DIMS_TYPE_V2) {
         tensorDims = tensorDesc.dimsV2;
     } else {
-        ACL_LOG_ERROR("[Check][dimsType]dims type[%d] is invalid", static_cast<int32_t>(dimsType));
+        ACL_LOG_INNER_ERROR("[Check][dimsType]dims type[%d] is invalid", static_cast<int32_t>(dimsType));
         return ACL_ERROR_FAILURE;
     }
 
     size_t dimSize = tensorDims.size();
     if (dimSize > ACL_MAX_DIM_CNT) {
-        ACL_LOG_ERROR("[Check][dimSize]get dims failed, dims count[%zu] can not larger than max[%d]",
+        ACL_LOG_INNER_ERROR("[Check][dimSize]get dims failed, dims count[%zu] can not larger than max[%d]",
             dims->dimCount, ACL_MAX_DIM_CNT);
         return ACL_ERROR_STORAGE_OVER_LIMIT;
     }
@@ -1197,7 +1197,7 @@ aclError aclmdlGetInputDims(const aclmdlDesc *modelDesc, size_t index, aclmdlIOD
 
     aclError ret = GetDims(modelDesc, INPUT_TENSOR_TYPE, DIMS_TYPE_V1, index, dims);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Get][Dims]get input dims failed, result[%d], index[%zu], modelId[%u]", ret, index,
+        ACL_LOG_INNER_ERROR("[Get][Dims]get input dims failed, result[%d], index[%zu], modelId[%u]", ret, index,
             modelDesc->modelId);
     }
 
@@ -1211,7 +1211,7 @@ aclError aclmdlGetOutputDims(const aclmdlDesc *modelDesc, size_t index, aclmdlIO
 
     aclError ret = GetDims(modelDesc, OUTPUT_TENSOR_TYPE, DIMS_TYPE_V1, index, dims);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Get][Dims]get output dims failed, result[%d], index[%zu], modelId[%u]",
+        ACL_LOG_INNER_ERROR("[Get][Dims]get output dims failed, result[%d], index[%zu], modelId[%u]",
             ret, index, modelDesc->modelId);
     }
 
@@ -1225,7 +1225,7 @@ aclError aclmdlGetInputDimsV2(const aclmdlDesc *modelDesc, size_t index, aclmdlI
 
     aclError ret = GetDims(modelDesc, INPUT_TENSOR_TYPE, DIMS_TYPE_V2, index, dims);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Get][Dims]get input dims(v2) failed, result[%d], index[%zu], modelId[%u]",
+        ACL_LOG_INNER_ERROR("[Get][Dims]get input dims(v2) failed, result[%d], index[%zu], modelId[%u]",
             ret, index, modelDesc->modelId);
     }
 
@@ -1267,7 +1267,7 @@ static aclError GetCurGearIndex(const aclmdlDesc *modelDesc, std::vector<uint64_
                 }
             }
         } else {
-            ACL_LOG_ERROR("[Check][dynamicType]dynamicType[%d] is invalid", dynamicType);
+            ACL_LOG_INNER_ERROR("[Check][dynamicType]dynamicType[%d] is invalid", dynamicType);
         }
     }
 
@@ -1281,7 +1281,7 @@ static aclError GetCurOuputShapeInfo(const aclmdlDesc *modelDesc, size_t index,
         curGearIndex, modelDesc->dynamicOutputShape.size(), modelDesc->modelId);
     for (auto &it : modelDesc->dynamicOutputShape) {
         if ((it.size() < MIN_OUTPUT_SHAPE_INFO_SIZE) || (it.size() > MAX_OUTPUT_SHAPE_INFO_SIZE)) {
-            ACL_LOG_ERROR("[Check][dynamicOutputShape]output shape info size[%zu] is invalid, range is [%zu, %zu]",
+            ACL_LOG_INNER_ERROR("[Check][dynamicOutputShape]output shape info size[%zu] is invalid, range is [%zu, %zu]",
                 it.size(), MIN_OUTPUT_SHAPE_INFO_SIZE, MAX_OUTPUT_SHAPE_INFO_SIZE);
             return ACL_ERROR_FAILURE;
         }
@@ -1297,7 +1297,7 @@ static aclError GetCurOuputShapeInfo(const aclmdlDesc *modelDesc, size_t index,
             const aclmdlTensorDesc &tensorDesc = modelDesc->outputDesc[index];
             auto ret = GetTensorDescNameToDims(modelDesc, tensorDesc.name, OUTPUT_TENSOR_TYPE, index, dims);
             if (ret != ACL_SUCCESS) {
-                ACL_LOG_ERROR("[Get][TensorDescName]get tensor desc name to dims failed, result = %d", ret);
+                ACL_LOG_INNER_ERROR("[Get][TensorDescName]get tensor desc name to dims failed, result = %d", ret);
                 return ret;
             }
             return ACL_SUCCESS;
@@ -1314,7 +1314,7 @@ aclError aclmdlGetCurOutputDims(const aclmdlDesc *modelDesc, size_t index, aclmd
     uint32_t modelId = modelDesc->modelId;
     size_t descSize = modelDesc->outputDesc.size();
     if (index >= descSize) {
-        ACL_LOG_ERROR("[Check][descSize]aclmdlGetCurOutputDims failed, index[%zu] should be smaller "
+        ACL_LOG_INNER_ERROR("[Check][descSize]aclmdlGetCurOutputDims failed, index[%zu] should be smaller "
             "than tensor size[%zu], modelId[%u]", index, descSize, modelId);
         return ACL_ERROR_INVALID_PARAM;
     }
@@ -1324,7 +1324,7 @@ aclError aclmdlGetCurOutputDims(const aclmdlDesc *modelDesc, size_t index, aclmd
     int32_t dynamicType = static_cast<int32_t>(ge::FIXED);
     ge::Status geRet = executor.GetCurShape(modelId, geShapeInfo, dynamicType);
     if (geRet != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Get][CurShape]can not get current shape, ge result[%d], modelId[%u]", geRet, modelId);
+        ACL_LOG_CALL_ERROR("[Get][CurShape]can not get current shape, ge result[%d], modelId[%u]", geRet, modelId);
         return ACL_GET_ERRCODE_GE(geRet);
     }
     // dynamic batch type is 1, dynamic hw type is 2, dynamic dims type is 3;
@@ -1332,13 +1332,13 @@ aclError aclmdlGetCurOutputDims(const aclmdlDesc *modelDesc, size_t index, aclmd
     aclError aclRet;
     size_t shapeSize = geShapeInfo.size();
     if (dynamicType != static_cast<int32_t>(ge::DYNAMIC_DIMS) && shapeSize > 2) {
-        ACL_LOG_ERROR("[Check][dynamicType]shapeSize[%zu] is invalid, modelId[%u]", shapeSize, modelId);
+        ACL_LOG_INNER_ERROR("[Check][dynamicType]shapeSize[%zu] is invalid, modelId[%u]", shapeSize, modelId);
         return ACL_ERROR_GE_FAILURE;
     } else if (shapeSize == 0) {
         ACL_LOG_DEBUG("Dynamic type is 0, model[%u] is static or not set dynamic shape info", modelId);
         aclRet = GetDims(modelDesc, OUTPUT_TENSOR_TYPE, DIMS_TYPE_V1, index, dims);
         if (aclRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("[Get][Dims]get current output dims failed, result[%d], index[%zu], modelId[%u]",
+            ACL_LOG_INNER_ERROR("[Get][Dims]get current output dims failed, result[%d], index[%zu], modelId[%u]",
                 aclRet, index, modelId);
         }
         return aclRet;
@@ -1351,14 +1351,14 @@ aclError aclmdlGetCurOutputDims(const aclmdlDesc *modelDesc, size_t index, aclmd
     }
     aclRet = GetCurGearIndex(modelDesc, shapeInfo, dynamicType, curGearIndex);
     if (aclRet != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Get][CurGearIndex]get current gear index failed, result[%d], index[%zu], "
+        ACL_LOG_INNER_ERROR("[Get][CurGearIndex]get current gear index failed, result[%d], index[%zu], "
             "modelId[%u], dynamicBatchSize[%zu], dynamicHWSize[%zu]", aclRet, index, modelId,
             modelDesc->dynamicBatch.size(), modelDesc->dynamicHW.size());
         return aclRet;
     }
     aclRet = GetCurOuputShapeInfo(modelDesc, index, curGearIndex, dims);
     if (aclRet != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Get][CurOuputShapeInfo]get current output shape info failed, result[%d], "
+        ACL_LOG_INNER_ERROR("[Get][CurOuputShapeInfo]get current output shape info failed, result[%d], "
             "index[%zu], modelId[%u], the size of dynamicOutputShape[%zu]", aclRet, index, modelId,
             modelDesc->dynamicOutputShape.size());
         return aclRet;
@@ -1370,7 +1370,7 @@ aclError aclmdlGetCurOutputDims(const aclmdlDesc *modelDesc, size_t index, aclmd
 static const char *aclmdlGetNameByIndex(const std::vector<aclmdlTensorDesc> &desc, size_t index)
 {
     if (index >= desc.size()) {
-        ACL_LOG_ERROR("[Check][index]get name by index failed, index[%zu] is larger than or equal to desc size[%zu]",
+        ACL_LOG_INNER_ERROR("[Check][index]get name by index failed, index[%zu] is larger than or equal to desc size[%zu]",
             index, desc.size());
         std::string errMsg = acl::AclErrorLogManager::FormatStr("cannot larger than or equal to desc size[%zu]",
             desc.size());
@@ -1393,7 +1393,7 @@ const char *aclmdlGetOpAttr(aclmdlDesc *modelDesc, const char *opName, const cha
     std::string opNameStr(opName);
     std::string attrStr(attr);
     if (attrStr != ACL_ATTR_NAME_DATA_DUMP_ORIGIN_OP_NAMES) {
-        ACL_LOG_ERROR("failed to execute aclmdlGetOpAttr, attr[%s] is invalid, only support "
+        ACL_LOG_INNER_ERROR("failed to execute aclmdlGetOpAttr, attr[%s] is invalid, only support "
             "ACL_ATTR_NAME_DATA_DUMP_ORIGIN_OP_NAMES", attrStr.c_str());
         return nullptr;
     }
@@ -1415,7 +1415,7 @@ const char *aclmdlGetOpAttr(aclmdlDesc *modelDesc, const char *opName, const cha
     std::string attrValue;
     ge::Status ret = executor.GetOpAttr(modelId, opNameStr, attrStr, attrValue);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_ERROR("Execute GetOpAttr failed, ge result[%u], modelId[%u]", ret, modelId);
+        ACL_LOG_CALL_ERROR("Execute GetOpAttr failed, ge result[%u], modelId[%u]", ret, modelId);
         return nullptr;
     }
     ACL_LOG_INFO("Execute aclmdlGetOpAttr successfully, opName is [%s], the value of attr[%s] is %s", opName, attr,
@@ -1428,7 +1428,7 @@ const char *aclmdlGetInputNameByIndex(const aclmdlDesc *modelDesc, size_t index)
 {
     ACL_LOG_INFO("start to execute aclmdlGetInputNameByIndex");
     if (modelDesc == nullptr) {
-        ACL_LOG_ERROR("[Check][ModelDesc]modelDesc is null");
+        ACL_LOG_INNER_ERROR("[Check][ModelDesc]modelDesc is null");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}),
             std::vector<std::string>({"modelDesc"}));
@@ -1442,7 +1442,7 @@ const char *aclmdlGetOutputNameByIndex(const aclmdlDesc *modelDesc, size_t index
 {
     ACL_LOG_INFO("start to execute aclmdlGetOutputNameByIndex");
     if (modelDesc == nullptr) {
-        ACL_LOG_ERROR("[Check][ModelDesc]modelDesc is null");
+        ACL_LOG_INNER_ERROR("[Check][ModelDesc]modelDesc is null");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}),
             std::vector<std::string>({"modelDesc"}));
@@ -1455,7 +1455,7 @@ const char *aclmdlGetOutputNameByIndex(const aclmdlDesc *modelDesc, size_t index
 static aclFormat aclmdlGetFormat(const std::vector<aclmdlTensorDesc> &desc, size_t index)
 {
     if (index >= desc.size()) {
-        ACL_LOG_ERROR("[Check][index]get data format by index failed, index[%zu] is larger "
+        ACL_LOG_INNER_ERROR("[Check][index]get data format by index failed, index[%zu] is larger "
             "than or equal to desc size[%zu]", index, desc.size());
         return ACL_FORMAT_UNDEFINED;
     }
@@ -1467,7 +1467,7 @@ aclFormat aclmdlGetInputFormat(const aclmdlDesc *modelDesc, size_t index)
 {
     ACL_LOG_INFO("start to execute aclmdlGetInputFormat");
     if (modelDesc == nullptr) {
-        ACL_LOG_ERROR("[Check][ModelDesc]modelDesc is null");
+        ACL_LOG_INNER_ERROR("[Check][ModelDesc]modelDesc is null");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}),
             std::vector<std::string>({"modelDesc"}));
@@ -1481,7 +1481,7 @@ aclFormat aclmdlGetOutputFormat(const aclmdlDesc *modelDesc, size_t index)
 {
     ACL_LOG_INFO("start to execute aclmdlGetOutputFormat");
     if (modelDesc == nullptr) {
-        ACL_LOG_ERROR("[Check][ModelDesc]modelDesc is null");
+        ACL_LOG_INNER_ERROR("[Check][ModelDesc]modelDesc is null");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"params"}),
             std::vector<std::string>({"modelDesc"}));
@@ -1494,7 +1494,7 @@ aclFormat aclmdlGetOutputFormat(const aclmdlDesc *modelDesc, size_t index)
 static aclDataType aclmdlGetDataType(const std::vector<aclmdlTensorDesc> &desc, size_t index)
 {
     if (index >= desc.size()) {
-        ACL_LOG_ERROR("[Check][Index]get data type by index failed, index[%zu] is larger than or "
+        ACL_LOG_INNER_ERROR("[Check][Index]get data type by index failed, index[%zu] is larger than or "
             "equal to desc size[%zu]", index, desc.size());
         return ACL_DT_UNDEFINED;
     }
@@ -1506,7 +1506,7 @@ aclDataType aclmdlGetInputDataType(const aclmdlDesc *modelDesc, size_t index)
 {
     ACL_LOG_INFO("start to execute aclmdlGetInputDataType");
     if (modelDesc == nullptr) {
-        ACL_LOG_ERROR("[Check][ModelDesc]modelDesc is null");
+        ACL_LOG_INNER_ERROR("[Check][ModelDesc]modelDesc is null");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}), std::vector<std::string>({"modelDesc"}));
         return ACL_DT_UNDEFINED;
@@ -1519,7 +1519,7 @@ aclDataType aclmdlGetOutputDataType(const aclmdlDesc *modelDesc, size_t index)
 {
     ACL_LOG_INFO("start to execute aclmdlGetOutputDataType");
     if (modelDesc == nullptr) {
-        ACL_LOG_ERROR("[Check][ModelDesc]modelDesc is null");
+        ACL_LOG_INNER_ERROR("[Check][ModelDesc]modelDesc is null");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}),
             std::vector<std::string>({"modelDesc"}));
@@ -1543,7 +1543,7 @@ static aclError aclmdlGetIndexByName(const std::vector<aclmdlTensorDesc> &desc, 
         }
     }
 
-    ACL_LOG_ERROR("[Get][Index]get index by name failed, cannot find tensor name[%s]", name);
+    ACL_LOG_INNER_ERROR("[Get][Index]get index by name failed, cannot find tensor name[%s]", name);
     return ACL_ERROR_INVALID_PARAM;
 }
 
@@ -1577,7 +1577,7 @@ aclError aclmdlGetDynamicBatch(const aclmdlDesc *modelDesc, aclmdlBatch *batch)
 
     size_t batchCnt = modelDesc->dynamicBatch.size();
     if (batchCnt > ACL_MAX_BATCH_NUM) {
-        ACL_LOG_ERROR("[Check][batchCnt]aclmdlGetBatch failed, batch count[%zu] is larger than max batch num[%d]",
+        ACL_LOG_INNER_ERROR("[Check][batchCnt]aclmdlGetBatch failed, batch count[%zu] is larger than max batch num[%d]",
             batchCnt, ACL_MAX_BATCH_NUM);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("batch count[%zu] is larger than max batch num[%d]",
             batchCnt, ACL_MAX_BATCH_NUM);
@@ -1609,7 +1609,7 @@ aclError aclmdlGetDynamicHW(const aclmdlDesc *modelDesc, size_t index, aclmdlHW 
 
     size_t hwCnt = modelDesc->dynamicHW.size();
     if (hwCnt > ACL_MAX_HW_NUM) {
-        ACL_LOG_ERROR("[Check][hwCnt]aclmdlGetHW failed, hw count[%zu] is larger than max[%d]", hwCnt, ACL_MAX_HW_NUM);
+        ACL_LOG_INNER_ERROR("[Check][hwCnt]aclmdlGetHW failed, hw count[%zu] is larger than max[%d]", hwCnt, ACL_MAX_HW_NUM);
         return ACL_ERROR_STORAGE_OVER_LIMIT;
     }
 
@@ -1635,14 +1635,14 @@ aclError aclmdlGetInputDynamicGearCount(const aclmdlDesc *modelDesc, size_t inde
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(gearCount);
 
     if (index != static_cast<size_t>(-1)) {
-        ACL_LOG_ERROR("[Check][index]aclmdlGetInputDynamicGearCount failed, index must be -1 while input is %zu.",
+        ACL_LOG_INNER_ERROR("[Check][index]aclmdlGetInputDynamicGearCount failed, index must be -1 while input is %zu.",
             index);
         return ACL_ERROR_INVALID_PARAM;
     }
 
     size_t dimCnt = modelDesc->dynamicDims.size();
     if (dimCnt > ACL_MAX_DIM_CNT) {
-        ACL_LOG_ERROR("[Check][dimCnt]aclmdlGetInputDynamicGearCount failed, dimCnt[%zu] is "
+        ACL_LOG_INNER_ERROR("[Check][dimCnt]aclmdlGetInputDynamicGearCount failed, dimCnt[%zu] is "
             "larger than max[%d]", dimCnt, ACL_MAX_DIM_CNT);
         return ACL_ERROR_STORAGE_OVER_LIMIT;
     }
@@ -1663,11 +1663,11 @@ aclError aclmdlGetInputDynamicDims(const aclmdlDesc *modelDesc, size_t index, ac
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelDesc);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dims);
     if (index != static_cast<std::size_t>(-1)) {
-        ACL_LOG_ERROR("[Check][index]aclmdlGetInputDynamicDims failed, index must be -1 but it is %zu", index);
+        ACL_LOG_INNER_ERROR("[Check][index]aclmdlGetInputDynamicDims failed, index must be -1 but it is %zu", index);
         return ACL_ERROR_INVALID_PARAM;
     }
     if (gearCount < modelDesc->dynamicDims.size()) {
-        ACL_LOG_ERROR("[Check][gearCount]Gear count[%zu] can not less than model's dynamic gear count[%zu]", gearCount,
+        ACL_LOG_INNER_ERROR("[Check][gearCount]Gear count[%zu] can not less than model's dynamic gear count[%zu]", gearCount,
                       modelDesc->dynamicDims.size());
         return ACL_ERROR_INVALID_PARAM;
     }
@@ -1685,7 +1685,7 @@ aclError aclmdlGetInputDynamicDims(const aclmdlDesc *modelDesc, size_t index, ac
         for (size_t j = 0; j < allRawDims.size(); ++j) {
             if (allRawDims[j] < 0) {
                 if (begIndex >= modelDesc->dynamicDims[i].size()) {
-                    ACL_LOG_ERROR("[Check][begIndex]User input data index[%zu] shape size overflow", index);
+                    ACL_LOG_INNER_ERROR("[Check][begIndex]User input data index[%zu] shape size overflow", index);
                     return ACL_ERROR_INVALID_PARAM;
                 }
                 dims[i].dims[j] = modelDesc->dynamicDims[i][begIndex++];
@@ -1715,20 +1715,20 @@ aclError aclmdlCreateAndGetOpDesc(uint32_t deviceId, uint32_t streamId, uint32_t
     ACL_LOG_DEBUG("call ge interface executor.GetOpDescInfo");
     ge::Status geRet = executor.GetOpDescInfo(deviceId, streamId, taskId, opDescInfo);
     if (geRet != ge::SUCCESS) {
-        ACL_LOG_ERROR("[Get][OpDescInfo]get op desc faild, ge result[%d], deviceId[%u], streamId[%u], taskId[%u]",
+        ACL_LOG_CALL_ERROR("[Get][OpDescInfo]get op desc faild, ge result[%d], deviceId[%u], streamId[%u], taskId[%u]",
             geRet, deviceId, streamId, taskId);
         return ACL_GET_ERRCODE_GE(geRet);
     }
 
     if (opNameLen <= opDescInfo.op_name.length()) {
-        ACL_LOG_ERROR("[Check][opNameLen]input length = %zu must be larger than op name real length = %zu",
+        ACL_LOG_INNER_ERROR("[Check][opNameLen]input length = %zu must be larger than op name real length = %zu",
             opNameLen, opDescInfo.op_name.length());
         return ACL_ERROR_INVALID_PARAM;
     }
     auto ret = strncpy_s(opName, opNameLen, opDescInfo.op_name.c_str(),
         opDescInfo.op_name.length());
     if (ret != EOK) {
-        ACL_LOG_ERROR("[Copy][OpName]copy op name failed, copy result = %d, input opNameLen = %zu, "
+        ACL_LOG_INNER_ERROR("[Copy][OpName]copy op name failed, copy result = %d, input opNameLen = %zu, "
             "real opNameLen = %zu", ret, opNameLen, opDescInfo.op_name.length());
         return ACL_ERROR_FAILURE;
     }
@@ -1742,7 +1742,7 @@ aclError aclmdlCreateAndGetOpDesc(uint32_t deviceId, uint32_t streamId, uint32_t
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(*inputDesc);
     *outputDesc = new(std::nothrow) aclTensorDesc[outputNum];
     if (*outputDesc == nullptr) {
-        ACL_LOG_ERROR("[Check][outputDesc]alloc outputDesc memory failed");
+        ACL_LOG_INNER_ERROR("[Check][outputDesc]alloc outputDesc memory failed");
         ACL_DELETE_ARRAY_AND_SET_NULL(*inputDesc);
         return ACL_ERROR_FAILURE;
     }
@@ -1774,7 +1774,7 @@ aclError aclmdlLoadWithConfig(const aclmdlConfigHandle *handle, uint32_t *modelI
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(handle);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelId);
     if (!CheckMdlConfigHandle(handle)) {
-        ACL_LOG_ERROR("[Check][ConfigHandle]model config is invalid because some param may not be set");
+        ACL_LOG_INNER_ERROR("[Check][ConfigHandle]model config is invalid because some param may not be set");
         return ACL_ERROR_INVALID_PARAM;
     }
     switch (handle->mdlLoadType) {
@@ -1799,7 +1799,7 @@ aclError aclmdlLoadWithConfig(const aclmdlConfigHandle *handle, uint32_t *modelI
                 handle->inputQ, handle->inputQNum,
                 handle->outputQ, handle->outputQNum, handle->priority);
         default:
-            ACL_LOG_ERROR("[Load][Model]model load type[%zu] is invalid, it should be in [%zu, %zu]",
+            ACL_LOG_INNER_ERROR("[Load][Model]model load type[%zu] is invalid, it should be in [%zu, %zu]",
                 handle->mdlLoadType, ACL_MDL_LOAD_FROM_FILE, ACL_MDL_LOAD_FROM_MEM_WITH_Q);
             return ACL_ERROR_INVALID_PARAM;
     }
@@ -1815,12 +1815,12 @@ static const char *TransTensorNameToReal(const aclmdlDesc *modelDesc, const stri
     vector<string> valArr;
     acl::string_utils::Split(tensorName, '_', valArr);
     if ((valArr.size() != TENSOR_NAME_ATTR_NUM) && (valArr.size() != TENSOR_NAME_ATTR_NUM + 1)) {
-        ACL_LOG_ERROR("[Check][Params]tensorName[%s] cannot be devided into %zu parts",
+        ACL_LOG_INNER_ERROR("[Check][Params]tensorName[%s] cannot be devided into %zu parts",
             tensorName.c_str(), TENSOR_NAME_ATTR_NUM);
         return nullptr;
     }
     if (valArr[0] != TENSOR_NAME_PREFIX) {
-        ACL_LOG_ERROR("[Check][Param]cannot find Attr[%s] in tensorName[%s]",
+        ACL_LOG_INNER_ERROR("[Check][Param]cannot find Attr[%s] in tensorName[%s]",
             TENSOR_NAME_PREFIX, tensorName.c_str());
         return nullptr;
     }
@@ -1828,11 +1828,11 @@ static const char *TransTensorNameToReal(const aclmdlDesc *modelDesc, const stri
     if ((valArr[1] == MODEL_ID_STR) && (acl::string_utils::IsDigit(valArr[2]))) {
         auto modelId = strtoul(valArr[2].c_str(), nullptr, base);
         if (modelId != modelDesc->modelId) {
-            ACL_LOG_ERROR("[Check][modelId]modelId[%lu] is invalid, tensorName[%s]", modelId, tensorName.c_str());
+            ACL_LOG_INNER_ERROR("[Check][modelId]modelId[%lu] is invalid, tensorName[%s]", modelId, tensorName.c_str());
             return nullptr;
         }
     } else {
-        ACL_LOG_ERROR("[Check][modelId]cannot find attr[%s] or modelId in tensorName[%s]",
+        ACL_LOG_INNER_ERROR("[Check][modelId]cannot find attr[%s] or modelId in tensorName[%s]",
             MODEL_ID_STR, tensorName.c_str());
         return nullptr;
     }
@@ -1840,14 +1840,14 @@ static const char *TransTensorNameToReal(const aclmdlDesc *modelDesc, const stri
         auto index = strtoul(valArr[4].c_str(), nullptr, base);
         if (valArr[3] == TENSOR_INPUT_STR) {
             if (index >= modelDesc->inputDesc.size() || index < 0) {
-                ACL_LOG_ERROR("[Check][index]inputDesc index[%lu] should be in [0, %zu), tensorName[%s]",
+                ACL_LOG_INNER_ERROR("[Check][index]inputDesc index[%lu] should be in [0, %zu), tensorName[%s]",
                     index, modelDesc->inputDesc.size(), tensorName.c_str());
                 return nullptr;
             }
             return modelDesc->inputDesc[index].name.c_str();
         } else if (valArr[3] == TENSOR_OUTPUT_STR) {
             if (index >= modelDesc->outputDesc.size() || index < 0) {
-                ACL_LOG_ERROR("[Check][index]outputDesc index[%lu] should be in [0, %zu), tensorName[%s]", index,
+                ACL_LOG_INNER_ERROR("[Check][index]outputDesc index[%lu] should be in [0, %zu), tensorName[%s]", index,
                     modelDesc->outputDesc.size(), tensorName.c_str());
                 return nullptr;
             }
@@ -1855,7 +1855,7 @@ static const char *TransTensorNameToReal(const aclmdlDesc *modelDesc, const stri
         }
     }
 
-    ACL_LOG_ERROR("[Find][Attr]cannot find [input_%s] or [ouput_%s] in tensorName[%s]", valArr[4].c_str(),
+    ACL_LOG_INNER_ERROR("[Find][Attr]cannot find [input_%s] or [ouput_%s] in tensorName[%s]", valArr[4].c_str(),
         valArr[4].c_str(), tensorName.c_str());
     return nullptr;
 }
@@ -1875,6 +1875,6 @@ const char *aclmdlGetTensorRealName(const aclmdlDesc *modelDesc, const char *nam
         ACL_LOG_INFO("successfully execute aclmdlGetTensorName, realTensorName = %s", realTensorName);
         return realTensorName;
     }
-    ACL_LOG_ERROR("[Get][TensorName]execute aclmdlGetTensorName failed, name[%s] is invalid.", name);
+    ACL_LOG_INNER_ERROR("[Get][TensorName]execute aclmdlGetTensorName failed, name[%s] is invalid.", name);
     return nullptr;
 }

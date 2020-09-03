@@ -23,7 +23,7 @@ static aclError GeFinalizeFunc()
 {
     auto geRet = GEFinalize();
     if (geRet != SUCCESS) {
-        ACL_LOG_ERROR("[Finalize][Ge]ge finalize failed. ge result = %u", geRet);
+        ACL_LOG_CALL_ERROR("[Finalize][Ge]ge finalize failed. ge result = %u", geRet);
         return ACL_GET_ERRCODE_GE(geRet);
     }
     return ACL_SUCCESS;
@@ -36,14 +36,14 @@ aclError LocalCompiler::Init(const std::map<std::string, std::string> &options)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (isInitialized_) {
-        ACL_LOG_ERROR("[Check][Compiler]Compiler already initialized");
+        ACL_LOG_INNER_ERROR("[Check][Compiler]Compiler already initialized");
         return ACL_ERROR_REPEAT_INITIALIZE;
     }
 
     options_ = options;
     auto geRet = ge::GEInitialize(options_);
     if (geRet != SUCCESS) {
-        ACL_LOG_ERROR("[Initialize][Ge]GEInitialize failed. ge result = %u", geRet);
+        ACL_LOG_CALL_ERROR("[Initialize][Ge]GEInitialize failed. ge result = %u", geRet);
         return ACL_GET_ERRCODE_GE(geRet);
     }
     SetGeFinalizeCallback(GeFinalizeFunc);
@@ -75,7 +75,7 @@ aclError LocalCompiler::OnlineCompile(CompileParam &param, std::shared_ptr<void>
     SetThreadCompileOpts(options);
     auto geRet = generator.Initialize(options, omgContext);
     if (geRet != SUCCESS) {
-        ACL_LOG_ERROR("[Initialize][Ge]call ge interface generator.Initialize failed. ge result = %u", geRet);
+        ACL_LOG_CALL_ERROR("[Initialize][Ge]call ge interface generator.Initialize failed. ge result = %u", geRet);
         return ACL_GET_ERRCODE_GE(geRet);
     }
     ACL_LOG_INFO("call ge interface generator.BuildSingleOpModel");
@@ -86,14 +86,14 @@ aclError LocalCompiler::OnlineCompile(CompileParam &param, std::shared_ptr<void>
     }
 
     if (geRet != SUCCESS) {
-        ACL_LOG_ERROR("[BuildSingleOpModel][Ge]call ge interface generator.BuildSingleOpModel failed. "
+        ACL_LOG_CALL_ERROR("[BuildSingleOpModel][Ge]call ge interface generator.BuildSingleOpModel failed. "
             "ge result = %u", geRet);
         return ACL_GET_ERRCODE_GE(geRet);
     }
 
     geRet = generator.Finalize();
     if (geRet != SUCCESS) {
-        ACL_LOG_ERROR("[Finalize][Ge]call ge interface generator.Finalize failed. ge result = %u", geRet);
+        ACL_LOG_CALL_ERROR("[Finalize][Ge]call ge interface generator.Finalize failed. ge result = %u", geRet);
         return ACL_GET_ERRCODE_GE(geRet);
     }
 

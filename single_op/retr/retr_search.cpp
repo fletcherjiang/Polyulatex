@@ -54,7 +54,7 @@ aclError AclFvSearch::SearchCheck(
     size_t hostSize = sizeof(searchInput->searchInput);
     size_t devSize = searchInput->dataBuffer.length;
     if (hostSize != devSize) {
-        ACL_LOG_ERROR("[Check][HostSize]input size between host [%u] and device [%u] not equal",
+        ACL_LOG_INNER_ERROR("[Check][HostSize]input size between host [%u] and device [%u] not equal",
             hostSize, devSize);
         return ACL_ERROR_FAILURE;
     }
@@ -62,14 +62,14 @@ aclError AclFvSearch::SearchCheck(
     hostSize = sizeof(searchRst->searchResult);
     devSize = searchRst->dataBuffer.length;
     if (hostSize != devSize) {
-        ACL_LOG_ERROR("[Check][HostSize]result size between host [%u] and device [%u] not equal",
+        ACL_LOG_INNER_ERROR("[Check][HostSize]result size between host [%u] and device [%u] not equal",
             hostSize, devSize);
         return ACL_ERROR_FAILURE;
     }
 
     if (searchRst->searchResult.dataLen <
         searchRst->searchResult.queryCnt * searchInput->searchInput.topK * sizeof(uint32_t)) {
-        ACL_LOG_ERROR("[Check][Params]dataLen:%u of search result should not be less than queryCnt:%u * "
+        ACL_LOG_INNER_ERROR("[Check][Params]dataLen:%u of search result should not be less than queryCnt:%u * "
             "topK:%u * sizeof(uint32_t).",
             searchRst->searchResult.dataLen,
             searchRst->searchResult.queryCnt,
@@ -105,7 +105,7 @@ aclError AclFvSearch::CopySearchToDevice(aclfvSearchInput *searchInput, aclfvSea
         copyKind,
         stream_);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Copy][Mem]memcpy from host to device failed, result = %d", ret);
+        ACL_LOG_INNER_ERROR("[Copy][Mem]memcpy from host to device failed, result = %d", ret);
         return ret;
     }
 
@@ -116,7 +116,7 @@ aclError AclFvSearch::CopySearchToDevice(aclfvSearchInput *searchInput, aclfvSea
         copyKind,
         stream_);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Copy][Mem]memcpy from host to device failed, result = %d", ret);
+        ACL_LOG_INNER_ERROR("[Copy][Mem]memcpy from host to device failed, result = %d", ret);
         return ret;
     }
     return ACL_SUCCESS;
@@ -143,19 +143,19 @@ aclError AclFvSearch::InitSearchTask(aclfvSearchInput *searchInput, aclfvSearchR
     uint32_t configOffset = sizeof(aicpu::AicpuParamHead) + ioAddrNum * sizeof(uint64_t);
 
     if (argsSize <= configOffset) {
-        ACL_LOG_ERROR("[Check][ArgsSize]param argsSize invalid, args size[%u] is smaller than or "
+        ACL_LOG_INNER_ERROR("[Check][ArgsSize]param argsSize invalid, args size[%u] is smaller than or "
             "equal to configOffset[%u].", argsSize, configOffset);
         return ACL_ERROR_RT_FAILURE;
     }
     auto memcpyRet = memcpy_s(args + configOffset, argsSize - configOffset, &(type_), sizeof(aclfvSearchType));
     if (memcpyRet != EOK) {
-        ACL_LOG_ERROR("[Copy][Mem]copy aclfvSearchType to args failed, result = %d.", memcpyRet);
+        ACL_LOG_INNER_ERROR("[Copy][Mem]copy aclfvSearchType to args failed, result = %d.", memcpyRet);
         return ACL_ERROR_RT_FAILURE;
     }
     configOffset += sizeof(aclfvSearchType);
 
     if (argsSize <= configOffset) {
-        ACL_LOG_ERROR("[Copy][Mem]memcpy_s failed, args size[%u] is smaller than or equal to "
+        ACL_LOG_INNER_ERROR("[Copy][Mem]memcpy_s failed, args size[%u] is smaller than or equal to "
             "configOffset[%u].", argsSize, configOffset);
         return ACL_ERROR_RT_FAILURE;
     }
@@ -168,7 +168,7 @@ aclError AclFvSearch::InitSearchTask(aclfvSearchInput *searchInput, aclfvSearchR
     memcpyRet = memcpy_s(args + configOffset, argsSize - configOffset, &(notifyId_), sizeof(uint32_t));
     if (memcpyRet != EOK) {
         (void)rtEventDestroy(static_cast<rtEvent_t>(notify_));
-        ACL_LOG_ERROR("[Copy][NotifyId]copy notifyId to args failed, result = %d.", memcpyRet);
+        ACL_LOG_INNER_ERROR("[Copy][NotifyId]copy notifyId to args failed, result = %d.", memcpyRet);
         return ACL_ERROR_RT_FAILURE;
     }
     return ACL_SUCCESS;
@@ -184,7 +184,7 @@ aclError AclFvSearch::SearchTask(aclfvArgs &retrArgs, uint32_t queryNum, uint32_
     auto memcpyRet = memcpy_s(
         retrArgs.args + retrArgs.configOffset, retrArgs.argsSize - retrArgs.configOffset, &queryNum, sizeof(uint32_t));
     if (memcpyRet != EOK) {
-        ACL_LOG_ERROR("[Copy][QueryNum]copy queryNum to args failed, result = %d.", memcpyRet);
+        ACL_LOG_INNER_ERROR("[Copy][QueryNum]copy queryNum to args failed, result = %d.", memcpyRet);
         return ACL_ERROR_RT_FAILURE;
     }
     memcpyRet = memcpy_s(retrArgs.args + retrArgs.configOffset + sizeof(uint32_t),
@@ -192,7 +192,7 @@ aclError AclFvSearch::SearchTask(aclfvArgs &retrArgs, uint32_t queryNum, uint32_
         &queryIndex,
         sizeof(uint32_t));
     if (memcpyRet != EOK) {
-        ACL_LOG_ERROR("[Copy][QueryIndex]copy queryIndex to args failed, result = %d.", memcpyRet);
+        ACL_LOG_INNER_ERROR("[Copy][QueryIndex]copy queryIndex to args failed, result = %d.", memcpyRet);
         return ACL_ERROR_RT_FAILURE;
     }
     rtError_t rtRet = rtCpuKernelLaunch(RETR_KERNELS_SONAME,
@@ -203,13 +203,13 @@ aclError AclFvSearch::SearchTask(aclfvArgs &retrArgs, uint32_t queryNum, uint32_
         nullptr,  // no need smDesc
         stream_);
     if (rtRet != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("[Copy][Retr]retr repo add call rtCpuKernelLaunch failed, runtime result = %d.",
+        ACL_LOG_CALL_ERROR("[Copy][Retr]retr repo add call rtCpuKernelLaunch failed, runtime result = %d.",
             rtRet);
         return ACL_ERROR_RT_FAILURE;
     }
     auto ret = aclFvNotifyWait(notify_, stream_);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Wait][Notify]wait for a notify to stream failed, runtime result = %d.", ret);
+        ACL_LOG_INNER_ERROR("[Wait][Notify]wait for a notify to stream failed, runtime result = %d.", ret);
         return ret;
     }
     ACL_LOG_INFO("SearchTask end.");
@@ -227,7 +227,7 @@ aclError AclFvSearch::Search1vN(aclfvArgs &retrArgs, aclfvSearchInput *searchInp
     uint32_t queryIndex = 0;
     aclError ret = SearchTask(retrArgs, queryNum, queryIndex);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Search][Task]execute aclfvRepoAddTask failed, result = %d.", ret);
+        ACL_LOG_INNER_ERROR("[Search][Task]execute aclfvRepoAddTask failed, result = %d.", ret);
         return ret;
     }
     ACL_LOG_INFO("Search1vN end.");
@@ -259,7 +259,7 @@ aclError AclFvSearch::SearchNvM(aclfvArgs &retrArgs, aclfvSearchInput *searchInp
         queryNum = (remainNum > acl::retr::RETR_BATCH_SEARCH_MAX) ? acl::retr::RETR_BATCH_SEARCH_MAX : remainNum;
         aclError ret = SearchTask(retrArgs, queryNum, queryIndex);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("[Search][Task]execute aclfvRepoAddTask failed, result = %d.", ret);
+            ACL_LOG_INNER_ERROR("[Search][Task]execute aclfvRepoAddTask failed, result = %d.", ret);
             return ret;
         }
         queryIndex += queryNum;
@@ -279,17 +279,17 @@ aclError AclFvSearch::LaunchSearchTask(aclfvArgs &retrArgs, aclfvSearchInput *se
     if (type_ == SEARCH_1_N) {
         ret = Search1vN(retrArgs, searchInput);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("[Exec][Search1vN]execute Search1vN failed, result = %d.", ret);
+            ACL_LOG_INNER_ERROR("[Exec][Search1vN]execute Search1vN failed, result = %d.", ret);
             return ret;
         }
     } else if (type_ == SEARCH_N_M) {
         ret = SearchNvM(retrArgs, searchInput);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("[Exec][SearchNvM]execute SearchNvM failed, result = %d.", ret);
+            ACL_LOG_INNER_ERROR("[Exec][SearchNvM]execute SearchNvM failed, result = %d.", ret);
             return ret;
         }
     } else {
-        ACL_LOG_ERROR("[Exec][Type]type must be SEARCH_1_N or SEARCH_N_M, type = %d",
+        ACL_LOG_INNER_ERROR("[Exec][Type]type must be SEARCH_1_N or SEARCH_N_M, type = %d",
             static_cast<int32_t>(type_));
         return ACL_ERROR_INVALID_PARAM;
     }
@@ -316,12 +316,12 @@ aclError AclFvSearch::GetSearchResult(aclfvSearchResult *searchRst)
 
     aclError ret = aclrtMemcpy(hostData, hostSize, devData, devSize, copyKind);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Copy][Mem]memcpy from device to host failed, result = %d", ret);
+        ACL_LOG_INNER_ERROR("[Copy][Mem]memcpy from device to host failed, result = %d", ret);
         return ret;
     }
 
     if (searchRst->searchResult.retCode != 0) {
-        ACL_LOG_ERROR("[Exec][Search]execute aclfvSearch failed, result = %d.",
+        ACL_LOG_INNER_ERROR("[Exec][Search]execute aclfvSearch failed, result = %d.",
             searchRst->searchResult.retCode);
         return ACL_ERROR_FAILURE;
     }

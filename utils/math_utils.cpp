@@ -17,7 +17,7 @@ aclError GetAlignedSize(size_t size, size_t &alignedSize)
 {
     // check overflow, the max value of size must be less than 0xFFFFFFFFFFFFFFFF-32*2
     if (size + DATA_MEMORY_ALIGN_SIZE * 2 < size) {
-        ACL_LOG_ERROR("[Check][Size]size too large: %zu", size);
+        ACL_LOG_INNER_ERROR("[Check][Size]size too large: %zu", size);
         return ACL_ERROR_INVALID_PARAM;
     }
 

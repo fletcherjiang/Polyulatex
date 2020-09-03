@@ -44,7 +44,7 @@ aclError ReadOpModelFromFile(const std::string &path, OpModel &opModel)
     char *data = nullptr;
     ACL_LOG_DEBUG("start to call ge::ReadBytesFromBinaryFile");
     if (!ge::ReadBytesFromBinaryFile(path.c_str(), &data, fileSize)) {
-        ACL_LOG_ERROR("[Read][Bytes]Read model file failed. path = %s", path.c_str());
+        ACL_LOG_CALL_ERROR("[Read][Bytes]Read model file failed. path = %s", path.c_str());
         return ACL_ERROR_READ_MODEL_FAILURE;
     }
 
