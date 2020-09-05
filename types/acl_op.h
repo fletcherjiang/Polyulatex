@@ -16,6 +16,7 @@
 #include "acl/acl_op.h"
 #include "op_attr.h"
 #include "tensor_desc_internal.h"
+#include "op_model.h"
 
 namespace acl {
 constexpr uint64_t DEFAULT_MAX_OPQUEUE_NUM = 10000;
@@ -52,6 +53,8 @@ struct ACL_FUNC_VISIBILITY AclOp {
     bool isCompile = false;
     OpExecuteType exeucteType = ACL_OP_EXECUTE;
     bool isCopyConstructor = false;
+    bool isMatched  =false;
+    OpModel opModel;
     std::string DebugString() const;
     void Init(const AclOp& aclOp);
 };

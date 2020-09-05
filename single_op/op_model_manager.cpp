@@ -504,12 +504,14 @@ aclError OpModelManager::SetHostMemToConst(AclOp &aclopHostMemToConst, bool &isE
     return ACL_SUCCESS;
 }
 
-aclError OpModelManager::GetOpModel(const AclOp &aclOp)
+aclError OpModelManager::GetOpModel(AclOp &aclOp)
 {
     OpModel opModel;
     bool isDynamic = false;
     aclError ret = MatchOpModel(aclOp, opModel, isDynamic);
     if (ret == ACL_SUCCESS) {
+        aclOp.opModel = opModel;
+        aclOp.isMatched = true;
         ACL_LOG_INFO("operator %s is already registered, isDynamicModel = %d", aclOp.opType.c_str(), isDynamic);
         return ret;
     }
@@ -849,8 +851,8 @@ aclError OpModelManager::MatchDynamicOpModel(const AclOp &aclOp, OpModel &opMode
             }
         }
     }
-
-    return ret;
+    ACL_CHECK_WITH_MESSAGE_AND_NO_RETURN(aclOp.isCompile, "MatchOpModel fail from static map or dynamic map");
+    return ACL_ERROR_OP_NOT_FOUND;
 }
 
 aclError OpModelManager::MatchOpModel(const AclOp &aclOp, OpModel &opModel, bool &isDynamic)
@@ -865,8 +867,7 @@ aclError OpModelManager::MatchOpModel(const AclOp &aclOp, OpModel &opModel, bool
         return ret;
     }
 
-    ACL_CHECK_WITH_MESSAGE_AND_NO_RETURN(aclOp.isCompile, "MatchOpModel fail from static map or dynamic map");
-    return ACL_ERROR_OP_NOT_FOUND;
+    return ret;
 }
 
 aclError OpModelManager::ReadModelDefs(const std::string &configPath,

@@ -127,6 +127,8 @@ void AclOp::Init(const AclOp& aclOp)
     this->compileType = aclOp.compileType;
     this->isCompile = aclOp.isCompile;
     this->exeucteType = aclOp.exeucteType;
+    this->isMatched = aclOp.isMatched;
+    this->opModel = aclOp.opModel;
 }
 } // namespace acl
 

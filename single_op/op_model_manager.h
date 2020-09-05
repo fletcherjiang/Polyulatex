@@ -52,7 +52,7 @@ public:
 
     aclError LoadModelFromSharedMem(std::shared_ptr<void> &model, size_t modelSize, bool isStatic = false);
 
-    aclError GetOpModel(const AclOp &aclOp);
+    aclError GetOpModel(AclOp &aclOp);
 
     OpModel* GetBasicOpModel(const std::string &opType);
 

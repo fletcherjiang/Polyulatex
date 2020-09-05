@@ -21,8 +21,6 @@
 #include "acl/acl_base.h"
 #include "types/tensor_desc_internal.h"
 #include "types/op_attr.h"
-#include "types/acl_op.h"
-
 
 namespace acl {
 struct OpModel {
