@@ -745,12 +745,13 @@ bool OpModelManager::BackAclopMatch(AclOp &aclOpMatch,
     return true;
 }
 
-aclError OpModelManager::MatchStaticOpModel(const AclOp &aclOp, OpModel &opModel, bool &isDynamic)
+aclError OpModelManager::MatchStaticOpModel(const AclOp &aclOp, OpModel &opModel,
+    bool &isDynamic, bool &isNeedMatchDymaic)
 {
     shared_ptr<OpModelDef> modelDef;
-    // First find in the static model map
     AclOp aclopHostMemToConst = aclOp;
     aclError ret = ACL_SUCCESS;
+    isNeedMatchDymaic = false;
     bool isExistConst = false;
     ACL_REQUIRES_OK(SetHostMemToConst(aclopHostMemToConst, isExistConst));
     if (isExistConst) {
@@ -781,6 +782,9 @@ aclError OpModelManager::MatchStaticOpModel(const AclOp &aclOp, OpModel &opModel
             return ret;
         }
     }
+    ACL_LOG_INFO("Match static opModels fail, begin to match model from dynamic opModels. opType = %s",
+        aclOp.opType.c_str());
+    isNeedMatchDymaic = true;
 
     return ret;
 }
@@ -789,10 +793,6 @@ aclError OpModelManager::MatchDynamicOpModel(const AclOp &aclOp, OpModel &opMode
 {
     shared_ptr<OpModelDef> modelDef;
     aclError ret = ACL_SUCCESS;
-    // First find in the dynamic model map
-    ACL_LOG_INFO("Match static opModels fail, begin to match model from dynamic opModels. opType = %s",
-        aclOp.opType.c_str());
-
     // check the input shape must be static when executing
     if (!aclOp.isCompile) {
         if (IsDynamicOpModel(aclOp)) {
@@ -800,7 +800,6 @@ aclError OpModelManager::MatchDynamicOpModel(const AclOp &aclOp, OpModel &opMode
             return ACL_ERROR_INVALID_PARAM;
         }
     }
-
     // Need to refresh the shape(-1/-2) and go to map to find model when executing
     ACL_LOG_INFO("aclOp.numInputs is %d, aclOp.numOutputs is %d", aclOp.numInputs, aclOp.numOutputs);
     std::vector<std::vector<aclTensorShapeStatus>> shapeStatus;
@@ -857,16 +856,13 @@ aclError OpModelManager::MatchDynamicOpModel(const AclOp &aclOp, OpModel &opMode
 
 aclError OpModelManager::MatchOpModel(const AclOp &aclOp, OpModel &opModel, bool &isDynamic)
 {
-    aclError ret = MatchStaticOpModel(aclOp, opModel, isDynamic);
-    if (ret == ACL_SUCCESS) {
+    bool isNeedMatchDymaic = false;
+    aclError ret = MatchStaticOpModel(aclOp, opModel, isDynamic, isNeedMatchDymaic);
+    if (isNeedMatchDymaic == false) {
         return ret;
     }
 
     ret = MatchDynamicOpModel(aclOp, opModel, isDynamic);
-    if (ret == ACL_SUCCESS) {
-        return ret;
-    }
-
     return ret;
 }
 
