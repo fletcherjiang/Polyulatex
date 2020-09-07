@@ -111,7 +111,7 @@ private:
                                const std::vector<aclTensorShapeStatus> &tensorShapeStatus,
                                const std::vector<std::vector<int64_t>> &tensorDims,
                                const std::vector<int64_t> &storageTensorDims);
-    aclError MatchStaticOpModel(const AclOp &aclOp, OpModel &opModel, bool &isDynamic);
+    aclError MatchStaticOpModel(const AclOp &aclOp, OpModel &opModel, bool &isDynamic, bool &isNeedMatchDymaic);
     aclError MatchDynamicOpModel(const AclOp &aclOp, OpModel &opModel, bool &isDynamic);
 
 private:
