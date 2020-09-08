@@ -366,7 +366,7 @@ void OpModelManager::SetTensorShapeRange(const AclOp &aclOp, const std::vector<a
 void OpModelManager::GetTensorShapeRange(const std::vector<aclTensorShapeStatus> &tensorShapeStatus,
                                          std::vector<std::vector<std::pair<int64_t, int64_t>>> &shapeRanges)
 {
-    std::string tensorShapeStatusDesc = TensorStatusToStr(tensorShapeStatus);
+    const std::string &tensorShapeStatusDesc = TensorStatusToStr(tensorShapeStatus);
     ACL_LOG_INFO("GetTensorShapeRange tensorShapeStatusDesc is %s", tensorShapeStatusDesc.c_str());
     std::lock_guard<std::mutex> lk(tensorShapeMutex_);
     auto it = tensorShapeRange_.find(tensorShapeStatusDesc);
