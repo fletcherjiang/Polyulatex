@@ -254,7 +254,7 @@ void OpModelManager::SetTensorShapeStatus(const AclOp &aclOp, std::vector<aclTen
     // Save shape status for tensors
     SetShapeStatus(aclOp.numInputs, aclOp.inputDesc, shapeStatus);
     SetShapeStatus(aclOp.numOutputs, aclOp.outputDesc, shapeStatus);
-    string shapeStatusDesc = TensorStatusToStr(shapeStatus);
+    const string &shapeStatusDesc = TensorStatusToStr(shapeStatus);
     std::lock_guard<std::mutex> lk(shapeStatusMutex_);
     auto it = tensorShapeStatusDesc_.find(aclOp.opType);
     if (it != tensorShapeStatusDesc_.end()) {
