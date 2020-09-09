@@ -53,7 +53,7 @@ struct ACL_FUNC_VISIBILITY AclOp {
     bool isCompile = false;
     OpExecuteType exeucteType = ACL_OP_EXECUTE;
     bool isCopyConstructor = false;
-    bool isMatched  =false;
+    bool isMatched = false;
     OpModel opModel;
     std::string DebugString() const;
     void Init(const AclOp& aclOp);
