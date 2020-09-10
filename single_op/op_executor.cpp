@@ -220,7 +220,7 @@ aclError OpExecutor::ExecuteAsync(const AclOp &aclOp,
     aclError ret;
     bool isDynamic = false;
 
-    if (aclOp.isMatched == false) {
+    if (!aclOp.isMatched) {
         ACL_REQUIRES_OK(OpModelManager::GetInstance().MatchOpModel(aclOp, opModel, isDynamic));
         ACL_LOG_DEBUG("match opModel success, opType = %s, isDynamic = %d", aclOp.opType.c_str(), isDynamic);
     } else {

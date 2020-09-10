@@ -858,7 +858,7 @@ aclError OpModelManager::MatchOpModel(const AclOp &aclOp, OpModel &opModel, bool
 {
     bool isNeedMatchDymaic = false;
     aclError ret = MatchStaticOpModel(aclOp, opModel, isDynamic, isNeedMatchDymaic);
-    if (isNeedMatchDymaic == false) {
+    if (!isNeedMatchDymaic) {
         return ret;
     }
 
