@@ -354,8 +354,8 @@ void OpModelManager::SetTensorShapeRange(const AclOp &aclOp, const std::vector<a
     std::lock_guard<std::mutex> lk(tensorShapeMutex_);
     auto it = tensorShapeRange_.find(tensorShapeStatusDesc);
     if (it != tensorShapeRange_.end()) {
-         auto shapeRangeIt = find(it->second.begin(), it->second.end(), shapeRanges);
-         if (shapeRangeIt == it->second.end()) {
+        auto shapeRangeIt = find(it->second.begin(), it->second.end(), shapeRanges);
+        if (shapeRangeIt == it->second.end()) {
             it->second.emplace_back(shapeRanges);
         }
     } else {
