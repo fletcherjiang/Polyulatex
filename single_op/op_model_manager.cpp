@@ -804,9 +804,6 @@ aclError OpModelManager::MatchDynamicOpModel(const AclOp &aclOp, OpModel &opMode
     ACL_LOG_INFO("aclOp.numInputs is %d, aclOp.numOutputs is %d", aclOp.numInputs, aclOp.numOutputs);
     std::vector<std::vector<aclTensorShapeStatus>> shapeStatus;
     GetTensorShapeStatus(aclOp, shapeStatus);
-    if (shapeStatus.empty()) {
-        return ACL_ERROR_OP_NOT_FOUND;
-    }
     for (size_t i = 0; i < shapeStatus.size(); ++i) {
         std::vector<std::vector<std::pair<int64_t, int64_t>>> shapeRanges;
         GetTensorShapeRange(shapeStatus[i], shapeRanges);
