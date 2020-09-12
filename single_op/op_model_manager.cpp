@@ -512,6 +512,7 @@ aclError OpModelManager::GetOpModel(AclOp &aclOp)
     if (ret == ACL_SUCCESS) {
         aclOp.opModel = opModel;
         aclOp.isMatched = true;
+        aclOp.isDynamic = isDynamic;
         ACL_LOG_INFO("operator %s is already registered, isDynamicModel = %d", aclOp.opType.c_str(), isDynamic);
         return ret;
     }
