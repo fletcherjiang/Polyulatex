@@ -15,6 +15,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <unordered_map>
 #include <memory>
 #include <mutex>
 
@@ -51,7 +52,7 @@ public:
 
     aclError LoadModelFromSharedMem(std::shared_ptr<void> &model, size_t modelSize, bool isStatic = false);
 
-    aclError GetOpModel(const AclOp &aclOp);
+    aclError GetOpModel(AclOp &aclOp);
 
     OpModel* GetBasicOpModel(const std::string &opType);
 
@@ -59,7 +60,7 @@ public:
 
     aclError HandleMaxOpQueueConfig(const char *configPath);
 
-    aclError SetHostMemToConst(AclOp &aclopHostMemToConst);
+    aclError SetHostMemToConst(AclOp &aclopHostMemToConst, bool &isExistConst);
 
     aclError SetTensorConst(aclTensorDesc *desc, const aclDataBuffer *hostMem);
 
@@ -110,6 +111,8 @@ private:
                                const std::vector<aclTensorShapeStatus> &tensorShapeStatus,
                                const std::vector<std::vector<int64_t>> &tensorDims,
                                const std::vector<int64_t> &storageTensorDims);
+    aclError MatchStaticOpModel(const AclOp &aclOp, OpModel &opModel, bool &isDynamic, bool &isNeedMatchDymaic);
+    aclError MatchDynamicOpModel(const AclOp &aclOp, OpModel &opModel, bool &isDynamic);
 
 private:
     ModelMap opModels_;
@@ -120,10 +123,12 @@ private:
     std::map<std::string, OpModel> basicModelMap_;
     std::mutex mutex_;
     std::uint32_t counter_ = 0;
+
     std::mutex shapeStatusMutex_;
-    std::vector<std::pair<std::string, std::vector<aclTensorShapeStatus>>> tensorShapeStatus_;
+    std::unordered_map<std::string, std::vector<std::vector<aclTensorShapeStatus>>> tensorShapeStatus_;
+    std::unordered_map<std::string, std::vector<std::string>> tensorShapeStatusDesc_;
     std::mutex tensorShapeMutex_;
-    std::map<std::string, std::vector<std::vector<std::pair<int64_t, int64_t>>>> tensorShapeRange_;
+    std::unordered_map<std::string, std::vector<std::vector<std::pair<int64_t, int64_t>>>> tensorShapeRange_;
 };
 } // namespace acl
 

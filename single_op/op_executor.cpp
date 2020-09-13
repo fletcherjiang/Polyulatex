@@ -221,8 +221,15 @@ aclError OpExecutor::ExecuteAsync(const AclOp &aclOp,
     aclError ret;
     bool isDynamic = false;
 
-    ACL_REQUIRES_OK(OpModelManager::GetInstance().MatchOpModel(aclOp, opModel, isDynamic));
-    ACL_LOG_DEBUG("match opModel success, opType = %s, isDynamic = %d", aclOp.opType.c_str(), isDynamic);
+    if (!aclOp.isMatched) {
+        ACL_REQUIRES_OK(OpModelManager::GetInstance().MatchOpModel(aclOp, opModel, isDynamic));
+        ACL_LOG_DEBUG("match opModel success, opType = %s, isDynamic = %d", aclOp.opType.c_str(), isDynamic);
+    } else {
+        opModel = aclOp.opModel;
+        isDynamic = aclOp.isDynamic;
+        ACL_LOG_INFO("opType = %s has been matched in the  op compile phase", aclOp.opType.c_str());
+    }
+
     bool isExactModel = (opModel.isStaticModelWithFuzzCompile == 0) ? true : false;
     if (isDynamic) {
         ACL_LOG_INFO("begin to load dynamic model. model = %s", opModel.name.c_str());

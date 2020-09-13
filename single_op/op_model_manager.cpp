@@ -255,19 +255,30 @@ void OpModelManager::SetTensorShapeStatus(const AclOp &aclOp, std::vector<aclTen
     // Save shape status for tensors
     SetShapeStatus(aclOp.numInputs, aclOp.inputDesc, shapeStatus);
     SetShapeStatus(aclOp.numOutputs, aclOp.outputDesc, shapeStatus);
+    const string &shapeStatusDesc = TensorStatusToStr(shapeStatus);
     std::lock_guard<std::mutex> lk(shapeStatusMutex_);
-    tensorShapeStatus_.emplace_back(make_pair(aclOp.opType, shapeStatus));
+    auto it = tensorShapeStatusDesc_.find(aclOp.opType);
+    if (it != tensorShapeStatusDesc_.end()) {
+        auto shapeStatusIt = find(it->second.begin(), it->second.end(), shapeStatusDesc);
+        if (shapeStatusIt == it->second.end()) {
+            it->second.emplace_back(shapeStatusDesc);
+            tensorShapeStatus_[aclOp.opType].emplace_back(shapeStatus);
+        }
+    } else {
+        tensorShapeStatus_[aclOp.opType].emplace_back(shapeStatus);
+        tensorShapeStatusDesc_[aclOp.opType].emplace_back(shapeStatusDesc);
+    }
 }
 
 void OpModelManager::GetTensorShapeStatus(const AclOp &aclOp,
                                           std::vector<std::vector<aclTensorShapeStatus>> &shapeStatus)
 {
     std::lock_guard<std::mutex> lk(shapeStatusMutex_);
-    for (size_t i = 0; i < tensorShapeStatus_.size(); i++) {
-        if (tensorShapeStatus_[i].first == aclOp.opType) {
-            shapeStatus.emplace_back(tensorShapeStatus_[i].second);
-        }
+    auto it = tensorShapeStatus_.find(aclOp.opType);
+    if (it != tensorShapeStatus_.end()) {
+        shapeStatus.assign(it->second.begin(), it->second.end());
     }
+
     ACL_LOG_INFO("GetTensorShapeStatus opType is %s, size of shapeStatus is %zu",
         aclOp.opType.c_str(), shapeStatus.size());
 }
@@ -342,13 +353,21 @@ void OpModelManager::SetTensorShapeRange(const AclOp &aclOp, const std::vector<a
     ACL_LOG_INFO("SetTensorShapeRange tensorShapeStatusDesc is %s, shapeRanges size is %zu",
         tensorShapeStatusDesc.c_str(), shapeRanges.size());
     std::lock_guard<std::mutex> lk(tensorShapeMutex_);
-    tensorShapeRange_[tensorShapeStatusDesc].emplace_back(shapeRanges);
+    auto it = tensorShapeRange_.find(tensorShapeStatusDesc);
+    if (it != tensorShapeRange_.end()) {
+        auto shapeRangeIt = find(it->second.begin(), it->second.end(), shapeRanges);
+        if (shapeRangeIt == it->second.end()) {
+            it->second.emplace_back(shapeRanges);
+        }
+    } else {
+        tensorShapeRange_[tensorShapeStatusDesc].emplace_back(shapeRanges);
+    }
 }
 
 void OpModelManager::GetTensorShapeRange(const std::vector<aclTensorShapeStatus> &tensorShapeStatus,
                                          std::vector<std::vector<std::pair<int64_t, int64_t>>> &shapeRanges)
 {
-    std::string tensorShapeStatusDesc = TensorStatusToStr(tensorShapeStatus);
+    const std::string &tensorShapeStatusDesc = TensorStatusToStr(tensorShapeStatus);
     ACL_LOG_INFO("GetTensorShapeRange tensorShapeStatusDesc is %s", tensorShapeStatusDesc.c_str());
     std::lock_guard<std::mutex> lk(tensorShapeMutex_);
     auto it = tensorShapeRange_.find(tensorShapeStatusDesc);
@@ -466,11 +485,12 @@ aclError OpModelManager::SetTensorConst(aclTensorDesc *desc, const aclDataBuffer
     return ACL_SUCCESS;
 }
 
-aclError OpModelManager::SetHostMemToConst(AclOp &aclopHostMemToConst)
+aclError OpModelManager::SetHostMemToConst(AclOp &aclopHostMemToConst, bool &isExistConst)
 {
     for (int i = 0; i < aclopHostMemToConst.numInputs; ++i) {
         if ((aclopHostMemToConst.inputDesc[i]->memtype == ACL_MEMTYPE_HOST) &&
             (!aclopHostMemToConst.inputDesc[i]->isConst)) {
+            isExistConst = true;
             // HostMem needs to be constructed as constTensor
             ACL_LOG_INFO("inputTensor %s is hostMem, index is %d", aclopHostMemToConst.opType.c_str(), i);
             ACL_REQUIRES_OK(SetTensorConst(const_cast<aclTensorDesc *>(aclopHostMemToConst.inputDesc[i]),
@@ -480,6 +500,7 @@ aclError OpModelManager::SetHostMemToConst(AclOp &aclopHostMemToConst)
     for (int i = 0; i < aclopHostMemToConst.numOutputs; ++i) {
         if ((aclopHostMemToConst.outputDesc[i]->memtype == ACL_MEMTYPE_HOST) &&
             (!aclopHostMemToConst.outputDesc[i]->isConst)) {
+            isExistConst = true;
             // HostMem needs to be constructed as constTensor
             ACL_LOG_INFO("outputTensor %s is hostMem, index is %d", aclopHostMemToConst.opType.c_str(), i);
             ACL_REQUIRES_OK(SetTensorConst(const_cast<aclTensorDesc *>(aclopHostMemToConst.outputDesc[i]),
@@ -489,12 +510,15 @@ aclError OpModelManager::SetHostMemToConst(AclOp &aclopHostMemToConst)
     return ACL_SUCCESS;
 }
 
-aclError OpModelManager::GetOpModel(const AclOp &aclOp)
+aclError OpModelManager::GetOpModel(AclOp &aclOp)
 {
     OpModel opModel;
     bool isDynamic = false;
     aclError ret = MatchOpModel(aclOp, opModel, isDynamic);
     if (ret == ACL_SUCCESS) {
+        aclOp.opModel = opModel;
+        aclOp.isMatched = true;
+        aclOp.isDynamic = isDynamic;
         ACL_LOG_INFO("operator %s is already registered, isDynamicModel = %d", aclOp.opType.c_str(), isDynamic);
         return ret;
     }
@@ -728,33 +752,54 @@ bool OpModelManager::BackAclopMatch(AclOp &aclOpMatch,
     return true;
 }
 
-aclError OpModelManager::MatchOpModel(const AclOp &aclOp, OpModel &opModel, bool &isDynamic)
+aclError OpModelManager::MatchStaticOpModel(const AclOp &aclOp, OpModel &opModel,
+    bool &isDynamic, bool &isNeedMatchDymaic)
 {
     shared_ptr<OpModelDef> modelDef;
-    // First find in the static model map
     AclOp aclopHostMemToConst = aclOp;
-    ACL_REQUIRES_OK(SetHostMemToConst(aclopHostMemToConst));
-    aclError ret = opModels_.Get(aclopHostMemToConst, modelDef, true);
-    if (ret == ACL_SUCCESS) {
-        isDynamic = false;
-        ACL_LOG_INFO("Match static model success. opType = %s, opModel = %s",
-            aclOp.opType.c_str(), modelDef->modelPath.c_str());
-        ret = modelCache_.GetOpModel(*modelDef, opModel);
-        return ret;
+    aclError ret = ACL_SUCCESS;
+    isNeedMatchDymaic = false;
+    bool isExistConst = false;
+    ACL_REQUIRES_OK(SetHostMemToConst(aclopHostMemToConst, isExistConst));
+    if (isExistConst) {
+        ret = opModels_.Get(aclopHostMemToConst, modelDef, true);
+        if (ret == ACL_SUCCESS) {
+            isDynamic = false;
+            ACL_LOG_INFO("Match static model with const memory successfully. opType = %s, opModel = %s",
+                aclOp.opType.c_str(), modelDef->modelPath.c_str());
+            ret = modelCache_.GetOpModel(*modelDef, opModel);
+            return ret;
+        } else {
+            ret = opModels_.Get(aclOp, modelDef, true);
+            if (ret == ACL_SUCCESS) {
+                isDynamic = false;
+                ACL_LOG_INFO("Match static model successfully. opType = %s, opModel = %s",
+                    aclOp.opType.c_str(), modelDef->modelPath.c_str());
+                ret = modelCache_.GetOpModel(*modelDef, opModel);
+                return ret;
+            }
+        }
     } else {
         ret = opModels_.Get(aclOp, modelDef, true);
         if (ret == ACL_SUCCESS) {
             isDynamic = false;
-            ACL_LOG_INFO("Match static model success111. opType = %s, opModel = %s",
+            ACL_LOG_INFO("Match static model successfully. opType = %s, opModel = %s",
                 aclOp.opType.c_str(), modelDef->modelPath.c_str());
             ret = modelCache_.GetOpModel(*modelDef, opModel);
             return ret;
         }
     }
-    // First find in the dynamic model map
     ACL_LOG_INFO("Match static opModels fail, begin to match model from dynamic opModels. opType = %s",
         aclOp.opType.c_str());
+    isNeedMatchDymaic = true;
 
+    return ret;
+}
+
+aclError OpModelManager::MatchDynamicOpModel(const AclOp &aclOp, OpModel &opModel, bool &isDynamic)
+{
+    shared_ptr<OpModelDef> modelDef;
+    aclError ret = ACL_SUCCESS;
     // check the input shape must be static when executing
     if (!aclOp.isCompile) {
         if (IsDynamicOpModel(aclOp)) {
@@ -763,7 +808,6 @@ aclError OpModelManager::MatchOpModel(const AclOp &aclOp, OpModel &opModel, bool
             return ACL_ERROR_INVALID_PARAM;
         }
     }
-
     // Need to refresh the shape(-1/-2) and go to map to find model when executing
     ACL_LOG_INFO("aclOp.numInputs is %d, aclOp.numOutputs is %d", aclOp.numInputs, aclOp.numOutputs);
     std::vector<std::vector<aclTensorShapeStatus>> shapeStatus;
@@ -798,7 +842,8 @@ aclError OpModelManager::MatchOpModel(const AclOp &aclOp, OpModel &opModel, bool
                 return ret;
             } else {
                 // aicpu is -2 but need to set const
-                ACL_REQUIRES_OK(SetHostMemToConst(aclOpMatch));
+                bool isExistConst = false;
+                ACL_REQUIRES_OK(SetHostMemToConst(aclOpMatch, isExistConst));
                 ret = dynamicOpModels_.Get(aclOpMatch, modelDef, true);
                 if (ret == ACL_SUCCESS) {
                     ACL_LOG_INFO("Match dynamic model success111. opType = %s, opModel = %s",
@@ -812,6 +857,18 @@ aclError OpModelManager::MatchOpModel(const AclOp &aclOp, OpModel &opModel, bool
     }
     ACL_CHECK_WITH_MESSAGE_AND_NO_RETURN(aclOp.isCompile, "MatchOpModel fail from static map or dynamic map");
     return ACL_ERROR_OP_NOT_FOUND;
+}
+
+aclError OpModelManager::MatchOpModel(const AclOp &aclOp, OpModel &opModel, bool &isDynamic)
+{
+    bool isNeedMatchDymaic = false;
+    aclError ret = MatchStaticOpModel(aclOp, opModel, isDynamic, isNeedMatchDymaic);
+    if (!isNeedMatchDymaic) {
+        return ret;
+    }
+
+    ret = MatchDynamicOpModel(aclOp, opModel, isDynamic);
+    return ret;
 }
 
 aclError OpModelManager::ReadModelDefs(const std::string &configPath,
