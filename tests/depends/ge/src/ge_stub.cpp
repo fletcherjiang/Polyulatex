@@ -1115,3 +1115,13 @@ std::string ErrorManager::GetErrorMessage()
     std::string message = "";
     return message;
 }
+
+int ErrorManager::ReportInterErrMessage(std::string error_code, const std::string &error_msg)
+{
+    return 0;
+}
+
+int error_message::FormatErrorMessage(char *str_dst, size_t dst_max, const char *format, ...)
+{
+    return 1;
+}
