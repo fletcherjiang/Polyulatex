@@ -26,6 +26,10 @@ aclError acldvppCreateChannel(acldvppChannelDesc *channelDesc)
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
         ACL_LOG_ERROR("image processor is null.");
+        const char *argList[] = {"param"};
+        const char *argVal[] = {"imageProcessor"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+            argList, argVal, 1);
         return ACL_ERROR_INTERNAL_ERROR;
     }
     ACL_REQUIRES_NOT_NULL(channelDesc);
@@ -48,6 +52,10 @@ aclError acldvppDestroyChannel(acldvppChannelDesc *channelDesc)
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
         ACL_LOG_ERROR("image processor is null.");
+        const char *argList[] = {"param"};
+        const char *argVal[] = {"imageProcessor"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+            argList, argVal, 1);
         return ACL_ERROR_INTERNAL_ERROR;
     }
     aclError aclRet = imageProcessor->acldvppDestroyChannel(channelDesc);

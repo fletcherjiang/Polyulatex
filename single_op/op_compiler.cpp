@@ -51,7 +51,7 @@ aclError aclopCompile(const char *opType,
     if (compileFlag != ACL_COMPILE_SYS && compileFlag != ACL_COMPILE_UNREGISTERED) {
         ACL_LOG_INNER_ERROR("[Check][CompileFlag]aclopCompile compile type[%d] not support",
             static_cast<int32_t>(compileFlag));
-        acl::AclErrorLogManager::ReportInputError(acl::UNSUPPORTED_FEATURE_MSG,
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"compile type", std::to_string(compileFlag),
             "not in range"}));

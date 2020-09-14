@@ -27,6 +27,10 @@ aclError acldvppJpegDecodeAsync(acldvppChannelDesc *channelDesc,
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
         ACL_LOG_ERROR("image processor is null.");
+        const char *argList[] = {"param"};
+        const char *argVal[] = {"imageProcessor"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+            argList, argVal, 1);
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return imageProcessor->acldvppJpegDecodeAsync(channelDesc, data, size, outputDesc, stream);
@@ -43,6 +47,10 @@ aclError acldvppJpegEncodeAsync(acldvppChannelDesc *channelDesc,
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
         ACL_LOG_ERROR("image processor is null.");
+        const char *argList[] = {"param"};
+        const char *argVal[] = {"imageProcessor"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+            argList, argVal, 1);
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return imageProcessor->acldvppJpegEncodeAsync(channelDesc, inputDesc, data, size, config, stream);
@@ -58,6 +66,10 @@ aclError acldvppJpegGetImageInfo(const void *data,
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
         ACL_LOG_ERROR("image processor is null.");
+        const char *argList[] = {"param"};
+        const char *argVal[] = {"imageProcessor"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+            argList, argVal, 1);
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return imageProcessor->acldvppJpegGetImageInfo(data, size, width, height, components, nullptr);
@@ -74,6 +86,10 @@ aclError acldvppJpegGetImageInfoV2(const void *data,
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
         ACL_LOG_ERROR("image processor is null.");
+        const char *argList[] = {"param"};
+        const char *argVal[] = {"imageProcessor"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+            argList, argVal, 1);
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return imageProcessor->acldvppJpegGetImageInfo(data, size, width, height, components, format);
@@ -88,6 +104,10 @@ aclError acldvppJpegPredictEncSize(const acldvppPicDesc *inputDesc, const acldvp
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
         ACL_LOG_ERROR("image processor is null.");
+        const char *argList[] = {"param"};
+        const char *argVal[] = {"imageProcessor"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+            argList, argVal, 1);
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return imageProcessor->acldvppJpegPredictEncSize(inputDesc, config, size);
@@ -102,6 +122,10 @@ aclError acldvppJpegPredictDecSize(const void *data,
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
         ACL_LOG_ERROR("image processor is null.");
+        const char *argList[] = {"param"};
+        const char *argVal[] = {"imageProcessor"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+            argList, argVal, 1);
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return imageProcessor->acldvppJpegPredictDecSize(data, dataSize, outputPixelFormat, decSize);

@@ -29,12 +29,19 @@ namespace acl {
             ACL_LOG_DEBUG("start to execute aclvdecSetChannelDescChannelId");
             if (channelDesc == nullptr) {
                 ACL_LOG_ERROR("channelDesc is null.");
+                const char *argList[] = {"param"};
+                const char *argVal[] = {"channelDesc"};
+                acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG, argList, argVal, 1);
                 return ACL_ERROR_INVALID_PARAM;
             }
 
             if ((channelId < V100_CHANNEL_ID_FLOOR) || (channelId > V100_CHANNEL_ID_CEILING)) {
                 ACL_LOG_ERROR("the value of channelId[%u] is invalid, it should be between in [%d, %d]",
                     channelId, V100_CHANNEL_ID_FLOOR, V100_CHANNEL_ID_CEILING);
+                const char *argList[] = {"param"};
+                const char *argVal[] = {"channelDesc"};
+                acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+                    argList, argVal, 1);
                 return ACL_ERROR_INVALID_PARAM;
             }
 
@@ -54,6 +61,10 @@ namespace acl {
             ACL_LOG_DEBUG("start to execute aclvdecSetChannelDescOutPicFormat");
             if (channelDesc == nullptr) {
                 ACL_LOG_ERROR("channelDesc is null.");
+                const char *argList[] = {"param"};
+                const char *argVal[] = {"channelDesc"};
+                acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+                    argList, argVal, 1);
                 return ACL_ERROR_INVALID_PARAM;
             }
             // v100 only support 2 format
@@ -62,6 +73,12 @@ namespace acl {
                 ACL_LOG_ERROR("the current outPicFormat[%d] is not support in this version, only support "
                     "PIXEL_FORMAT_YUV_SEMIPLANAR_420 and PIXEL_FORMAT_YVU_SEMIPLANAR_420",
                     static_cast<int32_t>(outPicFormat));
+                std::string val = acl::AclErrorLogManager::FormatStr("the current outPicFormat[%d]",
+                    static_cast<int32_t>(outPicFormat));
+                const char *argList[] = {"feature", "reason"};
+                const char *argVal[] = {"outPicFormat", val.c_str()};
+                acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
+                    argList, argVal, 2);
                 return ACL_ERROR_INVALID_PARAM;
             }
 
@@ -116,6 +133,10 @@ namespace acl {
             isSupport = true;
             if (channelDesc == nullptr) {
                 ACL_LOG_ERROR("venc channelDesc is null.");
+                const char *argList[] = {"param"};
+                const char *argVal[] = {"channelDesc"};
+                acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_PARAM_MSG,
+                    argList, argVal, 1);
                 return 0;
             }
 
