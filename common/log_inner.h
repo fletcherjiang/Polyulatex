@@ -84,6 +84,16 @@ public:
             printf("ERROR %d %s:%s:%d: "#fmt "\n", acl::AclLog::GetTid(), __FUNCTION__,       \
                 __FILE__, __LINE__, ##__VA_ARGS__);                                                 \
     } while (0)
+#define ACL_LOG_INNER_ERROR(fmt, ...)                                                               \
+    do {                                                                                            \
+            printf("ERROR %d %s:%s:%d: "#fmt "\n", acl::AclLog::GetTid(), __FUNCTION__,             \
+                __FILE__, __LINE__, ##__VA_ARGS__);                                                 \
+    } while (0)
+#define ACL_LOG_CALL_ERROR(fmt, ...)                                                                \
+    do {                                                                                            \
+            printf("ERROR %d %s:%s:%d: "#fmt "\n", acl::AclLog::GetTid(), __FUNCTION__,             \
+                __FILE__, __LINE__, ##__VA_ARGS__);                                                 \
+    } while (0)
 #define ACL_LOG_EVENT(fmt, ...)                                                                     \
     do {                                                                                            \
             if (acl::AclLog::IsEventLogOutputEnable()) {                                            \

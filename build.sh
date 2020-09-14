@@ -246,7 +246,11 @@ main()
   echo "---------------- ACL build start ----------------"
   g++ -v
   mk_dir ${OUTPUT_PATH}
-  build_acl || { echo "ACL build failed."; return; }
+  build_acl
+  if [[ "$?" -ne 0 ]]; then
+    echo "ACL build failed.";
+    exit 1;
+  fi
   echo "---------------- ACL build finished ----------------"
 
   rm -f ${OUTPUT_PATH}/libgmock*.so
