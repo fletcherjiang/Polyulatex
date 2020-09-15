@@ -27,6 +27,10 @@ aclError aclvdecCreateChannel(aclvdecChannelDesc *channelDesc)
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
         ACL_LOG_ERROR("video processor is null.");
+        const char *argList[] = {"param"};
+        const char *argVal[] = {"videoProcessor"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+            argList, argVal, 1);
         return ACL_ERROR_INTERNAL_ERROR;
     }
     ACL_REQUIRES_NOT_NULL(channelDesc);
@@ -49,6 +53,10 @@ aclError aclvdecDestroyChannel(aclvdecChannelDesc *channelDesc)
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
         ACL_LOG_ERROR("video processor is null.");
+        const char *argList[] = {"param"};
+        const char *argVal[] = {"videoProcessor"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+            argList, argVal, 1);
         return ACL_ERROR_INTERNAL_ERROR;
     }
     aclError aclRet = videoProcessor->aclvdecDestroyChannel(channelDesc);
@@ -68,6 +76,10 @@ aclError aclvdecSendFrame(aclvdecChannelDesc *channelDesc,
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
         ACL_LOG_ERROR("video processor is null.");
+        const char *argList[] = {"param"};
+        const char *argVal[] = {"videoProcessor"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+            argList, argVal, 1);
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return videoProcessor->aclvdecSendFrame(channelDesc, input, output, config, userData, false);
@@ -82,6 +94,10 @@ aclError aclvdecSendSkippedFrame(aclvdecChannelDesc *channelDesc,
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
         ACL_LOG_ERROR("video processor is null.");
+        const char *argList[] = {"param"};
+        const char *argVal[] = {"videoProcessor"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+            argList, argVal, 1);
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return videoProcessor->aclvdecSendFrame(channelDesc, input, nullptr, config, userData, true);

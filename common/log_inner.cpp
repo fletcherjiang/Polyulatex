@@ -135,4 +135,15 @@ void AclErrorLogManager::ReportCallError(const char *fmt, ...)
     va_end(ap);
 }
 
+void AclErrorLogManager::ReportInputErrorWithChar(const char *const errorCode, const char *argNames[],
+    const char *argVals[], size_t size)
+{
+    std::vector<std::string> argNameArr;
+    std::vector<std::string> argValArr;
+    for (size_t i = 0; i < size; ++i) {
+        argNameArr.push_back(argNames[i]);
+        argValArr.push_back(argVals[i]);
+    }
+    REPORT_INPUT_ERROR(errorCode, argNameArr, argValArr);
+}
 } // namespace acl

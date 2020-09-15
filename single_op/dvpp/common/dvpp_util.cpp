@@ -43,12 +43,12 @@ namespace acl {
                                             deviceSize, RT_MEMCPY_DEVICE_TO_HOST, static_cast<rtStream_t>(stream));
                 break;
             default:
-                ACL_LOG_ERROR("invalid memcpy kind: %d", static_cast<int32_t>(memcpyKind));
+                ACL_LOG_INNER_ERROR("invalid memcpy kind: %d", static_cast<int32_t>(memcpyKind));
                 return ACL_ERROR_INVALID_PARAM;
         }
 
         if (rtMemcpyRet != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("memcpy between host and device failed, kind = %d, runtime result = %d",
+            ACL_LOG_CALL_ERROR("memcpy between host and device failed, kind = %d, runtime result = %d",
                 static_cast<int32_t>(memcpyKind), rtMemcpyRet);
             return ACL_GET_ERRCODE_RTS(rtMemcpyRet);
         }
@@ -63,7 +63,7 @@ namespace acl {
         ACL_REQUIRES_NOT_NULL(aclBatchPicDesc);
         ACL_REQUIRES_NOT_NULL(aclBatchPicDesc->dataBuffer.data);
         if (aclBatchPicDesc->dvppBatchPicDescs.batchSize < batchSize) {
-            ACL_LOG_ERROR("batchSize[%u] must be larger than or equal to roi batch size[%u]",
+            ACL_LOG_INNER_ERROR("batchSize[%u] must be larger than or equal to roi batch size[%u]",
                 aclBatchPicDesc->dvppBatchPicDescs.batchSize, batchSize);
             return ACL_ERROR_INVALID_PARAM;
         }
@@ -79,7 +79,7 @@ namespace acl {
         void *devData = aclBatchPicDesc->dataBuffer.data;
         size_t devSize = aclBatchPicDesc->dataBuffer.length;
         if (hostSize != devSize) {
-            ACL_LOG_ERROR("memory size between host [%zu] and device [%zu] not equal", hostSize, devSize);
+            ACL_LOG_INNER_ERROR("memory size between host [%zu] and device [%zu] not equal", hostSize, devSize);
             return ACL_ERROR_INVALID_PARAM;
         }
 
@@ -94,12 +94,12 @@ namespace acl {
                                     devSize, RT_MEMCPY_DEVICE_TO_HOST, static_cast<rtStream_t>(stream));
                 break;
             default:
-                ACL_LOG_ERROR("invalid memcpy kind: %d", static_cast<int32_t>(memcpyKind));
+                ACL_LOG_INNER_ERROR("invalid memcpy kind: %d", static_cast<int32_t>(memcpyKind));
                 return ACL_ERROR_INVALID_PARAM;
         }
 
         if (ret != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("memcpy between host and device failed, kind = %d, runtime result = %d",
+            ACL_LOG_CALL_ERROR("memcpy between host and device failed, kind = %d, runtime result = %d",
                 static_cast<int32_t>(memcpyKind), ret);
             return ACL_GET_ERRCODE_RTS(ret);
         }
@@ -129,12 +129,12 @@ namespace acl {
                                                 ACL_MEMCPY_DEVICE_TO_HOST, stream);
                 break;
             default:
-                ACL_LOG_ERROR("invalid memcpy kind: %d", static_cast<int32_t>(memcpyKind));
+                ACL_LOG_INNER_ERROR("invalid memcpy kind: %d", static_cast<int32_t>(memcpyKind));
                 return ACL_ERROR_INVALID_PARAM;
         }
 
         if (aclMemcpyRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("memcpy between host and device failed, kind = %d, result = %d",
+            ACL_LOG_INNER_ERROR("memcpy between host and device failed, kind = %d, result = %d",
                 static_cast<int32_t>(memcpyKind), aclMemcpyRet);
             return aclMemcpyRet;
         }
@@ -146,7 +146,7 @@ namespace acl {
         if (dataBuffer.data != nullptr) {
             rtError_t rtErr = rtFree(dataBuffer.data);
             if (rtErr != RT_ERROR_NONE) {
-                ACL_LOG_ERROR("free device mem failed, runtime result = %d", static_cast<int32_t>(rtErr));
+                ACL_LOG_CALL_ERROR("free device mem failed, runtime result = %d", static_cast<int32_t>(rtErr));
             }
             dataBuffer.data = nullptr;
         }
@@ -157,7 +157,7 @@ namespace acl {
         if (dataBuffer.data != nullptr) {
             rtError_t rtErr = rtDvppFree(dataBuffer.data);
             if (rtErr != RT_ERROR_NONE) {
-                ACL_LOG_ERROR("free dvpp device mem(4G) failed, runtime result = %d", static_cast<int32_t>(rtErr));
+                ACL_LOG_CALL_ERROR("free dvpp device mem(4G) failed, runtime result = %d", static_cast<int32_t>(rtErr));
             }
             dataBuffer.data = nullptr;
         }
@@ -168,7 +168,7 @@ namespace acl {
         if (devAddr != nullptr) {
             rtError_t rtErr = rtFree(devAddr);
             if (rtErr != RT_ERROR_NONE) {
-                ACL_LOG_ERROR("free device mem failed, runtime result = %d", static_cast<int32_t>(rtErr));
+                ACL_LOG_CALL_ERROR("free device mem failed, runtime result = %d", static_cast<int32_t>(rtErr));
             }
             devAddr = nullptr;
         }
@@ -178,7 +178,7 @@ namespace acl {
     {
         char jpegLastErrorMsg[JMSG_LENGTH_MAX] = {0};
         (*(cinfo->err->format_message))(cinfo, jpegLastErrorMsg);
-        ACL_LOG_ERROR("run libjpeg get error : %s", jpegLastErrorMsg);
+        ACL_LOG_INNER_ERROR("run libjpeg get error : %s", jpegLastErrorMsg);
         throw std::runtime_error(jpegLastErrorMsg);
     }
 
@@ -209,7 +209,7 @@ namespace acl {
                 *size = width * height * 2;  // size=w*h*2 if pixel format is YUV440
                 break;
             default:
-                ACL_LOG_ERROR("not support image format %d.", static_cast<int32_t>(format));
+                ACL_LOG_INNER_ERROR("not support image format %d.", static_cast<int32_t>(format));
                 ret = false;
                 break;
         }
@@ -347,7 +347,7 @@ namespace acl {
                 return ACL_SUCCESS;
             }
         }
-        ACL_LOG_ERROR("The origin jpeg color space is YUV, unknow format, it can not be decode to format: %d",
+        ACL_LOG_INNER_ERROR("The origin jpeg color space is YUV, unknow format, it can not be decode to format: %d",
             pixelFormat);
 
         return ACL_ERROR_FORMAT_NOT_MATCH;
@@ -375,7 +375,7 @@ namespace acl {
                 ret = CalcImageSizeForYUV(libjpegHandler, needOrientation, outputPixelFormat, size);
                 break;
             default:
-                ACL_LOG_ERROR("invalid image color space, the current image color space is %d",
+                ACL_LOG_INNER_ERROR("invalid image color space, the current image color space is %d",
                     static_cast<int32_t>(colorSpace));
                 ret = ACL_ERROR_FORMAT_NOT_MATCH;
                 break;
@@ -388,7 +388,7 @@ namespace acl {
         int32_t deviceId = 0;
         rtError_t rtRet = rtGetDevice(&deviceId);
         if (rtRet != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("fail to get deviceId, runtime result = %d", rtRet);
+            ACL_LOG_CALL_ERROR("fail to get deviceId, runtime result = %d", rtRet);
             return false;
         }
 
@@ -396,7 +396,7 @@ namespace acl {
         rtRet = rtGetDeviceCapability(deviceId, static_cast<int32_t>(MODULE_TYPE_AICPU),
             static_cast<int32_t>(FEATURE_TYPE_SCHE), &value);
         if (rtRet != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("fail to get feature information, runtime result = %d", rtRet);
+            ACL_LOG_CALL_ERROR("fail to get feature information, runtime result = %d", rtRet);
             return false;
         }
 

@@ -27,6 +27,10 @@ aclError acldvppVpcResizeAsync(acldvppChannelDesc *channelDesc,
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
         ACL_LOG_ERROR("image processor is null.");
+        const char *argList[] = {"param"};
+        const char *argVal[] = {"imageProcessor"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+            argList, argVal, 1);
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return imageProcessor->acldvppVpcResizeAsync(channelDesc, inputDesc, outputDesc, resizeConfig, stream);
@@ -42,6 +46,10 @@ aclError acldvppVpcCropAsync(acldvppChannelDesc *channelDesc,
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
         ACL_LOG_ERROR("image processor is null.");
+        const char *argList[] = {"param"};
+        const char *argVal[] = {"imageProcessor"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+            argList, argVal, 1);
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return imageProcessor->acldvppVpcCropAsync(channelDesc, inputDesc, outputDesc, cropArea, stream);
@@ -59,6 +67,10 @@ aclError acldvppVpcCropAndPasteAsync(acldvppChannelDesc *channelDesc,
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
         ACL_LOG_ERROR("image processor is null.");
+        const char *argList[] = {"param"};
+        const char *argVal[] = {"imageProcessor"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+            argList, argVal, 1);
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return imageProcessor->acldvppVpcCropAndPasteAsync(channelDesc, inputDesc, outputDesc,
@@ -74,6 +86,10 @@ aclError acldvppVpcConvertColorAsync(acldvppChannelDesc *channelDesc,
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
         ACL_LOG_ERROR("image processor is null.");
+        const char *argList[] = {"param"};
+        const char *argVal[] = {"imageProcessor"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+            argList, argVal, 1);
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return imageProcessor->acldvppVpcConvertColorAsync(channelDesc, inputDesc, outputDesc, stream);
@@ -89,6 +105,10 @@ aclError acldvppVpcPyrDownAsync(acldvppChannelDesc *channelDesc,
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
         ACL_LOG_ERROR("image processor is null.");
+        const char *argList[] = {"param"};
+        const char *argVal[] = {"imageProcessor"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+            argList, argVal, 1);
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return imageProcessor->acldvppVpcPyrDownAsync(channelDesc, inputDesc, outputDesc, reserve, stream);
@@ -106,6 +126,10 @@ aclError acldvppVpcBatchCropAsync(acldvppChannelDesc *channelDesc,
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
         ACL_LOG_ERROR("image processor is null.");
+        const char *argList[] = {"param"};
+        const char *argVal[] = {"imageProcessor"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+            argList, argVal, 1);
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return imageProcessor->acldvppVpcBatchCropAsync(channelDesc, srcBatchPicDescs, roiNums,
@@ -125,6 +149,10 @@ aclError acldvppVpcBatchCropAndPasteAsync(acldvppChannelDesc *channelDesc,
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
         ACL_LOG_ERROR("image processor is null.");
+        const char *argList[] = {"param"};
+        const char *argVal[] = {"imageProcessor"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+            argList, argVal, 1);
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return imageProcessor->acldvppVpcBatchCropAndPasteAsync(channelDesc, srcBatchPicDescs, roiNums,
@@ -141,6 +169,10 @@ aclError acldvppVpcEqualizeHistAsync(const acldvppChannelDesc *channelDesc,
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
         ACL_LOG_ERROR("image processor is null.");
+        const char *argList[] = {"param"};
+        const char *argVal[] = {"imageProcessor"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+            argList, argVal, 1);
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return imageProcessor->acldvppVpcEqualizeHistAsync(channelDesc, inputDesc, outputDesc, lutMap, stream);
@@ -156,6 +188,10 @@ aclError acldvppVpcMakeBorderAsync(const acldvppChannelDesc *channelDesc,
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
         ACL_LOG_ERROR("image processor is null.");
+        const char *argList[] = {"param"};
+        const char *argVal[] = {"imageProcessor"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+            argList, argVal, 1);
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return imageProcessor->acldvppVpcMakeBorderAsync(channelDesc, inputDesc, outputDesc, borderConfig, stream);
@@ -171,6 +207,10 @@ aclError acldvppVpcCalcHistAsync(acldvppChannelDesc *channelDesc,
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
         ACL_LOG_ERROR("image processor is null.");
+        const char *argList[] = {"param"};
+        const char *argVal[] = {"imageProcessor"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+            argList, argVal, 1);
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return imageProcessor->acldvppVpcCalcHistAsync(channelDesc, srcPicDesc, hist, reserve, stream);
@@ -188,6 +228,10 @@ aclError acldvppVpcCropResizeAsync(acldvppChannelDesc *channelDesc,
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
         ACL_LOG_ERROR("image processor is null.");
+        const char *argList[] = {"param"};
+        const char *argVal[] = {"imageProcessor"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+            argList, argVal, 1);
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return imageProcessor->acldvppVpcCropResizeAsync(channelDesc, inputDesc, outputDesc, cropArea,
@@ -207,6 +251,10 @@ aclError acldvppVpcBatchCropResizeAsync(acldvppChannelDesc *channelDesc,
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
         ACL_LOG_ERROR("image processor is null.");
+        const char *argList[] = {"param"};
+        const char *argVal[] = {"imageProcessor"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+            argList, argVal, 1);
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return imageProcessor->acldvppVpcBatchCropResizeAsync(channelDesc, srcBatchPicDescs, roiNums, size,
@@ -226,6 +274,10 @@ aclError acldvppVpcCropResizePasteAsync(acldvppChannelDesc *channelDesc,
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
         ACL_LOG_ERROR("image processor is null.");
+        const char *argList[] = {"param"};
+        const char *argVal[] = {"imageProcessor"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+            argList, argVal, 1);
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return imageProcessor->acldvppVpcCropResizePasteAsync(channelDesc, inputDesc, outputDesc, cropArea,
@@ -246,6 +298,10 @@ aclError acldvppVpcBatchCropResizePasteAsync(acldvppChannelDesc *channelDesc,
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
         ACL_LOG_ERROR("image processor is null.");
+        const char *argList[] = {"param"};
+        const char *argVal[] = {"imageProcessor"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+            argList, argVal, 1);
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return imageProcessor->acldvppVpcBatchCropResizePasteAsync(channelDesc, srcBatchPicDescs, roiNums, size,
@@ -266,6 +322,10 @@ aclError acldvppVpcBatchCropResizeMakeBorderAsync(acldvppChannelDesc *channelDes
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
         ACL_LOG_ERROR("image processor is null.");
+        const char *argList[] = {"param"};
+        const char *argVal[] = {"imageProcessor"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+            argList, argVal, 1);
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return imageProcessor->acldvppVpcBatchCropResizeMakeBorderAsync(channelDesc, srcBatchPicDescs, roiNums, size,

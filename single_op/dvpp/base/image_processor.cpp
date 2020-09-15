@@ -120,14 +120,14 @@ namespace acl {
         // create notify for dvpp channel desc
         aclError aclRet = CreateNotifyForDvppChannel(channelDesc);
         if (aclRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("create notify for dvpp channel failed, result = %d", aclRet);
+            ACL_LOG_INNER_ERROR("create notify for dvpp channel failed, result = %d", aclRet);
             return aclRet;
         }
 
         rtStream_t rtStream = nullptr;
         rtError_t rtCreate = rtStreamCreate(&rtStream, RT_STREAM_PRIORITY_DEFAULT);
         if (rtCreate != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("create stream failed, result = %d", rtCreate);
+            ACL_LOG_CALL_ERROR("create stream failed, result = %d", rtCreate);
             if (channelDesc->dvppWaitTaskType == NOTIFY_TASK) {
                 (void)rtNotifyDestroy(static_cast<rtNotify_t>(channelDesc->notify));
             } else {
@@ -147,7 +147,7 @@ namespace acl {
                                             static_cast<const void *>(&channelDesc->dvppDesc), size,
                                             RT_MEMCPY_HOST_TO_DEVICE, rtStream);
             if (rtRet != RT_ERROR_NONE) {
-                ACL_LOG_ERROR("memcpy to device memory failed, size = %zu, runtime result = %d", size, rtRet);
+                ACL_LOG_CALL_ERROR("memcpy to device memory failed, size = %zu, runtime result = %d", size, rtRet);
                 DestroyNotifyAndStream(channelDesc, rtStream);
                 return ACL_GET_ERRCODE_RTS(rtRet);
             }
@@ -172,7 +172,7 @@ namespace acl {
                                             nullptr, // no need smDesc
                                             rtStream);
         if (rtRet != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("dvpp create channel call rtCpuKernelLaunch failed, runtime result = %d.", rtRet);
+            ACL_LOG_CALL_ERROR("dvpp create channel call rtCpuKernelLaunch failed, runtime result = %d.", rtRet);
             DestroyNotifyAndStream(channelDesc, rtStream);
             return ACL_GET_ERRCODE_RTS(rtRet);
         }
@@ -182,7 +182,7 @@ namespace acl {
                                             static_cast<const void *>(channelDesc->dataBuffer.data), size,
                                             RT_MEMCPY_DEVICE_TO_HOST, rtStream);
             if (rtRet != RT_ERROR_NONE) {
-                ACL_LOG_ERROR("memcpy to host memory failed, size = %zu, runtime result = %d", size, rtRet);
+                ACL_LOG_CALL_ERROR("memcpy to host memory failed, size = %zu, runtime result = %d", size, rtRet);
                 DestroyNotifyAndStream(channelDesc, rtStream);
                 return ACL_GET_ERRCODE_RTS(rtRet);
             }
@@ -190,21 +190,21 @@ namespace acl {
 
         rtError_t rtSynchronize = rtStreamSynchronize(rtStream);
         if (rtSynchronize != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("synchronize stream failed, result = %d", rtSynchronize);
+            ACL_LOG_CALL_ERROR("synchronize stream failed, result = %d", rtSynchronize);
             DestroyNotifyAndStream(channelDesc, rtStream);
             return ACL_GET_ERRCODE_RTS(rtSynchronize);
         }
 
         // retCode = 0 : success
         if (channelDesc->dvppDesc.retCode != 0) {
-            ACL_LOG_ERROR("create channel failed, result = %d", channelDesc->dvppDesc.retCode);
+            ACL_LOG_INNER_ERROR("create channel failed, result = %d", channelDesc->dvppDesc.retCode);
             DestroyNotifyAndStream(channelDesc, rtStream);
             return ACL_ERROR_INTERNAL_ERROR;
         }
 
         rtError_t rtDestroy = rtStreamDestroy(rtStream);
         if (rtDestroy != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("destroy stream failed, runtime result = %d", rtDestroy);
+            ACL_LOG_CALL_ERROR("destroy stream failed, runtime result = %d", rtDestroy);
             if (channelDesc->dvppWaitTaskType == NOTIFY_TASK) {
                 (void)rtNotifyDestroy(static_cast<rtNotify_t>(channelDesc->notify));
             } else {
@@ -223,7 +223,7 @@ namespace acl {
         rtStream_t rtStream = nullptr;
         rtError_t rtCreate = rtStreamCreate(&rtStream, RT_STREAM_PRIORITY_DEFAULT);
         if (rtCreate != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("create stream failed, result = %d", rtCreate);
+            ACL_LOG_CALL_ERROR("create stream failed, result = %d", rtCreate);
             return ACL_GET_ERRCODE_RTS(rtCreate);
         }
 
@@ -234,7 +234,7 @@ namespace acl {
                                             static_cast<const void *>(&channelDesc->dvppDesc), size,
                                             RT_MEMCPY_HOST_TO_DEVICE, rtStream);
             if (rtRet != RT_ERROR_NONE) {
-                ACL_LOG_ERROR("memcpy to device memory failed, size = %zu, runtime result = %d", size, rtRet);
+                ACL_LOG_CALL_ERROR("memcpy to device memory failed, size = %zu, runtime result = %d", size, rtRet);
                 DestroyStream(rtStream);
                 return ACL_GET_ERRCODE_RTS(rtRet);
             }
@@ -259,7 +259,7 @@ namespace acl {
                                             nullptr, // no need smDesc
                                             rtStream);
         if (rtRet != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("dvpp create channel call rtCpuKernelLaunch failed, runtime result = %d.", rtRet);
+            ACL_LOG_CALL_ERROR("dvpp create channel call rtCpuKernelLaunch failed, runtime result = %d.", rtRet);
             DestroyStream(rtStream);
             return ACL_GET_ERRCODE_RTS(rtRet);
         }
@@ -269,7 +269,7 @@ namespace acl {
                                             static_cast<const void *>(channelDesc->dataBuffer.data), size,
                                             RT_MEMCPY_DEVICE_TO_HOST, rtStream);
             if (rtRet != RT_ERROR_NONE) {
-                ACL_LOG_ERROR("memcpy to host memory failed, size = %zu, runtime result = %d", size, rtRet);
+                ACL_LOG_CALL_ERROR("memcpy to host memory failed, size = %zu, runtime result = %d", size, rtRet);
                 DestroyStream(rtStream);
                 return ACL_GET_ERRCODE_RTS(rtRet);
             }
@@ -277,21 +277,21 @@ namespace acl {
 
         rtError_t rtSynchronize = rtStreamSynchronize(rtStream);
         if (rtSynchronize != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("synchronize stream failed, runtime result = %d", rtSynchronize);
+            ACL_LOG_CALL_ERROR("synchronize stream failed, runtime result = %d", rtSynchronize);
             DestroyStream(rtStream);
             return ACL_GET_ERRCODE_RTS(rtSynchronize);
         }
 
         // retCode = 0 : success
         if (channelDesc->dvppDesc.retCode != 0) {
-            ACL_LOG_ERROR("create channel failed, result = %d", channelDesc->dvppDesc.retCode);
+            ACL_LOG_INNER_ERROR("create channel failed, result = %d", channelDesc->dvppDesc.retCode);
             DestroyStream(rtStream);
             return ACL_ERROR_INTERNAL_ERROR;
         }
 
         rtError_t rtDestroy = rtStreamDestroy(rtStream);
         if (rtDestroy != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("destroy stream failed, runtime result = %d", rtDestroy);
+            ACL_LOG_CALL_ERROR("destroy stream failed, runtime result = %d", rtDestroy);
             return ACL_GET_ERRCODE_RTS(rtDestroy);
         }
 
@@ -325,7 +325,7 @@ namespace acl {
         rtStream_t rtStream = nullptr;
         rtError_t rtCreate = rtStreamCreate(&rtStream, RT_STREAM_PRIORITY_DEFAULT);
         if (rtCreate != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("create stream failed, runtime result = %d", rtCreate);
+            ACL_LOG_CALL_ERROR("create stream failed, runtime result = %d", rtCreate);
             if (channelDesc->dvppWaitTaskType == NOTIFY_TASK) {
                 (void)rtNotifyDestroy(static_cast<rtNotify_t>(channelDesc->notify));
             } else {
@@ -342,21 +342,21 @@ namespace acl {
             nullptr, // no need smDesc
             rtStream);
         if (rtRetVal != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("dvpp destroy channel call rtCpuKernelLaunch failed, runtime result = %d.", rtRetVal);
+            ACL_LOG_CALL_ERROR("dvpp destroy channel call rtCpuKernelLaunch failed, runtime result = %d.", rtRetVal);
             DestroyNotifyAndStream(channelDesc, rtStream);
             return ACL_GET_ERRCODE_RTS(rtRetVal);
         }
 
         rtError_t rtSynchronizeVal = rtStreamSynchronize(rtStream);
         if (rtSynchronizeVal != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("synchronize stream failed, runtime result = %d.", rtSynchronizeVal);
+            ACL_LOG_CALL_ERROR("synchronize stream failed, runtime result = %d.", rtSynchronizeVal);
             DestroyNotifyAndStream(channelDesc, rtStream);
             return ACL_GET_ERRCODE_RTS(rtSynchronizeVal);
         }
 
         rtError_t rtDestroyVal = rtStreamDestroy(rtStream);
         if (rtDestroyVal != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("destroy stream failed, runtime result = %d.", rtDestroyVal);
+            ACL_LOG_CALL_ERROR("destroy stream failed, runtime result = %d.", rtDestroyVal);
             if (channelDesc->dvppWaitTaskType == NOTIFY_TASK) {
                 (void)rtNotifyDestroy(static_cast<rtNotify_t>(channelDesc->notify));
             } else {
@@ -372,7 +372,7 @@ namespace acl {
             rtRetVal = rtEventDestroy(static_cast<rtEvent_t>(channelDesc->notify));
         }
         if (rtRetVal != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("fail to destroy Notify, runtime result = %d.", rtRetVal);
+            ACL_LOG_CALL_ERROR("fail to destroy Notify, runtime result = %d.", rtRetVal);
             return ACL_GET_ERRCODE_RTS(rtRetVal);
         }
         channelDesc->notify = nullptr;
@@ -395,7 +395,7 @@ namespace acl {
         rtStream_t rtStream = nullptr;
         rtError_t rtCreate = rtStreamCreate(&rtStream, RT_STREAM_PRIORITY_DEFAULT);
         if (rtCreate != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("create stream failed, result = %d", rtCreate);
+            ACL_LOG_CALL_ERROR("create stream failed, result = %d", rtCreate);
             return ACL_GET_ERRCODE_RTS(rtCreate);
         }
         rtError_t rtRetVal = rtCpuKernelLaunch(acl::dvpp::DVPP_KERNELS_SONAME,
@@ -406,21 +406,21 @@ namespace acl {
             nullptr, // no need smDesc
             rtStream);
         if (rtRetVal != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("dvpp destroy channel call rtCpuKernelLaunch failed, ret=%d.", rtRetVal);
+            ACL_LOG_CALL_ERROR("dvpp destroy channel call rtCpuKernelLaunch failed, ret=%d.", rtRetVal);
             DestroyStream(rtStream);
             return ACL_GET_ERRCODE_RTS(rtRetVal);
         }
 
         rtError_t rtSynchronizeVal = rtStreamSynchronize(rtStream);
         if (rtSynchronizeVal != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("synchronize stream failed, result = %d", rtSynchronizeVal);
+            ACL_LOG_CALL_ERROR("synchronize stream failed, result = %d", rtSynchronizeVal);
             DestroyStream(rtStream);
             return ACL_GET_ERRCODE_RTS(rtSynchronizeVal);
         }
 
         rtError_t rtDestroyVal = rtStreamDestroy(rtStream);
         if (rtDestroyVal != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("destroy stream failed, result = %d", rtDestroyVal);
+            ACL_LOG_CALL_ERROR("destroy stream failed, result = %d", rtDestroyVal);
             return ACL_GET_ERRCODE_RTS(rtDestroyVal);
         }
 
@@ -447,18 +447,18 @@ namespace acl {
         if (channelDesc->dvppWaitTaskType == NOTIFY_TASK) {
             rtRetCodeVal = rtNotifyWait(static_cast<rtNotify_t>(channelDesc->notify), stream);
             if (rtRetCodeVal != RT_ERROR_NONE) {
-                ACL_LOG_ERROR("wait for a notify to stream failed, runtime result = %d", rtRetCodeVal);
+                ACL_LOG_CALL_ERROR("wait for a notify to stream failed, runtime result = %d", rtRetCodeVal);
                 return ACL_GET_ERRCODE_RTS(rtRetCodeVal);
             }
         } else {
             rtRetCodeVal = rtStreamWaitEvent(stream, static_cast<rtEvent_t>(channelDesc->notify));
             if (rtRetCodeVal != RT_ERROR_NONE) {
-                ACL_LOG_ERROR("wait for a event to stream failed, runtime result = %d", rtRetCodeVal);
+                ACL_LOG_CALL_ERROR("wait for a event to stream failed, runtime result = %d", rtRetCodeVal);
                 return ACL_GET_ERRCODE_RTS(rtRetCodeVal);
             }
             rtRetCodeVal = rtEventReset(static_cast<rtEvent_t>(channelDesc->notify), stream);
             if (rtRetCodeVal != RT_ERROR_NONE) {
-                ACL_LOG_ERROR("reset a event to stream failed, runtime result = %d", rtRetCodeVal);
+                ACL_LOG_CALL_ERROR("reset a event to stream failed, runtime result = %d", rtRetCodeVal);
                 return ACL_GET_ERRCODE_RTS(rtRetCodeVal);
             }
         }
@@ -478,13 +478,13 @@ namespace acl {
                                                        nullptr, // no need smDesc
                                                        stream);
             if (rtRetCodeVal != RT_ERROR_NONE) {
-                ACL_LOG_ERROR("dvpp call rtCpuKernelLaunch failed, runtime result = %d.", rtRetCodeVal);
+                ACL_LOG_INNER_ERROR("dvpp call rtCpuKernelLaunch failed, runtime result = %d.", rtRetCodeVal);
                 return ACL_GET_ERRCODE_RTS(rtRetCodeVal);
             }
 
             aclError launchTaskRet = LaunchDvppWaitTask(channelDesc, stream);
             if (launchTaskRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("launch dvpp wait task failed, result = %d.", launchTaskRet);
+                ACL_LOG_INNER_ERROR("launch dvpp wait task failed, result = %d.", launchTaskRet);
                 return launchTaskRet;
             }
             ACL_LOG_INFO("Launch dvpp tasks success, notifyId = %u", channelDesc->dvppDesc.notifyId);
@@ -499,7 +499,7 @@ namespace acl {
                                                        nullptr, // no need smDesc
                                                        stream);
             if (rtRetCodeVal != RT_ERROR_NONE) {
-                ACL_LOG_ERROR("dvpp  call rtCpuKernelLaunch failed, runtime result = %d.", rtRetCodeVal);
+                ACL_LOG_CALL_ERROR("dvpp  call rtCpuKernelLaunch failed, runtime result = %d.", rtRetCodeVal);
                 return ACL_GET_ERRCODE_RTS(rtRetCodeVal);
             }
         }
@@ -528,7 +528,7 @@ namespace acl {
         aclError validResizeInputRet = ValidateVpcInputFormat(
             static_cast<acldvppPixelFormat>(inputDesc->dvppPicDesc.format));
         if (validResizeInputRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("input picture describe format verify failed, result = %d, format = %u.",
+            ACL_LOG_INNER_ERROR("input picture describe format verify failed, result = %d, format = %u.",
                           validResizeInputRet, inputDesc->dvppPicDesc.format);
             return validResizeInputRet;
         }
@@ -537,14 +537,14 @@ namespace acl {
         aclError validResizeOutputRet = ValidateVpcOutputFormat(
             static_cast<acldvppPixelFormat>(outputDesc->dvppPicDesc.format));
         if (validResizeOutputRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("output picture describe format verify failed, result = %d, format = %u.",
+            ACL_LOG_INNER_ERROR("output picture describe format verify failed, result = %d, format = %u.",
                           validResizeOutputRet, outputDesc->dvppPicDesc.format);
             return validResizeOutputRet;
         }
         // check dvpp resize config
         aclError validResizeConfigRet = ValidateDvppResizeConfig(resizeConfig);
         if (validResizeConfigRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("resize config acldvppResizeConfig verify failed, result = %d.", validResizeConfigRet);
+            ACL_LOG_INNER_ERROR("resize config acldvppResizeConfig verify failed, result = %d.", validResizeConfigRet);
             return validResizeConfigRet;
         }
 
@@ -565,19 +565,19 @@ namespace acl {
         auto memcpyRet = memcpy_s(args.get() + configOffset, argsSize - configOffset, &(resizeConfig->dvppResizeConfig),
             resizeConfigSize);
         if (memcpyRet != EOK) {
-            ACL_LOG_ERROR("copy resize config to args failed, result = %d.", memcpyRet);
+            ACL_LOG_INNER_ERROR("copy resize config to args failed, result = %d.", memcpyRet);
             return ACL_ERROR_FAILURE;
         }
 
         if (aclRunMode_ == ACL_HOST) {
             aclError cpyRet = CopyDvppPicDescAsync(inputDesc, ACL_MEMCPY_HOST_TO_DEVICE, stream);
             if (cpyRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("copy resize input picture desc failed, result = %d.", cpyRet);
+                ACL_LOG_INNER_ERROR("copy resize input picture desc failed, result = %d.", cpyRet);
                 return cpyRet;
             }
             cpyRet = CopyDvppPicDescAsync(outputDesc, ACL_MEMCPY_HOST_TO_DEVICE, stream);
             if (cpyRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("copy resize output picture desc to device failed, result = %d.", cpyRet);
+                ACL_LOG_INNER_ERROR("copy resize output picture desc to device failed, result = %d.", cpyRet);
                 return cpyRet;
             }
         }
@@ -585,14 +585,14 @@ namespace acl {
         aclError launchRet = LaunchDvppTask(channelDesc, args.get(), argsSize,
             acl::dvpp::DVPP_KERNELNAME_RESIZE, stream);
         if (launchRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("launch dvpp task failed, result = %d.", launchRet);
+            ACL_LOG_INNER_ERROR("launch dvpp task failed, result = %d.", launchRet);
             return launchRet;
         }
 
         if (aclRunMode_ == ACL_HOST) {
             aclError cpyRet = CopyDvppPicDescAsync(outputDesc, ACL_MEMCPY_DEVICE_TO_HOST, stream);
             if (cpyRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("copy resize output pic desc from device failed, result = %d.", cpyRet);
+                ACL_LOG_INNER_ERROR("copy resize output pic desc from device failed, result = %d.", cpyRet);
                 return cpyRet;
             }
         }
@@ -629,7 +629,8 @@ namespace acl {
             ACL_REQUIRES_NOT_NULL(resizeConfig);
             aclError validResizeConfigRet = ValidateDvppResizeConfig(resizeConfig);
             if (validResizeConfigRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("resize config acldvppResizeConfig verify failed, result = %d.", validResizeConfigRet);
+                ACL_LOG_INNER_ERROR("resize config acldvppResizeConfig verify failed, result = %d.",
+                    validResizeConfigRet);
                 return validResizeConfigRet;
             }
             resizeConfigSize = CalDevDvppStructRealUsedSize(&resizeConfig->dvppResizeConfig);
@@ -639,7 +640,7 @@ namespace acl {
         aclError validCropInputRet = ValidateVpcInputFormat(
             static_cast<acldvppPixelFormat>(inputDesc->dvppPicDesc.format));
         if (validCropInputRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("input acldvppPicDesc format verify failed, result = %d, format = %u.",
+            ACL_LOG_INNER_ERROR("input acldvppPicDesc format verify failed, result = %d, format = %u.",
                           validCropInputRet, inputDesc->dvppPicDesc.format);
             return validCropInputRet;
         }
@@ -648,7 +649,7 @@ namespace acl {
         aclError validCropOutputRet = ValidateVpcOutputFormat(
             static_cast<acldvppPixelFormat>(outputDesc->dvppPicDesc.format));
         if (validCropOutputRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("output acldvppPicDesc format verify failed, result = %d, format = %u.",
+            ACL_LOG_INNER_ERROR("output acldvppPicDesc format verify failed, result = %d, format = %u.",
                           validCropOutputRet, outputDesc->dvppPicDesc.format);
             return validCropOutputRet;
         }
@@ -667,7 +668,7 @@ namespace acl {
         aclError validateRet = ValidateParamForDvppVpcCropResizePaste(channelDesc, inputDesc, outputDesc, cropArea,
             nullptr, false, resizeConfig, resizeConfigSwitch, resizeConfigSize);
         if (validateRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("verify params for DvppVpcCropResize failed, ret = %d", validateRet);
+            ACL_LOG_INNER_ERROR("verify params for DvppVpcCropResize failed, ret = %d", validateRet);
             return validateRet;
         }
         // CropAndPaste have 3 inputs
@@ -690,20 +691,20 @@ namespace acl {
         auto cpyRet = memcpy_s(args.get() + cropAreaOffset, argsSize - cropAreaOffset, &(cropArea->dvppRoiConfig),
             roiConfigSize);
         if (cpyRet != EOK) {
-            ACL_LOG_ERROR("copy crop area to args failed, result = %d.", cpyRet);
+            ACL_LOG_INNER_ERROR("copy crop area to args failed, result = %d.", cpyRet);
             return ACL_ERROR_FAILURE;
         }
 
         if (aclRunMode_ == ACL_HOST) {
             aclError copyRet = CopyDvppPicDescAsync(inputDesc, ACL_MEMCPY_HOST_TO_DEVICE, stream);
             if (copyRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("copy input pic desc to device failed, result = %d.", copyRet);
+                ACL_LOG_INNER_ERROR("copy input pic desc to device failed, result = %d.", copyRet);
                 return copyRet;
             }
 
             copyRet = CopyDvppPicDescAsync(outputDesc, ACL_MEMCPY_HOST_TO_DEVICE, stream);
             if (copyRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("copy output pic desc to device failed, result = %d.", copyRet);
+                ACL_LOG_INNER_ERROR("copy output pic desc to device failed, result = %d.", copyRet);
                 return copyRet;
             }
         }
@@ -714,7 +715,7 @@ namespace acl {
             cpyRet = memcpy_s(args.get() + resizeConfigOffset, argsSize - resizeConfigOffset,
                 &(resizeConfig->dvppResizeConfig), resizeConfigSize);
             if (cpyRet != EOK) {
-                ACL_LOG_ERROR("copy resize config to args failed, result = %d.", cpyRet);
+                ACL_LOG_INNER_ERROR("copy resize config to args failed, result = %d.", cpyRet);
                 return ACL_ERROR_FAILURE;
             }
             kernelName = acl::dvpp::DVPP_KERNELNAME_CROP_RESIZE;
@@ -722,14 +723,14 @@ namespace acl {
         aclError launchRet = LaunchDvppTask(channelDesc, args.get(), argsSize,
             kernelName, stream);
         if (launchRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("launch dvpp task failed, result = %d.", launchRet);
+            ACL_LOG_INNER_ERROR("launch dvpp task failed, result = %d.", launchRet);
             return launchRet;
         }
 
         if (aclRunMode_ == ACL_HOST) {
             aclError copyRet = CopyDvppPicDescAsync(outputDesc, ACL_MEMCPY_DEVICE_TO_HOST, stream);
             if (copyRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("copy output pic desc from device failed, result = %d.", copyRet);
+                ACL_LOG_INNER_ERROR("copy output pic desc from device failed, result = %d.", copyRet);
                 return copyRet;
             }
         }
@@ -746,7 +747,7 @@ namespace acl {
         ACL_LOG_INFO("start to execute acldvppVpcCropResizeAsync");
         auto ret = DvppVpcCropResizeAsync(channelDesc, inputDesc, outputDesc, cropArea, resizeConfig, true, stream);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("execute acldvppVpcCropResizeAsync failed, result = %d.", ret);
+            ACL_LOG_INNER_ERROR("execute acldvppVpcCropResizeAsync failed, result = %d.", ret);
             return ret;
         }
         ACL_LOG_INFO("Launch vpc crop and resize tasks success");
@@ -762,7 +763,7 @@ namespace acl {
         ACL_LOG_INFO("start to execute acldvppVpcCropAsync");
         auto ret = DvppVpcCropResizeAsync(channelDesc, inputDesc, outputDesc, cropArea, nullptr, false, stream);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("execute acldvppVpcCropAsync failed, result = %d.", ret);
+            ACL_LOG_INNER_ERROR("execute acldvppVpcCropAsync failed, result = %d.", ret);
             return ret;
         }
         ACL_LOG_INFO("Launch vpc crop tasks success");
@@ -799,7 +800,7 @@ namespace acl {
         // valid input param
         std::unique_ptr<uint16_t[]> roiNumsPtr(new (std::nothrow)uint16_t[size]);
         if (roiNumsPtr == nullptr) {
-            ACL_LOG_ERROR("create batch crop roiNums pointer failed, roiNums size = %u.", size);
+            ACL_LOG_INNER_ERROR("create batch crop roiNums pointer failed, roiNums size = %u.", size);
             return ACL_ERROR_INVALID_PARAM;
         }
         uint32_t totalRoiNums = 0;
@@ -812,7 +813,7 @@ namespace acl {
                                                                   BATCH_ROI_MAX_SIZE,
                                                                   resizeConfig);
         if (validParamRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("verify batch crop param failed, result = %d.", validParamRet);
+            ACL_LOG_INNER_ERROR("verify batch crop param failed, result = %d.", validParamRet);
             return validParamRet;
         }
 
@@ -823,7 +824,7 @@ namespace acl {
                                                              size,
                                                              stream);
             if (cpyAsyncRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("async copy input batch pic desc to device failed, result = %d.", cpyAsyncRet);
+                ACL_LOG_INNER_ERROR("async copy input batch pic desc to device failed, result = %d.", cpyAsyncRet);
                 return cpyAsyncRet;
             }
 
@@ -833,21 +834,21 @@ namespace acl {
                                                     totalRoiNums,
                                                     stream);
             if (cpyAsyncRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("async copy output batch pic desc to device failed, result = %d.", cpyAsyncRet);
+                ACL_LOG_INNER_ERROR("async copy output batch pic desc to device failed, result = %d.", cpyAsyncRet);
                 return cpyAsyncRet;
             }
         } else {
             // set data buffer for input batch pic desc
             aclError setDataRet = SetDataBufferForBatchPicDesc(srcBatchPicDescs, size);
             if (setDataRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("dvpp batch crop set data buffer for src batch pic desc failed, result = %d.",
+                ACL_LOG_INNER_ERROR("dvpp batch crop set data buffer for src batch pic desc failed, result = %d.",
                     setDataRet);
                 return setDataRet;
             }
 
             setDataRet = SetDataBufferForBatchPicDesc(dstBatchPicDescs, totalRoiNums);
             if (setDataRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("dvpp batch crop set data buffer for dst batch pic desc failed, result = %d.",
+                ACL_LOG_INNER_ERROR("dvpp batch crop set data buffer for dst batch pic desc failed, result = %d.",
                     setDataRet);
                 return setDataRet;
             }
@@ -865,7 +866,7 @@ namespace acl {
         // launch task
         aclError launchTaskRet = LaunchTaskForVpcBatchCrop(channelDesc, batchParams, resizeConfig, stream);
         if (launchTaskRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("launch task for vpc batch crop failed, result = %d.", launchTaskRet);
+            ACL_LOG_INNER_ERROR("launch task for vpc batch crop failed, result = %d.", launchTaskRet);
             return launchTaskRet;
         }
 
@@ -876,7 +877,7 @@ namespace acl {
                                                              totalRoiNums,
                                                              stream);
             if (validCpyRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("copy output batch pic desc to host failed, result = %d.", validCpyRet);
+                ACL_LOG_INNER_ERROR("copy output batch pic desc to host failed, result = %d.", validCpyRet);
                 return validCpyRet;
             }
         }
@@ -896,7 +897,7 @@ namespace acl {
         auto ret = DvppVpcBatchCropResizeAsync(channelDesc, srcBatchPicDescs, roiNums, size, dstBatchPicDescs,
             cropAreas, resizeConfig, true, stream);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("execute acldvppVpcBatchCropResizeAsync failed, result = %d.", ret);
+            ACL_LOG_INNER_ERROR("execute acldvppVpcBatchCropResizeAsync failed, result = %d.", ret);
             return ret;
         }
         ACL_LOG_INFO("Launch vpc batch crop and resize tasks success");
@@ -915,7 +916,7 @@ namespace acl {
         auto ret = DvppVpcBatchCropResizeAsync(channelDesc, srcBatchPicDescs, roiNums, size, dstBatchPicDescs,
             cropAreas, nullptr, false, stream);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("execute acldvppVpcBatchCropAsync failed, result = %d.", ret);
+            ACL_LOG_INNER_ERROR("execute acldvppVpcBatchCropAsync failed, result = %d.", ret);
             return ret;
         }
         ACL_LOG_INFO("Launch vpc batch crop tasks success");
@@ -935,7 +936,7 @@ namespace acl {
         aclError validateRet = ValidateParamForDvppVpcCropResizePaste(channelDesc, inputDesc, outputDesc, cropArea,
             pasteArea, true, resizeConfig, resizeConfigSwitch, resizeConfigSize);
         if (validateRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("verify params for DvppVpcCropResizePaste failed, ret = %d", validateRet);
+            ACL_LOG_INNER_ERROR("verify params for DvppVpcCropResizePaste failed, ret = %d", validateRet);
             return validateRet;
         }
         // CropAndPaste have 3 inputs
@@ -958,7 +959,7 @@ namespace acl {
         auto memcpyRet = memcpy_s(args.get() + cropAreaOffset, argsSize - cropAreaOffset, &(cropArea->dvppRoiConfig),
                                   cropAreaConfigSize);
         if (memcpyRet != EOK) {
-            ACL_LOG_ERROR("copy crop area to args failed, result = %d.", memcpyRet);
+            ACL_LOG_INNER_ERROR("copy crop area to args failed, result = %d.", memcpyRet);
             return ACL_ERROR_FAILURE;
         }
 
@@ -966,7 +967,7 @@ namespace acl {
         memcpyRet = memcpy_s(args.get() + pasteAreaOffset, argsSize - pasteAreaOffset, &(pasteArea->dvppRoiConfig),
             pasteAreaConfigSize);
         if (memcpyRet != EOK) {
-            ACL_LOG_ERROR("copy paste area to args failed, result = %d.", memcpyRet);
+            ACL_LOG_INNER_ERROR("copy paste area to args failed, result = %d.", memcpyRet);
             return ACL_ERROR_FAILURE;
         }
 
@@ -975,7 +976,7 @@ namespace acl {
             memcpyRet = memcpy_s(args.get() + resizeConfigOffset, argsSize - resizeConfigOffset,
                 &(resizeConfig->dvppResizeConfig), resizeConfigSize);
             if (memcpyRet != EOK) {
-                ACL_LOG_ERROR("copy resize config to args failed, result = %d.", memcpyRet);
+                ACL_LOG_INNER_ERROR("copy resize config to args failed, result = %d.", memcpyRet);
                 return ACL_ERROR_FAILURE;
             }
         }
@@ -983,13 +984,13 @@ namespace acl {
         if (aclRunMode_ == ACL_HOST) {
             aclError cpyRet = CopyDvppPicDescAsync(inputDesc, ACL_MEMCPY_HOST_TO_DEVICE, stream);
             if (cpyRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("copy input pic desc to device failed, result = %d.", cpyRet);
+                ACL_LOG_INNER_ERROR("copy input pic desc to device failed, result = %d.", cpyRet);
                 return cpyRet;
             }
 
             cpyRet = CopyDvppPicDescAsync(outputDesc, ACL_MEMCPY_HOST_TO_DEVICE, stream);
             if (cpyRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("copy output pic desc to device failed, result = %d.", cpyRet);
+                ACL_LOG_INNER_ERROR("copy output pic desc to device failed, result = %d.", cpyRet);
                 return cpyRet;
             }
         }
@@ -1000,14 +1001,14 @@ namespace acl {
         aclError launchRet = LaunchDvppTask(channelDesc, args.get(), argsSize,
             kernelName, stream);
         if (launchRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("launch dvpp task failed, result = %d.", launchRet);
+            ACL_LOG_INNER_ERROR("launch dvpp task failed, result = %d.", launchRet);
             return launchRet;
         }
 
         if (aclRunMode_ == ACL_HOST) {
             aclError cpyRet = acl::dvpp::CopyDvppPicDescAsync(outputDesc, ACL_MEMCPY_DEVICE_TO_HOST, stream);
             if (cpyRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("copy output pic desc from device failed, result = %d.", cpyRet);
+                ACL_LOG_INNER_ERROR("copy output pic desc from device failed, result = %d.", cpyRet);
                 return cpyRet;
             }
         }
@@ -1026,7 +1027,7 @@ namespace acl {
         auto ret = DvppVpcCropResizePasteAsync(channelDesc, inputDesc, outputDesc, cropArea,
             pasteArea, resizeConfig, true, stream);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("execute acldvppVpcCropResizePasteAsync failed, result = %d.", ret);
+            ACL_LOG_INNER_ERROR("execute acldvppVpcCropResizePasteAsync failed, result = %d.", ret);
             return ret;
         }
         ACL_LOG_INFO("Launch vpc crop, resize and paste tasks success");
@@ -1044,7 +1045,7 @@ namespace acl {
         auto ret = DvppVpcCropResizePasteAsync(channelDesc, inputDesc, outputDesc, cropArea,
             pasteArea, nullptr, false, stream);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("execute acldvppVpcCropAndPasteAsync failed, result = %d.", ret);
+            ACL_LOG_INNER_ERROR("execute acldvppVpcCropAndPasteAsync failed, result = %d.", ret);
             return ret;
         }
         ACL_LOG_INFO("Launch vpc crop and paste tasks success.");
@@ -1083,7 +1084,7 @@ namespace acl {
         // valid input param
         std::unique_ptr<uint16_t[]> devRoiNums(new (std::nothrow)uint16_t[size]);
         if (devRoiNums == nullptr) {
-            ACL_LOG_ERROR("create device roiNums failed, roiNums size = %u.", size);
+            ACL_LOG_INNER_ERROR("create device roiNums failed, roiNums size = %u.", size);
             return ACL_ERROR_INVALID_PARAM;
         }
         uint32_t totalRoiNums = 0;
@@ -1096,7 +1097,7 @@ namespace acl {
                                                                   BATCH_ROI_MAX_SIZE,
                                                                   resizeConfig);
         if (validParamRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("verify batch crop and paste param failed, result = %d.", validParamRet);
+            ACL_LOG_INNER_ERROR("verify batch crop and paste param failed, result = %d.", validParamRet);
             return validParamRet;
         }
 
@@ -1107,7 +1108,7 @@ namespace acl {
                                                         size,
                                                         stream);
             if (cpyRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("copy input batch pic desc to device failed, result = %d.", cpyRet);
+                ACL_LOG_INNER_ERROR("copy input batch pic desc to device failed, result = %d.", cpyRet);
                 return cpyRet;
             }
 
@@ -1116,20 +1117,20 @@ namespace acl {
                                                totalRoiNums,
                                                stream);
             if (cpyRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("copy output batch pic desc to device failed, result = %d.", cpyRet);
+                ACL_LOG_INNER_ERROR("copy output batch pic desc to device failed, result = %d.", cpyRet);
                 return cpyRet;
             }
         } else {
             // set data buffer for input batch pic desc
             aclError setDataRet = SetDataBufferForBatchPicDesc(srcBatchPicDescs, size);
             if (setDataRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("set data buffer for src batch pic desc failed, result = %d.", setDataRet);
+                ACL_LOG_INNER_ERROR("set data buffer for src batch pic desc failed, result = %d.", setDataRet);
                 return setDataRet;
             }
 
             setDataRet = SetDataBufferForBatchPicDesc(dstBatchPicDescs, totalRoiNums);
             if (setDataRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("set data buffer for dst batch pic desc failed, result = %d.", setDataRet);
+                ACL_LOG_INNER_ERROR("set data buffer for dst batch pic desc failed, result = %d.", setDataRet);
                 return setDataRet;
             }
         }
@@ -1146,7 +1147,7 @@ namespace acl {
         // launch task
         aclError launchTaskRet = LaunchTaskForVpcBatchCropAndPaste(channelDesc, batchParams, resizeConfig, stream);
         if (launchTaskRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("launch task for vpc batch crop and paste failed, result = %d.", launchTaskRet);
+            ACL_LOG_INNER_ERROR("launch task for vpc batch crop and paste failed, result = %d.", launchTaskRet);
             return launchTaskRet;
         }
 
@@ -1157,7 +1158,7 @@ namespace acl {
                                                                    totalRoiNums,
                                                                    stream);
             if (cpyRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("copy output batch pic desc to host failed, result = %d.", cpyRet);
+                ACL_LOG_INNER_ERROR("copy output batch pic desc to host failed, result = %d.", cpyRet);
                 return cpyRet;
             }
         }
@@ -1178,7 +1179,7 @@ namespace acl {
         auto ret = DvppVpcBatchCropResizePasteAsync(channelDesc, srcBatchPicDescs, roiNums, size, dstBatchPicDescs,
             cropAreas, pasteAreas, resizeConfig, true, stream);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("execute acldvppVpcBatchCropResizePasteAsync failed, result = %d.", ret);
+            ACL_LOG_INNER_ERROR("execute acldvppVpcBatchCropResizePasteAsync failed, result = %d.", ret);
             return ret;
         }
         ACL_LOG_INFO("Launch vpc batch crop, resize and paste tasks success");
@@ -1199,7 +1200,7 @@ namespace acl {
         auto ret = DvppVpcBatchCropResizePasteAsync(channelDesc, srcBatchPicDescs, roiNums, size, dstBatchPicDescs,
             cropAreas, pasteAreas, nullptr, false, stream);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("execute acldvppVpcBatchCropAndPasteAsync failed, result = %d.", ret);
+            ACL_LOG_INNER_ERROR("execute acldvppVpcBatchCropAndPasteAsync failed, result = %d.", ret);
             return ret;
         }
         ACL_LOG_INFO("Launch vpc batch crop and paste tasks success");
@@ -1212,6 +1213,10 @@ namespace acl {
                                                          aclrtStream stream)
     {
         ACL_LOG_ERROR("This version can not support vpc convert color api. Please check.");
+        const char *argList[] = {"feature", "reason"};
+        const char *argVal[] = {"vpc convert color api", "Please check"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
+            argList, argVal, 2);
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
 
@@ -1222,6 +1227,10 @@ namespace acl {
                                                     aclrtStream stream)
     {
         ACL_LOG_ERROR("This version can not support vpc pyramid down api. Please check.");
+        const char *argList[] = {"feature", "reason"};
+        const char *argVal[] = {"vpc pyramid down api", "please check"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
+            argList, argVal, 2);
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
 
@@ -1232,6 +1241,10 @@ namespace acl {
                                                          aclrtStream stream)
     {
         ACL_LOG_ERROR("This version can not support vpc equalize hist api. Please check.");
+        const char *argList[] = {"feature", "reason"};
+        const char *argVal[] = {"vpc equalize hist api", "please check"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
+            argList, argVal, 2);
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
 
@@ -1242,6 +1255,10 @@ namespace acl {
                                                        aclrtStream stream)
     {
         ACL_LOG_ERROR("This version can not support vpc make border api. Please check.");
+        const char *argList[] = {"feature", "reason"};
+        const char *argVal[] = {"vpc make border api", "please check"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
+            argList, argVal, 2);
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
 
@@ -1256,6 +1273,10 @@ namespace acl {
                                                                       aclrtStream stream)
     {
         ACL_LOG_ERROR("This version can not support vpc batch crop, resize and make border api. Please check.");
+        const char *argList[] = {"feature", "reason"};
+        const char *argVal[] = {"vpc make border api", "please check"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
+            argList, argVal, 2);
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
 
@@ -1266,42 +1287,70 @@ namespace acl {
                                                      aclrtStream stream)
     {
         ACL_LOG_ERROR("This version can not support vpc calculate hist api. Please check.");
+        const char *argList[] = {"feature", "reason"};
+        const char *argVal[] = {"vpc calculate hist api", "please check"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
+            argList, argVal, 2);
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
 
     acldvppHist* ImageProcessor::acldvppCreateHist()
     {
         ACL_LOG_ERROR("This version can not support vpc hist api. Please check.");
+        const char *argList[] = {"feature", "reason"};
+        const char *argVal[] = {"vpc hist api", "please check"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
+            argList, argVal, 2);
         return nullptr;
     }
 
     aclError ImageProcessor::acldvppDestroyHist(acldvppHist *hist)
     {
         ACL_LOG_ERROR("This version can not support vpc hist api. Please check.");
+        const char *argList[] = {"feature", "reason"};
+        const char *argVal[] = {"vpc hist api", "please check"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
+            argList, argVal, 2);        
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
 
     aclError ImageProcessor::acldvppClearHist(acldvppHist *hist)
     {
         ACL_LOG_ERROR("This version can not support vpc hist api. Please check.");
+        const char *argList[] = {"feature", "reason"};
+        const char *argVal[] = {"vpc hist api", "please check"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
+            argList, argVal, 2);
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
 
     uint32_t ImageProcessor::acldvppGetHistDims(acldvppHist *hist)
     {
         ACL_LOG_ERROR("This version can not support vpc hist api. Please check.");
+        const char *argList[] = {"feature", "reason"};
+        const char *argVal[] = {"vpc hist api", "please check"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
+            argList, argVal, 2);
         return 0;
     }
 
     aclError ImageProcessor::acldvppGetHistData(acldvppHist *hist, uint32_t dim, uint32_t **data, uint16_t *len)
     {
         ACL_LOG_ERROR("This version can not support vpc hist api. Please check.");
+        const char *argList[] = {"feature", "reason"};
+        const char *argVal[] = {"vpc hist api", "please check"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
+            argList, argVal, 2);
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
 
     uint32_t ImageProcessor::acldvppGetHistRetCode(acldvppHist* hist)
     {
         ACL_LOG_ERROR("This version can not support vpc hist api. Please check.");
+        const char *argList[] = {"feature", "reason"};
+        const char *argVal[] = {"vpc hist api", "please check"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
+            argList, argVal, 2);
         return 0;
     }
 
@@ -1325,7 +1374,7 @@ namespace acl {
         aclError validOutputRet = ValidateJpegOutputFormat(
                 static_cast<acldvppPixelFormat>(outputDesc->dvppPicDesc.format));
         if (validOutputRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("output acldvppPicDesc format verify failed, result = %d, format = %u.",
+            ACL_LOG_INNER_ERROR("output acldvppPicDesc format verify failed, result = %d, format = %u.",
                           validOutputRet, outputDesc->dvppPicDesc.format);
             return validOutputRet;
         }
@@ -1350,7 +1399,7 @@ namespace acl {
         if (aclRunMode_ == ACL_HOST) {
             aclError cpyRet = CopyDvppPicDescAsync(outputDesc, ACL_MEMCPY_HOST_TO_DEVICE, stream);
             if (cpyRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("copy input pic desc to device failed, result = %d.", cpyRet);
+                ACL_LOG_INNER_ERROR("copy input pic desc to device failed, result = %d.", cpyRet);
                 return cpyRet;
             }
         }
@@ -1358,14 +1407,14 @@ namespace acl {
         aclError launchRet = LaunchDvppTask(channelDesc, args.get(), argsSize,
             acl::dvpp::DVPP_KERNELNAME_DECODE_JPEG, stream);
         if (launchRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("launch dvpp task failed, result = %d.", launchRet);
+            ACL_LOG_INNER_ERROR("launch dvpp task failed, result = %d.", launchRet);
             return launchRet;
         }
 
         if (aclRunMode_ == ACL_HOST) {
             aclError cpyRet = CopyDvppPicDescAsync(outputDesc, ACL_MEMCPY_DEVICE_TO_HOST, stream);
             if (cpyRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("copy output pic desc from device failed, result = %d.", cpyRet);
+                ACL_LOG_INNER_ERROR("copy output pic desc from device failed, result = %d.", cpyRet);
                 return cpyRet;
             }
         }
@@ -1398,7 +1447,7 @@ namespace acl {
         aclError validOutputRet = ValidateJpegInputFormat(
             static_cast<acldvppPixelFormat>(inputDesc->dvppPicDesc.format));
         if (validOutputRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("input acldvppPicDesc format verify failed, result = %d, format = %u.",
+            ACL_LOG_INNER_ERROR("input acldvppPicDesc format verify failed, result = %d, format = %u.",
                           validOutputRet, inputDesc->dvppPicDesc.format);
             return validOutputRet;
         }
@@ -1426,7 +1475,7 @@ namespace acl {
         auto memcpyRet = memcpy_s(args.get() + configOffset, argsSize - configOffset,
                                   &(config->dvppJpegeConfig), dvppJpegeConfigSize);
         if (memcpyRet != EOK) {
-            ACL_LOG_ERROR("copy jpege config to args failed, result = %d.", memcpyRet);
+            ACL_LOG_INNER_ERROR("copy jpege config to args failed, result = %d.", memcpyRet);
             return ACL_ERROR_FAILURE;
         }
 
@@ -1435,14 +1484,14 @@ namespace acl {
         memcpyRet = memcpy_s(args.get() + bufferSizeOffset, argsSize - bufferSizeOffset, size,
             sizeof(uint32_t));
         if (memcpyRet != EOK) {
-            ACL_LOG_ERROR("copy output buffer size to args failed, result = %d.", memcpyRet);
+            ACL_LOG_INNER_ERROR("copy output buffer size to args failed, result = %d.", memcpyRet);
             return ACL_ERROR_FAILURE;
         }
 
         if (aclRunMode_ == ACL_HOST) {
             aclError cpyRet = CopyDvppPicDescAsync(inputDesc, ACL_MEMCPY_HOST_TO_DEVICE, stream);
             if (cpyRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("copy input pic desc to device failed, result = %d.", cpyRet);
+                ACL_LOG_INNER_ERROR("copy input pic desc to device failed, result = %d.", cpyRet);
                 return cpyRet;
             }
         }
@@ -1450,14 +1499,14 @@ namespace acl {
         aclError launchRet = LaunchDvppTask(channelDesc, args.get(), argsSize,
             acl::dvpp::DVPP_KERNELNAME_ENCODE_JPEG, stream);
         if (launchRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("launch dvpp task failed, result = %d.", launchRet);
+            ACL_LOG_INNER_ERROR("launch dvpp task failed, result = %d.", launchRet);
             return launchRet;
         }
 
         if (aclRunMode_ == ACL_HOST) {
             aclError cpyRet = CopyDvppPicDescAsync(inputDesc, ACL_MEMCPY_DEVICE_TO_HOST, stream);
             if (cpyRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("copy jpege config from device failed, result = %d.", cpyRet);
+                ACL_LOG_INNER_ERROR("copy jpege config from device failed, result = %d.", cpyRet);
                 return cpyRet;
             }
 
@@ -1465,7 +1514,7 @@ namespace acl {
                                             channelDesc->shareBuffer.data, sizeof(uint32_t),
                                             RT_MEMCPY_DEVICE_TO_HOST, stream);
             if (rtRet != RT_ERROR_NONE) {
-                ACL_LOG_ERROR("copy jpege size back to host failed, runtime result = %d.", rtRet);
+                ACL_LOG_INNER_ERROR("copy jpege size back to host failed, runtime result = %d.", rtRet);
                 return ACL_GET_ERRCODE_RTS(rtRet);
             }
         } else {
@@ -1474,7 +1523,7 @@ namespace acl {
                                        channelDesc->shareBuffer.data, sizeof(uint32_t),
                                        RT_MEMCPY_DEVICE_TO_HOST_EX, stream);
             if (rtRet != RT_ERROR_NONE) {
-                ACL_LOG_ERROR("copy jpege size to host failed, runtime result = %d.", rtRet);
+                ACL_LOG_INNER_ERROR("copy jpege size to host failed, runtime result = %d.", rtRet);
                 return ACL_GET_ERRCODE_RTS(rtRet);
             }
         }
@@ -1489,7 +1538,7 @@ namespace acl {
                                                    acldvppPicDesc *outputDesc,
                                                    aclrtStream stream)
     {
-        ACL_LOG_ERROR("png decode is not supported in this version. Please check.");
+        ACL_LOG_INNER_ERROR("png decode is not supported in this version. Please check.");
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
 
@@ -1765,7 +1814,7 @@ namespace acl {
                     // output pixel format as same as input pixel format
                     ret = CalcImageSize(libjpegHandler, needOrientation, outputPixelFormat, decSize);
                     if (ret != ACL_SUCCESS) {
-                        ACL_LOG_ERROR("predict decode size failed, output pixel format = %d",
+                        ACL_LOG_INNER_ERROR("predict decode size failed, output pixel format = %d",
                             static_cast<int32_t>(outputPixelFormat));
                     }
                     break;
@@ -1795,14 +1844,14 @@ namespace acl {
                 break;
             }
             default: {
-                ACL_LOG_ERROR("unknown acl run mode %d.", aclRunMode_);
+                ACL_LOG_INNER_ERROR("unknown acl run mode %d.", aclRunMode_);
                 return nullptr;
             }
         }
 
         // check result
         if (aclDvppChannelDesc == nullptr) {
-            ACL_LOG_ERROR("create channel desc failed. Please check.");
+            ACL_LOG_INNER_ERROR("create channel desc failed. Please check.");
             return nullptr;
         }
 
@@ -1841,7 +1890,7 @@ namespace acl {
                 break;
             }
             default: {
-                ACL_LOG_ERROR("unkown acl run mode %d.", aclRunMode_);
+                ACL_LOG_INNER_ERROR("unkown acl run mode %d.", aclRunMode_);
                 return ACL_ERROR_INTERNAL_ERROR;
             }
         }
@@ -1862,7 +1911,7 @@ namespace acl {
                 break;
             }
             default: {
-                ACL_LOG_ERROR("unkown acl run mode %d.", aclRunMode_);
+                ACL_LOG_INNER_ERROR("unkown acl run mode %d.", aclRunMode_);
                 return nullptr;
             }
         }
@@ -1886,7 +1935,7 @@ namespace acl {
                 break;
             }
             default: {
-                ACL_LOG_ERROR("unkown acl run mode %d.", aclRunMode_);
+                ACL_LOG_INNER_ERROR("unkown acl run mode %d.", aclRunMode_);
                 return ACL_ERROR_INTERNAL_ERROR;
             }
         }
@@ -1906,14 +1955,14 @@ namespace acl {
         ACL_REQUIRES_POSITIVE_RET_NULL(aclDvppRoiConfigSize);
         void *addr = malloc(aclDvppRoiConfigSize);
         if (addr == nullptr) {
-            ACL_LOG_ERROR("malloc memory failed. size is %u.", aclDvppRoiConfigSize);
+            ACL_LOG_INNER_ERROR("malloc memory failed. size is %u.", aclDvppRoiConfigSize);
             return nullptr;
         }
 
         // create acldvppRoiConfig in memory
         aclRoiConfig = new (addr)acldvppRoiConfig();
         if (aclRoiConfig == nullptr) {
-            ACL_LOG_ERROR("create aclDvppRoiConfig with function new failed");
+            ACL_LOG_INNER_ERROR("create aclDvppRoiConfig with function new failed");
             ACL_FREE(addr);
             return nullptr;
         }
@@ -1941,14 +1990,14 @@ namespace acl {
         ACL_REQUIRES_POSITIVE_RET_NULL(aclResizeConfigSize);
         void *addr = malloc(aclResizeConfigSize);
         if (addr == nullptr) {
-            ACL_LOG_ERROR("malloc memory failed. size is %u.", aclResizeConfigSize);
+            ACL_LOG_INNER_ERROR("malloc memory failed. size is %u.", aclResizeConfigSize);
             return nullptr;
         }
 
         // create acldvppResizeConfig in memory
         aclResizeConfig = new (addr)acldvppResizeConfig();
         if (aclResizeConfig == nullptr) {
-            ACL_LOG_ERROR("create acldvppResizeConfig with function new failed");
+            ACL_LOG_INNER_ERROR("create acldvppResizeConfig with function new failed");
             ACL_FREE(addr);
             return nullptr;
         }
@@ -1969,14 +2018,14 @@ namespace acl {
         ACL_REQUIRES_POSITIVE_RET_NULL(aclJpegeConfigSize);
         void *addr = malloc(aclJpegeConfigSize);
         if (addr == nullptr) {
-            ACL_LOG_ERROR("malloc memory failed. size is %u.", aclJpegeConfigSize);
+            ACL_LOG_INNER_ERROR("malloc memory failed. size is %u.", aclJpegeConfigSize);
             return nullptr;
         }
 
         // create acldvppResizeConfig in memory
         aclJpegeConfig = new (addr)acldvppJpegeConfig();
         if (aclJpegeConfig == nullptr) {
-            ACL_LOG_ERROR("create acldvppJpegeConfig with function new failed");
+            ACL_LOG_INNER_ERROR("create acldvppJpegeConfig with function new failed");
             ACL_FREE(addr);
             return nullptr;
         }
@@ -1998,7 +2047,7 @@ namespace acl {
         size_t pageSize = mmGetPageSize();
         void *hostAddr = mmAlignMalloc(aclPicDescSize, pageSize);
         if (hostAddr == nullptr) {
-            ACL_LOG_ERROR("malloc memory failed. size is %u.", aclPicDescSize);
+            ACL_LOG_INNER_ERROR("malloc memory failed. size is %u.", aclPicDescSize);
             return nullptr;
         }
 
@@ -2012,7 +2061,7 @@ namespace acl {
         uint32_t flags = RT_MEMORY_DEFAULT | RT_MEMORY_POLICY_DEFAULT_PAGE_ONLY;
         rtError_t ret = rtMalloc(&devPtr, size, flags);
         if (ret != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("malloc device memory for acl dvpp pic desc failed, runtime result = %d", ret);
+            ACL_LOG_CALL_ERROR("malloc device memory for acl dvpp pic desc failed, runtime result = %d", ret);
             ACL_ALIGN_FREE(hostAddr);
             return nullptr;
         }
@@ -2033,14 +2082,14 @@ namespace acl {
         uint32_t flags = RT_MEMORY_DEFAULT | RT_MEMORY_POLICY_DEFAULT_PAGE_ONLY;
         rtError_t rtErr = rtMalloc(&devAddr, aclPicDescSize, flags);
         if (rtErr != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("alloc device memory failed, size = %zu, runtime result = %d", aclPicDescSize, rtErr);
+            ACL_LOG_CALL_ERROR("alloc device memory failed, size = %zu, runtime result = %d", aclPicDescSize, rtErr);
             return nullptr;
         }
 
         // create acldvppPicDesc in device addr
         aclPicDesc = new (devAddr)acldvppPicDesc;
         if (aclPicDesc == nullptr) {
-            ACL_LOG_ERROR("create acldvppPicDesc with function new failed");
+            ACL_LOG_INNER_ERROR("create acldvppPicDesc with function new failed");
             (void) rtFree(devAddr);
             devAddr = nullptr;
             return nullptr;
@@ -2069,7 +2118,7 @@ namespace acl {
         size_t pageSize = mmGetPageSize();
         void *hostAddr = mmAlignMalloc(aclDvppChannelDescSize, pageSize);
         if (hostAddr == nullptr) {
-            ACL_LOG_ERROR("malloc memory failed. size is %u.", aclDvppChannelDescSize);
+            ACL_LOG_INNER_ERROR("malloc memory failed. size is %u.", aclDvppChannelDescSize);
             return nullptr;
         }
         // create acldvppChannelDesc in host addr
@@ -2082,7 +2131,7 @@ namespace acl {
         uint32_t flags = RT_MEMORY_DEFAULT | RT_MEMORY_POLICY_DEFAULT_PAGE_ONLY;
         rtError_t rtErr = rtMalloc(&aclDvppChannelDesc->dataBuffer.data, totalSize, flags);
         if (rtErr != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("alloc device memory failed, size = %zu, runtime result = %d", totalSize, rtErr);
+            ACL_LOG_CALL_ERROR("alloc device memory failed, size = %zu, runtime result = %d", totalSize, rtErr);
             ACL_ALIGN_FREE(hostAddr);
             return nullptr;
         }
@@ -2098,7 +2147,7 @@ namespace acl {
         size_t tmpDataSize = GetCmdlistBuffSize();
         rtErr = rtDvppMalloc(&tmpData, tmpDataSize);
         if (rtErr != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("alloc device memory for channel tmp buffer failed, size = %zu, runtime result = %d",
+            ACL_LOG_CALL_ERROR("alloc device memory for channel tmp buffer failed, size = %zu, runtime result = %d",
                 tmpDataSize, rtErr);
             (void) rtFree(aclDvppChannelDesc->dataBuffer.data);
             aclDvppChannelDesc->dataBuffer.data = nullptr;
@@ -2120,14 +2169,15 @@ namespace acl {
         uint32_t flags = RT_MEMORY_DEFAULT | RT_MEMORY_POLICY_DEFAULT_PAGE_ONLY;
         rtError_t rtErr = rtMalloc(&devAddr, aclDvppChannelDescSize, flags);
         if (rtErr != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("alloc device memory failed, size = %zu, runtime result = %d", aclDvppChannelDescSize, rtErr);
+            ACL_LOG_INNER_ERROR("alloc device memory failed, size = %zu, runtime result = %d",
+                aclDvppChannelDescSize, rtErr);
             return nullptr;
         }
 
         // create acldvppChannelDesc in device addr
         aclDvppChannelDesc = new (devAddr)acldvppChannelDesc;
         if (aclDvppChannelDesc == nullptr) {
-            ACL_LOG_ERROR("create acldvppChannelDesc with function new failed");
+            ACL_LOG_INNER_ERROR("create acldvppChannelDesc with function new failed");
             (void) rtFree(devAddr);
             devAddr = nullptr;
             return nullptr;
@@ -2143,7 +2193,7 @@ namespace acl {
         uint32_t shareBufferSize = acl::dvpp::DVPP_CHANNEL_SHARE_BUFFER_SIZE;
         rtErr = rtMalloc(&aclDvppChannelDesc->shareBuffer.data, shareBufferSize, flags);
         if (rtErr != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("alloc device memory failed, size = %zu, runtime result = %d", shareBufferSize, rtErr);
+            ACL_LOG_CALL_ERROR("alloc device memory failed, size = %zu, runtime result = %d", shareBufferSize, rtErr);
             (void) rtFree(devAddr);
             devAddr = nullptr;
             return nullptr;
@@ -2155,7 +2205,7 @@ namespace acl {
         size_t tmpDataSize = GetCmdlistBuffSize();
         rtErr = rtDvppMalloc(&tmpData, tmpDataSize); // 2M align
         if (rtErr != RT_ERROR_NONE) {
-            ACL_LOG_ERROR("alloc device memory for channel tmp buffer failed, size = %zu, runtime result = %d",
+            ACL_LOG_CALL_ERROR("alloc device memory for channel tmp buffer failed, size = %zu, runtime result = %d",
                 tmpDataSize, rtErr);
             (void) rtFree(aclDvppChannelDesc->shareBuffer.data);
             (void) rtFree(devAddr);
@@ -2177,7 +2227,7 @@ namespace acl {
             int32_t deviceId = 0;
             rtRet = rtGetDevice(&deviceId);
             if (rtRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("fail to get deviceId when create dvpp channel, result = %d", rtRet);
+                ACL_LOG_CALL_ERROR("fail to get deviceId when create dvpp channel, result = %d", rtRet);
                 return ACL_GET_ERRCODE_RTS(rtRet);
             }
 
@@ -2185,7 +2235,7 @@ namespace acl {
             rtNotify_t notify = nullptr;
             rtRet = rtNotifyCreate(deviceId, &notify);
             if (rtRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("fail to create notify, result = %d", rtRet);
+                ACL_LOG_CALL_ERROR("fail to create notify, result = %d", rtRet);
                 return ACL_GET_ERRCODE_RTS(rtRet);
             }
             channelDesc->notify = static_cast<void *>(notify);
@@ -2194,7 +2244,7 @@ namespace acl {
             uint32_t notifyId = 0;
             rtRet = rtGetNotifyID(notify, &notifyId);
             if (rtRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("fail to get NotifyId, result = %d", rtRet);
+                ACL_LOG_CALL_ERROR("fail to get NotifyId, result = %d", rtRet);
                 (void)rtNotifyDestroy(channelDesc->notify);
                 return ACL_GET_ERRCODE_RTS(rtRet);
             }
@@ -2205,7 +2255,7 @@ namespace acl {
             rtEvent_t event = nullptr;
             rtRet = rtEventCreateWithFlag(&event, RT_EVENT_WITH_FLAG);
             if (rtRet != RT_ERROR_NONE) {
-                ACL_LOG_ERROR("fail to create sendFrameEvent, runtime result = %d", rtRet);
+                ACL_LOG_CALL_ERROR("fail to create sendFrameEvent, runtime result = %d", rtRet);
                 return ACL_GET_ERRCODE_RTS(rtRet);
             }
             channelDesc->notify = static_cast<void *>(event);
@@ -2214,7 +2264,7 @@ namespace acl {
             uint32_t eventId = 0;
             rtRet = rtGetEventID(event, &eventId);
             if (rtRet != RT_ERROR_NONE) {
-                ACL_LOG_ERROR("fail to get eventId, runtime result = %d", rtRet);
+                ACL_LOG_INNER_ERROR("fail to get eventId, runtime result = %d", rtRet);
                 (void)rtEventDestroy(event);
                 return ACL_GET_ERRCODE_RTS(rtRet);
             }
@@ -2228,14 +2278,18 @@ namespace acl {
     {
         ACL_LOG_DEBUG("begin to destroy notify and stream.");
         if (channelDesc == nullptr) {
-            ACL_LOG_ERROR("dvpp channel desc is null.");
+            ACL_LOG_INNER_ERROR("dvpp channel desc is null.");
+            const char *argList[] = {"param"};
+            const char *argVal[] = {"channelDesc"};
+            acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+                argList, argVal, 1);
             return;
         }
 
         if (stream != nullptr) {
             rtError_t rtRet = rtStreamDestroy(stream);
             if (rtRet != RT_ERROR_NONE) {
-                ACL_LOG_ERROR("fail to destroy stream, runtime result = %d", rtRet);
+                ACL_LOG_CALL_ERROR("fail to destroy stream, runtime result = %d", rtRet);
             }
         }
 
@@ -2244,12 +2298,12 @@ namespace acl {
             if (channelDesc->dvppWaitTaskType == NOTIFY_TASK) {
                 rtRet = rtNotifyDestroy(static_cast<rtNotify_t>(channelDesc->notify));
                 if (rtRet != RT_ERROR_NONE) {
-                    ACL_LOG_ERROR("fail to destroy notify, runtime result = %d", rtRet);
+                    ACL_LOG_CALL_ERROR("fail to destroy notify, runtime result = %d", rtRet);
                 }
             } else {
                 rtRet = rtEventDestroy(static_cast<rtEvent_t>(channelDesc->notify));
                 if (rtRet != RT_ERROR_NONE) {
-                    ACL_LOG_ERROR("fail to destroy event, runtime result = %d", rtRet);
+                    ACL_LOG_CALL_ERROR("fail to destroy event, runtime result = %d", rtRet);
                 }
             }
             channelDesc->notify = nullptr;
@@ -2265,7 +2319,7 @@ namespace acl {
         if (stream != nullptr) {
             rtError_t rtRet = rtStreamDestroy(stream);
             if (rtRet != RT_ERROR_NONE) {
-                ACL_LOG_ERROR("fail to destroy stream, runtime result = %d", rtRet);
+                ACL_LOG_CALL_ERROR("fail to destroy stream, runtime result = %d", rtRet);
             }
         }
 
@@ -2302,15 +2356,22 @@ namespace acl {
         // valid size
         bool validParam = (size == 0) || (srcBatchPicDescs->dvppBatchPicDescs.batchSize < size);
         if (validParam) {
-            ACL_LOG_ERROR("srcBatchPicDescs batchSize less than roiNums size or size = 0, batch size = %u, size = %u.",
-                          srcBatchPicDescs->dvppBatchPicDescs.batchSize, size);
+            ACL_LOG_INNER_ERROR("srcBatchPicDescs batchSize less than roiNums size or size = 0, "
+                "batch size = %u, size = %u.", srcBatchPicDescs->dvppBatchPicDescs.batchSize, size);
+            std::string convertedStr = std::to_string(srcBatchPicDescs->dvppBatchPicDescs.batchSize);
+            std::string errMsg = acl::AclErrorLogManager::FormatStr("less than roiNums size[%u] or size = 0", size);
+            const char *argList[] = {"param", "value", "reason"};
+            const char *argVal[] = {"srcBatchPicDescs batchSize", convertedStr.c_str(), errMsg.c_str()};
+            acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_PARAM_MSG,
+                argList, argVal, 3);
             return ACL_ERROR_INVALID_PARAM;
         }
 
         if (resizeConfig != nullptr) {
             aclError validResizeConfigRet = ValidateDvppResizeConfig(resizeConfig);
             if (validResizeConfigRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("resize config acldvppResizeConfig verify failed, result = %d.", validResizeConfigRet);
+                ACL_LOG_INNER_ERROR("resize config acldvppResizeConfig verify failed, result = %d.",
+                    validResizeConfigRet);
                 return validResizeConfigRet;
             }
         }
@@ -2321,7 +2382,7 @@ namespace acl {
             validFormat = ValidateVpcInputFormat(
                 static_cast<acldvppPixelFormat>(srcBatchPicDescs->aclDvppPicDescs[index].dvppPicDesc.format));
             if (validFormat != ACL_SUCCESS) {
-                ACL_LOG_ERROR("input acldvppPicDesc format verify failed, result = %d, format = %u.",
+                ACL_LOG_INNER_ERROR("input acldvppPicDesc format verify failed, result = %d, format = %u.",
                     validFormat, srcBatchPicDescs->aclDvppPicDescs[index].dvppPicDesc.format);
                 return validFormat;
             }
@@ -2332,7 +2393,7 @@ namespace acl {
             validFormat = ValidateVpcOutputFormat(
                 static_cast<acldvppPixelFormat>(dstBatchPicDescs->aclDvppPicDescs[index].dvppPicDesc.format));
             if (validFormat != ACL_SUCCESS) {
-                ACL_LOG_ERROR("output acldvppPicDesc format verify failed, result = %d, format = %u.",
+                ACL_LOG_INNER_ERROR("output acldvppPicDesc format verify failed, result = %d, format = %u.",
                     validFormat, dstBatchPicDescs->aclDvppPicDescs[index].dvppPicDesc.format);
                 return validFormat;
             }
@@ -2342,7 +2403,7 @@ namespace acl {
         for (uint32_t index = 0; index < size; ++index) {
             validParam = (roiNums[index] > UINT16_MAX) || (roiNums[index] == 0);
             if (validParam) {
-                ACL_LOG_ERROR("roiNums index[%u] great than UINT16_MAX[65535] or its value is %u",
+                ACL_LOG_INNER_ERROR("roiNums index[%u] great than UINT16_MAX[65535] or its value is %u",
                     index, roiNums[index]);
                 return ACL_ERROR_INVALID_PARAM;
             }
@@ -2353,7 +2414,7 @@ namespace acl {
         // validate total roi nums: min value is 1
         validParam = (totalRoiNums < 1) || (totalRoiNums > maxRoiNums);
         if (validParam) {
-            ACL_LOG_ERROR("the value of totalRoiNums[%d] is invalid, it must be between in [%d, %d]",
+            ACL_LOG_INNER_ERROR("the value of totalRoiNums[%d] is invalid, it must be between in [%d, %d]",
                 totalRoiNums, 1, maxRoiNums);
             return ACL_ERROR_INVALID_PARAM;
         }
@@ -2365,7 +2426,7 @@ namespace acl {
         ACL_REQUIRES_NOT_NULL(batchPicDesc);
         ACL_REQUIRES_NOT_NULL(batchPicDesc->dataBuffer.data);
         if (batchPicDesc->dvppBatchPicDescs.batchSize < batchSize) {
-            ACL_LOG_ERROR("batchSize[%u] from batchPicDesc must be greater or equal roi batch size[%u].",
+            ACL_LOG_INNER_ERROR("batchSize[%u] from batchPicDesc must be greater or equal roi batch size[%u].",
                 batchSize, batchPicDesc->dvppBatchPicDescs.batchSize);
             return ACL_ERROR_INVALID_PARAM;
         }
@@ -2417,7 +2478,7 @@ namespace acl {
             auto memcpyRet = memcpy_s(args.get() + cropAreaOffset, argsSize - cropAreaOffset,
                                       &(batchParams.cropAreas_[index]->dvppRoiConfig), cropAreaSize);
             if (memcpyRet != EOK) {
-                ACL_LOG_ERROR("copy crop area to args failed, result = %d.", memcpyRet);
+                ACL_LOG_INNER_ERROR("copy crop area to args failed, result = %d.", memcpyRet);
                 return ACL_ERROR_FAILURE;
             }
             cropAreaOffset += cropAreaSize;
@@ -2426,7 +2487,7 @@ namespace acl {
         auto memcpyRet = memcpy_s(args.get() + cropAreaOffset, argsSize - cropAreaOffset,
                                   batchParams.roiNums_, sizeof(uint16_t) * batchParams.batchSize_);
         if (memcpyRet != EOK) {
-            ACL_LOG_ERROR("copy roiNums to args failed, result = %d.", memcpyRet);
+            ACL_LOG_INNER_ERROR("copy roiNums to args failed, result = %d.", memcpyRet);
             return ACL_ERROR_FAILURE;
         }
 
@@ -2438,14 +2499,14 @@ namespace acl {
             memcpyRet = memcpy_s(args.get() + cropAreaOffset, argsSize - cropAreaOffset,
                 &(resizeConfig->dvppResizeConfig), resizeConfigSize);
             if (memcpyRet != EOK) {
-                ACL_LOG_ERROR("copy resize config to args failed, result = %d.", memcpyRet);
+                ACL_LOG_INNER_ERROR("copy resize config to args failed, result = %d.", memcpyRet);
                 return ACL_ERROR_FAILURE;
             }
         }
         aclError launchRet = LaunchDvppTask(channelDesc, args.get(), argsSize,
             kernelName, stream);
         if (launchRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("launch dvpp task failed, result = %d.", launchRet);
+            ACL_LOG_INNER_ERROR("launch dvpp task failed, result = %d.", launchRet);
             return launchRet;
         }
         return ACL_SUCCESS;
@@ -2489,7 +2550,7 @@ namespace acl {
             auto memcpyRet = memcpy_s(args.get() + roiAreaOffset, argsSize - roiAreaOffset,
                                       &(batchParams.cropAreas_[index]->dvppRoiConfig), roiAreaSize);
             if (memcpyRet != EOK) {
-                ACL_LOG_ERROR("copy crop area to args failed, result = %d.", memcpyRet);
+                ACL_LOG_INNER_ERROR("copy crop area to args failed, result = %d.", memcpyRet);
                 return ACL_ERROR_FAILURE;
             }
             roiAreaOffset += roiAreaSize;
@@ -2497,7 +2558,7 @@ namespace acl {
             memcpyRet = memcpy_s(args.get() + roiAreaOffset, argsSize - roiAreaOffset,
                                  &(batchParams.pasteAreas_[index]->dvppRoiConfig), roiAreaSize);
             if (memcpyRet != EOK) {
-                ACL_LOG_ERROR("copy paste area to args failed, result = %d.", memcpyRet);
+                ACL_LOG_INNER_ERROR("copy paste area to args failed, result = %d.", memcpyRet);
                 return ACL_ERROR_FAILURE;
             }
             roiAreaOffset += roiAreaSize;
@@ -2506,7 +2567,7 @@ namespace acl {
         auto memcpyRet = memcpy_s(args.get() + roiAreaOffset, argsSize - roiAreaOffset,
                                   batchParams.roiNums_, sizeof(uint16_t) * batchParams.batchSize_);
         if (memcpyRet != EOK) {
-            ACL_LOG_ERROR("copy roiNums to args failed, result = %d.", memcpyRet);
+            ACL_LOG_INNER_ERROR("copy roiNums to args failed, result = %d.", memcpyRet);
             return ACL_ERROR_FAILURE;
         }
 
@@ -2517,7 +2578,7 @@ namespace acl {
             memcpyRet = memcpy_s(args.get() + resizeConfigOffset, argsSize - resizeConfigOffset,
                 &(resizeConfig->dvppResizeConfig), resizeConfigSize);
             if (memcpyRet != EOK) {
-                ACL_LOG_ERROR("copy resize config to args failed, result = %d.", memcpyRet);
+                ACL_LOG_INNER_ERROR("copy resize config to args failed, result = %d.", memcpyRet);
                 return ACL_ERROR_FAILURE;
             }
             kernelName = acl::dvpp::DVPP_KERNELNAME_BATCH_CROP_RESIZE_PASTE;
@@ -2525,7 +2586,7 @@ namespace acl {
 
         aclError launchRet = LaunchDvppTask(channelDesc, args.get(), argsSize, kernelName, stream);
         if (launchRet != ACL_SUCCESS) {
-            ACL_LOG_ERROR("launch dvpp task failed, result = %d.", launchRet);
+            ACL_LOG_INNER_ERROR("launch dvpp task failed, result = %d.", launchRet);
             return launchRet;
         }
         return ACL_SUCCESS;
@@ -2533,19 +2594,19 @@ namespace acl {
 
     acldvppLutMap *ImageProcessor::acldvppCreateLutMap()
     {
-        ACL_LOG_ERROR("acl dvpp create lut map is not supported in this version. Please check.");
+        ACL_LOG_INNER_ERROR("acl dvpp create lut map is not supported in this version. Please check.");
         return nullptr;
     }
 
     aclError ImageProcessor::acldvppDestroyLutMap(acldvppLutMap *lutMap)
     {
-        ACL_LOG_ERROR("acl dvpp destroy lut map is not supported in this version. Please check.");
+        ACL_LOG_INNER_ERROR("acl dvpp destroy lut map is not supported in this version. Please check.");
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
 
     uint32_t ImageProcessor::acldvppGetLutMapDims(const acldvppLutMap *lutMap)
     {
-        ACL_LOG_ERROR("acl dvpp get lut map dims is not supported in this version. Please check.");
+        ACL_LOG_INNER_ERROR("acl dvpp get lut map dims is not supported in this version. Please check.");
         return 0;
     }
 
@@ -2554,20 +2615,19 @@ namespace acl {
                                                   uint8_t **data,
                                                   uint32_t *len)
     {
-        ACL_LOG_ERROR("acl dvpp get lut map data is not supported in this version. Please check.");
+        ACL_LOG_INNER_ERROR("acl dvpp get lut map data is not supported in this version. Please check.");
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
 
-
     acldvppBorderConfig *ImageProcessor::acldvppCreateBorderConfig()
     {
-        ACL_LOG_ERROR("acl dvpp create border config is not supported in this version. Please check.");
+        ACL_LOG_INNER_ERROR("acl dvpp create border config is not supported in this version. Please check.");
         return nullptr;
     }
 
     aclError ImageProcessor::acldvppDestroyBorderConfig(acldvppBorderConfig *borderConfig)
     {
-        ACL_LOG_ERROR("acl dvpp destroy border config is not supported in this version. Please check.");
+        ACL_LOG_INNER_ERROR("acl dvpp destroy border config is not supported in this version. Please check.");
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
 

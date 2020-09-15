@@ -44,12 +44,23 @@ namespace acl {
         {
             if (channelDesc == nullptr) {
                 ACL_LOG_ERROR("channelDesc is null.");
+                const char *argList[] = {"param"};
+                const char *argVal[] = {"channelDesc"};
+                acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+                    argList, argVal, 1);
                 return ACL_ERROR_INVALID_PARAM;
             }
 
             if (bufSize < MIN_VENC_BUFF_SIZE) {
                 ACL_LOG_ERROR("the value of bufSize[%u] can't be smaller than MIN_VENC_BUFF_SIZE[%u]",
                     bufSize, MIN_VENC_BUFF_SIZE);
+                std::string bufSizeStr = std::to_string(bufSize);
+                std::string errMsg = acl::AclErrorLogManager::FormatStr("can't be smaller than MIN_VENC_BUFF_SIZE[%u]",
+                    MIN_VENC_BUFF_SIZE);
+                const char *argList[] = {"param", "value", "reason"};
+                const char *argVal[] = {"bufSize", bufSizeStr.c_str(), errMsg.c_str()};
+                acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_PARAM_MSG,
+                    argList, argVal, 3);
                 return ACL_ERROR_INVALID_PARAM;
             }
 
@@ -63,16 +74,29 @@ namespace acl {
         {
             if (channelDesc == nullptr) {
                 ACL_LOG_ERROR("channelDesc is null.");
+                const char *argList[] = {"param"};
+                const char *argVal[] = {"channelDesc"};
+                acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+                    argList, argVal, 1);
                 return ACL_ERROR_INVALID_PARAM;
             }
 
             if (bufAddr == nullptr) {
                 ACL_LOG_ERROR("bufAddr is null.");
+                const char *argList[] = {"param"};
+                const char *argVal[] = {"bufAddr"};
+                acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+                    argList, argVal, 1);
                 return ACL_ERROR_INVALID_PARAM;
             }
 
             if (channelDesc->bufAddr != 0) {
                 ACL_LOG_ERROR("bufAddr is already set, bufAddr = %lu", channelDesc->bufAddr);
+                std::string bufAddr = std::to_string(channelDesc->bufAddr);
+                const char *argList[] = {"param", "value", "reason"};
+                const char *argVal[] = {"bufAddr", bufAddr.c_str(), "bufAddr is already set"};
+                acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_PARAM_MSG,
+                    argList, argVal, 3);
                 return ACL_ERROR_INVALID_PARAM;
             }
 
@@ -88,6 +112,10 @@ namespace acl {
             isSupport = true;
             if (channelDesc == nullptr) {
                 ACL_LOG_ERROR("channelDesc is null");
+                const char *argList[] = {"param"};
+                const char *argVal[] = {"channelDesc"};
+                acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+                    argList, argVal, 1);
                 return 0;  // default 0
             }
 
@@ -102,6 +130,10 @@ namespace acl {
             isSupport = true;
             if (channelDesc == nullptr) {
                 ACL_LOG_ERROR("channelDesc is null");
+                const char *argList[] = {"param"};
+                const char *argVal[] = {"channelDesc"};
+                acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+                    argList, argVal, 1);
                 return nullptr;
             }
 
@@ -125,7 +157,7 @@ namespace acl {
                     break;
                 }
                 default: {
-                    ACL_LOG_ERROR("aclvencCreateChannelDesc failed, unkown acl run mode %d.", aclRunMode_);
+                    ACL_LOG_INNER_ERROR("aclvencCreateChannelDesc failed, unkown acl run mode %d.", aclRunMode_);
                     return nullptr;
                 }
             }
@@ -156,7 +188,7 @@ namespace acl {
                     break;
                 }
                 default: {
-                    ACL_LOG_ERROR("aclvencDestroyChannelDesc failed, unkown acl run mode %d.", aclRunMode_);
+                    ACL_LOG_INNER_ERROR("aclvencDestroyChannelDesc failed, unkown acl run mode %d.", aclRunMode_);
                     return ACL_ERROR_INTERNAL_ERROR;
                 }
             }
@@ -173,7 +205,7 @@ namespace acl {
             ACL_REQUIRES_NOT_NULL(output);
             channelDesc->outStreamDesc = output;
             if (output->dataBuffer.data == nullptr) {
-                ACL_LOG_ERROR("output dvpp stream desc dataBuffer data is null.");
+                ACL_LOG_INNER_ERROR("output dvpp stream desc dataBuffer data is null.");
                 (void)acldvppDestroyStreamDesc(output);
                 channelDesc->outStreamDesc = nullptr;
                 return ACL_ERROR_RT_FAILURE;
@@ -181,7 +213,7 @@ namespace acl {
 
             if ((channelDesc->bufAddr == 0 && channelDesc->bufSize != 0) ||
                 (channelDesc->bufAddr != 0 && channelDesc->bufSize == 0)) {
-                ACL_LOG_ERROR("bufAddr and bufSize should be set together.");
+                ACL_LOG_INNER_ERROR("bufAddr and bufSize should be set together.");
                 (void)acldvppDestroyStreamDesc(output);
                 channelDesc->outStreamDesc = nullptr;
                 return ACL_ERROR_RT_FAILURE;
@@ -195,7 +227,7 @@ namespace acl {
             void *outData = nullptr;
             aclError rtErr = acldvppMalloc(&outData, VENC_DEFAULT_BUFF_SIZE);
             if (rtErr != RT_ERROR_NONE) {
-                ACL_LOG_ERROR("alloc device memory failed, size = %u, runtime result = %d",
+                ACL_LOG_CALL_ERROR("alloc device memory failed, size = %u, runtime result = %d",
                     VENC_DEFAULT_BUFF_SIZE, rtErr);
                 (void)acldvppDestroyStreamDesc(output);
                 channelDesc->outStreamDesc = nullptr;
@@ -219,7 +251,7 @@ namespace acl {
                 ACL_LOG_INFO("aclrtFree begin");
                 aclError ret = aclrtFree(outData);
                 if (ret != ACL_SUCCESS) {
-                    ACL_LOG_ERROR("free device mem failed, result = %d", ret);
+                    ACL_LOG_CALL_ERROR("free device mem failed, result = %d", ret);
                 }
                 outData = nullptr;
                 ACL_LOG_INFO("aclrtFree end");
@@ -236,8 +268,8 @@ namespace acl {
             auto addr = reinterpret_cast<uintptr_t>(callbackData);
             auto info = aicpu::dvpp::CallbackInfoManager<aicpu::dvpp::VencCallbackInfoPtr>::Instance().Take(addr);
             if (info == nullptr) {
-                ACL_LOG_ERROR("GetVencFrameCallbackV200 callbackData = %p, but no info found in CallbackInfoManager.",
-                    callbackData);
+                ACL_LOG_INNER_ERROR("GetVencFrameCallbackV200 callbackData = %p, but no info found in "
+                    "CallbackInfoManager.", callbackData);
                 return;
             }
 
@@ -248,7 +280,7 @@ namespace acl {
                     info->outputStreamDesc->dataBuffer.data,
                     info->outputStreamDesc->dataBuffer.length, RT_MEMCPY_DEVICE_TO_HOST);
                 if (ret != ACL_SUCCESS) {
-                    ACL_LOG_ERROR("memcpy output stream desc to host memory failed, size = %zu, result = %d",
+                    ACL_LOG_INNER_ERROR("memcpy output stream desc to host memory failed, size = %zu, result = %d",
                         size, ret);
                     return;
                 }
@@ -261,7 +293,7 @@ namespace acl {
 
             // check user callback func
             if (info->callbackFunc == nullptr) {
-                ACL_LOG_ERROR("call back func is null!");
+                ACL_LOG_INNER_ERROR("call back func is null!");
                 return;
             }
             // call user callback func
@@ -271,7 +303,6 @@ namespace acl {
             ACL_LOG_INFO("GetVencFrameCallbackV200 success");
             return;
         }
-
 
         aclError VideoProcessorV200::LaunchVencSendFrameTask(const aclvencChannelDesc *channelDesc,
             acldvppPicDesc *inputPicDesc, aclvencFrameConfig *config)
@@ -293,7 +324,7 @@ namespace acl {
             auto memcpyRet = memcpy_s(args.get() + configOffset, argsSize - configOffset, &(config->vencFrameConfig),
                 acl::dvpp::CalAclDvppStructSize(&config->vencFrameConfig));
             if (memcpyRet != EOK) {
-                ACL_LOG_ERROR("copy venc frame config to args failed, result = %d.", memcpyRet);
+                ACL_LOG_INNER_ERROR("copy venc frame config to args failed, result = %d.", memcpyRet);
                 return ACL_ERROR_FAILURE;
             }
 
@@ -306,7 +337,7 @@ namespace acl {
                 channelDesc->sendFrameStream);
             ACL_LOG_INFO("end to send frame to device.");
             if (rtRet != RT_ERROR_NONE) {
-                ACL_LOG_ERROR("venc send frame task call rtCpuKernelLaunch failed, runtime result = %d.", rtRet);
+                ACL_LOG_CALL_ERROR("venc send frame task call rtCpuKernelLaunch failed, runtime result = %d.", rtRet);
                 return ACL_GET_ERRCODE_RTS(rtRet);
             }
             return ACL_SUCCESS;
@@ -332,7 +363,8 @@ namespace acl {
                 nullptr, // no need smDesc
                 channelDesc->getFrameStream);
             if (rtRet != RT_ERROR_NONE) {
-                ACL_LOG_ERROR("release venc frame task call rtCpuKernelLaunch failed, runtime result = %d.", rtRet);
+                ACL_LOG_CALL_ERROR("release venc frame task call rtCpuKernelLaunch failed, "
+                    "runtime result = %d.", rtRet);
                 return ACL_GET_ERRCODE_RTS(rtRet);
             }
             return ACL_SUCCESS;
@@ -347,7 +379,7 @@ namespace acl {
                 sendFrameWaitRet = rtNotifyWait(static_cast<rtNotify_t>(channelDesc->sendFrameNotify),
                     channelDesc->sendFrameStream);
                 if (sendFrameWaitRet != RT_ERROR_NONE) {
-                    ACL_LOG_ERROR("wait for a notify to send frame stream failed, runtime result = %d",
+                    ACL_LOG_CALL_ERROR("wait for a notify to send frame stream failed, runtime result = %d",
                         sendFrameWaitRet);
                     return ACL_GET_ERRCODE_RTS(sendFrameWaitRet);
                 }
@@ -356,7 +388,7 @@ namespace acl {
                 getFrameWaitRet = rtNotifyWait(static_cast<rtNotify_t>(channelDesc->getFrameNotify),
                     channelDesc->getFrameStream);
                 if (getFrameWaitRet != RT_ERROR_NONE) {
-                    ACL_LOG_ERROR("wait for a notify to get frame stream failed, runtime result = %d",
+                    ACL_LOG_CALL_ERROR("wait for a notify to get frame stream failed, runtime result = %d",
                         getFrameWaitRet);
                     return ACL_GET_ERRCODE_RTS(getFrameWaitRet);
                 }
@@ -364,27 +396,30 @@ namespace acl {
                 sendFrameWaitRet = rtStreamWaitEvent(channelDesc->sendFrameStream,
                     static_cast<rtEvent_t>(channelDesc->sendFrameNotify));
                 if (sendFrameWaitRet != RT_ERROR_NONE) {
-                    ACL_LOG_ERROR("wait for a event to send frame stream failed, runtime result = %d",
+                    ACL_LOG_CALL_ERROR("wait for a event to send frame stream failed, runtime result = %d",
                         sendFrameWaitRet);
                     return ACL_GET_ERRCODE_RTS(sendFrameWaitRet);
                 }
                 sendFrameWaitRet = rtEventReset(static_cast<rtEvent_t>(channelDesc->sendFrameNotify),
                     channelDesc->sendFrameStream);
                 if (sendFrameWaitRet != RT_ERROR_NONE) {
-                    ACL_LOG_ERROR("reset a event to send frame stream failed, runtime result = %d", sendFrameWaitRet);
+                    ACL_LOG_CALL_ERROR("reset a event to send frame stream failed, runtime result = %d",
+                        sendFrameWaitRet);
                     return ACL_GET_ERRCODE_RTS(sendFrameWaitRet);
                 }
 
                 getFrameWaitRet = rtStreamWaitEvent(channelDesc->getFrameStream,
                     static_cast<rtEvent_t>(channelDesc->getFrameNotify));
                 if (getFrameWaitRet != RT_ERROR_NONE) {
-                    ACL_LOG_ERROR("wait for a event to get frame stream failed, runtime result = %d", getFrameWaitRet);
+                    ACL_LOG_CALL_ERROR("wait for a event to get frame stream failed, runtime result = %d",
+                        getFrameWaitRet);
                     return ACL_GET_ERRCODE_RTS(getFrameWaitRet);
                 }
                 getFrameWaitRet = rtEventReset(static_cast<rtEvent_t>(channelDesc->getFrameNotify),
                     channelDesc->getFrameStream);
                 if (getFrameWaitRet != RT_ERROR_NONE) {
-                    ACL_LOG_ERROR("reset a event to get frame stream failed, runtime result = %d", getFrameWaitRet);
+                    ACL_LOG_CALL_ERROR("reset a event to get frame stream failed, runtime result = %d",
+                        getFrameWaitRet);
                     return ACL_GET_ERRCODE_RTS(getFrameWaitRet);
                 }
             }
@@ -405,7 +440,7 @@ namespace acl {
                 rtError_t memcpyRet = rtMemcpy(input->dataBuffer.data, input->dataBuffer.length,
                     static_cast<const void *>(&input->dvppPicDesc), size, RT_MEMCPY_HOST_TO_DEVICE);
                 if (memcpyRet != RT_ERROR_NONE) {
-                    ACL_LOG_ERROR("memcpy input pic desc to device memory failed, size = %zu, runtime result = %d",
+                    ACL_LOG_CALL_ERROR("memcpy input pic desc to device memory failed, size = %zu, runtime result = %d",
                         size, memcpyRet);
                     return ACL_GET_ERRCODE_RTS(memcpyRet);
                 }
@@ -414,13 +449,13 @@ namespace acl {
             // launch send frame task to send frame stream
             aclError sendFrameRet = LaunchVencSendFrameTask(channelDesc, input, config);
             if (sendFrameRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("launch send frame task failed, result = %d", sendFrameRet);
+                ACL_LOG_INNER_ERROR("launch send frame task failed, result = %d", sendFrameRet);
                 return sendFrameRet;
             }
 
             aclError launchWaitTaskRet = LaunchVencWaitTask(channelDesc);
             if (launchWaitTaskRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("launch wait task failed, result = %d", launchWaitTaskRet);
+                ACL_LOG_INNER_ERROR("launch wait task failed, result = %d", launchWaitTaskRet);
                 return launchWaitTaskRet;
             }
 
@@ -430,7 +465,7 @@ namespace acl {
                 callbackInfoPtr = std::make_shared<aicpu::dvpp::VencGetFrameCallbackInfo>(channelDesc->callback, input,
                     channelDesc->outStreamDesc, channelDesc->outputMemMode, userdata);
             } catch (...) {
-                ACL_LOG_ERROR("Make shared for get frame callback info failed.");
+                ACL_LOG_INNER_ERROR("Make shared for get frame callback info failed.");
                 return ACL_ERROR_BAD_ALLOC;
             }
             // save callback info
@@ -442,7 +477,7 @@ namespace acl {
             rtError_t callbackRet =
                 rtCallbackLaunch(GetVencFrameCallbackV200, callbackInfoPtr.get(), channelDesc->getFrameStream, true);
             if (callbackRet != RT_ERROR_NONE) {
-                ACL_LOG_ERROR("launch venc callback to get frame stream failed, runtime result = %d", callbackRet);
+                ACL_LOG_CALL_ERROR("launch venc callback to get frame stream failed, runtime result = %d", callbackRet);
                 (void)aicpu::dvpp::CallbackInfoManager<aicpu::dvpp::VencCallbackInfoPtr>::Instance().Erase(addr);
                 return ACL_GET_ERRCODE_RTS(callbackRet);
             }
@@ -450,14 +485,14 @@ namespace acl {
             // launch release frame task to get frame stream
             aclError releaseFrameRet = LaunchReleaseFrameTask(channelDesc);
             if (releaseFrameRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("launch venc release frame task failed, result = %d", releaseFrameRet);
+                ACL_LOG_INNER_ERROR("launch venc release frame task failed, result = %d", releaseFrameRet);
                 return releaseFrameRet;
             }
 
             // streamSynchronize send frame stream
             rtError_t streamSynRet = rtStreamSynchronize(channelDesc->sendFrameStream);
             if (streamSynRet != RT_ERROR_NONE) {
-                ACL_LOG_ERROR("fail to synchronize venc sendFrameStream, runtime result = %d", streamSynRet);
+                ACL_LOG_CALL_ERROR("fail to synchronize venc sendFrameStream, runtime result = %d", streamSynRet);
                 (void)aicpu::dvpp::CallbackInfoManager<aicpu::dvpp::VencCallbackInfoPtr>::Instance().Erase(addr);
                 return ACL_GET_ERRCODE_RTS(streamSynRet);
             }
@@ -471,7 +506,7 @@ namespace acl {
             ACL_LOG_INFO("rtStreamSynchronize get frame begin.");
             rtError_t rtRet = rtStreamSynchronize(channelDesc->getFrameStream);
             if (rtRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("fail to synchronize getFrameStream, result = %d", rtRet);
+                ACL_LOG_CALL_ERROR("fail to synchronize getFrameStream, result = %d", rtRet);
                 return ACL_GET_ERRCODE_RTS(rtRet);
             }
             ACL_LOG_INFO("rtStreamSynchronize get frame end.");
@@ -483,7 +518,7 @@ namespace acl {
             // send eos and sychronize
             aclError ret = aclvencSendEosFrame(channelDesc, nullptr);
             if (ret != ACL_SUCCESS) {
-                ACL_LOG_ERROR("fail to send eos, result = %d", ret);
+                ACL_LOG_INNER_ERROR("fail to send eos, result = %d", ret);
                 return ret;
             }
             return ACL_SUCCESS;
@@ -512,7 +547,7 @@ namespace acl {
         {
             // rcMode value
             if (rcMode > 2) {
-                ACL_LOG_ERROR("rcMode %u, rcMode must be set to 0, 1, or 2.", rcMode);
+                ACL_LOG_INNER_ERROR("rcMode %u, rcMode must be set to 0, 1, or 2.", rcMode);
                 return ACL_ERROR_INVALID_PARAM;
             }
             return VideoProcessor::aclvencSetChannelDescRcMode(channelDesc, rcMode);
@@ -544,6 +579,10 @@ namespace acl {
             ACL_LOG_DEBUG("start to execute aclvdecGetChannelDescRefFrameNum");
             if (channelDesc == nullptr) {
                 ACL_LOG_ERROR("channelDesc is null");
+                const char *argList[] = {"param"};
+                const char *argVal[] = {"channelDesc"};
+                acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+                    argList, argVal, 1);
                 return 0; // default 0
             }
 
@@ -562,10 +601,14 @@ namespace acl {
             ACL_LOG_DEBUG("start to execute aclvdecSetChannelDescOutPicFormat");
             if (channelDesc == nullptr) {
                 ACL_LOG_ERROR("channelDesc is null.");
+                const char *argList[] = {"param"};
+                const char *argVal[] = {"channelDesc"};
+                acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+                    argList, argVal, 1);
                 return ACL_ERROR_INVALID_PARAM;
             }
             if (validOutPicFormatSet.find(outPicFormat) == validOutPicFormatSet.end()) {
-                ACL_LOG_ERROR("the value of outPicFormat[%d] is not supported in this version",
+                ACL_LOG_INNER_ERROR("the value of outPicFormat[%d] is not supported in this version",
                     static_cast<int32_t>(outPicFormat));
                 return ACL_ERROR_INVALID_PARAM;
             }
@@ -586,11 +629,15 @@ namespace acl {
             ACL_LOG_DEBUG("start to execute aclvdecSetChannelDescChannelId");
             if (channelDesc == nullptr) {
                 ACL_LOG_ERROR("channelDesc is null.");
+                const char *argList[] = {"param"};
+                const char *argVal[] = {"channelDesc"};
+                acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+                    argList, argVal, 1);
                 return ACL_ERROR_INVALID_PARAM;
             }
 
             if ((channelId < V200_CHANNEL_ID_FLOOR) || (channelId > V200_CHANNEL_ID_CEILING)) {
-                ACL_LOG_ERROR("the value of channelId[%u] is invalid, it should be between in [%d, %d]",
+                ACL_LOG_INNER_ERROR("the value of channelId[%u] is invalid, it should be between in [%d, %d]",
                     channelId, V200_CHANNEL_ID_FLOOR, V200_CHANNEL_ID_CEILING);
                 return ACL_ERROR_INVALID_PARAM;
             }
@@ -630,7 +677,7 @@ namespace acl {
         {
             ACL_LOG_DEBUG("start to execute aclvdecGetChannelDescBitDepth");
             if ((channelDesc == nullptr) || (channelDesc->vdecDesc.extendInfo == nullptr)) {
-                ACL_LOG_ERROR("vdec channelDesc or vdec channelDesc extendInfo is null.");
+                ACL_LOG_INNER_ERROR("vdec channelDesc or vdec channelDesc extendInfo is null.");
                 return 0;
             }
 
@@ -659,7 +706,8 @@ namespace acl {
                                                 nullptr, // no need smDesc
                                                 channelDesc->getFrameStream);
             if (rtRet != RT_ERROR_NONE) {
-                ACL_LOG_ERROR("vdec release frame task call rtCpuKernelLaunch failed, runtime result = %d.", rtRet);
+                ACL_LOG_CALL_ERROR("vdec release frame task call rtCpuKernelLaunch failed, "
+                    "runtime result = %d.", rtRet);
                 return ACL_GET_ERRCODE_RTS(rtRet);
             }
             return ACL_SUCCESS;
@@ -671,6 +719,10 @@ namespace acl {
             if ((channelDesc == nullptr) || (channelDesc->shareBuffer.data == nullptr)) {
                 ACL_LOG_ERROR("GetVdecFrameCallback callbackData = %p, but channelDesc or shareBuffer is null.",
                     callbackData);
+                const char *argList[] = {"param"};
+                const char *argVal[] = {"channelDesc or shareBuffer"};
+                acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+                    argList, argVal, 1);
                 return;
             }
 
@@ -682,7 +734,7 @@ namespace acl {
             bool eos = false;
             aclError aclRet = GetVdecCallInfo(channelDesc, input, output, userData, eos);
             if (aclRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("get vdec callback info failed, channelId = %u.", channelId);
+                ACL_LOG_INNER_ERROR("get vdec callback info failed, channelId = %u.", channelId);
                 return;
             }
 
@@ -714,33 +766,33 @@ namespace acl {
                 // get current context
                 rtError_t getCtxRet = rtCtxGetCurrent(&curContext);
                 if (getCtxRet != RT_ERROR_NONE) {
-                    ACL_LOG_ERROR("get ctx failed, runtime result = %d, channelId = %u.", getCtxRet, channelId);
+                    ACL_LOG_CALL_ERROR("get ctx failed, runtime result = %d, channelId = %u.", getCtxRet, channelId);
                     return;
                 }
                 // set context of vdec main thread to current callback thread
                 rtError_t setCtxRet = rtCtxSetCurrent(channelDesc->vdecMainContext);
                 if (setCtxRet != RT_ERROR_NONE) {
-                    ACL_LOG_ERROR("set ctx failed, runtime result = %d, channelId = %u.", setCtxRet, channelId);
+                    ACL_LOG_CALL_ERROR("set ctx failed, runtime result = %d, channelId = %u.", setCtxRet, channelId);
                     return;
                 }
 
                 aclError launchRet = LaunchTaskForGetStream(channelDesc, nextCallbackInfo);
                 if (launchRet != ACL_SUCCESS) {
-                    ACL_LOG_ERROR("launch task for get stream failed.");
+                    ACL_LOG_INNER_ERROR("launch task for get stream failed.");
                     (void) rtCtxSetCurrent(curContext);
                     return;
                 }
                 // reset context of current callback thread
                 rtError_t resetCtxRet = rtCtxSetCurrent(curContext);
                 if (resetCtxRet != RT_ERROR_NONE) {
-                    ACL_LOG_ERROR("set ctx failed, runtime result = %d, channelId = %u.", resetCtxRet, channelId);
+                    ACL_LOG_CALL_ERROR("set ctx failed, runtime result = %d, channelId = %u.", resetCtxRet, channelId);
                     return;
                 }
             }
 
             // check user callback func
             if (channelDesc->callback == nullptr) {
-                ACL_LOG_ERROR("call back func is null!");
+                ACL_LOG_INNER_ERROR("call back func is null!");
                 return;
             }
             // call user callback func
@@ -757,7 +809,7 @@ namespace acl {
                 getFrameWaitRet = rtNotifyWait(static_cast<rtNotify_t>(channelDesc->getFrameNotify),
                     channelDesc->getFrameStream);
                 if (getFrameWaitRet != RT_ERROR_NONE) {
-                    ACL_LOG_ERROR("wait for a notify to release frame stream failed, runtime result = %d",
+                    ACL_LOG_CALL_ERROR("wait for a notify to release frame stream failed, runtime result = %d",
                         getFrameWaitRet);
                     return ACL_GET_ERRCODE_RTS(getFrameWaitRet);
                 }
@@ -766,14 +818,15 @@ namespace acl {
                 getFrameWaitRet = rtStreamWaitEvent(channelDesc->getFrameStream,
                     static_cast<rtEvent_t>(channelDesc->getFrameNotify));
                 if (getFrameWaitRet != RT_ERROR_NONE) {
-                    ACL_LOG_ERROR("wait for a event to release frame stream failed, runtime result = %d",
+                    ACL_LOG_CALL_ERROR("wait for a event to release frame stream failed, runtime result = %d",
                         getFrameWaitRet);
                     return ACL_GET_ERRCODE_RTS(getFrameWaitRet);
                 }
                 getFrameWaitRet = rtEventReset(static_cast<rtEvent_t>(channelDesc->getFrameNotify),
                     channelDesc->getFrameStream);
                 if (getFrameWaitRet != RT_ERROR_NONE) {
-                    ACL_LOG_ERROR("reset a event to release frame stream failed, runtime result = %d", getFrameWaitRet);
+                    ACL_LOG_CALL_ERROR("reset a event to release frame stream failed, runtime result = %d",
+                        getFrameWaitRet);
                     return ACL_GET_ERRCODE_RTS(getFrameWaitRet);
                 }
             }
@@ -783,7 +836,8 @@ namespace acl {
                                                      static_cast<void *>(channelDesc),
                                                      channelDesc->getFrameStream, true);
             if (callbackRet != RT_ERROR_NONE) {
-                ACL_LOG_ERROR("launch callback to release frame stream failed, runtime result = %d", callbackRet);
+                ACL_LOG_CALL_ERROR("launch callback to release frame stream failed, runtime result = %d",
+                    callbackRet);
                 return ACL_GET_ERRCODE_RTS(callbackRet);
             }
 
@@ -791,7 +845,7 @@ namespace acl {
                 // launch release frame task to release frame stream
                 aclError releaseFrameRet = LaunchVdecReleaseFrameTask(channelDesc);
                 if (releaseFrameRet != ACL_SUCCESS) {
-                    ACL_LOG_ERROR("launch release frame task failed, result = %d", releaseFrameRet);
+                    ACL_LOG_INNER_ERROR("launch release frame task failed, result = %d", releaseFrameRet);
                     return releaseFrameRet;
                 }
             }
@@ -823,7 +877,7 @@ namespace acl {
 
             aclError checkRet = CheckAndCopyVdecInfoData(input, output, isSkipFlag);
             if (checkRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("check and copy stream desc or pic desc failed, result = %d", checkRet);
+                ACL_LOG_INNER_ERROR("check and copy stream desc or pic desc failed, result = %d", checkRet);
                 return checkRet;
             }
 
@@ -836,7 +890,7 @@ namespace acl {
             }
             aclError launchRet = LaunchTaskForSendStream(channelDesc, input, output, eos);
             if (launchRet != ACL_SUCCESS) {
-                ACL_LOG_ERROR("launch tasks for send stream failed, result = %d", launchRet);
+                ACL_LOG_INNER_ERROR("launch tasks for send stream failed, result = %d", launchRet);
                 return launchRet;
             }
 
@@ -845,7 +899,7 @@ namespace acl {
                 callbackInfoPtr = std::make_shared<aicpu::dvpp::VdecGetFrameCallbackInfo>(
                     input, output, userData, eos);
             } catch (std::bad_alloc &) {
-                ACL_LOG_ERROR("Make shared for get frame callback info failed.");
+                ACL_LOG_INNER_ERROR("Make shared for get frame callback info failed.");
                 return ACL_ERROR_BAD_ALLOC;
             }
 
@@ -876,7 +930,7 @@ namespace acl {
                         std::unique_lock<std::mutex> lock{channelDesc->mutexForCallbackMap};
                         channelDesc->callbackMap.erase(frameId);
                     }
-                    ACL_LOG_ERROR("launch tasks for get stream failed, result = %d", launchRet);
+                    ACL_LOG_INNER_ERROR("launch tasks for get stream failed, result = %d", launchRet);
                     return launchRet;
                 }
             }
@@ -884,7 +938,7 @@ namespace acl {
             // streamSynchronize vdec send frame stream
             rtError_t streamSynRet = rtStreamSynchronize(channelDesc->sendFrameStream);
             if (streamSynRet != RT_ERROR_NONE) {
-                ACL_LOG_ERROR("vdec fail to synchronize sendFrameStream, runtime result = %d", streamSynRet);
+                ACL_LOG_CALL_ERROR("vdec fail to synchronize sendFrameStream, runtime result = %d", streamSynRet);
                 {
                     std::unique_lock<std::mutex> lock{channelDesc->mutexForCallbackMap};
                     channelDesc->callbackMap.erase(frameId);

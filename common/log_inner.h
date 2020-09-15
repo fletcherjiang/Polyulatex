@@ -50,8 +50,13 @@ public:
     virtual ~AclErrorLogManager();
     static const std::string GetStagesHeader();
     static std::string FormatStr(const char *fmt, ...);
+#if !defined(ENABLE_DVPP_INTERFACE) || defined(RUN_TEST)
     static void ReportInputError(std::string errorCode, const std::vector<std::string> &key = {},
         const std::vector<std::string> &value = {});
+#else
+#endif
+    static void ReportInputErrorWithChar(const char *const errorCode, const char *argNames[],
+        const char *argVals[], size_t size);
     static void ReportInnerError(const char *fmt, ...);
     static void ReportCallError(const char *fmt, ...);
 };
@@ -183,6 +188,7 @@ inline bool IsInfoLogEnabled()
     } \
     while (0)
 
+#ifndef ENABLE_DVPP_INTERFACE
 #define ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(val) \
     do { \
     if ((val) == nullptr) { \
@@ -191,6 +197,18 @@ inline bool IsInfoLogEnabled()
         return ACL_ERROR_INVALID_PARAM; } \
     } \
     while (0)
+#else
+#define ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(val) \
+    do { \
+    if ((val) == nullptr) { \
+        ACL_LOG_ERROR("param [%s] must not be null.", #val); \
+        const char *argList[] = {"param"}; \
+        const char *argVal[] = {#val}; \
+        acl::AclErrorLogManager::ReportInputErrorWithChar("EH0002", argList, argVal, 1); \
+        return ACL_ERROR_INVALID_PARAM; } \
+    } \
+    while (0)
+#endif
 
 #define ACL_REQUIRES_NOT_NULL(val) \
     do { \
