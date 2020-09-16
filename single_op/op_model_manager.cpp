@@ -317,7 +317,7 @@ static void SetShapeRange(int tensorNum, const aclTensorDesc *const tensorDesc[]
             } else {
                 std::vector<std::pair<int64_t, int64_t>> range;
                 for (size_t dimIndex = 0; dimIndex < tensorDesc[tensorIndex]->dims.size(); ++dimIndex) {
-                    range.emplace_back(make_pair(atensorDesc[tensorIndex]->dims[dimIndex],
+                    range.emplace_back(make_pair(tensorDesc[tensorIndex]->dims[dimIndex],
                         tensorDesc[tensorIndex]->dims[dimIndex]));
                 }
                 const_cast<aclTensorDesc *>(tensorDesc[tensorIndex])->shapeRange = range;
