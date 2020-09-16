@@ -305,50 +305,39 @@ std::string OpModelManager::TensorStatusToStr(const std::vector<aclTensorShapeSt
     return tensorShapeStatusDesc;
 }
 
+static void SetShapeRange(int tensorNum, const aclTensorDesc *const tensorDesc[],
+    std::vector<std::pair<int64_t, int64_t>> &shapeRanges)
+{
+    for (int tensorIndex = 0; tensorIndex < tensorNum; ++tensorIndex) {
+        // Complete the shape range for static tensor
+        if (tensorDesc[tensorIndex]->shapeRange.empty()) {
+            if ((tensorDesc[tensorIndex]->dims.size() > 0) &&
+                (tensorDesc[tensorIndex]->dims[0] == UNKNOW_RANK)) {
+                ACL_LOG_INFO("the %d tensor dim is unknownrank", tensorIndex);
+            } else {
+                std::vector<std::pair<int64_t, int64_t>> range;
+                for (size_t dimIndex = 0; dimIndex < tensorDesc[tensorIndex]->dims.size(); ++dimIndex) {
+                    range.emplace_back(make_pair(atensorDesc[tensorIndex]->dims[dimIndex],
+                        tensorDesc[tensorIndex]->dims[dimIndex]));
+                }
+                const_cast<aclTensorDesc *>(tensorDesc[tensorIndex])->shapeRange = range;
+            }
+        }
+        // Save shape range for tensors
+        for (size_t rangeIndex = 0; rangeIndex < tensorDesc[tensorIndex]->shapeRange.size(); ++rangeIndex) {
+            shapeRanges.emplace_back(tensorDesc[tensorIndex]->shapeRange[rangeIndex]);
+        }
+    }
+}
+
 void OpModelManager::SetTensorShapeRange(const AclOp &aclOp, const std::vector<aclTensorShapeStatus> &tensorShapeStatus)
 {
     std::vector<std::pair<int64_t, int64_t>> shapeRanges;
-    for (int tensorIndex = 0; tensorIndex < aclOp.numInputs; ++tensorIndex) {
-        // Complete the shape range for static tensor
-        if (aclOp.inputDesc[tensorIndex]->shapeRange.empty()) {
-            if ((aclOp.inputDesc[tensorIndex]->dims.size() > 0) &&
-                (aclOp.inputDesc[tensorIndex]->dims[0] == UNKNOW_RANK)) {
-                ACL_LOG_INFO("the %d inputTensor dim is unknownrank", tensorIndex);
-            } else {
-                std::vector<std::pair<int64_t, int64_t>> range;
-                for (size_t dimIndex = 0; dimIndex < aclOp.inputDesc[tensorIndex]->dims.size(); ++dimIndex) {
-                    range.emplace_back(make_pair(aclOp.inputDesc[tensorIndex]->dims[dimIndex],
-                        aclOp.inputDesc[tensorIndex]->dims[dimIndex]));
-                }
-                const_cast<aclTensorDesc *>(aclOp.inputDesc[tensorIndex])->shapeRange = range;
-            }
-        }
-        // Save shape range for input tensors
-        for (size_t rangeIndex = 0; rangeIndex < aclOp.inputDesc[tensorIndex]->shapeRange.size(); ++rangeIndex) {
-            shapeRanges.emplace_back(aclOp.inputDesc[tensorIndex]->shapeRange[rangeIndex]);
-        }
-    }
+    ACL_LOG_INFO("set input shape range");
+    SetShapeRange(aclOp.numInputs, aclOp.inputDesc, shapeRanges);
+    ACL_LOG_INFO("set output shape range");
+    SetShapeRange(aclOp.numOutputs, aclOp.outputDesc, shapeRanges);
 
-    for (int tensorIndex = 0; tensorIndex < aclOp.numOutputs; ++tensorIndex) {
-        // Complete the shape range for static tensor
-        if (aclOp.outputDesc[tensorIndex]->shapeRange.empty()) {
-            if ((aclOp.outputDesc[tensorIndex]->dims.size() > 0) &&
-                (aclOp.outputDesc[tensorIndex]->dims[0] == UNKNOW_RANK)) {
-                ACL_LOG_INFO("the %d outputTensor dim is unknownrank", tensorIndex);
-            } else {
-                std::vector<std::pair<int64_t, int64_t>> range;
-                for (size_t dimIndex = 0; dimIndex < aclOp.outputDesc[tensorIndex]->dims.size(); ++dimIndex) {
-                    range.emplace_back(make_pair(aclOp.outputDesc[tensorIndex]->dims[dimIndex],
-                        aclOp.outputDesc[tensorIndex]->dims[dimIndex]));
-                }
-                const_cast<aclTensorDesc *>(aclOp.outputDesc[tensorIndex])->shapeRange = range;
-            }
-        }
-        // Save shape range for output tensors
-        for (size_t rangeIndex = 0; rangeIndex < aclOp.outputDesc[tensorIndex]->shapeRange.size(); ++rangeIndex) {
-            shapeRanges.emplace_back(aclOp.outputDesc[tensorIndex]->shapeRange[rangeIndex]);
-        }
-    }
     std::string tensorShapeStatusDesc = TensorStatusToStr(tensorShapeStatus);
     ACL_LOG_INFO("SetTensorShapeRange tensorShapeStatusDesc is %s, shapeRanges size is %zu",
         tensorShapeStatusDesc.c_str(), shapeRanges.size());
