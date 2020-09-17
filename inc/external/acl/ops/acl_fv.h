@@ -278,12 +278,11 @@ ACL_FUNC_VISIBILITY aclError aclfvRelease();
  *
  * @param type [IN]          repo add type
  * @param featureInfo [IN]   add feature information
- * @param stream [IN]        stream of task execute
  *
  * @retval ACL_SUCCESS The function is successfully executed.
  * @retval OtherValues Failure.
  */
-ACL_FUNC_VISIBILITY aclError aclfvRepoAdd(aclfvSearchType type, aclfvFeatureInfo *featureInfo, aclrtStream stream);
+ACL_FUNC_VISIBILITY aclError aclfvRepoAdd(aclfvSearchType type, aclfvFeatureInfo *featureInfo);
 
 /**
  * @ingroup AscendCL
@@ -291,36 +290,33 @@ ACL_FUNC_VISIBILITY aclError aclfvRepoAdd(aclfvSearchType type, aclfvFeatureInfo
  *
  * @param type [IN]       repo delete type
  * @param repoRange [IN]  repo range information
- * @param stream [IN]     stream of task execute
  *
  * @retval ACL_SUCCESS The function is successfully executed.
  * @retval OtherValues Failure.
  */
-ACL_FUNC_VISIBILITY aclError aclfvRepoDel(aclfvSearchType type, aclfvRepoRange *repoRange, aclrtStream stream);
+ACL_FUNC_VISIBILITY aclError aclfvRepoDel(aclfvSearchType type, aclfvRepoRange *repoRange);
 
 /**
  * @ingroup AscendCL
  * @brief fv accurate del.
  *
  * @param featureInfo [IN]   accurate delete feature information
- * @param stream [IN]        stream of task execute
  *
  * @retval ACL_SUCCESS The function is successfully executed.
  * @retval OtherValues Failure.
  */
-ACL_FUNC_VISIBILITY aclError aclfvDel(aclfvFeatureInfo *featureInfo, aclrtStream stream);
+ACL_FUNC_VISIBILITY aclError aclfvDel(aclfvFeatureInfo *featureInfo);
 
 /**
  * @ingroup AscendCL
  * @brief fv accurate modify.
  *
  * @param featureInfo [IN]  accurate modify feature information
- * @param stream [IN]  stream of task execute
  *
  * @retval ACL_SUCCESS The function is successfully executed.
  * @retval OtherValues Failure.
  */
-ACL_FUNC_VISIBILITY aclError aclfvModify(aclfvFeatureInfo *featureInfo, aclrtStream stream);
+ACL_FUNC_VISIBILITY aclError aclfvModify(aclfvFeatureInfo *featureInfo);
 
 /**
  * @ingroup AscendCL
@@ -329,13 +325,12 @@ ACL_FUNC_VISIBILITY aclError aclfvModify(aclfvFeatureInfo *featureInfo, aclrtStr
  * @param type [IN]  search type
  * @param searchInput [IN]    search input
  * @param searchRst [OUT]     search result
- * @param stream [IN]  stream of task execute
  *
  * @retval ACL_SUCCESS The function is successfully executed.
  * @retval OtherValues Failure.
  */
 ACL_FUNC_VISIBILITY aclError aclfvSearch(aclfvSearchType type, aclfvSearchInput *searchInput,
-                                         aclfvSearchResult *searchRst, aclrtStream stream);
+                                         aclfvSearchResult *searchRst);
 
 #ifdef __cplusplus
 }

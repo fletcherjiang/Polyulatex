@@ -15,6 +15,7 @@
 
 #include "acl/acl_rt.h"
 #include "common/log_inner.h"
+#include "common/error_codes_inner.h"
 #include "retr_internal.h"
 
 namespace acl {
@@ -172,14 +173,21 @@ aclError AclFvAccurate::AccurateDelOrModify(aclAccurateType typeAccurate, aclfvF
  * execute retr accurate Del, including check parameters launch task and check result
  * @return ACL_SUCCESS:success other:failed
  */
-aclError AclFvAccurate::Delete(aclfvFeatureInfo *featureInfo, aclrtStream stream)
+aclError AclFvAccurate::Delete(aclfvFeatureInfo *featureInfo)
 {
     ACL_LOG_INFO("start to execute aclfvDel.");
+    rtStream_t stream = nullptr;
+    rtError_t rtErr = rtStreamCreate(&stream, RT_STREAM_PRIORITY_DEFAULT);
+    if (rtErr != RT_ERROR_NONE) {
+        ACL_LOG_ERROR("create stream failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        return ACL_GET_ERRCODE_RTS(rtErr);
+    }
     aclError ret = AccurateDelOrModify(acl::retr::ACCURATE_DELETE, featureInfo, stream);
     if (ret != ACL_SUCCESS) {
         ACL_LOG_ERROR("execute aclfvDel failed, result = %d.", ret);
         return ACL_ERROR_FAILURE;
     }
+    (void)rtStreamDestroy(stream);
     ACL_LOG_INFO("execute aclfvDel success.");
     return ACL_SUCCESS;
 }
@@ -188,14 +196,21 @@ aclError AclFvAccurate::Delete(aclfvFeatureInfo *featureInfo, aclrtStream stream
  * execute retr accurate modify, including check parameters launch task and check result
  * @return ACL_SUCCESS:success other:failed
  */
-aclError AclFvAccurate::Modify(aclfvFeatureInfo *featureInfo, aclrtStream stream)
+aclError AclFvAccurate::Modify(aclfvFeatureInfo *featureInfo)
 {
     ACL_LOG_INFO("start to execute aclfvModify.");
+    rtStream_t stream = nullptr;
+    rtError_t rtErr = rtStreamCreate(&stream, RT_STREAM_PRIORITY_DEFAULT);
+    if (rtErr != RT_ERROR_NONE) {
+        ACL_LOG_ERROR("create stream failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        return ACL_GET_ERRCODE_RTS(rtErr);
+    }
     aclError ret = AccurateDelOrModify(acl::retr::ACCURATE_MODFILY, featureInfo, stream);
     if (ret != ACL_SUCCESS) {
         ACL_LOG_ERROR("execute aclfvModify failed, result = %d.", ret);
         return ACL_ERROR_FAILURE;
     }
+    (void)rtStreamDestroy(stream);
     ACL_LOG_INFO("execute aclfvModify success.");
     return ACL_SUCCESS;
 }

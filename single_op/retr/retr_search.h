@@ -32,7 +32,7 @@ public:
      * @return ACL_SUCCESS:success other:failed
      */
     aclError Search(
-        aclfvSearchType type, aclfvSearchInput *searchInput, aclfvSearchResult *searchRst, aclrtStream stream);
+        aclfvSearchType type, aclfvSearchInput *searchInput, aclfvSearchResult *searchRst);
 
 private:
     /**
