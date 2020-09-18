@@ -15,6 +15,7 @@
 
 #include "acl/acl_rt.h"
 #include "common/log_inner.h"
+#include "common/error_codes_inner.h"
 #include "retr_internal.h"
 
 namespace acl {
@@ -239,9 +240,15 @@ aclError AclFvRepo::AddExecute(aclfvSearchType type, aclfvFeatureInfo *featureIn
  * execute retr repo add task, including check parameters launch task and check result
  * @return ACL_SUCCESS:success other:failed
  */
-aclError AclFvRepo::Add(aclfvSearchType type, aclfvFeatureInfo *featureInfo, aclrtStream stream)
+aclError AclFvRepo::Add(aclfvSearchType type, aclfvFeatureInfo *featureInfo)
 {
     ACL_LOG_INFO("start to execute aclfvRepoAdd.");
+    rtStream_t stream = nullptr;
+    rtError_t rtErr = rtStreamCreate(&stream, RT_STREAM_PRIORITY_DEFAULT);
+    if (rtErr != RT_ERROR_NONE) {
+        ACL_LOG_ERROR("create stream failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        return ACL_GET_ERRCODE_RTS(rtErr);
+    }
     aclError ret = AddCheck(featureInfo, stream);
     if (ret != ACL_SUCCESS) {
         return ret;
@@ -276,7 +283,7 @@ aclError AclFvRepo::Add(aclfvSearchType type, aclfvFeatureInfo *featureInfo, acl
         (void)rtEventDestroy(static_cast<rtEvent_t>(notify_));
         return ACL_ERROR_FAILURE;
     }
-
+    (void)rtStreamDestroy(stream);
     (void)rtEventDestroy(static_cast<rtEvent_t>(notify_));
     ACL_LOG_INFO("execute aclfvRepoAdd success.");
     return ACL_SUCCESS;
@@ -359,9 +366,15 @@ aclError AclFvRepo::DelExecute(aclfvRepoRange *repoRange, aclrtStream stream, co
  * execute retr repo del task, including check parameters launch task and check result
  * @return ACL_SUCCESS:success other:failed
  */
-aclError AclFvRepo::Del(aclfvSearchType type, aclfvRepoRange *repoRange, aclrtStream stream)
+aclError AclFvRepo::Del(aclfvSearchType type, aclfvRepoRange *repoRange)
 {
     ACL_LOG_INFO("start to execute aclfvRepoDel.");
+    rtStream_t stream = nullptr;
+    rtError_t rtErr = rtStreamCreate(&stream, RT_STREAM_PRIORITY_DEFAULT);
+    if (rtErr != RT_ERROR_NONE) {
+        ACL_LOG_ERROR("create stream failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        return ACL_GET_ERRCODE_RTS(rtErr);
+    }
     aclError ret = DelCheck(repoRange, stream);
     if (ret != ACL_SUCCESS) {
         return ret;
@@ -394,7 +407,7 @@ aclError AclFvRepo::Del(aclfvSearchType type, aclfvRepoRange *repoRange, aclrtSt
         (void)rtEventDestroy(static_cast<rtEvent_t>(notify_));
         return ACL_ERROR_FAILURE;
     }
-
+    (void)rtStreamDestroy(stream);
     (void)rtEventDestroy(static_cast<rtEvent_t>(notify_));
     ACL_LOG_INFO("execute aclfvRepoDel success.");
     return ACL_SUCCESS;

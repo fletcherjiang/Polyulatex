@@ -15,6 +15,7 @@
 
 #include "acl/acl_rt.h"
 #include "common/log_inner.h"
+#include "common/error_codes_inner.h"
 #include "retr_internal.h"
 
 namespace acl {
@@ -76,7 +77,6 @@ aclError AclFvSearch::SearchCheck(
             searchInput->searchInput.topK);
         return ACL_ERROR_INVALID_PARAM;
     }
-
     type_ = type;
     stream_ = stream;
     return ACL_SUCCESS;
@@ -335,9 +335,16 @@ aclError AclFvSearch::GetSearchResult(aclfvSearchResult *searchRst)
  * @return ACL_SUCCESS:success other:failed
  */
 aclError AclFvSearch::Search(
-    aclfvSearchType type, aclfvSearchInput *searchInput, aclfvSearchResult *searchRst, aclrtStream stream)
+    aclfvSearchType type, aclfvSearchInput *searchInput, aclfvSearchResult *searchRst)
 {
     ACL_LOG_INFO("Search start.");
+    rtStream_t stream = nullptr;
+    rtError_t rtErr = rtStreamCreate(&stream, RT_STREAM_PRIORITY_DEFAULT);
+    if (rtErr != RT_ERROR_NONE) {
+        ACL_LOG_ERROR("create stream failed, runtime result = %d", static_cast<int32_t>(rtErr));
+        return ACL_GET_ERRCODE_RTS(rtErr);
+    }
+    ACL_LOG_INFO("rtStreamCreate success");
     aclError ret = SearchCheck(type, searchInput, searchRst, stream);
     if (ret != ACL_SUCCESS) {
         return ret;
@@ -382,7 +389,7 @@ aclError AclFvSearch::Search(
         return ret;
     }
     ACL_LOG_INFO("aclGetSearchResult success.");
-
+    (void)rtStreamDestroy(stream);
     // destroy notif
     (void)rtEventDestroy(static_cast<rtEvent_t>(notify_));
     ACL_LOG_INFO("Search success.");

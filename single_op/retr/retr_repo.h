@@ -27,19 +27,17 @@ public:
      * execute retr repo add task, including check parameters launch task and check result
      * @param type: add type
      * @param featureInfo: add feature information
-     * @param stream: stream of task execute
      * @return ACL_SUCCESS:success other:failed
      */
-    aclError Add(aclfvSearchType type, aclfvFeatureInfo *featureInfo, aclrtStream stream);
+    aclError Add(aclfvSearchType type, aclfvFeatureInfo *featureInfo);
 
     /* *
      * execute retr  repo del task, including check parameters launch task and check result
      * @param type: delete type
      * @param repoRange: repo range information
-     * @param stream: stream of task execute
      * @return ACL_SUCCESS:success other:failed
      */
-    aclError Del(aclfvSearchType type, aclfvRepoRange *repoRange, aclrtStream stream);
+    aclError Del(aclfvSearchType type, aclfvRepoRange *repoRange);
 
 private:
     /* *
@@ -124,7 +122,6 @@ private:
      * @return ACL_SUCCESS:success other:failed
      */
     aclError DelExecute(aclfvRepoRange *repoRange, aclrtStream stream, const char *args, uint32_t argsSize);
-
 private:
     rtNotify_t notify_; // use to wait for task end
     uint32_t notifyId_;

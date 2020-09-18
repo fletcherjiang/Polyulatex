@@ -29,30 +29,30 @@ aclError aclfvRelease()
     return acl::retr::AclFvRelease().Release();
 }
 
-aclError aclfvRepoAdd(aclfvSearchType type, aclfvFeatureInfo *featureInfo, aclrtStream stream)
+aclError aclfvRepoAdd(aclfvSearchType type, aclfvFeatureInfo *featureInfo)
 {
-    return acl::retr::AclFvRepo().Add(type, featureInfo, stream);
+    return acl::retr::AclFvRepo().Add(type, featureInfo);
 }
 
-aclError aclfvRepoDel(aclfvSearchType type, aclfvRepoRange *repoRange, aclrtStream stream)
+aclError aclfvRepoDel(aclfvSearchType type, aclfvRepoRange *repoRange)
 {
-    return acl::retr::AclFvRepo().Del(type, repoRange, stream);
+    return acl::retr::AclFvRepo().Del(type, repoRange);
 }
 
-aclError aclfvDel(aclfvFeatureInfo *featureInfo, aclrtStream stream)
+aclError aclfvDel(aclfvFeatureInfo *featureInfo)
 {
-    return acl::retr::AclFvAccurate().Delete(featureInfo, stream);
+    return acl::retr::AclFvAccurate().Delete(featureInfo);
 }
 
-aclError aclfvModify(aclfvFeatureInfo *featureInfo, aclrtStream stream)
+aclError aclfvModify(aclfvFeatureInfo *featureInfo)
 {
-    return acl::retr::AclFvAccurate().Modify(featureInfo, stream);
+    return acl::retr::AclFvAccurate().Modify(featureInfo);
 }
 
 aclError aclfvSearch(
-    aclfvSearchType type, aclfvSearchInput *searchInput, aclfvSearchResult *searchRst, aclrtStream stream)
+    aclfvSearchType type, aclfvSearchInput *searchInput, aclfvSearchResult *searchRst)
 {
-    return acl::retr::AclFvSearch().Search(type, searchInput, searchRst, stream);
+    return acl::retr::AclFvSearch().Search(type, searchInput, searchRst);
 }
 
 #ifdef __cplusplus

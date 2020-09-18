@@ -32,18 +32,16 @@ public:
     /* *
      * execute retr accurate Del, including check parameters launch task and check result
      * @param featureInfo: accurate delete feature information
-     * @param stream: stream of task execute
      * @return ACL_SUCCESS:success other:failed
      */
-    aclError Delete(aclfvFeatureInfo *featureInfo, aclrtStream stream);
+    aclError Delete(aclfvFeatureInfo *featureInfo);
 
     /* *
      * execute retr accurate Modify, including check parameters launch task and check result
      * @param featureInfo: accurate modify feature information
-     * @param stream: stream of task execute
      * @return ACL_SUCCESS:success other:failed
      */
-    aclError Modify(aclfvFeatureInfo *featureInfo, aclrtStream stream);
+    aclError Modify(aclfvFeatureInfo *featureInfo);
 
 private:
     /* *
