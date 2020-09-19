@@ -49,6 +49,7 @@ aclError aclopTransData(aclTensorDesc *srcDesc,
                         aclDataBuffer *dstBuffer,
                         aclrtStream stream)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_EXEC, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(srcDesc);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(srcBuffer);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dstDesc);
@@ -80,6 +81,7 @@ aclError aclopCreateHandleForTransData(aclTensorDesc *srcDesc,
                                        aclTensorDesc *dstDesc,
                                        aclopHandle **handle)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_CREATE, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(srcDesc);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dstDesc);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(handle);

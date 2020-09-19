@@ -223,6 +223,7 @@ aclTensorDesc *aclCreateTensorDesc(aclDataType dataType,
                                    const int64_t *dims,
                                    aclFormat format)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_CREATE, acl::ACL_STAGE_DEFAULT);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_TENSOR_DESC);
     if (numDims < 0) {
         ACL_LOG_ERROR("[Check][NumDims]numDims[%d] is smaller than 0", numDims);
@@ -248,6 +249,7 @@ aclTensorDesc *aclCreateTensorDesc(aclDataType dataType,
 
 void aclDestroyTensorDesc(const aclTensorDesc *desc)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_DESTROY, acl::ACL_STAGE_DEFAULT);
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_TENSOR_DESC);
     ACL_DELETE_ARRAY_AND_SET_NULL(desc);
     ACL_ADD_RELEASE_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_TENSOR_DESC);
@@ -255,6 +257,7 @@ void aclDestroyTensorDesc(const aclTensorDesc *desc)
 
 aclError aclSetTensorShapeRange(aclTensorDesc* desc, size_t dimsCout, int64_t dimsRange[][ACL_TENSOR_SHAPE_RANGE_NUM])
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(desc);
     // dimsCout should be equal to length of array dimsRange
     desc->shapeRange.clear();
@@ -266,6 +269,7 @@ aclError aclSetTensorShapeRange(aclTensorDesc* desc, size_t dimsCout, int64_t di
 
 aclDataType aclGetTensorDescType(const aclTensorDesc *desc)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if (desc == nullptr) {
         ACL_LOG_ERROR("[Check][Desc]desc is null");
         REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG, std::vector<std::string>({"param"}),
@@ -278,6 +282,7 @@ aclDataType aclGetTensorDescType(const aclTensorDesc *desc)
 
 aclFormat aclGetTensorDescFormat(const aclTensorDesc *desc)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if (desc == nullptr) {
         ACL_LOG_ERROR("[Check][Desc]desc is null");
         REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG, std::vector<std::string>({"param"}),
@@ -290,6 +295,7 @@ aclFormat aclGetTensorDescFormat(const aclTensorDesc *desc)
 
 size_t aclGetTensorDescSize(const aclTensorDesc *desc)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if (desc == nullptr) {
         ACL_LOG_ERROR("[Check][Desc]desc is null");
         REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG, std::vector<std::string>({"param"}),
@@ -305,6 +311,7 @@ size_t aclGetTensorDescSize(const aclTensorDesc *desc)
 
 size_t aclGetTensorDescElementCount(const aclTensorDesc *desc)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if (desc == nullptr) {
         ACL_LOG_ERROR("[Check][Desc]desc is null");
         REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG, std::vector<std::string>({"param"}),
@@ -333,6 +340,7 @@ size_t aclGetTensorDescElementCount(const aclTensorDesc *desc)
 
 size_t aclGetTensorDescNumDims(const aclTensorDesc *desc)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if (desc == nullptr) {
         ACL_LOG_ERROR("[Check][Desc]desc is null");
         REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG, std::vector<std::string>({"param"}),
@@ -350,6 +358,7 @@ aclError aclGetTensorDescDimRange(const aclTensorDesc* desc,
                                   size_t dimRangeNum,
                                   int64_t *dimRange)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(desc);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dimRange);
     if (index >= desc->shapeRange.size()) {
@@ -379,6 +388,7 @@ aclError aclGetTensorDescDimRange(const aclTensorDesc* desc,
 
 int64_t aclGetTensorDescDim(const aclTensorDesc *desc, size_t index)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if (desc == nullptr) {
         ACL_LOG_ERROR("[Check][Desc]desc is null");
         REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG, std::vector<std::string>({"param"}),
@@ -402,6 +412,7 @@ int64_t aclGetTensorDescDim(const aclTensorDesc *desc, size_t index)
 
 aclError aclGetTensorDescDimV2(const aclTensorDesc *desc, size_t index, int64_t *dimSize)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if (desc == nullptr) {
         ACL_LOG_ERROR("[Check][Desc]desc is null");
         REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG,
@@ -426,6 +437,7 @@ aclError aclGetTensorDescDimV2(const aclTensorDesc *desc, size_t index, int64_t 
 
 aclDataBuffer *aclCreateDataBuffer(void *data, size_t size)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_CREATE, acl::ACL_STAGE_DEFAULT);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_DATA_BUFFER);
     ACL_ADD_APPLY_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_DATA_BUFFER);
     return new(std::nothrow) aclDataBuffer(data, size);
@@ -433,6 +445,7 @@ aclDataBuffer *aclCreateDataBuffer(void *data, size_t size)
 
 aclError aclDestroyDataBuffer(const aclDataBuffer *dataBuffer)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_DESTROY, acl::ACL_STAGE_DEFAULT);
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_DATA_BUFFER);
     if (dataBuffer == nullptr) {
         return ACL_ERROR_INVALID_PARAM;
@@ -445,6 +458,7 @@ aclError aclDestroyDataBuffer(const aclDataBuffer *dataBuffer)
 
 aclError aclUpdateDataBuffer(aclDataBuffer *dataBuffer, void *data, size_t size)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     if (dataBuffer == nullptr) {
         ACL_LOG_ERROR("[Check][DataBuffer]invalid input pointer of dataBuffer, please use aclCreateDataBuffer "
             "interface to create.");
@@ -460,6 +474,7 @@ aclError aclUpdateDataBuffer(aclDataBuffer *dataBuffer, void *data, size_t size)
 
 void *aclGetDataBufferAddr(const aclDataBuffer *dataBuffer)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if (dataBuffer == nullptr) {
         return nullptr;
     }
@@ -469,6 +484,7 @@ void *aclGetDataBufferAddr(const aclDataBuffer *dataBuffer)
 
 uint32_t aclGetDataBufferSize(const aclDataBuffer *dataBuffer)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if (dataBuffer == nullptr) {
         return 0;
     }
@@ -478,6 +494,7 @@ uint32_t aclGetDataBufferSize(const aclDataBuffer *dataBuffer)
 
 size_t aclGetDataBufferSizeV2(const aclDataBuffer *dataBuffer)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if (dataBuffer == nullptr) {
         return 0;
     }
@@ -487,6 +504,7 @@ size_t aclGetDataBufferSizeV2(const aclDataBuffer *dataBuffer)
 
 void aclSetTensorDescName(aclTensorDesc *desc, const char *name)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     if (desc == nullptr) {
         ACL_LOG_ERROR("[Check][Desc]desc is null");
         REPORT_INPUT_ERROR(acl::INVALID_NULL_POINTER_MSG, std::vector<std::string>({"param"}),
@@ -504,6 +522,7 @@ void aclSetTensorDescName(aclTensorDesc *desc, const char *name)
 
 const char *aclGetTensorDescName(aclTensorDesc *desc)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if (desc == nullptr) {
         return "";
     }
@@ -513,6 +532,7 @@ const char *aclGetTensorDescName(aclTensorDesc *desc)
 
 aclError aclSetTensorStorageFormat(aclTensorDesc *desc, aclFormat format)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     if (desc != nullptr) {
         desc->storageFormat = format;
     }
@@ -522,6 +542,7 @@ aclError aclSetTensorStorageFormat(aclTensorDesc *desc, aclFormat format)
 
 aclError aclSetTensorStorageShape(aclTensorDesc *desc, int numDims, const int64_t *dims)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(desc);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dims);
 
@@ -535,6 +556,7 @@ aclError aclSetTensorStorageShape(aclTensorDesc *desc, int numDims, const int64_
 
 aclError aclSetTensorFormat(aclTensorDesc *desc, aclFormat format)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     if (desc != nullptr) {
         desc->storageFormat = format;
     }
@@ -544,6 +566,7 @@ aclError aclSetTensorFormat(aclTensorDesc *desc, aclFormat format)
 
 aclError aclSetTensorShape(aclTensorDesc *desc, int numDims, const int64_t *dims)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(desc);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dims);
 
@@ -557,6 +580,7 @@ aclError aclSetTensorShape(aclTensorDesc *desc, int numDims, const int64_t *dims
 
 aclError aclSetTensorOriginFormat(aclTensorDesc *desc, aclFormat format)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     if (desc != nullptr) {
         desc->format = format;
     }
@@ -566,6 +590,7 @@ aclError aclSetTensorOriginFormat(aclTensorDesc *desc, aclFormat format)
 
 aclError aclSetTensorOriginShape(aclTensorDesc *desc, int numDims, const int64_t *dims)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(desc);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dims);
 
@@ -579,6 +604,7 @@ aclError aclSetTensorOriginShape(aclTensorDesc *desc, int numDims, const int64_t
 
 aclTensorDesc *aclGetTensorDescByIndex(aclTensorDesc *desc, size_t index)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_RET_NULL_INPUT_REPORT(desc);
 
     return (desc + index);
@@ -586,12 +612,14 @@ aclTensorDesc *aclGetTensorDescByIndex(aclTensorDesc *desc, size_t index)
 
 void *aclGetTensorDescAddress(const aclTensorDesc *desc)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_RET_NULL_INPUT_REPORT(desc);
     return desc->address;
 }
 
 aclError aclSetTensorDynamicInput(aclTensorDesc *desc, const char *dynamicInputName)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(desc);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dynamicInputName);
 
@@ -601,6 +629,7 @@ aclError aclSetTensorDynamicInput(aclTensorDesc *desc, const char *dynamicInputN
 
 aclError aclSetTensorConst(aclTensorDesc *desc, void *dataBuffer, size_t length)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclSetTensorConst");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(desc);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataBuffer);
@@ -629,6 +658,7 @@ aclError aclSetTensorConst(aclTensorDesc *desc, void *dataBuffer, size_t length)
 
 aclError aclSetTensorPlaceMent(aclTensorDesc *desc, aclMemType memType)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclSetTensorPlaceMent, memType is %d", static_cast<int32_t>(memType));
     ACL_REQUIRES_NOT_NULL(desc);
     desc->memtype = memType;

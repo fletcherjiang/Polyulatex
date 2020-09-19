@@ -202,6 +202,7 @@ static aclError SetIODims(const ge::InputOutputDims oriDims, aclmdlIODims &dstDi
 
 aclmdlAIPP *aclmdlCreateAIPP(uint64_t batchSize)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_CREATE, acl::ACL_STAGE_DEFAULT);
     aclmdlAIPP *aippParmsSet = nullptr;
     try {
         ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_AIPP);
@@ -247,8 +248,9 @@ aclmdlAIPP *aclmdlCreateAIPP(uint64_t batchSize)
 
 aclError aclmdlDestroyAIPP(const aclmdlAIPP *aippParmsSet)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_DESTROY, acl::ACL_STAGE_DEFAULT);
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_AIPP);
-    ACL_LOG_INFO("start to execute aclmdlDestroyAIPP");
+    ACL_LOG_INFO("start to execute aclmdlDestroyAIPP.");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
     ACL_DELETE_AND_SET_NULL(aippParmsSet);
     ACL_ADD_RELEASE_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_AIPP);
@@ -258,6 +260,7 @@ aclError aclmdlDestroyAIPP(const aclmdlAIPP *aippParmsSet)
 aclError aclmdlSetAIPPInputFormat(aclmdlAIPP *aippParmsSet, aclAippInputFormat inputFormat)
 {
     ACL_LOG_INFO("start to execute aclmdlSetAIPPInputFormat");
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
     static std::map<aclAippInputFormat, CceAippInputFormat> inputFormatMap = {
         {ACL_YUV420SP_U8, CCE_YUV420SP_U8},
@@ -293,9 +296,9 @@ aclError aclmdlSetAIPPCscParams(aclmdlAIPP *aippParmsSet, int8_t cscSwitch,
                                 uint8_t cscOutputBiasR0, uint8_t cscOutputBiasR1, uint8_t cscOutputBiasR2,
                                 uint8_t cscInputBiasR0, uint8_t cscInputBiasR1, uint8_t cscInputBiasR2)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlSetAIPPCscParams");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
-
     ACL_CHECK_RANGE_INT(cscSwitch, AIPP_SWITCH_OFF, AIPP_SWITCH_ON);
     aippParmsSet->aippParms.cscSwitch = cscSwitch;
     if (cscSwitch == 0) {
@@ -341,6 +344,7 @@ aclError aclmdlSetAIPPCscParams(aclmdlAIPP *aippParmsSet, int8_t cscSwitch,
 
 aclError aclmdlSetAIPPRbuvSwapSwitch(aclmdlAIPP *aippParmsSet, int8_t rbuvSwapSwitch)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlSetAIPPRbuvSwapSwitch");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
     ACL_CHECK_RANGE_INT(rbuvSwapSwitch, AIPP_SWITCH_OFF, AIPP_SWITCH_ON);
@@ -351,6 +355,7 @@ aclError aclmdlSetAIPPRbuvSwapSwitch(aclmdlAIPP *aippParmsSet, int8_t rbuvSwapSw
 
 aclError aclmdlSetAIPPAxSwapSwitch(aclmdlAIPP *aippParmsSet, int8_t axSwapSwitch)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlSetAIPPAxSwapSwitch");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
     ACL_CHECK_RANGE_INT(axSwapSwitch, AIPP_SWITCH_OFF, AIPP_SWITCH_ON);
@@ -360,13 +365,14 @@ aclError aclmdlSetAIPPAxSwapSwitch(aclmdlAIPP *aippParmsSet, int8_t axSwapSwitch
 
 aclError aclmdlSetAIPPSrcImageSize(aclmdlAIPP *aippParmsSet, int32_t srcImageSizeW, int32_t srcImageSizeH)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlSetAIPPSrcImageSize");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
     ACL_CHECK_RANGE_INT(srcImageSizeW, IMAGE_SIZE_MIN + 1, IMAGE_SIZE_MAX);
     ACL_CHECK_RANGE_INT(srcImageSizeH, IMAGE_SIZE_MIN, IMAGE_SIZE_MAX);
     aippParmsSet->aippParms.srcImageSizeW = srcImageSizeW;
     aippParmsSet->aippParms.srcImageSizeH = srcImageSizeH;
-    ACL_LOG_INFO("successfully execute aclmdlSetAIPPSrcImageSize");
+    ACL_LOG_INFO("successfully execute aclmdlSetAIPPSrcImageSize.");
     return ACL_SUCCESS;
 }
 
@@ -375,6 +381,7 @@ aclError aclmdlSetAIPPScfParams(aclmdlAIPP *aippParmsSet, int8_t scfSwitch,
                                 int32_t scfOutputSizeW, int32_t scfOutputSizeH,
                                 uint64_t batchIndex)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlSetAIPPScfParams");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
     uint64_t aippBatchParaSize = static_cast<uint64_t>(aippParmsSet->aippBatchPara.size());
@@ -411,6 +418,7 @@ aclError aclmdlSetAIPPCropParams(aclmdlAIPP *aippParmsSet, int8_t cropSwitch,
                                  int32_t cropSizeW, int32_t cropSizeH,
                                  uint64_t batchIndex)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlSetAIPPCropParams");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
     uint64_t aippBatchParaSize = static_cast<uint64_t>(aippParmsSet->aippBatchPara.size());
@@ -447,6 +455,7 @@ aclError aclmdlSetAIPPPaddingParams(aclmdlAIPP *aippParmsSet, int8_t paddingSwit
                                     int32_t paddingSizeLeft, int32_t paddingSizeRight,
                                     uint64_t batchIndex)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlSetAIPPPaddingParams");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
     uint64_t aippBatchParaSize = static_cast<uint64_t>(aippParmsSet->aippBatchPara.size());
@@ -485,6 +494,7 @@ aclError aclmdlSetAIPPDtcPixelMean(aclmdlAIPP *aippParmsSet,
                                    int16_t dtcPixelMeanChn3,
                                    uint64_t batchIndex)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlSetAIPPDtcPixelMean");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
     uint64_t aippBatchParaSize = static_cast<uint64_t>(aippParmsSet->aippBatchPara.size());
@@ -515,6 +525,7 @@ aclError aclmdlSetAIPPDtcPixelMin(aclmdlAIPP *aippParmsSet,
                                   float dtcPixelMinChn3,
                                   uint64_t batchIndex)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlSetAIPPDtcPixelMin");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
     uint64_t aippBatchParaSize = static_cast<uint64_t>(aippParmsSet->aippBatchPara.size());
@@ -548,6 +559,7 @@ aclError aclmdlSetAIPPPixelVarReci(aclmdlAIPP *aippParmsSet,
                                    float dtcPixelVarReciChn3,
                                    uint64_t batchIndex)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlSetAIPPPixelVarReci");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
     uint64_t aippBatchParaSize = static_cast<uint64_t>(aippParmsSet->aippBatchPara.size());
@@ -676,7 +688,7 @@ static aclError GetModelOriDims(uint32_t modelId, uint32_t relatedInputRank, boo
     // get model origin input info
     ge::GeExecutor executor;
     ge::OriginInputInfo inputInfo;
-    ACL_LOG_DEBUG("call ge interface executor.GetOrigInputInfo");
+    ACL_LOG_DEBUG("call ge interface executor.GetOrigInputInfo.");
     auto ret = executor.GetOrigInputInfo(modelId, relatedInputRank, inputInfo);
     if (ret != ge::SUCCESS) {
         ACL_LOG_ERROR("[Get][OrigInputInfo]GetOrigInputInfo failed, modelId[%u], index[%zu], "
@@ -688,7 +700,7 @@ static aclError GetModelOriDims(uint32_t modelId, uint32_t relatedInputRank, boo
     // get model origin input dims
     std::vector<ge::InputOutputDims> inputDims;
     std::vector<ge::InputOutputDims> outputDims;
-    ACL_LOG_DEBUG("call ge interface executor.GetAllAippInputOutputDims");
+    ACL_LOG_DEBUG("call ge interface executor.GetAllAippInputOutputDims.");
     ret = executor.GetAllAippInputOutputDims(modelId, relatedInputRank, inputDims, outputDims);
     if (ret != ge::SUCCESS) {
         ACL_LOG_ERROR("[Get][AllAippInputOutputDims]GetAllAippInputOutputDims failed, modelId[%u], "
@@ -828,6 +840,7 @@ aclError aclmdlSetInputAIPP(uint32_t modelId,
                             const aclmdlAIPP *aippParmsSet)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_MODEL);
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_DEBUG("start to execute aclmdlSetInputAIPP, modelId[%u], index[%zu]", modelId, index);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataset);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
@@ -886,6 +899,7 @@ aclError aclmdlSetInputAIPP(uint32_t modelId,
 
 aclError aclmdlGetAippType(uint32_t modelId, size_t index, aclmdlInputAippType *type, size_t *dynamicAttachedDataIndex)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlGetAippType, modelId[%u], index[%zu]", modelId, index);
     *dynamicAttachedDataIndex = ACL_INVALID_NODE_INDEX;
     ge::GeExecutor executor;
@@ -906,6 +920,7 @@ aclError aclmdlSetAIPPByInputIndex(uint32_t modelId,
                                    const aclmdlAIPP *aippParmsSet)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_MODEL);
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlSetAIPPByInputIndex, modelId[%u], index[%zu]", modelId, index);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
     if ((dataset == nullptr) || (index >= dataset->blobs.size())) {
@@ -1093,8 +1108,10 @@ static void SetAippInfo(aclAippInfo *aippInfo, const ge::AippConfigInfo &aippPar
 
 aclError aclmdlGetFirstAippInfo(uint32_t modelId, size_t index, aclAippInfo *aippInfo)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_DEBUG("start to execute aclmdlGetFirstAippInfo, modelId[%u], index[%zu]", modelId, index);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippInfo);
+
     ge::AippConfigInfo aippParams;
     ge::GeExecutor executor;
     ACL_LOG_DEBUG("call ge interface executor.GetAIPPInfo");

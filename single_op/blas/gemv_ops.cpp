@@ -19,6 +19,7 @@ aclError aclblasGemvEx(aclTransType transA, int m, int n, const void *alpha,
     aclComputeType type, aclrtStream stream)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
+    ACL_STAGES_REG(acl::ACL_STAGE_BLAS, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclblasGemvEx");
     return aclblasGemmEx(transA, ACL_TRANS_N, ACL_TRANS_N,
         m, 1, n, alpha, a, lda, dataTypeA, x, incx,
@@ -33,6 +34,7 @@ aclError aclblasCreateHandleForGemvEx(aclTransType transA, int m, int n,
                                       aclopHandle **handle)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
+    ACL_STAGES_REG(acl::ACL_STAGE_CREATE, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclblasCreateHandleForGemvEx");
     return aclblasCreateHandleForGemmEx(transA, ACL_TRANS_N, ACL_TRANS_N, m, 1, n,
         dataTypeA, dataTypeX, dataTypeY, type, handle);
@@ -44,6 +46,7 @@ aclError aclblasHgemv(aclTransType transA,
     aclFloat16 *y, int incy, aclComputeType type, aclrtStream stream)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
+    ACL_STAGES_REG(acl::ACL_STAGE_BLAS, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclblasHgemv");
     return aclblasGemvEx(transA, m, n, alpha, a, lda, ACL_FLOAT16, x, incx,
         ACL_FLOAT16, beta, y, incy, ACL_FLOAT16, type, stream);
@@ -56,6 +59,7 @@ aclError aclblasCreateHandleForHgemv(aclTransType transA,
                                      aclopHandle **handle)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
+    ACL_STAGES_REG(acl::ACL_STAGE_CREATE, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclblasCreateHandleForHgemv");
     return aclblasCreateHandleForGemvEx(transA, m, n, ACL_FLOAT16, ACL_FLOAT16, ACL_FLOAT16, type, handle);
 }
@@ -67,6 +71,7 @@ aclError aclblasCreateHandleForS8gemv(aclTransType transA,
                                       aclopHandle **handle)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
+    ACL_STAGES_REG(acl::ACL_STAGE_CREATE, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclblasCreateHandleForS8gemv");
     return aclblasCreateHandleForGemvEx(transA, m, n, ACL_INT8, ACL_INT8, ACL_INT32, type, handle);
 }
@@ -77,6 +82,7 @@ aclError aclblasS8gemv(aclTransType transA,
     int32_t *y, int incy, aclComputeType type, aclrtStream stream)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
+    ACL_STAGES_REG(acl::ACL_STAGE_BLAS, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclblasS8gemv");
     return aclblasGemvEx(transA, m, n, alpha, a, lda, ACL_INT8, x, incx,
         ACL_INT8, beta, y, incy, ACL_INT32, type, stream);

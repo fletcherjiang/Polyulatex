@@ -335,6 +335,7 @@ static aclError aclprofInnerModelUnSubscribe(void *data, uint32_t len)
 aclError _aclprofCommandHandle(uint32_t type, void *data, uint32_t len)
 {
     ACL_LOG_INFO("start to execute _aclprofCommandHandle");
+    ACL_STAGES_REG(acl::ACL_STAGE_PROF, acl::ACL_STAGE_DEFAULT);
     aclError ret;
     switch (type) {
         case PROF_COMMANDHANDLE_INIT:
@@ -368,6 +369,7 @@ aclError _aclprofCommandHandle(uint32_t type, void *data, uint32_t len)
 aclError _aclprofGetDeviceByModelId(uint32_t modelId, uint32_t &deviceId)
 {
     ACL_LOG_INFO("start to execute _aclprofGetDeviceByModelId");
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ge::GeExecutor geExecutor;
     ge::Status geRet = geExecutor.GetDeviceIdByModelId(modelId, deviceId);
     if (geRet != ge::SUCCESS) {

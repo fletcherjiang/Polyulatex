@@ -18,6 +18,7 @@ using namespace ge;
 
 aclopAttr *aclopCreateAttr()
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_CREATE, acl::ACL_STAGE_DEFAULT);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_ATTR);
     auto *attr = new(std::nothrow) aclopAttr();
     if (attr == nullptr) {
@@ -30,6 +31,7 @@ aclopAttr *aclopCreateAttr()
 
 void aclopDestroyAttr(const aclopAttr *attr)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_DESTROY, acl::ACL_STAGE_DEFAULT);
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_ATTR);
     ACL_DELETE_AND_SET_NULL(attr);
     ACL_ADD_RELEASE_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_ATTR);
@@ -37,24 +39,28 @@ void aclopDestroyAttr(const aclopAttr *attr)
 
 aclError aclopSetAttrBool(aclopAttr *attr, const char *attrName, uint8_t attrValue)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attr);
     return attr->SetAttr(attrName, static_cast<bool>(attrValue));
 }
 
 aclError aclopSetAttrInt(aclopAttr *attr, const char *attrName, int64_t attrValue)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attr);
     return attr->SetAttr(attrName, attrValue);
 }
 
 aclError aclopSetAttrFloat(aclopAttr *attr, const char *attrName, float attrValue)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attr);
     return attr->SetAttr(attrName, attrValue);
 }
 
 aclError aclopSetAttrString(aclopAttr *attr, const char *attrName, const char *attrValue)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attr);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attrValue);
     return attr->SetAttr(attrName, std::string(attrValue));
@@ -62,6 +68,7 @@ aclError aclopSetAttrString(aclopAttr *attr, const char *attrName, const char *a
 
 aclError aclopSetAttrListBool(aclopAttr *attr, const char *attrName, int numValues, const uint8_t *values)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attr);
     auto *boolValues = reinterpret_cast<const bool *>(values);
     return attr->SetAttr(attrName, numValues, boolValues);
@@ -69,18 +76,21 @@ aclError aclopSetAttrListBool(aclopAttr *attr, const char *attrName, int numValu
 
 aclError aclopSetAttrListInt(aclopAttr *attr, const char *attrName, int numValues, const int64_t *values)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attr);
     return attr->SetAttr(attrName, numValues, values);
 }
 
 aclError aclopSetAttrListFloat(aclopAttr *attr, const char *attrName, int numValues, const float *values)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attr);
     return attr->SetAttr(attrName, numValues, values);
 }
 
 aclError aclopSetAttrListString(aclopAttr *attr, const char *attrName, int numValues, const char **values)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attr);
     ACL_REQUIRES_OK(acl::array_utils::CheckPtrArray(numValues, values));
     std::vector<std::string> strValues;
@@ -96,6 +106,7 @@ aclError aclopSetAttrListListInt(aclopAttr *attr,
                                  const int *numListValues,
                                  const int64_t *const values[])
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attr);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attrName);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(numListValues);

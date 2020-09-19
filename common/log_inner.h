@@ -32,6 +32,27 @@ const char *const INVALID_FILE_MSG = "EH0004";
 const char *const INVALID_AIPP_MSG = "EH0005";
 const char *const UNSUPPORTED_FEATURE_MSG = "EH0006";
 
+// first stage
+const char *const ACL_STAGE_SET = "SET";
+const char *const ACL_STAGE_GET = "GET";
+const char *const ACL_STAGE_CREATE = "CREATE";
+const char *const ACL_STAGE_DESTROY = "DESTROY";
+const char *const ACL_STAGE_PROF = "PROF";
+const char *const ACL_STAGE_BLAS = "BLAS";
+const char *const ACL_STAGE_INFER = "INFER";
+const char *const ACL_STAGE_COMP = "COMP";
+const char *const ACL_STAGE_LOAD = "LOAD";
+const char *const ACL_STAGE_UNLOAD = "UNLOAD";
+const char *const ACL_STAGE_EXEC = "EXEC";
+const char *const ACL_STAGE_COMP_AND_EXEC = "COMP_AND_EXEC";
+const char *const ACL_STAGE_DUMP = "DUMP";
+const char *const ACL_STAGE_DVPP = "DVPP";
+const char *const ACL_STAGE_TDT = "TDT";
+const char *const ACL_STAGE_INIT = "INIT";
+const char *const ACL_STAGE_FINAL = "FINAL";
+// second stage
+const char *const ACL_STAGE_DEFAULT = "DEFAULT";
+
 class ACL_FUNC_VISIBILITY AclLog {
 public:
     static bool IsLogOutputEnable(aclLogLevel logLevel);
@@ -45,7 +66,7 @@ private:
 
 class ACL_FUNC_VISIBILITY AclErrorLogManager {
 public:
-    AclErrorLogManager(const std::string &firstStage, const std::string &secondStage);
+    AclErrorLogManager(const char *const firstStage, const char *const secondStage);
     virtual ~AclErrorLogManager();
     static const std::string GetStagesHeader();
     static std::string FormatStr(const char *fmt, ...);
@@ -76,8 +97,8 @@ public:
     } while (0)
 #define ACL_LOG_ERROR(fmt, ...)                                                                     \
     do {                                                                                            \
-            printf("ERROR %d %s:%s:%d: "#fmt "\n", acl::AclLog::GetTid(), __FUNCTION__,       \
-                __FILE__, __LINE__, ##__VA_ARGS__);                                                 \
+            printf("ERROR %d %s:%s:%d: %s" fmt "\n", acl::AclLog::GetTid(), __FUNCTION__,       \
+                __FILE__, __LINE__, acl::AclErrorLogManager::GetStagesHeader().c_str(), ##__VA_ARGS__);  \
     } while (0)
 #define ACL_LOG_EVENT(fmt, ...)                                                                     \
     do {                                                                                            \
@@ -110,8 +131,8 @@ public:
     } while (0)
 #define ACL_LOG_ERROR(fmt, ...)                                                                     \
     do {                                                                                            \
-            dlog_error(ACL_MODE_ID, "%d %s: " fmt, acl::AclLog::GetTid(), __FUNCTION__,             \
-                ##__VA_ARGS__);                                                                     \
+            dlog_error(ACL_MODE_ID, "%d %s: %s" fmt, acl::AclLog::GetTid(), __FUNCTION__,           \
+                acl::AclErrorLogManager::GetStagesHeader().c_str(), ##__VA_ARGS__);                 \
     } while (0)
 #define ACL_LOG_EVENT(fmt, ...)                                                                     \
     do {                                                                                            \
@@ -135,6 +156,9 @@ inline bool IsInfoLogEnabled()
     int dlogLevel = dlog_getlevel(ACL_MODE_ID, &eventEnable);
     return dlogLevel <= DLOG_INFO;
 }
+
+#define ACL_STAGES_REG(firstStage, secondStage) \
+    const acl::AclErrorLogManager error_manager(firstStage, secondStage)
 
 #define ACL_REQUIRES_OK(expr) \
     do { \
@@ -168,7 +192,7 @@ inline bool IsInfoLogEnabled()
 #define ACL_REQUIRES_NOT_NULL(val) \
     do { \
         if ((val) == nullptr) { \
-            ACL_LOG_ERROR("param [%s] must not be null.", #val); \
+            ACL_LOG_ERROR("[Check][%s]param must not be null.", #val); \
             return ACL_ERROR_INVALID_PARAM; } \
         } \
     while (0)
@@ -176,7 +200,7 @@ inline bool IsInfoLogEnabled()
 #define ACL_REQUIRES_NOT_NULL_RET_NULL(val) \
     do { \
         if ((val) == nullptr) { \
-            ACL_LOG_ERROR("param [%s] must not be null.", #val); \
+            ACL_LOG_ERROR("[Check][%s]param must not be null.", #val); \
             return nullptr; } \
         } \
     while (0)
@@ -193,7 +217,7 @@ inline bool IsInfoLogEnabled()
 #define ACL_REQUIRES_NOT_NULL_RET_STR(val) \
     do { \
         if ((val) == nullptr) { \
-            ACL_LOG_ERROR("param [%s] must not be null.", #val); \
+            ACL_LOG_ERROR("[Check][%s]param must not be null.", #val); \
             return ""; } \
         } \
     while (0)
@@ -201,7 +225,7 @@ inline bool IsInfoLogEnabled()
 #define ACL_REQUIRES_NOT_NULL_RET_VOID(val) \
     do { \
         if ((val) == nullptr) { \
-            ACL_LOG_ERROR("param [%s] must not be null.", #val); \
+            ACL_LOG_ERROR("[Check][%s]param must not be null.", #val); \
             return; } \
         } \
     while (0)
@@ -233,7 +257,7 @@ inline bool IsInfoLogEnabled()
 #define ACL_CHECK_MALLOC_RESULT(val) \
     do { \
         if ((val) == nullptr) { \
-            ACL_LOG_ERROR("Allocate memory for [%s] failed.", #val); \
+            ACL_LOG_ERROR("[Check][Malloc]Allocate memory for [%s] failed.", #val); \
             return ACL_ERROR_BAD_ALLOC; } \
         } \
     while (0)
@@ -241,7 +265,7 @@ inline bool IsInfoLogEnabled()
 #define ACL_REQUIRES_NON_NEGATIVE(val) \
     do { \
         if ((val) < 0) { \
-            ACL_LOG_ERROR("param [%s] must be non-negative.", #val); \
+            ACL_LOG_ERROR("[Check][%s]param must be non-negative.", #val); \
             return ACL_ERROR_INVALID_PARAM; } \
         } \
     while (0)
@@ -259,7 +283,7 @@ inline bool IsInfoLogEnabled()
 #define ACL_REQUIRES_POSITIVE(val) \
     do { \
         if ((val) <= 0) { \
-            ACL_LOG_ERROR("param [%s] must be positive.", #val); \
+            ACL_LOG_ERROR("[Check][%s]param must be positive.", #val); \
             return ACL_ERROR_INVALID_PARAM; } \
         } \
     while (0)
@@ -277,7 +301,7 @@ inline bool IsInfoLogEnabled()
 #define ACL_REQUIRES_POSITIVE_RET_NULL(val) \
     do { \
         if ((val) <= 0) { \
-            ACL_LOG_ERROR("param [%s] must be positive.", #val); \
+            ACL_LOG_ERROR("[Check][%s]param must be positive.", #val); \
             return nullptr; } \
         } \
     while (0)

@@ -139,7 +139,6 @@ aclError AippScfSizeCheck(const aclmdlAIPP *aippParmsSet, int32_t batchIndex)
     int32_t scfInputSizeH = aippParmsSet->aippBatchPara[batchIndex].scfInputSizeH;
     int32_t scfOutputSizeW = aippParmsSet->aippBatchPara[batchIndex].scfOutputSizeW;
     int32_t scfOutputSizeH = aippParmsSet->aippBatchPara[batchIndex].scfOutputSizeH;
-
     int32_t srcImageSizeW = aippParmsSet->aippParms.srcImageSizeW;
     int32_t srcImageSizeH = aippParmsSet->aippParms.srcImageSizeH;
 
@@ -496,6 +495,7 @@ uint64_t GetSrcImageSize(const aclmdlAIPP *aippParmsSet)
     ACL_LOG_INFO("Input SrcImageSize = %lu, cce_InputFormat = %d", size, static_cast<int32_t>(inputFormat));
     return size;
 }
+
 
 
 

@@ -41,6 +41,7 @@ namespace {
 
 aclError aclInit(const char *configPath)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_INIT, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclInit");
     std::unique_lock<std::mutex> lk(aclInitMutex);
     if (aclInitFlag) {
@@ -105,6 +106,7 @@ aclError aclInit(const char *configPath)
 
 aclError aclFinalize()
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_FINAL, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclFinalize");
     std::unique_lock<std::mutex> lk(aclInitMutex);
     if (aclFinalizeFlag) {
