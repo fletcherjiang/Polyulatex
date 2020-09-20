@@ -42,6 +42,9 @@ include_directories(${CMAKE_BINARY_DIR})
 set(UT_FILES
     "testcase/acl_common_unittest.cpp"
     "testcase/acl_toolchain_unittest.cpp"
+    "../compatibility/enum_check.cpp"
+    "../compatibility/const_check.cpp"
+    "../compatibility/offset_check.cpp"
 )
 
 set(SRC_FILES
@@ -156,6 +159,7 @@ target_compile_options(ascendcl_utest PRIVATE
 
 target_compile_definitions(ascendcl_utest PRIVATE
     google=ascend_private
+    ENABLE_DVPP_INTERFACE
 )
 
 target_link_libraries(ascendcl_utest PRIVATE
