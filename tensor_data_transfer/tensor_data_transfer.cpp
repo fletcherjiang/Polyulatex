@@ -231,6 +231,7 @@ namespace acl {
 
 acltdtTensorType acltdtGetTensorTypeFromItem(const acltdtDataItem *dataItem)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if (dataItem == nullptr) {
         ACL_LOG_INNER_ERROR("param [dataItem] must not be null.");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
@@ -243,6 +244,7 @@ acltdtTensorType acltdtGetTensorTypeFromItem(const acltdtDataItem *dataItem)
 
 aclDataType acltdtGetDataTypeFromItem(const acltdtDataItem *dataItem)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if (dataItem == nullptr) {
         ACL_LOG_INNER_ERROR("param [dataItem] must not be null.");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
@@ -261,6 +263,7 @@ void *acltdtGetDataAddrFromItem(const acltdtDataItem *dataItem)
 
 size_t acltdtGetDataSizeFromItem(const acltdtDataItem *dataItem)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if (dataItem == nullptr) {
         ACL_LOG_INNER_ERROR("param [dataItem] must not be null.");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
@@ -273,6 +276,7 @@ size_t acltdtGetDataSizeFromItem(const acltdtDataItem *dataItem)
 
 size_t acltdtGetDimNumFromItem(const acltdtDataItem *dataItem)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if (dataItem == nullptr) {
         ACL_LOG_INNER_ERROR("param [dataItem] must not be null.");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
@@ -285,6 +289,7 @@ size_t acltdtGetDimNumFromItem(const acltdtDataItem *dataItem)
 
 aclError acltdtGetDimsFromItem(const acltdtDataItem *dataItem, int64_t *dims, size_t dimNum)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL(dataItem);
     // check dims and dimNum
     if ((dims == nullptr && dimNum != 0) || (dims != nullptr && dimNum == 0)) {
@@ -307,6 +312,7 @@ aclError acltdtGetDimsFromItem(const acltdtDataItem *dataItem, int64_t *dims, si
 acltdtDataItem *acltdtCreateDataItem(acltdtTensorType tdtType,
     const int64_t *dims, size_t dimNum, aclDataType dataType, void *data, size_t size)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_CREATE, acl::ACL_STAGE_DEFAULT);
     if ((dims == nullptr && dimNum != 0) || (dims != nullptr && dimNum == 0)) {
         ACL_LOG_INNER_ERROR("acltdtCreateDataItem failed, invalid dims and dimNum[%zu]", dimNum);
         return nullptr;
@@ -347,6 +353,7 @@ acltdtDataItem *acltdtCreateDataItem(acltdtTensorType tdtType,
 
 aclError acltdtDestroyDataItem(acltdtDataItem *dataItem)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_DESTROY, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL(dataItem);
     ACL_DELETE_AND_SET_NULL(dataItem);
     return ACL_SUCCESS;
@@ -354,11 +361,13 @@ aclError acltdtDestroyDataItem(acltdtDataItem *dataItem)
 
 acltdtDataset *acltdtCreateDataset()
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_CREATE, acl::ACL_STAGE_DEFAULT);
     return new(std::nothrow) acltdtDataset();
 }
 
 aclError acltdtDestroyDataset(acltdtDataset *dataset)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_DESTROY, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL(dataset);
     ACL_DELETE_AND_SET_NULL(dataset);
     return ACL_SUCCESS;
@@ -366,6 +375,7 @@ aclError acltdtDestroyDataset(acltdtDataset *dataset)
 
 aclError acltdtAddDataItem(acltdtDataset *dataset, acltdtDataItem *dataItem)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL(dataset);
     ACL_REQUIRES_NOT_NULL(dataItem);
     if (dataset->freeSelf) {
@@ -378,6 +388,7 @@ aclError acltdtAddDataItem(acltdtDataset *dataset, acltdtDataItem *dataItem)
 
 acltdtDataItem *acltdtGetDataItem(const acltdtDataset *dataset, size_t index)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if ((dataset == nullptr) || (index >= dataset->blobs.size())) {
         ACL_LOG_INNER_ERROR("input param is invalid, index[%zu]", index);
         return nullptr;
@@ -388,6 +399,7 @@ acltdtDataItem *acltdtGetDataItem(const acltdtDataset *dataset, size_t index)
 
 size_t acltdtGetDatasetSize(const acltdtDataset *dataset)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if (dataset == nullptr) {
         ACL_LOG_INNER_ERROR("dataset is null.");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
@@ -399,6 +411,7 @@ size_t acltdtGetDatasetSize(const acltdtDataset *dataset)
 
 acltdtChannelHandle *acltdtCreateChannel(uint32_t deviceId, const char *name)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_CREATE, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_RET_NULL(name);
     auto ret = tdt::TdtHostInit(deviceId);
     if (ret != 0) {
@@ -420,6 +433,7 @@ acltdtChannelHandle *acltdtCreateChannel(uint32_t deviceId, const char *name)
 
 aclError acltdtStopChannel(acltdtChannelHandle *handle)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_TDT, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL(handle);
     ACL_LOG_INFO("start to acltdtStopChannel, device is %u, name is %s",
         handle->devId, handle->name.c_str());
@@ -439,6 +453,7 @@ aclError acltdtStopChannel(acltdtChannelHandle *handle)
 
 aclError acltdtDestroyChannel(acltdtChannelHandle *handle)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_DESTROY, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL(handle);
     ACL_LOG_INFO("start to acltdtDestroyChannel, device is %u, name is %s",
         handle->devId, handle->name.c_str());
@@ -458,6 +473,7 @@ aclError acltdtDestroyChannel(acltdtChannelHandle *handle)
 
 aclError acltdtSendTensor(const acltdtChannelHandle *handle, const acltdtDataset *dataset, int32_t timeout)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_TDT, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute acltdtSendTensor, device is %u, name is %s",
         handle->devId, handle->name.c_str());
     ACL_REQUIRES_NOT_NULL(handle);
@@ -495,6 +511,7 @@ aclError acltdtSendTensor(const acltdtChannelHandle *handle, const acltdtDataset
 
 aclError acltdtReceiveTensor(const acltdtChannelHandle *handle, acltdtDataset *dataset, int32_t timeout)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_TDT, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute acltdtReceiveTensor, device is %u, name is %s",
         handle->devId, handle->name.c_str());
     ACL_REQUIRES_NOT_NULL(handle);

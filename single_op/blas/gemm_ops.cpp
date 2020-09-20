@@ -164,6 +164,7 @@ aclError aclblasGemmEx(aclTransType transA,
     int ldc, aclDataType dataTypeC, aclComputeType type, aclrtStream stream)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
+    ACL_STAGES_REG(acl::ACL_STAGE_BLAS, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclblasGemmEx");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(alpha);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(beta);
@@ -227,6 +228,7 @@ aclError aclblasCreateHandleForGemmEx(aclTransType transA,
     aclComputeType type, aclopHandle **handle)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
+    ACL_STAGES_REG(acl::ACL_STAGE_CREATE, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclblasCreateHandleForGemmEx");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(handle);
     if (m <= 0 || n <= 0 || k <= 0) {
@@ -282,6 +284,7 @@ aclError aclblasCreateHandleForHgemm(aclTransType transA,
                                      aclopHandle **handle)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
+    ACL_STAGES_REG(acl::ACL_STAGE_CREATE, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclblasCreateHandleForHgemm");
 
     return aclblasCreateHandleForGemmEx(transA, transB, transC,
@@ -298,6 +301,7 @@ aclError aclblasHgemm(aclTransType transA,
     aclFloat16 *matrixC, int ldc, aclComputeType type, aclrtStream stream)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
+    ACL_STAGES_REG(acl::ACL_STAGE_BLAS, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclblasHgemm");
     return aclblasGemmEx(transA, transB, transC,
                          m, n, k,
@@ -314,6 +318,7 @@ aclError aclblasS8gemm(aclTransType transA,
     int ldc, aclComputeType type, aclrtStream stream)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
+    ACL_STAGES_REG(acl::ACL_STAGE_BLAS, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclblasS8gemm");
     return aclblasGemmEx(transA, transB, transC,
                          m, n, k,
@@ -333,6 +338,7 @@ aclError aclblasCreateHandleForS8gemm(aclTransType transA,
                                       aclopHandle **handle)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
+    ACL_STAGES_REG(acl::ACL_STAGE_CREATE, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclblasCreateHandleForS8gemm");
     return aclblasCreateHandleForGemmEx(transA, transB, transC, m, n, k, ACL_INT8, ACL_INT8, ACL_INT32, type, handle);
 }

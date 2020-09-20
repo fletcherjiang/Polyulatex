@@ -348,6 +348,7 @@ bool CheckMdlConfigHandle(const aclmdlConfigHandle *handle)
 aclError aclmdlSetConfigOpt(aclmdlConfigHandle *handle, aclmdlConfigAttr attr,
     const void *attrValue, size_t valueSize)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlSetConfigOpt, attr[%d]", static_cast<int32_t>(attr));
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(handle);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attrValue);
@@ -380,6 +381,7 @@ aclError aclmdlSetConfigOpt(aclmdlConfigHandle *handle, aclmdlConfigAttr attr,
 
 aclmdlConfigHandle *aclmdlCreateConfigHandle()
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_CREATE, acl::ACL_STAGE_DEFAULT);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_MODEL_CONFIG);
     ACL_ADD_APPLY_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_MODEL_CONFIG);
     return new(std::nothrow) aclmdlConfigHandle();
@@ -387,6 +389,7 @@ aclmdlConfigHandle *aclmdlCreateConfigHandle()
 
 aclError aclmdlDestroyConfigHandle(aclmdlConfigHandle *handle)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_DESTROY, acl::ACL_STAGE_DEFAULT);
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_MODEL_CONFIG);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(handle);
     ACL_DELETE_AND_SET_NULL(handle);

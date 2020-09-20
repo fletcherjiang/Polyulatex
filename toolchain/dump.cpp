@@ -67,7 +67,7 @@ namespace acl {
         config.dumpList = js.at(ACL_DUMP_LIST).get<std::vector<DumpInfo>>();
         if (js.find(ACL_DUMP_MODE) != js.end()) {
             config.dumpMode = js.at(ACL_DUMP_MODE).get<std::string>();
-            ACL_LOG_DEBUG("dump_mode field parse successfully, value = %s", config.dumpMode.c_str());
+            ACL_LOG_DEBUG("dump_mode field parse successfully, value = %s.", config.dumpMode.c_str());
         } else {
             // dump_mode is an optional field, valid values include input/output/all
             // default value is output
@@ -75,7 +75,7 @@ namespace acl {
         }
         if (js.find(ACL_DUMP_OP_SWITCH) != js.end()) {
             config.dumpOpSwitch = js.at(ACL_DUMP_OP_SWITCH).get<std::string>();
-            ACL_LOG_DEBUG("dump_op_switch field parse successfully, value = %s", config.dumpOpSwitch.c_str());
+            ACL_LOG_DEBUG("dump_op_switch field parse successfully, value = %s.", config.dumpOpSwitch.c_str());
         } else {
             // dump_op_switch is an optional field, valid values include on/off
             // default value is off
@@ -112,7 +112,7 @@ namespace acl {
 
     static bool CheckDumplist(const nlohmann::json &js)
     {
-        ACL_LOG_INFO("start to execute CheckDumpListValidity");
+        ACL_LOG_INFO("start to execute CheckDumpListValidity.");
         const nlohmann::json &jsDumpConfig = js.at(ACL_DUMP);
         std::vector<DumpInfo> dumpList = jsDumpConfig.at(ACL_DUMP_LIST).get<std::vector<DumpInfo>>();
         std::string dumpOpSwitch;
@@ -162,9 +162,9 @@ namespace acl {
                 return false;
             }
 
-            ACL_LOG_INFO("dump_list is valid, dump_op_switch is %s, only dump model", dumpOpSwitch.c_str());
+            ACL_LOG_INFO("dump_list is valid, dump_op_switch is %s, only dump model.", dumpOpSwitch.c_str());
         }
-        ACL_LOG_INFO("end to check the validity of dump_list and dump_op_switch field");
+        ACL_LOG_INFO("end to check the validity of dump_list and dump_op_switch field.");
         return true;
     }
 
@@ -186,17 +186,17 @@ namespace acl {
             }
         }
 
-        ACL_LOG_INFO("successfully execute IsValidDirChar, the dump result path[%s] is valid", dumpPath.c_str());
+        ACL_LOG_INFO("successfully execute IsValidDirChar, the dump result path[%s] is valid.", dumpPath.c_str());
         return true;
     }
 
     static bool CheckIpAddress(DumpConfig &config)
     {
         // check the valid of ipAddress in dump_path
-        ACL_LOG_INFO("start to execute IsValidIpAddress");
+        ACL_LOG_INFO("start to execute IsValidIpAddress.");
         size_t colonPos = config.dumpPath.find_first_of(":");
         if (colonPos != std::string::npos) {
-            ACL_LOG_INFO("dump_path field contains ip address");
+            ACL_LOG_INFO("dump_path field contains ip address.");
             if (colonPos + 1 == config.dumpPath.size()) {
                 ACL_LOG_INNER_ERROR("[Check][colonPos]dump_path field is invalid");
                 acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
@@ -215,18 +215,18 @@ namespace acl {
                     }
                 }
 
-                ACL_LOG_INFO("ip address[%s] is valid in dump_path field", ipAddress.c_str());
+                ACL_LOG_INFO("ip address[%s] is valid in dump_path field.", ipAddress.c_str());
                 return true;
             }
         }
 
-        ACL_LOG_WARN("the dump_path field does not contains ip address or it does't comply with the ipv4 rule");
+        ACL_LOG_WARN("the dump_path field does not contains ip address or it does't comply with the ipv4 rule.");
         return false;
     }
 
     static bool CheckDumpPath(const nlohmann::json &js)
     {
-        ACL_LOG_INFO("start to execute CheckDumpPath");
+        ACL_LOG_INFO("start to execute CheckDumpPath.");
         const nlohmann::json &jsDumpConfig = js.at(ACL_DUMP);
         DumpConfig config = jsDumpConfig;
         if (config.dumpPath.length() > MAX_DUMP_PATH_LENGTH) {
@@ -280,13 +280,13 @@ namespace acl {
             ACL_LOG_INFO("the dump result path is %s", trustedPath);
         }
 
-        ACL_LOG_INFO("successfully execute CheckDumpPath to verify dump_path field, it's valid");
+        ACL_LOG_INFO("successfully execute CheckDumpPath to verify dump_path field, it's valid.");
         return true;
     }
 
     static bool IsValidDumpConfig(const nlohmann::json &js)
     {
-        ACL_LOG_INFO("start to execute IsValidDumpConfig");
+        ACL_LOG_INFO("start to execute IsValidDumpConfig.");
         // if dump fields not exist, don't send dump config
         if (js.find(ACL_DUMP) == js.end()) {
             ACL_LOG_WARN("no dump item, no need to do dump!");
@@ -341,13 +341,13 @@ namespace acl {
             return false;
         }
 
-        ACL_LOG_INFO("successfully execute IsValidDumpConfig to verify dump config, it's valid");
+        ACL_LOG_INFO("successfully execute IsValidDumpConfig to verify dump config, it's valid.");
         return true;
     }
 
     aclError ConvertDumpConfig(const nlohmann::json &js, ge::DumpConfig &dumpConfig)
     {
-        ACL_LOG_INFO("start to execute ConvertDumpConfig");
+        ACL_LOG_INFO("start to execute ConvertDumpConfig.");
         if (!IsValidDumpConfig(js)) {
             ACL_LOG_INNER_ERROR("[Check][DumpConfig]dump config is invalid");
             return ACL_ERROR_INVALID_DUMP_CONFIG;
@@ -377,7 +377,7 @@ namespace acl {
             dumpConfig.dump_list.emplace_back(modelDumpConfig);
         }
 
-        ACL_LOG_INFO("convert to ge dump config successfully, dump_mode = %s, dump_path = %s, dump_op_switch = %s",
+        ACL_LOG_INFO("convert to ge dump config successfully, dump_mode = %s, dump_path = %s, dump_op_switch = %s.",
                      dumpConfig.dump_mode.c_str(),
                      dumpConfig.dump_path.c_str(),
                      dumpConfig.dump_op_switch.c_str());
@@ -386,7 +386,7 @@ namespace acl {
 
     aclError AclDump::HandleDumpCommand(ge::DumpConfig &dumpConfig)
     {
-        ACL_LOG_INFO("start to execute HandleDumpCommand");
+        ACL_LOG_INFO("start to execute HandleDumpCommand.");
         ge::GeExecutor geExecutor;
         nlohmann::json js;
         int adxRet = AdxDataDumpServerInit();
@@ -401,14 +401,14 @@ namespace acl {
             ACL_LOG_CALL_ERROR("[Set][Dump]set dump config for model failed, ge result = %d", geRet);
             return ACL_GET_ERRCODE_GE(geRet);
         }
-        ACL_LOG_INFO("set dump config for model successfully, dump_path = %s, dump_mode = %s, dump_op_switch = %s",
+        ACL_LOG_INFO("set dump config for model successfully, dump_path = %s, dump_mode = %s, dump_op_switch = %s.",
             dumpConfig.dump_path.c_str(), dumpConfig.dump_mode.c_str(), dumpConfig.dump_op_switch.c_str());
         return ACL_SUCCESS;
     }
 
     aclError AclDump::HandleDumpConfig(const char *configPath)
     {
-        ACL_LOG_INFO("start to execute HandleDumpConfig");
+        ACL_LOG_INFO("start to execute HandleDumpConfig.");
         nlohmann::json js;
         acl::JsonParser jsonParser;
         aclError ret = jsonParser.ParseJsonFromFile(configPath, js, nullptr, nullptr);
@@ -435,14 +435,15 @@ namespace acl {
                 e.what());
             return ACL_ERROR_INVALID_DUMP_CONFIG;
         }
-        ACL_LOG_INFO("HandleDumpConfig end in HandleDumpConfig");
+        ACL_LOG_INFO("HandleDumpConfig end in HandleDumpConfig.");
         return ACL_SUCCESS;
     }
 } // namespace acl
 
 aclError aclmdlInitDump()
 {
-    ACL_LOG_INFO("start to execute aclmdlInitDump");
+    ACL_LOG_INFO("start to execute aclmdlInitDump.");
+    ACL_STAGES_REG(acl::ACL_STAGE_DUMP, acl::ACL_STAGE_DEFAULT);
     if (!GetAclInitFlag()) {
         ACL_LOG_INNER_ERROR("[Check][AclInitFlag]aclmdlInitDump is not support because it does not execute aclInit");
         return ACL_ERROR_UNINITIALIZE;
@@ -467,13 +468,14 @@ aclError aclmdlInitDump()
     }
 
     aclmdlInitDumpFlag = true;
-    ACL_LOG_INFO("successfully initialized dump in aclmdlInitDump");
+    ACL_LOG_INFO("successfully initialized dump in aclmdlInitDump.");
     return ACL_SUCCESS;
 }
 
 aclError aclmdlSetDump(const char *dumpCfgPath)
 {
-    ACL_LOG_INFO("start to execute aclmdlSetDump");
+    ACL_LOG_INFO("start to execute aclmdlSetDump.");
+    ACL_STAGES_REG(acl::ACL_STAGE_DUMP, acl::ACL_STAGE_DEFAULT);
     if (!GetAclInitFlag()) {
         ACL_LOG_INNER_ERROR("[Check][AclInitFlag]aclmdlSetDump is not support because it does not execute aclInit");
         return ACL_ERROR_UNINITIALIZE;
@@ -519,13 +521,14 @@ aclError aclmdlSetDump(const char *dumpCfgPath)
         return ACL_GET_ERRCODE_GE(geRet);
     }
 
-    ACL_LOG_INFO("set dump config for model successfully");
+    ACL_LOG_INFO("set dump config for model successfully.");
     return ACL_SUCCESS;
 }
 
 aclError aclmdlFinalizeDump()
 {
-    ACL_LOG_INFO("start to execute aclmdlFinalizeDump");
+    ACL_LOG_INFO("start to execute aclmdlFinalizeDump.");
+    ACL_STAGES_REG(acl::ACL_STAGE_DUMP, acl::ACL_STAGE_DEFAULT);
     if (!GetAclInitFlag()) {
         ACL_LOG_INNER_ERROR("[Check][AclInitFlag]aclmdlFinalizeDump is not support because it does not execute aclInit");
         return ACL_ERROR_UNINITIALIZE;

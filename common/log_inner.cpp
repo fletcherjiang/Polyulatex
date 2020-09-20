@@ -81,7 +81,7 @@ void AclLog::ACLSaveLog(aclLogLevel logLevel, const char* strLog)
     }
 }
 
-AclErrorLogManager::AclErrorLogManager(const std::string &firstStage, const std::string &secondStage)
+AclErrorLogManager::AclErrorLogManager(const char *const firstStage, const char *const secondStage)
 {
     ErrorManager::GetInstance().SetStage(firstStage, secondStage);
 };

@@ -58,6 +58,7 @@ enum TensorType {
 
 aclmdlDesc *aclmdlCreateDesc()
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_CREATE, acl::ACL_STAGE_DEFAULT);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_DESC);
     ACL_ADD_APPLY_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_DESC);
     return new(std::nothrow) aclmdlDesc();
@@ -65,6 +66,7 @@ aclmdlDesc *aclmdlCreateDesc()
 
 aclError aclmdlDestroyDesc(aclmdlDesc *modelDesc)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_DESTROY, acl::ACL_STAGE_DEFAULT);
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_DESC);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelDesc);
     ACL_DELETE_AND_SET_NULL(modelDesc);
@@ -354,6 +356,7 @@ static aclError ModelLoadFromMemWithQ(const void *model, size_t modelSize, uint3
 aclError aclmdlGetDesc(aclmdlDesc *modelDesc, uint32_t modelId)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_MODEL);
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlGetDesc, model id[%u]", modelId);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelDesc);
     modelDesc->Clear();
@@ -444,6 +447,7 @@ aclError aclmdlGetDesc(aclmdlDesc *modelDesc, uint32_t modelId)
 
 size_t aclmdlGetNumInputs(aclmdlDesc *modelDesc)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if (modelDesc == nullptr) {
         return 0;
     }
@@ -453,6 +457,7 @@ size_t aclmdlGetNumInputs(aclmdlDesc *modelDesc)
 
 size_t aclmdlGetNumOutputs(aclmdlDesc *modelDesc)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if (modelDesc == nullptr) {
         return 0;
     }
@@ -519,6 +524,7 @@ size_t aclmdlGetOutputSizeByIndex(aclmdlDesc *modelDesc, size_t index)
 
 aclmdlDataset *aclmdlCreateDataset()
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_CREATE, acl::ACL_STAGE_DEFAULT);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_DATASET);
     ACL_ADD_APPLY_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_DATASET);
     return new(std::nothrow) aclmdlDataset();
@@ -526,6 +532,7 @@ aclmdlDataset *aclmdlCreateDataset()
 
 aclError aclmdlDestroyDataset(const aclmdlDataset *dataset)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_DESTROY, acl::ACL_STAGE_DEFAULT);
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_DATASET);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataset);
     for (size_t i = 0; i < dataset->blobs.size(); ++i) {
@@ -538,6 +545,7 @@ aclError aclmdlDestroyDataset(const aclmdlDataset *dataset)
 
 aclError aclmdlAddDatasetBuffer(aclmdlDataset *dataset, aclDataBuffer *dataBuffer)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataset);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataBuffer);
     AclModelTensor tensor = AclModelTensor(dataBuffer, nullptr);
@@ -547,6 +555,7 @@ aclError aclmdlAddDatasetBuffer(aclmdlDataset *dataset, aclDataBuffer *dataBuffe
 
 size_t aclmdlGetDatasetNumBuffers(const aclmdlDataset *dataset)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if (dataset == nullptr) {
         ACL_LOG_INNER_ERROR("[Check][Dataset]input param[dataset] is null");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
@@ -560,6 +569,7 @@ size_t aclmdlGetDatasetNumBuffers(const aclmdlDataset *dataset)
 
 aclDataBuffer *aclmdlGetDatasetBuffer(const aclmdlDataset *dataset, size_t index)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if ((dataset == nullptr) || (index >= dataset->blobs.size())) {
         ACL_LOG_INNER_ERROR("[Check][Params]input param is invalid, dataset[%p], index[%zu]", dataset, index);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("dataset[%p], index[%zu]", dataset, index);
@@ -574,6 +584,7 @@ aclDataBuffer *aclmdlGetDatasetBuffer(const aclmdlDataset *dataset, size_t index
 
 aclError aclmdlSetDatasetTensorDesc(aclmdlDataset *dataset, aclTensorDesc *tensorDesc, size_t index)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL(dataset);
     if (index >= dataset->blobs.size()) {
         ACL_LOG_INNER_ERROR("[Check][Index]input param index[%zu] must be smaller than input databuf size[%zu]",
@@ -603,6 +614,7 @@ aclError aclmdlSetDatasetTensorDesc(aclmdlDataset *dataset, aclTensorDesc *tenso
 
 aclError aclmdlLoadFromFile(const char *modelPath, uint32_t *modelId)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_LOAD, acl::ACL_STAGE_DEFAULT);
     ACL_PROFILING_REG(ACL_PROF_FUNC_MODEL);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_LOAD_UNLOAD_MODEL);
     ACL_LOG_INFO("start to execute aclmdlLoadFromFile");
@@ -619,6 +631,7 @@ aclError aclmdlLoadFromFileWithMem(const char *modelPath, uint32_t *modelId,
                                    void *workPtr, size_t workSize,
                                    void *weightPtr, size_t weightSize)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_LOAD, acl::ACL_STAGE_DEFAULT);
     ACL_PROFILING_REG(ACL_PROF_FUNC_MODEL);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_LOAD_UNLOAD_MODEL);
     ACL_LOG_INFO("start to execute aclmdlLoadFromFileWithMem, workSize[%zu], weightSize[%zu]", workSize, weightSize);
@@ -634,6 +647,7 @@ aclError aclmdlLoadFromFileWithMem(const char *modelPath, uint32_t *modelId,
 aclError aclmdlLoadFromMem(const void *model, size_t modelSize, uint32_t *modelId)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_MODEL);
+    ACL_STAGES_REG(acl::ACL_STAGE_LOAD, acl::ACL_STAGE_DEFAULT);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_LOAD_UNLOAD_MODEL);
     ACL_LOG_INFO("start to execute aclmdlLoadFromMem, modelSize[%zu]", modelSize);
     aclError ret = ModelLoadFromMemWithMem(model, modelSize, modelId, nullptr, 0, nullptr, 0, 0);
@@ -651,6 +665,7 @@ aclError aclmdlLoadFromMemWithMem(const void *model, size_t modelSize,
                                   void *weightPtr, size_t weightSize)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_MODEL);
+    ACL_STAGES_REG(acl::ACL_STAGE_LOAD, acl::ACL_STAGE_DEFAULT);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_LOAD_UNLOAD_MODEL);
     ACL_LOG_INFO("start to execute AaclmdlLoadFromMemWithMem, modelSize[%zu], workSize[%zu], weightSize[%zu]",
         modelSize, workSize, weightSize);
@@ -668,6 +683,7 @@ aclError aclmdlLoadFromFileWithQ(const char *modelPath, uint32_t *modelId, const
                                  size_t inputQNum, const uint32_t *outputQ, size_t outputQNum)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_MODEL);
+    ACL_STAGES_REG(acl::ACL_STAGE_LOAD, acl::ACL_STAGE_DEFAULT);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_LOAD_UNLOAD_MODEL);
     ACL_LOG_INFO("start to execute aclmdlLoadFromFileWithQ, inputQNum[%zu], outputQNum[%zu]", inputQNum, outputQNum);
     aclError ret = ModelLoadFromFileWithQ(modelPath, modelId, inputQ, inputQNum, outputQ, outputQNum, 0);
@@ -684,6 +700,7 @@ aclError aclmdlLoadFromMemWithQ(const void *model, size_t modelSize, uint32_t *m
     const uint32_t *inputQ, size_t inputQNum, const uint32_t *outputQ, size_t outputQNum)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_MODEL);
+    ACL_STAGES_REG(acl::ACL_STAGE_LOAD, acl::ACL_STAGE_DEFAULT);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_LOAD_UNLOAD_MODEL);
     ACL_LOG_INFO("start to execute aclmdlLoadFromMemWithQ, modelSize[%zu], inputQNum[%zu], outputQNum[%zu]",
         modelSize, inputQNum, outputQNum);
@@ -808,6 +825,7 @@ aclError aclmdlExecute(uint32_t modelId, const aclmdlDataset *input,
     aclmdlDataset *output)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_MODEL);
+    ACL_STAGES_REG(acl::ACL_STAGE_EXEC, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlExecute, modelId[%u]", modelId);
     aclError ret = ModelExecute(modelId, input, output, false, nullptr);
     if (ret == ACL_SUCCESS) {
@@ -822,6 +840,7 @@ aclError aclmdlExecuteAsync(uint32_t modelId, const aclmdlDataset *input,
                             aclmdlDataset *output, aclrtStream stream)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_MODEL);
+    ACL_STAGES_REG(acl::ACL_STAGE_EXEC, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlExecuteAsync, modelId[%u]", modelId);
     aclError ret = ModelExecute(modelId, input, output, true, stream);
     if (ret == ACL_SUCCESS) {
@@ -835,6 +854,7 @@ aclError aclmdlExecuteAsync(uint32_t modelId, const aclmdlDataset *input,
 aclError aclmdlUnload(uint32_t modelId)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_MODEL);
+    ACL_STAGES_REG(acl::ACL_STAGE_UNLOAD, acl::ACL_STAGE_DEFAULT);
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_LOAD_UNLOAD_MODEL);
     ACL_LOG_INFO("start to execute ACL_ModelUnload, modelId[%u]", modelId);
     ge::GeExecutor executor;
@@ -853,6 +873,7 @@ aclError aclmdlUnload(uint32_t modelId)
 aclError aclmdlQuerySize(const char *fileName, size_t *workSize, size_t *weightSize)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_MODEL);
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlQuerySize");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(fileName);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(workSize);
@@ -880,6 +901,7 @@ aclError aclmdlQuerySize(const char *fileName, size_t *workSize, size_t *weightS
 aclError aclmdlQuerySizeFromMem(const void *model, size_t modelSize, size_t *workSize, size_t *weightSize)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_MODEL);
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute ACL_QueryModelSizeFromMem, modelSize[%zu]", modelSize);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(model);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(workSize);
@@ -905,6 +927,7 @@ aclError aclmdlQuerySizeFromMem(const void *model, size_t modelSize, size_t *wor
 aclError aclmdlSetDynamicBatchSize(uint32_t modelId, aclmdlDataset *dataset, size_t index, uint64_t batchSize)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_MODEL);
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlSetDynamicBatchSize, modelId[%u], index[%zu], batchSize[%lu]",
         modelId, index, batchSize);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataset);
@@ -947,6 +970,7 @@ aclError aclmdlSetDynamicHWSize(uint32_t modelId, aclmdlDataset *dataset, size_t
     uint64_t height, uint64_t width)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_MODEL);
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlSetDynamicHWSize, modelId[%u], index[%zu], height[%lu], width[%lu]",
         modelId, index, height, width);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataset);
@@ -988,6 +1012,7 @@ aclError aclmdlSetDynamicHWSize(uint32_t modelId, aclmdlDataset *dataset, size_t
 aclError aclmdlSetInputDynamicDims(uint32_t modelId, aclmdlDataset *dataset, size_t index, const aclmdlIODims *dims)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_MODEL);
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataset);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dims);
     if (dims->dimCount == 0) {
@@ -1020,7 +1045,7 @@ aclError aclmdlSetInputDynamicDims(uint32_t modelId, aclmdlDataset *dataset, siz
     dataset->dynamicDims.clear();
     vector<uint64_t> curAllDims;
     for (size_t i = 0; i < static_cast<std::size_t>(dims->dimCount); ++i) {
-      curAllDims.push_back(dims->dims[i]);
+        curAllDims.push_back(dims->dims[i]);
     }
     ACL_LOG_DEBUG("Call ge interface executor.SetDynamicDims, dimCount[%u]", dims->dimCount);
     ACL_LOG_DEBUG("Cur all dims size %zu", curAllDims.size());
@@ -1192,6 +1217,7 @@ static aclError GetDims(const aclmdlDesc *modelDesc, TensorType tensorType, Dims
 
 aclError aclmdlGetInputDims(const aclmdlDesc *modelDesc, size_t index, aclmdlIODims *dims)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelDesc);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dims);
 
@@ -1206,6 +1232,7 @@ aclError aclmdlGetInputDims(const aclmdlDesc *modelDesc, size_t index, aclmdlIOD
 
 aclError aclmdlGetOutputDims(const aclmdlDesc *modelDesc, size_t index, aclmdlIODims *dims)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelDesc);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dims);
 
@@ -1220,6 +1247,7 @@ aclError aclmdlGetOutputDims(const aclmdlDesc *modelDesc, size_t index, aclmdlIO
 
 aclError aclmdlGetInputDimsV2(const aclmdlDesc *modelDesc, size_t index, aclmdlIODims *dims)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelDesc);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dims);
 
@@ -1309,6 +1337,7 @@ static aclError GetCurOuputShapeInfo(const aclmdlDesc *modelDesc, size_t index,
 
 aclError aclmdlGetCurOutputDims(const aclmdlDesc *modelDesc, size_t index, aclmdlIODims *dims)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelDesc);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dims);
     uint32_t modelId = modelDesc->modelId;
@@ -1440,6 +1469,7 @@ const char *aclmdlGetInputNameByIndex(const aclmdlDesc *modelDesc, size_t index)
 
 const char *aclmdlGetOutputNameByIndex(const aclmdlDesc *modelDesc, size_t index)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlGetOutputNameByIndex");
     if (modelDesc == nullptr) {
         ACL_LOG_INNER_ERROR("[Check][ModelDesc]modelDesc is null");
@@ -1465,6 +1495,7 @@ static aclFormat aclmdlGetFormat(const std::vector<aclmdlTensorDesc> &desc, size
 
 aclFormat aclmdlGetInputFormat(const aclmdlDesc *modelDesc, size_t index)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlGetInputFormat");
     if (modelDesc == nullptr) {
         ACL_LOG_INNER_ERROR("[Check][ModelDesc]modelDesc is null");
@@ -1479,6 +1510,7 @@ aclFormat aclmdlGetInputFormat(const aclmdlDesc *modelDesc, size_t index)
 
 aclFormat aclmdlGetOutputFormat(const aclmdlDesc *modelDesc, size_t index)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlGetOutputFormat");
     if (modelDesc == nullptr) {
         ACL_LOG_INNER_ERROR("[Check][ModelDesc]modelDesc is null");
@@ -1504,6 +1536,7 @@ static aclDataType aclmdlGetDataType(const std::vector<aclmdlTensorDesc> &desc, 
 
 aclDataType aclmdlGetInputDataType(const aclmdlDesc *modelDesc, size_t index)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlGetInputDataType");
     if (modelDesc == nullptr) {
         ACL_LOG_INNER_ERROR("[Check][ModelDesc]modelDesc is null");
@@ -1517,6 +1550,7 @@ aclDataType aclmdlGetInputDataType(const aclmdlDesc *modelDesc, size_t index)
 
 aclDataType aclmdlGetOutputDataType(const aclmdlDesc *modelDesc, size_t index)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlGetOutputDataType");
     if (modelDesc == nullptr) {
         ACL_LOG_INNER_ERROR("[Check][ModelDesc]modelDesc is null");
@@ -1549,6 +1583,7 @@ static aclError aclmdlGetIndexByName(const std::vector<aclmdlTensorDesc> &desc, 
 
 aclError aclmdlGetInputIndexByName(const aclmdlDesc *modelDesc, const char *name, size_t *index)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlGetInputIndexByName");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelDesc);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(name);
@@ -1560,6 +1595,7 @@ aclError aclmdlGetInputIndexByName(const aclmdlDesc *modelDesc, const char *name
 
 aclError aclmdlGetOutputIndexByName(const aclmdlDesc *modelDesc, const char *name, size_t *index)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlGetOutputIndexByName");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelDesc);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(name);
@@ -1571,6 +1607,7 @@ aclError aclmdlGetOutputIndexByName(const aclmdlDesc *modelDesc, const char *nam
 
 aclError aclmdlGetDynamicBatch(const aclmdlDesc *modelDesc, aclmdlBatch *batch)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlGetDynamicBatch");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelDesc);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(batch);
@@ -1603,6 +1640,7 @@ aclError aclmdlGetDynamicBatch(const aclmdlDesc *modelDesc, aclmdlBatch *batch)
 
 aclError aclmdlGetDynamicHW(const aclmdlDesc *modelDesc, size_t index, aclmdlHW *hw)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlGetDynamicHW");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelDesc);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(hw);
@@ -1630,6 +1668,7 @@ aclError aclmdlGetDynamicHW(const aclmdlDesc *modelDesc, size_t index, aclmdlHW 
 
 aclError aclmdlGetInputDynamicGearCount(const aclmdlDesc *modelDesc, size_t index, size_t *gearCount)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlGetInputDynamicGearCount");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelDesc);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(gearCount);
@@ -1659,6 +1698,7 @@ aclError aclmdlGetInputDynamicGearCount(const aclmdlDesc *modelDesc, size_t inde
 
 aclError aclmdlGetInputDynamicDims(const aclmdlDesc *modelDesc, size_t index, aclmdlIODims *dims, size_t gearCount)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlGetInputDynamicDims");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelDesc);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dims);
@@ -1769,6 +1809,7 @@ aclError aclmdlCreateAndGetOpDesc(uint32_t deviceId, uint32_t streamId, uint32_t
 aclError aclmdlLoadWithConfig(const aclmdlConfigHandle *handle, uint32_t *modelId)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_MODEL);
+    ACL_STAGES_REG(acl::ACL_STAGE_LOAD, acl::ACL_STAGE_DEFAULT);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_LOAD_UNLOAD_MODEL);
     ACL_LOG_INFO("start to execute aclmdlLoadWithConfig");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(handle);
@@ -1862,6 +1903,7 @@ static const char *TransTensorNameToReal(const aclmdlDesc *modelDesc, const stri
 
 const char *aclmdlGetTensorRealName(const aclmdlDesc *modelDesc, const char *name)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlGetTensorName");
     ACL_REQUIRES_NOT_NULL_RET_NULL_INPUT_REPORT(modelDesc);
     ACL_REQUIRES_NOT_NULL_RET_NULL_INPUT_REPORT(name);

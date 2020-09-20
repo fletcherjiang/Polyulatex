@@ -35,6 +35,10 @@ void Split(const std::string &str, char delim, std::vector<std::string> &elems)
 
 bool IsDigit(const std::string &str)
 {
+    if (str.empty()) {
+        return false;
+    }
+
     for (const char &c : str) {
         if (!isdigit(c)) {
             return false;
