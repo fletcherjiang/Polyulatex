@@ -42,9 +42,9 @@ include_directories(${CMAKE_BINARY_DIR})
 set(UT_FILES
     "testcase/acl_common_unittest.cpp"
     "testcase/acl_toolchain_unittest.cpp"
-    "../compatibility/enum_check.cpp"
-    "../compatibility/const_check.cpp"
-    "../compatibility/offset_check.cpp"
+    "testcase/compatibility/enum_check.cpp"
+    "testcase/compatibility/const_check.cpp"
+    "testcase/compatibility/offset_check.cpp"
 )
 
 set(SRC_FILES
