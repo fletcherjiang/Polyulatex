@@ -295,7 +295,7 @@ TEST_F(UTEST_ACL_compatibility, struct_check_aclAippInfo)
     EXPECT_EQ(offset, offsetExpected);
 
     size_t total_size;
-    total_size = sizeof(aclAippInputFormat) + sizeof(aclFormat) + sizeof(aclDataType) +
-        + 2*sizeof(size_t) + 128*sizeof(aclAippDims) + sizeof (aclAippExtendInfo *) + 39*4 + 4 + 3*4;
+    total_size = sizeof(aclAippInputFormat) + sizeof(aclFormat) + sizeof(aclDataType) + 2*sizeof(size_t) +
+        128*sizeof(aclAippDims) + sizeof (aclAippExtendInfo *) + 39*4 + 4 + 3*4;
     EXPECT_EQ(sizeof(aclAippInfo), total_size);
 }
