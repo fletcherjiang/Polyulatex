@@ -12,16 +12,16 @@
 #undef private
 #endif
 
-class UTEST_ACL_compatibility : public testing::Test
+class UTEST_ACL_compatibility_const_check : public testing::Test
 {
     public:
-        UTEST_ACL_compatibility() {}
+        UTEST_ACL_compatibility_const_check() {}
     protected:
         virtual void SetUp() {}
         virtual void TearDown() {}
 };
 
-TEST_F(UTEST_ACL_compatibility, const_check_ge_error_codes)
+TEST_F(UTEST_ACL_compatibility_const_check, const_check_ge_error_codes)
 {
     EXPECT_EQ(ACL_ERROR_GE_PARAM_INVALID, 145000);
     EXPECT_EQ(ACL_ERROR_GE_EXEC_NOT_INIT, 145001);
@@ -54,7 +54,7 @@ TEST_F(UTEST_ACL_compatibility, const_check_ge_error_codes)
     EXPECT_EQ(ACL_ERROR_GE_UNLOAD_MODEL, 545009);
 }
 
-TEST_F(UTEST_ACL_compatibility, const_check_rt_error_codes)
+TEST_F(UTEST_ACL_compatibility_const_check, const_check_rt_error_codes)
 {
     EXPECT_EQ(ACL_ERROR_RT_PARAM_INVALID, 107000);
     EXPECT_EQ(ACL_ERROR_RT_INVALID_DEVICEID, 107001);
@@ -131,14 +131,14 @@ TEST_F(UTEST_ACL_compatibility, const_check_rt_error_codes)
     EXPECT_EQ(ACL_ERROR_RT_SOCKET_CLOSE, 507901);
 }
 
-TEST_F(UTEST_ACL_compatibility, const_check_acl)
+TEST_F(UTEST_ACL_compatibility_const_check, const_check_acl)
 {
     EXPECT_EQ(ACL_MAJOR_VERSION, 1);
     EXPECT_EQ(ACL_MINOR_VERSION, 0);
     EXPECT_EQ(ACL_PATCH_VERSION, 0);
 }
 
-TEST_F(UTEST_ACL_compatibility, const_check_acl_mdl)
+TEST_F(UTEST_ACL_compatibility_const_check, const_check_acl_mdl)
 {
     EXPECT_EQ(ACL_MAX_DIM_CNT, 128);
     EXPECT_EQ(ACL_MAX_TENSOR_NAME_LEN, 128);
@@ -159,7 +159,7 @@ TEST_F(UTEST_ACL_compatibility, const_check_acl_mdl)
     EXPECT_EQ(std::string(ACL_ATTR_NAME_DATA_DUMP_ORIGIN_OP_NAMES), std::string("_datadump_original_op_names"));
 }
 
-TEST_F(UTEST_ACL_compatibility, const_check_acl_base)
+TEST_F(UTEST_ACL_compatibility_const_check, const_check_acl_base)
 {
     EXPECT_EQ(ACL_ERROR_NONE, 0);
     EXPECT_EQ(ACL_SUCCESS, 0);
@@ -238,7 +238,7 @@ TEST_F(UTEST_ACL_compatibility, const_check_acl_base)
     EXPECT_EQ(ACL_UNKNOWN_RANK, 0xFFFFFFFFFFFFFFFE);
 }
 
-TEST_F(UTEST_ACL_compatibility, const_check_acl_prof)
+TEST_F(UTEST_ACL_compatibility_const_check, const_check_acl_prof)
 {
     EXPECT_EQ(ACL_PROF_ACL_API, 0x0001);
     EXPECT_EQ(ACL_PROF_TASK_TIME, 0x0002);
@@ -249,7 +249,7 @@ TEST_F(UTEST_ACL_compatibility, const_check_acl_prof)
     EXPECT_EQ(ACL_PROF_MAX_OP_TYPE_LEN, 65);
 }
 
-TEST_F(UTEST_ACL_compatibility, const_check_acl_op)
+TEST_F(UTEST_ACL_compatibility_const_check, const_check_acl_op)
 {
     EXPECT_EQ(ACL_COMPILE_FLAG_BIN_SELECTOR, 1);
 }

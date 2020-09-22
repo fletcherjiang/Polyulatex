@@ -9,16 +9,16 @@
 
 #define OFFSET_OF_MEMBER(type, member) (size_t)(&(((type *)0)->member))
 
-class UTEST_ACL_compatibility : public testing::Test
+class UTEST_ACL_compatibility_struct_check : public testing::Test
 {
     public:
-        UTEST_ACL_compatibility() {}
+        UTEST_ACL_compatibility_struct_check() {}
     protected:
         virtual void SetUp() {}
         virtual void TearDown() {}
 };
 
-TEST_F(UTEST_ACL_compatibility, struct_check_aclmdlIODims)
+TEST_F(UTEST_ACL_compatibility_struct_check, struct_check_aclmdlIODims)
 {
     // check every member
     size_t offset;
@@ -35,7 +35,7 @@ TEST_F(UTEST_ACL_compatibility, struct_check_aclmdlIODims)
     EXPECT_EQ(sizeof(aclmdlIODims), 128 + sizeof(size_t) + 128*sizeof(int64_t));
 }
 
-TEST_F(UTEST_ACL_compatibility, struct_check_aclAippDims)
+TEST_F(UTEST_ACL_compatibility_struct_check, struct_check_aclAippDims)
 {
     size_t offset;
     offset = OFFSET_OF_MEMBER(aclAippDims, srcDims);
@@ -53,7 +53,7 @@ TEST_F(UTEST_ACL_compatibility, struct_check_aclAippDims)
     EXPECT_EQ(sizeof(aclAippDims), 2*(sizeof(size_t) + sizeof(aclmdlIODims)));
 }
 
-TEST_F(UTEST_ACL_compatibility, struct_check_aclmdlBatch)
+TEST_F(UTEST_ACL_compatibility_struct_check, struct_check_aclmdlBatch)
 {
     size_t offset;
     offset = OFFSET_OF_MEMBER(aclmdlBatch, batchCount);
@@ -65,7 +65,7 @@ TEST_F(UTEST_ACL_compatibility, struct_check_aclmdlBatch)
     EXPECT_EQ(sizeof(aclmdlBatch), sizeof(size_t) + 128*sizeof(uint64_t));
 }
 
-TEST_F(UTEST_ACL_compatibility, struct_check_aclmdlHW)
+TEST_F(UTEST_ACL_compatibility_struct_check, struct_check_aclmdlHW)
 {
     size_t offset;
     offset = OFFSET_OF_MEMBER(aclmdlHW, hwCount);
@@ -77,7 +77,7 @@ TEST_F(UTEST_ACL_compatibility, struct_check_aclmdlHW)
     EXPECT_EQ(sizeof(aclmdlHW), sizeof(size_t) + 2*128*sizeof(uint64_t));
 }
 
-TEST_F(UTEST_ACL_compatibility, struct_check_aclAippInfo)
+TEST_F(UTEST_ACL_compatibility_struct_check, struct_check_aclAippInfo)
 {
     size_t offset;
     size_t offsetExpected;
