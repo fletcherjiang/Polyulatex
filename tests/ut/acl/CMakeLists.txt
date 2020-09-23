@@ -44,7 +44,7 @@ set(UT_FILES
     "testcase/acl_toolchain_unittest.cpp"
     "testcase/compatibility/enum_check.cpp"
     "testcase/compatibility/const_check.cpp"
-    "testcase/compatibility/offset_check.cpp"
+    "testcase/compatibility/struct_check.cpp"
 )
 
 set(SRC_FILES
