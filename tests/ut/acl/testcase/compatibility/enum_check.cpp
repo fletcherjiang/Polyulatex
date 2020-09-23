@@ -22,7 +22,7 @@ class UTEST_ACL_compatibility_enum_check : public testing::Test
         virtual void TearDown() {}
 };
 
-TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclDataType)
+TEST_F(UTEST_ACL_compatibility_enum_check, aclDataType)
 {
     aclDataType dataType;
     dataType = (aclDataType)-1;
@@ -68,7 +68,7 @@ TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclDataType)
     EXPECT_EQ(dataType, ACL_STRING);
 }
 
-TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclFormat)
+TEST_F(UTEST_ACL_compatibility_enum_check, aclFormat)
 {
     aclFormat format;
     format = (aclFormat)-1;
@@ -108,7 +108,7 @@ TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclFormat)
     EXPECT_EQ(format, ACL_FRACTAL_Z_3D);
 }
 
-TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclMemType)
+TEST_F(UTEST_ACL_compatibility_enum_check, aclMemType)
 {
     aclMemType memType;
     memType = (aclMemType)0;
@@ -118,7 +118,7 @@ TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclMemType)
     EXPECT_EQ(memType, ACL_MEMTYPE_HOST);
 }
 
-TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclAippInputFormat)
+TEST_F(UTEST_ACL_compatibility_enum_check, aclAippInputFormat)
 {
     aclAippInputFormat format;
     format = (aclAippInputFormat)1;
@@ -167,7 +167,7 @@ TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclAippInputFormat)
     EXPECT_EQ(format, ACL_AIPP_RESERVED);
 }
 
-TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclmdlConfigAttr)
+TEST_F(UTEST_ACL_compatibility_enum_check, aclmdlConfigAttr)
 {
     aclmdlConfigAttr configAttr;
     configAttr = (aclmdlConfigAttr)0;
@@ -210,7 +210,7 @@ TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclmdlConfigAttr)
     EXPECT_EQ(configAttr, ACL_MDL_OUTPUTQ_ADDR_PTR);
 }
 
-TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclmdlInputAippType)
+TEST_F(UTEST_ACL_compatibility_enum_check, aclmdlInputAippType)
 {
     aclmdlInputAippType inputAippType;
     inputAippType = (aclmdlInputAippType)0;
@@ -226,7 +226,7 @@ TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclmdlInputAippType)
     EXPECT_EQ(inputAippType, ACL_DYNAMIC_AIPP_NODE);
 }
 
-TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclCompileType)
+TEST_F(UTEST_ACL_compatibility_enum_check, aclCompileType)
 {
     aclopCompileType compileType;
     compileType = (aclopCompileType)0;
@@ -236,7 +236,7 @@ TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclCompileType)
     EXPECT_EQ(compileType, ACL_COMPILE_UNREGISTERED);
 }
 
-TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclCompileOpt)
+TEST_F(UTEST_ACL_compatibility_enum_check, aclCompileOpt)
 {
     aclCompileOpt compileOpt;
     compileOpt = (aclCompileOpt)0;
@@ -270,7 +270,7 @@ TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclCompileOpt)
     EXPECT_EQ(compileOpt, ACL_OP_PERFORMANCE_MODE);
 }
 
-TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclCompileFlag)
+TEST_F(UTEST_ACL_compatibility_enum_check, aclCompileFlag)
 {
     aclOpCompileFlag compileFlag;
     compileFlag = (aclCompileFlag)0;
@@ -280,7 +280,7 @@ TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclCompileFlag)
     EXPECT_EQ(compileFlag, ACL_OP_COMPILE_FUZZ);
 }
 
-TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclopEngineType)
+TEST_F(UTEST_ACL_compatibility_enum_check, aclopEngineType)
 {
     aclopEngineType engineType;
     engineType = (aclopEngineType)0;
@@ -293,7 +293,7 @@ TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclopEngineType)
     EXPECT_EQ(engineType, ACL_ENGINE_VECTOR);
 }
 
-TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclprofAicoreMetrics)
+TEST_F(UTEST_ACL_compatibility_enum_check, aclprofAicoreMetrics)
 {
     aclprofAicoreMetrics aicoreMetrics;
     aicoreMetrics = (aclprofAicoreMetrics)0;
@@ -315,7 +315,7 @@ TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclprofAicoreMetrics)
     EXPECT_EQ(aicoreMetrics, ACL_AICORE_NONE);
 }
 
-TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclrtRunMode)
+TEST_F(UTEST_ACL_compatibility_enum_check, aclrtRunMode)
 {
     aclrtRunMode runMode;
     runMode = (aclrtRunMode)0;
@@ -325,7 +325,7 @@ TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclrtRunMode)
     EXPECT_EQ(runMode, ACL_HOST);
 }
 
-TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclrtTsId)
+TEST_F(UTEST_ACL_compatibility_enum_check, aclrtTsId)
 {
     aclrtTsId tsId;
     tsId = (aclrtTsId)0;
@@ -338,7 +338,7 @@ TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclrtTsId)
     EXPECT_EQ(tsId, ACL_TS_ID_RESERVED);
 }
 
-TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclrtEventStatus)
+TEST_F(UTEST_ACL_compatibility_enum_check, aclrtEventStatus)
 {
     aclrtEventStatus eventStatus;
     eventStatus = (aclrtEventStatus)0;
@@ -351,7 +351,7 @@ TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclrtEventStatus)
     EXPECT_EQ(eventStatus, ACL_EVENT_STATUS_RESERVED);
 }
 
-TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclrtCallbackBlockType)
+TEST_F(UTEST_ACL_compatibility_enum_check, aclrtCallbackBlockType)
 {
     aclrtCallbackBlockType blockType;
     blockType = (aclrtCallbackBlockType)0;
@@ -361,7 +361,7 @@ TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclrtCallbackBlockType)
     EXPECT_EQ(blockType, ACL_CALLBACK_BLOCK);
 }
 
-TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclrtMemcpyKind)
+TEST_F(UTEST_ACL_compatibility_enum_check, aclrtMemcpyKind)
 {
     aclrtMemcpyKind memoryKind;
     memoryKind = (aclrtMemcpyKind)0;
@@ -377,7 +377,7 @@ TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclrtMemcpyKind)
     EXPECT_EQ(memoryKind, ACL_MEMCPY_DEVICE_TO_DEVICE);
 }
 
-TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclrtMemMallocPolicy)
+TEST_F(UTEST_ACL_compatibility_enum_check, aclrtMemMallocPolicy)
 {
     aclrtMemMallocPolicy policy;
     policy = (aclrtMemMallocPolicy)0;
@@ -399,7 +399,7 @@ TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclrtMemMallocPolicy)
     EXPECT_EQ(policy, ACL_MEM_MALLOC_NORMAL_ONLY_P2P);
 }
 
-TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclrtMemAttr)
+TEST_F(UTEST_ACL_compatibility_enum_check, aclrtMemAttr)
 {
     aclrtMemAttr memAttr;
     memAttr = (aclrtMemAttr)0;
@@ -433,7 +433,7 @@ TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclrtMemAttr)
     EXPECT_EQ(memAttr, ACL_HBM_MEM_P2P_NORMAL);
 }
 
-TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclrtGroupAttr)
+TEST_F(UTEST_ACL_compatibility_enum_check, aclrtGroupAttr)
 {
     aclrtGroupAttr groupAttr;
     groupAttr = (aclrtGroupAttr)0;
@@ -455,7 +455,7 @@ TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclrtGroupAttr)
     EXPECT_EQ(groupAttr, ACL_GROUP_GROUPID_INT);
 }
 
-TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_acltdtTensorType)
+TEST_F(UTEST_ACL_compatibility_enum_check, acltdtTensorType)
 {
     acltdtTensorType tensorType;
     tensorType = (acltdtTensorType)-1;
@@ -471,7 +471,7 @@ TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_acltdtTensorType)
     EXPECT_EQ(tensorType, ACL_TENSOR_DATA_ABNORMAL);
 }
 
-TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclTransType)
+TEST_F(UTEST_ACL_compatibility_enum_check, aclTransType)
 {
     aclTransType transType;
     transType = (aclTransType)0;
@@ -487,7 +487,7 @@ TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclTransType)
     EXPECT_EQ(transType, ACL_TRANS_NZ_T);
 }
 
-TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclComputeType)
+TEST_F(UTEST_ACL_compatibility_enum_check, aclComputeType)
 {
     aclComputeType computeType;
     computeType = (aclComputeType)0;
@@ -497,7 +497,7 @@ TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclComputeType)
     EXPECT_EQ(computeType, ACL_COMPUTE_LOW_PRECISION);
 }
 
-TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclfvSearchType)
+TEST_F(UTEST_ACL_compatibility_enum_check, aclfvSearchType)
 {
     aclfvSearchType searchType;
     searchType = (aclfvSearchType)0;
@@ -507,7 +507,7 @@ TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclfvSearchType)
     EXPECT_EQ(searchType, SEARCH_N_M);
 }
 
-TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_acldvppStreamFormat)
+TEST_F(UTEST_ACL_compatibility_enum_check, acldvppStreamFormat)
 {
     acldvppStreamFormat format;
     format = (acldvppStreamFormat)0;
@@ -523,7 +523,7 @@ TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_acldvppStreamFormat)
     EXPECT_EQ(format, H264_HIGH_LEVEL);
 }
 
-TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_acldvppChannelMode)
+TEST_F(UTEST_ACL_compatibility_enum_check, acldvppChannelMode)
 {
     acldvppChannelMode mode;
     mode = (acldvppChannelMode)1;
@@ -536,7 +536,7 @@ TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_acldvppChannelMode)
     EXPECT_EQ(mode, DVPP_CHNMODE_JPEGE);
 }
 
-TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_acldvppBorderType)
+TEST_F(UTEST_ACL_compatibility_enum_check, acldvppBorderType)
 {
     acldvppBorderType type;
     type = (acldvppBorderType)0;
@@ -554,7 +554,7 @@ TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_acldvppBorderType)
     EXPECT_EQ(type, BORDER_REFLECT_101);
 }
 
-TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclvencChannelDescParamType)
+TEST_F(UTEST_ACL_compatibility_enum_check, aclvencChannelDescParamType)
 {
     aclvencChannelDescParamType type;
     type = (aclvencChannelDescParamType)0;
@@ -597,7 +597,7 @@ TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_aclvencChannelDescParamTyp
     EXPECT_EQ(type, ACL_VENC_MAX_IP_PROP_UINT32);
 }
 
-TEST_F(UTEST_ACL_compatibility_enum_check, enum_check_acldvppJpegFormat)
+TEST_F(UTEST_ACL_compatibility_enum_check, acldvppJpegFormat)
 {
     acldvppJpegFormat format;
     format = (acldvppJpegFormat)0;
