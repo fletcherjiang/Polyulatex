@@ -183,6 +183,18 @@ static aclError UpdateTensorAttrs(std::vector<aclTensorDesc> &tensorDescs,
                          shape.size(), shapeRange.size());
             tensorDescs[index].UpdateTensorShape(shapeByAttr);
             tensorDescs[index].UpdateTensorShapeRange(rangesByAttr);
+            if ((ge::AttrUtils::HasAttr(tensorAttr, "value_range")) && (ge::AttrUtils::HasAttr(tensorAttr, "value"))) {
+                ACL_LOG_INNER_ERROR("value and value_range can not be existed at the same time");
+                return ACL_ERROR_PARSE_MODEL;
+            }
+            if (ge::AttrUtils::HasAttr(tensorAttr, "value_range")) {
+                ACL_LOG_INFO("find value_range attr in %ld", index);
+                tensorDescs[index].valueRange[RANGE_TYPE] = tensorAttr.GetItem("value_range");
+            }
+            if (ge::AttrUtils::HasAttr(tensorAttr, "value")) {
+                ACL_LOG_INFO("find value attr in %ld", index);
+                tensorDescs[index].valueRange[VALUE_TYPE] = tensorAttr.GetItem("value");
+            }
             index++;
         }
     }

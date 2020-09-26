@@ -299,7 +299,7 @@ bool AttrListValueEquals(const ge::GeAttrValue &lhs, const ge::GeAttrValue &rhs)
     return lhsValue == rhsValue;
 }
 
-bool IsListFloatEquals(vector<float> &lhsValue, vector<float> &rhsValue)
+bool IsListFloatEquals(const vector<float> &lhsValue, const vector<float> &rhsValue)
 {
     if (lhsValue.size() != rhsValue.size()) {
         return false;
@@ -368,6 +368,205 @@ bool AttrValueEquals(const ge::GeAttrValue &lhs, const ge::GeAttrValue &rhs)
             ACL_LOG_INNER_ERROR("[Check][Type]Unknown type %d", static_cast<int32_t>(type));
             return false;
     }
+}
+
+template<typename T>
+bool CheckValueRange(const std::vector<std::vector<T>> &valueRange, const std::vector<T> &data)
+{
+    if (valueRange.size() != data.size()) {
+        ACL_LOG_WARN("input data size [%zu] must be equal to value range size [%zu]", data.size(), valueRange.size());
+        return false;
+    }
+    for (size_t i = 0; i < valueRange.size(); ++i) {
+        if (valueRange.size() != 2) {
+            ACL_LOG_WARN("range size must be 2");
+            return false;
+        }
+        ACL_LOG_DEBUG("min is %s, max is %s, value is %s", std::to_string(valueRange[i][0]).c_str(),
+                      std::to_string(valueRange[i][1]).c_str(), std::to_string(data[i]).c_str());
+        if ((valueRange[i][0] > data[i]) || (valueRange[i][1] < data[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
+template<typename T>
+bool CheckValueExact(const std::::vector<T> &valueRange, const std::vector<T> &data)
+{
+    if (valueRange.size() != data.size()) {
+        ACL_LOG_WARN("input data size [%zu] must be equal to value range size [%zu]", data.size(), valueRange.size());
+        return false;
+    }
+    for (size_t i = 0; i < valueRange.size(); ++i) {
+        ACL_LOG_DEBUG("valeRange is %s, value is %s", std::to_string(valueRange[i]).c_str(),
+                      std::to_string(data[i]).c_str());
+        if (valueRange[i] != data[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool GetInputData(const aclDataBuffer *value, aclDataType dataType,
+                  std::::vector<int64_t> &inputIntData, std::::vector<float> &inputFloatData)
+{
+    switch (dataType) {
+        case ACL_FLOAT:
+            for (size_t i = 0; i < (value->length / sizeof(float)); ++i) {
+                inputFloatData.push_back(*(reinterpret_cast<const float *>(value->data) + i));
+            }
+            break;
+        case ACL_FLOAT16:
+            for (size_t i = 0; i < (value->length / sizeof(float) * 2); ++i) {
+                inputFloatData.push_back(aclFloat16ToFloat(*(reinterpret_cast<const float *>(value->data) + i)));
+            }
+            break;
+        case ACL_INT8:
+            for (size_t i = 0; i < (value->length / sizeof(int8_t)); ++i) {
+                inputIntData.push_back(*(reinterpret_cast<const int8_t *>(value->data) + i));
+            }
+            break;
+        case ACL_UINT8:
+            for (size_t i = 0; i < (value->length / sizeof(uint8_t)); ++i) {
+                inputIntData.push_back(*(reinterpret_cast<const uint8_t *>(value->data) + i));
+            }
+            break;
+        case ACL_INT16:
+            for (size_t i = 0; i < (value->length / sizeof(int16_t)); ++i) {
+                inputIntData.push_back(*(reinterpret_cast<const int16_t *>(value->data) + i));
+            }
+            break;
+        case ACL_UINT16:
+            for (size_t i = 0; i < (value->length / sizeof(uint16_t)); ++i) {
+                inputIntData.push_back(*(reinterpret_cast<const uint16_t *>(value->data) + i));
+            }
+            break;
+        case ACL_INT32:
+            for (size_t i = 0; i < (value->length / sizeof(int32_t)); ++i) {
+                inputIntData.push_back(*(reinterpret_cast<const int32_t *>(value->data) + i));
+            }
+            break;
+        case ACL_UINT32:
+            for (size_t i = 0; i < (value->length / sizeof(uint32_t)); ++i) {
+                inputIntData.push_back(*(reinterpret_cast<const uint32_t *>(value->data) + i));
+            }
+            break;
+        case ACL_INT64:
+            for (size_t i = 0; i < (value->length / sizeof(int64_t)); ++i) {
+                inputIntData.push_back(*(reinterpret_cast<const int64_t *>(value->data) + i));
+            }
+            break;
+        case ACL_UINT64:
+            for (size_t i = 0; i < (value->length / sizeof(uint64_t)); ++i) {
+                inputIntData.push_back(*(reinterpret_cast<const uint64_t *>(value->data) + i));
+            }
+            break;
+        default:
+            ACL_LOG_WARN("unsupported type: %d", type);
+            return false;
+    }
+    ACL_LOG_INFO("Get input data success, dt is %d, int type size is %zu, float type size is %zu",
+                 dataType, inputIntData.size(), inputFloatData.size());
+    return true;
+}
+
+bool CheckIntValueRange(const std::map<AttrRangeType, ge::GeAttrValue> &valueRange,
+                        const std::vector<int64_t> &inputIntData)
+{
+    // Check range
+    auto it = valueRange.find(RANGE_TYPE);
+    if (it != valueRange.end()) {
+        std::vector<std::vector<int64_t>> valRangeInt;
+        if (it->second.GetValue<vector<vector<int64_t>>>(valRangeInt) == ge::GRAPH_SUCCESS) {
+            ACL_LOG_INFO("Get listlistInt value");
+            return CheckValueRange(valRangeInt, inputIntData);
+        } else {
+            vetcor<int64_t> tmpInt;
+            if (it->second.GetValue<vector<int64_t>>(tmpInt) == ge::GRAPH_SUCCESS) {
+                valRangeInt.push_back(tmpInt);
+                ACL_LOG_INFO("Get listInt value");
+                return CheckValueRange(valRangeInt, inputIntData);
+            }
+        }
+    }
+    // Check value
+    it = valueRange.find(VALUE_TYPE);
+    if (it != valueRange.end()) {
+        std::vector<int64_t> valExactInt;
+        if (it->second.GetValue<vector<vector<int64_t>>>(valExactInt) == ge::GRAPH_SUCCESS) {
+            ACL_LOG_INFO("Get listInt value");
+            return CheckValueExact(valExactInt, inputIntData);
+        } else {
+            int64_t tmpInt;
+            if (it->second.GetValue<int64_t>(tmpInt) == ge::GRAPH_SUCCESS) {
+                valExactInt.push_back(tmpInt);
+                ACL_LOG_INFO("Get int value");
+                return CheckValueRange(valExactInt, inputIntData);
+            }
+        }
+    }
+    return true;
+}
+
+bool CheckFloatValueRange(const std::map<AttrRangeType, ge::GeAttrValue> &valueRange,
+                          const std::vector<float> &inputFloatData)
+{
+    // Check range
+    auto it = valueRange.find(RANGE_TYPE);
+    if (it != valueRange.end()) {
+        std::vector<std::vector<float>> valRangeFloat;
+        if (it->second.GetValue<vector<vector<float>>>(valRangeFloat) == ge::GRAPH_SUCCESS) {
+            ACL_LOG_INFO("Get listlistfloat value");
+            return CheckValueRange(valRangeFloat, inputIntData);
+        } else {
+            vetcor<float> tmpFloat;
+            if (it->second.GetValue<vector<float>>(tmpFloat) == ge::GRAPH_SUCCESS) {
+                valRangeFloat.push_back(tmpFloat);
+                ACL_LOG_INFO("Get listfloat value");
+                return CheckValueRange(valRangeFloat, inputIntData);
+            }
+        }
+    }
+    // Check value
+    it = valueRange.find(VALUE_TYPE);
+    if (it != valueRange.end()) {
+        std::vector<float> valExactFloat;
+        if (it->second.GetValue<vector<vector<float>>>(valExactFloat) == ge::GRAPH_SUCCESS) {
+            ACL_LOG_INFO("Get listfloat value");
+            return IsListFloatEquals(valExactFloat, inputIntData);
+        } else {
+            float tmpFloat;
+            if (it->second.GetValue<float>(tmpFloat) == ge::GRAPH_SUCCESS) {
+                valExactFloat.push_back(tmpFloat);
+                ACL_LOG_INFO("Get float value");
+                return IsListFloatEquals(valExactFloat, inputIntData);
+            }
+        }
+    }
+    return true;
+}
+
+bool valueRangeCheck(const std::map<AttrRangeType, ge::GeAttrValue> &valueRange,
+                     const aclDataBuffer *value, aclDataType dataType)
+{
+    // value is not nullptr
+    if (value->data == nullptr) {
+        return true;
+    }
+    std::vector<int64_t> inputIntData;
+    std::vector<float> inputFloatData;
+    if (!GetInputData(value, dataType, inputIntData, inputFloatData)) {
+        return false;
+    }
+    // check value range
+    if (!inputIntData.empty()) {
+        return CheckIntValueRange(valueRange, inputIntData);
+    }
+    if (!inputFloatData.empty()) {
+        return CheckFloatValueRange(valueRange, inputFloatData);
+    }
+    return true;
 }
 
 bool OpAttrEquals(const aclopAttr *lhs, const aclopAttr *rhs)
