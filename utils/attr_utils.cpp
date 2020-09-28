@@ -463,7 +463,7 @@ bool GetInputData(const aclDataBuffer *value, aclDataType dataType,
             }
             break;
         default:
-            ACL_LOG_WARN("unsupported type: %d", type);
+            ACL_LOG_WARN("unsupported type: %d", dataType);
             return false;
     }
     ACL_LOG_INFO("Get input data success, dt is %d, int type size is %zu, float type size is %zu",
@@ -532,7 +532,7 @@ bool CheckFloatValueRange(const std::map<AttrRangeType, ge::GeAttrValue> &valueR
     it = valueRange.find(VALUE_TYPE);
     if (it != valueRange.end()) {
         std::vector<float> valExactFloat;
-        if (it->second.GetValue<vector<vector<float>>>(valExactFloat) == ge::GRAPH_SUCCESS) {
+        if (it->second.GetValue<vector<float>>(valExactFloat) == ge::GRAPH_SUCCESS) {
             ACL_LOG_INFO("Get listfloat value");
             return IsListFloatEquals(valExactFloat, inputFloatData);
         } else {
