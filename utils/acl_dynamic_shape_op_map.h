@@ -205,8 +205,7 @@ bool CheckValueRange(const AclOp &aclOp, T &entry)
             }
         }
     }
-    for (size_t i = 0; i < entry->outputDescArr.size();
-     ++i) {
+    for (size_t i = 0; i < entry->outputDescArr.size(); ++i) {
         if ((entry->outputDescArr[i].IsHostMemTensor()) && (!entry->outputDescArr[i].valueRange.empty())) {
             ACL_LOG_INFO("the output [%zu] needs to check value range", i);
             if (!attr_utils::ValueRangeCheck(entry->outputDescArr[i].valueRange,
