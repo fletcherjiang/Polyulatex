@@ -482,7 +482,7 @@ bool CheckIntValueRange(const std::map<AttrRangeType, ge::GeAttrValue> &valueRan
             ACL_LOG_INFO("Get listlistInt value");
             return CheckValueRange(valRangeInt, inputIntData);
         } else {
-            vector<int64_t> tmpInt = 0;
+            vector<int64_t> tmpInt;
             if (it->second.GetValue<vector<int64_t>>(tmpInt) == ge::GRAPH_SUCCESS) {
                 valRangeInt.push_back(tmpInt);
                 ACL_LOG_INFO("Get listInt value");
@@ -520,7 +520,7 @@ bool CheckFloatValueRange(const std::map<AttrRangeType, ge::GeAttrValue> &valueR
             ACL_LOG_INFO("Get listlistfloat value");
             return CheckValueRange(valRangeFloat, inputFloatData);
         } else {
-            vector<float> tmpFloat = 0.0;
+            vector<float> tmpFloat;
             if (it->second.GetValue<vector<float>>(tmpFloat) == ge::GRAPH_SUCCESS) {
                 valRangeFloat.push_back(tmpFloat);
                 ACL_LOG_INFO("Get listfloat value");
