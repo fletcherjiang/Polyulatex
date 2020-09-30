@@ -789,12 +789,6 @@ std::map<string, GeAttrValue> g_geAttrMap;
         return GRAPH_SUCCESS;
     }
 
-    graphStatus GeAttrValue::GetValue(std::vector<int64_t>& value) const
-    {
-        value = g_geAttrValueListInt;
-        return GRAPH_SUCCESS;
-    }
-
     graphStatus GeAttrValue::GetValue(std::vector<std::vector<int64_t>>& value) const
     {
         value = g_geAttrValueListListInt;
