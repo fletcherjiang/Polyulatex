@@ -193,7 +193,7 @@ void AclShapeRangeMap<T>::AddMemAndAging(std::vector<std::pair<aclopAttr, T>> &m
 }
 
 template<typename T>
-bool CheckValueRange(const AclOp &aclOp, T &entry)
+bool AclShapeRangeMap<T>::CheckValueRange(const AclOp &aclOp, T &entry)
 {
     for (size_t i = 0; i < entry->inputDescArr.size(); ++i) {
         if ((entry->inputDescArr[i].IsHostMemTensor()) && (!entry->inputDescArr[i].valueRange.empty())) {
