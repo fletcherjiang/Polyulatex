@@ -547,7 +547,7 @@ bool CheckFloatValueRange(const std::map<AttrRangeType, ge::GeAttrValue> &valueR
     return true;
 }
 
-bool valueRangeCheck(const std::map<AttrRangeType, ge::GeAttrValue> &valueRange,
+bool ValueRangeCheck(const std::map<AttrRangeType, ge::GeAttrValue> &valueRange,
                      const aclDataBuffer *value, aclDataType dataType)
 {
     // value is not nullptr
