@@ -419,7 +419,7 @@ bool GetInputData(const aclDataBuffer *value, aclDataType dataType,
             break;
         case ACL_FLOAT16:
             for (size_t i = 0; i < (value->length / sizeof(float) * 2); ++i) {
-                inputFloatData.push_back(aclFloat16ToFloat(*(reinterpret_cast<const float *>(value->data) + i)));
+                inputFloatData.push_back(aclFloat16ToFloat(*(reinterpret_cast<const aclFloat16 *>(value->data) + i)));
             }
             break;
         case ACL_INT8:
