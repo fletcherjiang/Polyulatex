@@ -378,7 +378,7 @@ bool CheckValueRange(const std::vector<std::vector<T>> &valueRange, const std::v
         return false;
     }
     for (size_t i = 0; i < valueRange.size(); ++i) {
-        if (valueRange.size() != 2) {
+        if (valueRange.[i]size() != 2) {
             ACL_LOG_WARN("range size must be 2");
             return false;
         }
