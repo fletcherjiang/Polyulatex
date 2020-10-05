@@ -52,7 +52,9 @@ void aclTensorDesc::Init(const aclTensorDesc &tensorDesc)
     this->cachedKey = tensorDesc.cachedKey;
     this->cachedShapeKey = tensorDesc.cachedShapeKey;
     this->memtype = tensorDesc.memtype;
-    this->valueRange = tensorDesc.valueRange;
+    for (auto it = tensorDesc.valueRange.begin(); it != tensorDesc.valueRange.end(); ++it) {
+        this->valueRange[it->first] = it->second.Copy();
+    }
 }
 
 aclTensorDesc::aclTensorDesc(const aclTensorDesc &tensorDesc)
