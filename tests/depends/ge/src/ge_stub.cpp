@@ -659,6 +659,11 @@ std::map<string, GeAttrValue> g_geAttrMap;
     {
     }
 
+    GeAttrValue GeAttrValue::Copy() const {
+        GeAttrValue value;
+        return value;
+    }
+
     graphStatus GeAttrValue::SetValue(bool const& value)
     {
         g_geAttrValueType = GeAttrValue::VT_BOOL;
