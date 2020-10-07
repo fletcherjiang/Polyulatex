@@ -328,7 +328,7 @@ aclError AclShapeRangeMap<T>::Get(const AclOp &aclOp, T &entry, bool needUpdateT
                 ACL_LOG_INFO("check value rangr success");
                 matchedByRange = &attrAndValue.second;
                 break;
-            }  
+            }
         }
     }
 
