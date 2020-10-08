@@ -325,7 +325,7 @@ aclError AclShapeRangeMap<T>::Get(const AclOp &aclOp, T &entry, bool needUpdateT
     for (auto &attrAndValue : entries) {
         if (attr_utils::OpAttrEquals(&attrAndValue.first, opAttr)) {
             if (CheckValueRange(aclOp, attrAndValue.second)) {
-                ACL_LOG_INFO("check value rangr success");
+                ACL_LOG_INFO("check value range success");
                 matchedByRange = &attrAndValue.second;
                 break;
             }

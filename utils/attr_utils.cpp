@@ -418,7 +418,7 @@ bool GetInputData(const aclDataBuffer *value, aclDataType dataType,
             }
             break;
         case ACL_FLOAT16:
-            for (size_t i = 0; i < (value->length / sizeof(float) * 2); ++i) {
+            for (size_t i = 0; i < (value->length / sizeof(aclFloat16)); ++i) {
                 inputFloatData.push_back(aclFloat16ToFloat(*(reinterpret_cast<const aclFloat16 *>(value->data) + i)));
             }
             break;
@@ -487,6 +487,9 @@ bool CheckIntValueRange(const std::map<AttrRangeType, ge::GeAttrValue> &valueRan
                 valRangeInt.push_back(tmpInt);
                 ACL_LOG_INFO("Get listInt value");
                 return CheckValueRange(valRangeInt, inputIntData);
+            } else {
+                ACL_LOG_WARN("can not find listlist or list data struct");
+                return false;
             }
         }
     }
@@ -503,6 +506,9 @@ bool CheckIntValueRange(const std::map<AttrRangeType, ge::GeAttrValue> &valueRan
                 valExactInt.push_back(tmpInt);
                 ACL_LOG_INFO("Get int value");
                 return CheckValueExact(valExactInt, inputIntData);
+            } else {
+                ACL_LOG_WARN("can not find list or single data struct");
+                return false;
             }
         }
     }

@@ -55,6 +55,7 @@ struct ACL_FUNC_VISIBILITY aclTensorDesc {
     std::shared_ptr<void> constDataBuf;
     size_t constDataLen = 0;
     aclMemType memtype = ACL_MEMTYPE_DEVICE;
+    // for windows compile,use map ignore dvpp.so find the implementation GeAttrValue
     std::map<AttrRangeType, ge::GeAttrValue> valueRange;
 
     const std::string& GetKey() const;
