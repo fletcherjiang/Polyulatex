@@ -52,6 +52,9 @@ void aclTensorDesc::Init(const aclTensorDesc &tensorDesc)
     this->cachedKey = tensorDesc.cachedKey;
     this->cachedShapeKey = tensorDesc.cachedShapeKey;
     this->memtype = tensorDesc.memtype;
+    for (auto it = tensorDesc.valueRange.begin(); it != tensorDesc.valueRange.end(); ++it) {
+        this->valueRange[it->first] = it->second.Copy();
+    }
 }
 
 aclTensorDesc::aclTensorDesc(const aclTensorDesc &tensorDesc)
@@ -142,6 +145,9 @@ bool aclTensorDesc::IsDynamicTensor() const
         if ((dims[i] == UNKNOW_DIM) || (dims[i] == UNKNOW_RANK)) {
             return true;
         }
+    }
+    if (!valueRange.empty()) {
+        return true;
     }
     return false;
 }

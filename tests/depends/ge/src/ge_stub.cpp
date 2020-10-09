@@ -78,6 +78,7 @@ std::vector<std::string> g_geAttrValueListString;
 std::vector<float> g_geAttrValueListFloat;
 std::vector<int64_t> g_geAttrValueListInt;
 std::vector<std::vector<int64_t>> g_geAttrValueListListInt;
+std::vector<std::vector<float>> g_geAttrValueListListFloat;
 
 ge::GeAttrValue::ValueType g_geAttrValueType = ge::GeAttrValue::VT_FLOAT;
 
@@ -658,6 +659,11 @@ std::map<string, GeAttrValue> g_geAttrMap;
     {
     }
 
+    GeAttrValue GeAttrValue::Copy() const {
+        GeAttrValue value;
+        return value;
+    }
+
     graphStatus GeAttrValue::SetValue(bool const& value)
     {
         g_geAttrValueType = GeAttrValue::VT_BOOL;
@@ -782,7 +788,7 @@ std::map<string, GeAttrValue> g_geAttrMap;
         return GRAPH_SUCCESS;
     }
 
-    graphStatus GeAttrValue::GetValue(std::vector<long >& value) const
+    graphStatus GeAttrValue::GetValue(std::vector<long>& value) const
     {
         value = g_geAttrValueListInt;
         return GRAPH_SUCCESS;
@@ -791,6 +797,12 @@ std::map<string, GeAttrValue> g_geAttrMap;
     graphStatus GeAttrValue::GetValue(std::vector<std::vector<int64_t>>& value) const
     {
         value = g_geAttrValueListListInt;
+        return GRAPH_SUCCESS;
+    }
+
+    graphStatus GeAttrValue::GetValue(std::vector<std::vector<float>>& value) const
+    {
+        value = g_geAttrValueListListFloat;
         return GRAPH_SUCCESS;
     }
 

@@ -41,6 +41,7 @@ private:
     void Updatetimestamp(T &entry);
     void AddMemAndAging(std::vector<std::pair<aclopAttr, T>> &modelVec,
                         const aclopAttr &attr, const T &entry, T &agingT);
+    bool CheckValueRange(const AclOp &aclOp, T &entry);
 
     using RangeMap = std::map<std::string, std::vector<std::pair<aclopAttr, T>>>;
     using AttrMap = std::map<size_t, RangeMap>;
@@ -192,6 +193,32 @@ void AclShapeRangeMap<T>::AddMemAndAging(std::vector<std::pair<aclopAttr, T>> &m
 }
 
 template<typename T>
+bool AclShapeRangeMap<T>::CheckValueRange(const AclOp &aclOp, T &entry)
+{
+    for (size_t i = 0; i < entry->inputDescArr.size(); ++i) {
+        if ((entry->inputDescArr[i].IsHostMemTensor()) && (!entry->inputDescArr[i].valueRange.empty())) {
+            ACL_LOG_INFO("the input [%zu] needs to check value range", i);
+            if (!attr_utils::ValueRangeCheck(entry->inputDescArr[i].valueRange,
+                                             aclOp.inputs[i], entry->inputDescArr[i].dataType)) {
+                ACL_LOG_WARN("ValueRangeCheck input is not match");
+                return false;
+            }
+        }
+    }
+    for (size_t i = 0; i < entry->outputDescArr.size(); ++i) {
+        if ((entry->outputDescArr[i].IsHostMemTensor()) && (!entry->outputDescArr[i].valueRange.empty())) {
+            ACL_LOG_INFO("the output [%zu] needs to check value range", i);
+            if (!attr_utils::ValueRangeCheck(entry->outputDescArr[i].valueRange,
+                                             aclOp.outputs[i], entry->outputDescArr[i].dataType)) {
+                ACL_LOG_WARN("ValueRangeCheck output is not match");
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+template<typename T>
 void AclShapeRangeMap<T>::Insert(const AclOp &aclOp, const T &entry, T &agingT)
 {
     ACL_LOG_INFO("AclShapeRangeMap::Insert IN, aclOp = %s", aclOp.DebugString().c_str());
@@ -297,8 +324,11 @@ aclError AclShapeRangeMap<T>::Get(const AclOp &aclOp, T &entry, bool needUpdateT
     T *matchedByRange = nullptr;
     for (auto &attrAndValue : entries) {
         if (attr_utils::OpAttrEquals(&attrAndValue.first, opAttr)) {
-            matchedByRange = &attrAndValue.second;
-            break;
+            if (CheckValueRange(aclOp, attrAndValue.second)) {
+                ACL_LOG_INFO("check value range success");
+                matchedByRange = &attrAndValue.second;
+                break;
+            }
         }
     }
 

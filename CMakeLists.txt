@@ -678,10 +678,12 @@ if(NOT ENABLE_OPEN_SRC)
     ${TOP_DIR}/inc
     ${TOP_DIR}/inc/mmpa
     ${TOP_DIR}/metadef/inc
+    ${TOP_DIR}/metadef/inc/external
 else()
     ${BASE_DIR}/third_party/inc/
     ${BASE_DIR}/third_party/inc/mmpa
     ${BASE_DIR}/third_party/inc/metadef/inc
+    ${BASE_DIR}/third_party/inc/metadef/inc/external
 endif()
     ${BASE_DIR}/inc/external
     ${BASE_DIR}/inc
@@ -808,9 +810,11 @@ target_include_directories(acl_retr PRIVATE
 if(NOT ENABLE_OPEN_SRC)
     ${TOP_DIR}/inc
     ${TOP_DIR}/metadef/inc
+    ${TOP_DIR}/metadef/inc/external
 else()
     ${BASE_DIR}/third_party/inc/
     ${BASE_DIR}/third_party/inc/metadef/inc
+    ${BASE_DIR}/third_party/inc/metadef/inc/external
 endif()
 )
 

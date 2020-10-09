@@ -14,6 +14,7 @@
 #include <string>
 #include <memory>
 
+#include "graph/ge_attr_value.h"
 #include "acl/acl_base.h"
 
 constexpr int64_t UNKNOW_DIM = -1;
@@ -28,6 +29,11 @@ struct aclDataBuffer {
 
     void *data;
     uint64_t length;
+};
+
+enum AttrRangeType {
+    RANGE_TYPE,
+    VALUE_TYPE
 };
 
 struct ACL_FUNC_VISIBILITY aclTensorDesc {
@@ -49,6 +55,8 @@ struct ACL_FUNC_VISIBILITY aclTensorDesc {
     std::shared_ptr<void> constDataBuf;
     size_t constDataLen = 0;
     aclMemType memtype = ACL_MEMTYPE_DEVICE;
+    // for windows compile,use map ignore dvpp.so find the implementation GeAttrValue
+    std::map<AttrRangeType, ge::GeAttrValue> valueRange;
 
     const std::string& GetKey() const;
     const std::string &GetShapeKey() const;
