@@ -408,14 +408,21 @@ bool CheckValueExact(const std::vector<T> &valueRange, const std::vector<T> &dat
     return true;
 }
 
+template<typename T1, typename T2>
+void SetInputValue(const aclDataBuffer *value, std::vector<T1> &inputData)
+{
+    for (size_t i = 0; i < (value->length / sizeof(T2)); ++i) {
+        inputData.push_back(*(reinterpret_cast<const T2 *>(value->data) + i));
+    }
+    return;
+}
+
 bool GetInputData(const aclDataBuffer *value, aclDataType dataType,
                   std::vector<int64_t> &inputIntData, std::vector<float> &inputFloatData)
 {
     switch (dataType) {
         case ACL_FLOAT:
-            for (size_t i = 0; i < (value->length / sizeof(float)); ++i) {
-                inputFloatData.push_back(*(reinterpret_cast<const float *>(value->data) + i));
-            }
+            SetInputValue<float, float>(value, inputFloatData);
             break;
         case ACL_FLOAT16:
             for (size_t i = 0; i < (value->length / sizeof(aclFloat16)); ++i) {
@@ -423,44 +430,28 @@ bool GetInputData(const aclDataBuffer *value, aclDataType dataType,
             }
             break;
         case ACL_INT8:
-            for (size_t i = 0; i < (value->length / sizeof(int8_t)); ++i) {
-                inputIntData.push_back(*(reinterpret_cast<const int8_t *>(value->data) + i));
-            }
+            SetInputValue<int64_t, int8_t>(value, inputIntData);
             break;
         case ACL_UINT8:
-            for (size_t i = 0; i < (value->length / sizeof(uint8_t)); ++i) {
-                inputIntData.push_back(*(reinterpret_cast<const uint8_t *>(value->data) + i));
-            }
+            SetInputValue<int64_t, uint8_t>(value, inputIntData);
             break;
         case ACL_INT16:
-            for (size_t i = 0; i < (value->length / sizeof(int16_t)); ++i) {
-                inputIntData.push_back(*(reinterpret_cast<const int16_t *>(value->data) + i));
-            }
+            SetInputValue<int64_t, int16_t>(value, inputIntData);
             break;
         case ACL_UINT16:
-            for (size_t i = 0; i < (value->length / sizeof(uint16_t)); ++i) {
-                inputIntData.push_back(*(reinterpret_cast<const uint16_t *>(value->data) + i));
-            }
+            SetInputValue<int64_t, uint16_t>(value, inputIntData);
             break;
         case ACL_INT32:
-            for (size_t i = 0; i < (value->length / sizeof(int32_t)); ++i) {
-                inputIntData.push_back(*(reinterpret_cast<const int32_t *>(value->data) + i));
-            }
+            SetInputValue<int64_t, int32_t>(value, inputIntData);
             break;
         case ACL_UINT32:
-            for (size_t i = 0; i < (value->length / sizeof(uint32_t)); ++i) {
-                inputIntData.push_back(*(reinterpret_cast<const uint32_t *>(value->data) + i));
-            }
+            SetInputValue<int64_t, uint32_t>(value, inputIntData);
             break;
         case ACL_INT64:
-            for (size_t i = 0; i < (value->length / sizeof(int64_t)); ++i) {
-                inputIntData.push_back(*(reinterpret_cast<const int64_t *>(value->data) + i));
-            }
+            SetInputValue<int64_t, int64_t>(value, inputIntData);
             break;
         case ACL_UINT64:
-            for (size_t i = 0; i < (value->length / sizeof(uint64_t)); ++i) {
-                inputIntData.push_back(*(reinterpret_cast<const uint64_t *>(value->data) + i));
-            }
+            SetInputValue<int64_t, uint64_t>(value, inputIntData);
             break;
         default:
             ACL_LOG_WARN("unsupported type: %d", dataType);
