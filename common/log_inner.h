@@ -112,13 +112,13 @@ public:
     } while (0)
 #define ACL_LOG_INNER_ERROR(fmt, ...)                                                               \
     do {                                                                                            \
-            printf("ERROR %d %s:%s:%d: "#fmt "\n", acl::AclLog::GetTid(), __FUNCTION__,             \
-                __FILE__, __LINE__, ##__VA_ARGS__);                                                 \
+            printf("ERROR %d %s:%s:%d: %s" fmt "\n", acl::AclLog::GetTid(), __FUNCTION__,             \
+                __FILE__, __LINE__, acl::AclErrorLogManager::GetStagesHeader().c_str(), ##__VA_ARGS__); \
     } while (0)
 #define ACL_LOG_CALL_ERROR(fmt, ...)                                                                \
     do {                                                                                            \
-            printf("ERROR %d %s:%s:%d: "#fmt "\n", acl::AclLog::GetTid(), __FUNCTION__,             \
-                __FILE__, __LINE__, ##__VA_ARGS__);                                                 \
+            printf("ERROR %d %s:%s:%d: %s" fmt "\n", acl::AclLog::GetTid(), __FUNCTION__,             \
+                __FILE__, __LINE__, acl::AclErrorLogManager::GetStagesHeader().c_str(), ##__VA_ARGS__); \
     } while (0)
 #define ACL_LOG_EVENT(fmt, ...)                                                                     \
     do {                                                                                            \
@@ -154,17 +154,17 @@ public:
             dlog_error(ACL_MODE_ID, "%d %s: %s" fmt, acl::AclLog::GetTid(), __FUNCTION__,           \
                 acl::AclErrorLogManager::GetStagesHeader().c_str(), ##__VA_ARGS__);                 \
     } while (0)
-#define ACL_LOG_INNER_ERROR(fmt, ...)                                                                     \
+#define ACL_LOG_INNER_ERROR(fmt, ...)                                                               \
     do {                                                                                            \
-            dlog_error(ACL_MODE_ID, "%d %s: " fmt, acl::AclLog::GetTid(), __FUNCTION__,             \
-                ##__VA_ARGS__);                                                                     \
-            acl::AclErrorLogManager::ReportInnerError(fmt, ##__VA_ARGS__);                \
+            dlog_error(ACL_MODE_ID, "%d %s: %s" fmt, acl::AclLog::GetTid(), __FUNCTION__,           \
+                acl::AclErrorLogManager::GetStagesHeader().c_str(), ##__VA_ARGS__);                 \
+            acl::AclErrorLogManager::ReportInnerError(fmt, ##__VA_ARGS__);                          \
     } while (0)
-#define ACL_LOG_CALL_ERROR(fmt, ...)                                                                     \
+#define ACL_LOG_CALL_ERROR(fmt, ...)                                                                \
     do {                                                                                            \
-            dlog_error(ACL_MODE_ID, "%d %s: " fmt, acl::AclLog::GetTid(), __FUNCTION__,             \
-                ##__VA_ARGS__);                                                                     \
-            acl::AclErrorLogManager::ReportCallError(fmt, ##__VA_ARGS__);                \
+            dlog_error(ACL_MODE_ID, "%d %s: %s" fmt, acl::AclLog::GetTid(), __FUNCTION__,           \
+                acl::AclErrorLogManager::GetStagesHeader().c_str(), ##__VA_ARGS__);                 \
+            acl::AclErrorLogManager::ReportCallError(fmt, ##__VA_ARGS__);                           \
     } while (0)
 #define ACL_LOG_EVENT(fmt, ...)                                                                     \
     do {                                                                                            \
@@ -216,7 +216,7 @@ inline bool IsInfoLogEnabled()
 #define ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(val) \
     do { \
     if ((val) == nullptr) { \
-        ACL_LOG_ERROR("param [%s] must not be null.", #val); \
+        ACL_LOG_ERROR("[Check][%s]param must not be null.", #val); \
         acl::AclErrorLogManager::ReportInputError("EH0002", {"param"}, {#val}); \
         return ACL_ERROR_INVALID_PARAM; } \
     } \
@@ -225,7 +225,7 @@ inline bool IsInfoLogEnabled()
 #define ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(val) \
     do { \
     if ((val) == nullptr) { \
-        ACL_LOG_ERROR("param [%s] must not be null.", #val); \
+        ACL_LOG_ERROR("[Check][%s]param must not be null.", #val); \
         const char *argList[] = {"param"}; \
         const char *argVal[] = {#val}; \
         acl::AclErrorLogManager::ReportInputErrorWithChar("EH0002", argList, argVal, 1); \
@@ -253,7 +253,7 @@ inline bool IsInfoLogEnabled()
 #define ACL_REQUIRES_NOT_NULL_RET_NULL_INPUT_REPORT(val) \
     do { \
         if ((val) == nullptr) { \
-            ACL_LOG_ERROR("param [%s] must not be null.", #val); \
+            ACL_LOG_ERROR("[Check][%s]param must not be null.", #val); \
             acl::AclErrorLogManager::ReportInputError("EH0002", {"param"}, {#val}); \
             return nullptr; } \
         } \
@@ -278,7 +278,7 @@ inline bool IsInfoLogEnabled()
 #define ACL_CHECK_RANGE_INT(val, min, max) \
     do { \
         if (((val) < (min)) || ((val) > (max))) { \
-            ACL_LOG_ERROR("param [%s]:[%d] must be in range of [%d] and [%d]", #val, val, min, max); \
+            ACL_LOG_ERROR("[Check][%s]param:[%d] must be in range of [%d] and [%d]", #val, val, min, max); \
             return ACL_ERROR_INVALID_PARAM; } \
         } \
     while (0)
@@ -286,7 +286,7 @@ inline bool IsInfoLogEnabled()
 #define ACL_CHECK_RANGE_UINT(val, min, max) \
     do { \
         if (((val) < (min)) || ((val) > (max))) { \
-            ACL_LOG_ERROR("param [%s]:[%u] must be in range of [%u] and [%u]", #val, val, min, max); \
+            ACL_LOG_ERROR("[Check][%s]param:[%u] must be in range of [%u] and [%u]", #val, val, min, max); \
             return ACL_ERROR_INVALID_PARAM; } \
         } \
     while (0)
@@ -294,7 +294,7 @@ inline bool IsInfoLogEnabled()
 #define ACL_CHECK_RANGE_FLOAT(val, min, max) \
     do { \
         if (((val) < (min)) || ((val) > (max))) { \
-            ACL_LOG_ERROR("param [%s]:[%.2f] must be in range of [%.2f] and [%.2f]", #val, val, min, max); \
+            ACL_LOG_ERROR("[Check][%s]param:[%.2f] must be in range of [%.2f] and [%.2f]", #val, val, min, max); \
             return ACL_ERROR_INVALID_PARAM; } \
         } \
     while (0)
@@ -318,7 +318,7 @@ inline bool IsInfoLogEnabled()
 #define ACL_REQUIRES_NON_NEGATIVE_WITH_INPUT_REPORT(val) \
     do { \
         if ((val) < 0) { \
-            ACL_LOG_ERROR("param [%s] must be non-negative.", #val); \
+            ACL_LOG_ERROR("[Check][%s]param must be non-negative.", #val); \
             acl::AclErrorLogManager::ReportInputError("EH0001", std::vector<string>({"param", "value", "reason"}), \
             std::vector<string>({#val, std::to_string(val), "must be non-negative"})); \
             return ACL_ERROR_INVALID_PARAM; } \
@@ -336,7 +336,7 @@ inline bool IsInfoLogEnabled()
 #define ACL_REQUIRES_POSITIVE_WITH_INPUT_REPORT(val) \
     do { \
         if ((val) <= 0) { \
-            ACL_LOG_ERROR("param [%s] must be positive.", #val); \
+            ACL_LOG_ERROR("[Check][%s]param must be positive.", #val); \
             acl::AclErrorLogManager::ReportInputError("EH0001", std::vector<string>({"param", "value", "reason"}), \
             std::vector<string>({#val, std::to_string(val), "must be positive"})); \
             return ACL_ERROR_INVALID_PARAM; } \
@@ -427,14 +427,14 @@ inline bool IsInfoLogEnabled()
     try { \
         expr0; \
     } catch (const std::bad_alloc &) { \
-        ACL_LOG_ERROR("Make shared failed"); \
+        ACL_LOG_ERROR("[Make][Shared]Make shared failed"); \
         expr1; \
     }
 
 #define RETURN_NULL_WITH_ALIGN_FREE(newAddr, mallocAddr) \
     do { \
         if (newAddr == nullptr) { \
-            ACL_LOG_ERROR("new memory failed"); \
+            ACL_LOG_ERROR("[Malloc][Mem]new memory failed"); \
             mmAlignFree(mallocAddr); \
             return nullptr; \
         } \

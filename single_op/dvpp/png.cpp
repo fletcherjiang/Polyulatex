@@ -29,15 +29,16 @@ aclError acldvppPngDecodeAsync(acldvppChannelDesc *channelDesc,
 
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OTHERS);
+    ACL_STAGES_REG(acl::ACL_STAGE_DVPP, acl::ACL_STAGE_DEFAULT);
     uint32_t aicpuVersion = acl::dvpp::DvppManager::GetInstance().GetAicpuVersion();
     if (aicpuVersion < AICPU_VERSION_PNGD) {
-        ACL_LOG_INNER_ERROR("curVersion[%u], aicpu version must be larger than or equal to version 1 when using pngd.",
-            aicpuVersion);
+        ACL_LOG_INNER_ERROR("[Check][aicpuVersion]curVersion[%u], aicpu version must be larger than or "
+            "equal to version 1 when using pngd.", aicpuVersion);
         return ACL_ERROR_RESOURCE_NOT_MATCH;
     }
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
-        ACL_LOG_ERROR("image processor is null.");
+        ACL_LOG_ERROR("[Check][ImageProcessor]image processor is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"imageProcessor"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
@@ -56,10 +57,11 @@ aclError acldvppPngGetImageInfo(const void *data,
 
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OTHERS);
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     uint32_t aicpuVersion = acl::dvpp::DvppManager::GetInstance().GetAicpuVersion();
     if (aicpuVersion < AICPU_VERSION_PNGD) {
-        ACL_LOG_INNER_ERROR("curVersion[%u], aicpu version must be larger than or equal to version 1 when using pngd.",
-            aicpuVersion);
+        ACL_LOG_INNER_ERROR("[Check][Version]curVersion[%u], aicpu version must be larger "
+            "than or equal to version 1 when using pngd.", aicpuVersion);
         return ACL_ERROR_RESOURCE_NOT_MATCH;
     }
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
@@ -78,6 +80,7 @@ aclError acldvppPngPredictDecSize(const void *data,
 
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OTHERS);
+    ACL_STAGES_REG(acl::ACL_STAGE_DVPP, acl::ACL_STAGE_DEFAULT);
     uint32_t aicpuVersion = acl::dvpp::DvppManager::GetInstance().GetAicpuVersion();
     if (aicpuVersion < AICPU_VERSION_PNGD) {
         ACL_LOG_ERROR("curVersion[%u], aicpu version must be larger than or equal to version 1 when using pngd.",

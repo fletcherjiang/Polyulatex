@@ -52,7 +52,7 @@ namespace dvpp {
 
     aclError ImageProcessorV100::acldvppSetChannelDescMode(acldvppChannelDesc *channelDesc, uint32_t mode)
     {
-        ACL_LOG_INNER_ERROR("Setting mode for channel desc is not supported in this version. Please check.");
+        ACL_LOG_INNER_ERROR("[Set][Mode]Setting mode for channel desc is not supported in this version. Please check.");
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
 
@@ -69,7 +69,7 @@ namespace dvpp {
 
         aclError ret = GetPngImgInfo(data, dataSize, width, height, components, nullptr);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_INNER_ERROR("get png info failed, result = %d.", ret);
+            ACL_LOG_INNER_ERROR("[Get][PngInfo]get png info failed, result = %d.", ret);
             return ret;
         }
 
@@ -85,8 +85,8 @@ namespace dvpp {
         ACL_REQUIRES_NOT_NULL(decSize);
         if ((outputPixelFormat != PIXEL_FORMAT_RGB_888) && (outputPixelFormat != PIXEL_FORMAT_RGBA_8888) &&
             (outputPixelFormat != PIXEL_FORMAT_UNKNOWN)) {
-            ACL_LOG_INNER_ERROR("the current outputPixelFormat[%d] is not support, "
-                          "only support RGB_888, RGBA_8888 and UNKNOWN", static_cast<int32_t>(outputPixelFormat));
+            ACL_LOG_INNER_ERROR("[Unsupported][Format]the current outputPixelFormat[%d] is not support, "
+                "only support RGB_888, RGBA_8888 and UNKNOWN", static_cast<int32_t>(outputPixelFormat));
             return ACL_ERROR_FORMAT_NOT_MATCH;
         }
 
@@ -95,7 +95,7 @@ namespace dvpp {
         uint32_t bitDepth = 0;
         aclError ret = GetPngImgInfo(data, dataSize, &width, &height, nullptr, &bitDepth);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_INNER_ERROR("get png info failed, result = %d.", ret);
+            ACL_LOG_INNER_ERROR("[Get][PngInfo]get png info failed, result = %d.", ret);
             return ret;
         }
 
@@ -122,7 +122,8 @@ namespace dvpp {
                 width = (width * bitDepth * 4 + 7) >> 3; // 4 represents rgba has 4 byte, 7 is padding
                 break;
             default:
-                ACL_LOG_INNER_ERROR("invalid kind of outputPixelFormat[%d]", static_cast<int32_t>(outputPixelFormat));
+                ACL_LOG_INNER_ERROR("[Invalid][Kind]invalid kind of outputPixelFormat[%d]",
+                    static_cast<int32_t>(outputPixelFormat));
                 return ACL_ERROR_FORMAT_NOT_MATCH;
         }
         *decSize = width * height;
@@ -152,8 +153,8 @@ namespace dvpp {
         acldvppPixelFormat outputPixelFormat = static_cast<acldvppPixelFormat>(outputDesc->dvppPicDesc.format);
         if ((outputPixelFormat != PIXEL_FORMAT_RGB_888) &&
             (outputPixelFormat != PIXEL_FORMAT_UNKNOWN)) {
-            ACL_LOG_INNER_ERROR("the current outputPixelFormat[%d] is not support, only support PIXEL_FORMAT_RGB_888, "
-                          "PIXEL_FORMAT_UNKNOWN", static_cast<int32_t>(outputPixelFormat));
+            ACL_LOG_INNER_ERROR("[Unsupported][PixelFormat]the current outputPixelFormat[%d] is not support, "
+                "only support PIXEL_FORMAT_RGB_888, PIXEL_FORMAT_UNKNOWN", static_cast<int32_t>(outputPixelFormat));
             return ACL_ERROR_FORMAT_NOT_MATCH;
         }
 
@@ -178,7 +179,7 @@ namespace dvpp {
         if (aclRunMode_ == ACL_HOST) {
             aclError cpyRet = CopyDvppPicDescAsync(outputDesc, ACL_MEMCPY_HOST_TO_DEVICE, stream);
             if (cpyRet != ACL_SUCCESS) {
-                ACL_LOG_INNER_ERROR("copy input pic desc to device failed, result = %d.", cpyRet);
+                ACL_LOG_INNER_ERROR("[Copy][PicDesc]copy input pic desc to device failed, result = %d.", cpyRet);
                 return cpyRet;
             }
         }
@@ -186,14 +187,14 @@ namespace dvpp {
         aclError launchRet = LaunchDvppTask(channelDesc, args.get(), argsSize,
             acl::dvpp::DVPP_KERNELNAME_DECODE_PNG, stream);
         if (launchRet != ACL_SUCCESS) {
-            ACL_LOG_INNER_ERROR("launch dvpp task failed, result = %d.", launchRet);
+            ACL_LOG_INNER_ERROR("[Launch][Task]launch dvpp task failed, result = %d.", launchRet);
             return launchRet;
         }
 
         if (aclRunMode_ == ACL_HOST) {
             aclError cpyRet = CopyDvppPicDescAsync(outputDesc, ACL_MEMCPY_DEVICE_TO_HOST, stream);
             if (cpyRet != ACL_SUCCESS) {
-                ACL_LOG_INNER_ERROR("copy output pic desc from device failed, result = %d.", cpyRet);
+                ACL_LOG_INNER_ERROR("[Copy][Desc]copy output pic desc from device failed, result = %d.", cpyRet);
                 return cpyRet;
             }
         }
@@ -221,7 +222,7 @@ namespace dvpp {
         // {0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a}
         if ((GET_PNG_VALUE(pngData[0], pngData[1], pngData[2], pngData[3]) != 0x89504e47) ||
             (GET_PNG_VALUE(pngData[4], pngData[5], pngData[6], pngData[7]) != 0x0d0a1a0a)) {
-            ACL_LOG_INNER_ERROR("invalid png image");
+            ACL_LOG_INNER_ERROR("[Check][PngImage]invalid png image");
             return ACL_ERROR_INVALID_PARAM;
         }
 
@@ -245,7 +246,7 @@ namespace dvpp {
             } else if (pngData[25] == 6) {
                 *components = 4; // 4 represents RGBA
             } else {
-                ACL_LOG_INNER_ERROR("invalid png color type %u, only support 0, 2, 4 or 6",
+                ACL_LOG_INNER_ERROR("[Check][Pngtype]invalid png color type %u, only support 0, 2, 4 or 6",
                     static_cast<uint32_t>(pngData[25]));
                 return ACL_ERROR_FORMAT_NOT_MATCH;
             }
