@@ -1093,7 +1093,7 @@ namespace acl {
         ACL_REQUIRES_NOT_NULL(config);
         // 3 interplation type(value: 0 default Bilinear/1 Bilinear/2 Nearest neighbor)
         if (config->dvppResizeConfig.interpolation > DVPP_RESIZE_INTERPLATION_TYPE_UPPER) {
-            ACL_LOG_INNER_ERROR("[Check][Interpolation]the current interpolation[%u] is not support",
+            ACL_LOG_ERROR("[Check][Interpolation]the current interpolation[%u] is not support",
                 config->dvppResizeConfig.interpolation);
             const char *argList[] = {"feature", "reason"};
             const char *argVal[] = {"interpolation", "interpolation only can be set [0,2]"};

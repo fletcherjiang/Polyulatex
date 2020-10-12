@@ -557,7 +557,7 @@ size_t aclmdlGetDatasetNumBuffers(const aclmdlDataset *dataset)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if (dataset == nullptr) {
-        ACL_LOG_INNER_ERROR("[Check][Dataset]input param[dataset] is null");
+        ACL_LOG_ERROR("[Check][Dataset]input param[dataset] is null");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}),
             std::vector<std::string>({"dataset"}));
@@ -571,7 +571,7 @@ aclDataBuffer *aclmdlGetDatasetBuffer(const aclmdlDataset *dataset, size_t index
 {
     ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if ((dataset == nullptr) || (index >= dataset->blobs.size())) {
-        ACL_LOG_INNER_ERROR("[Check][Params]input param is invalid, dataset[%p], index[%zu]", dataset, index);
+        ACL_LOG_ERROR("[Check][Params]input param is invalid, dataset[%p], index[%zu]", dataset, index);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("dataset[%p], index[%zu]", dataset, index);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
@@ -587,7 +587,7 @@ aclError aclmdlSetDatasetTensorDesc(aclmdlDataset *dataset, aclTensorDesc *tenso
     ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL(dataset);
     if (index >= dataset->blobs.size()) {
-        ACL_LOG_INNER_ERROR("[Check][Index]input param index[%zu] must be smaller than input databuf size[%zu]",
+        ACL_LOG_ERROR("[Check][Index]input param index[%zu] must be smaller than input databuf size[%zu]",
                       index, dataset->blobs.size());
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
@@ -763,7 +763,7 @@ aclError ModelExecute(uint32_t modelId, const aclmdlDataset *input,
         ge::DataBuffer inputBuffer;
         auto dataBuffer = input->blobs[i].dataBuf;
         if (dataBuffer == nullptr) {
-            ACL_LOG_INNER_ERROR("[Check][dataBuffer]input dataset blobs is null, "
+            ACL_LOG_ERROR("[Check][dataBuffer]input dataset blobs is null, "
                 "modelId[%d], index[%zu]", modelId, i);
             acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
                 std::vector<std::string>({"param"}),
@@ -785,7 +785,7 @@ aclError ModelExecute(uint32_t modelId, const aclmdlDataset *input,
         ge::DataBuffer outputBuffer;
         auto dataBuffer = output->blobs[i].dataBuf;
         if (dataBuffer == nullptr) {
-            ACL_LOG_INNER_ERROR("[Check][Databuffer]output dataset blobs is null, modelId[%d], index[%zu]",
+            ACL_LOG_ERROR("[Check][Databuffer]output dataset blobs is null, modelId[%d], index[%zu]",
                 modelId, i);
             acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
                 std::vector<std::string>({"param"}),
@@ -1016,7 +1016,7 @@ aclError aclmdlSetInputDynamicDims(uint32_t modelId, aclmdlDataset *dataset, siz
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataset);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dims);
     if (dims->dimCount == 0) {
-        ACL_LOG_INNER_ERROR("[Check][dimCount]dimCount[%u] is invalid, can't be zero.", dims->dimCount);
+        ACL_LOG_ERROR("[Check][dimCount]dimCount[%u] is invalid, can't be zero.", dims->dimCount);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("dimCount[%u] can't be zero", dims->dimCount);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
@@ -1399,7 +1399,7 @@ aclError aclmdlGetCurOutputDims(const aclmdlDesc *modelDesc, size_t index, aclmd
 static const char *aclmdlGetNameByIndex(const std::vector<aclmdlTensorDesc> &desc, size_t index)
 {
     if (index >= desc.size()) {
-        ACL_LOG_INNER_ERROR("[Check][index]get name by index failed, index[%zu] is larger than or equal to desc size[%zu]",
+        ACL_LOG_ERROR("[Check][index]get name by index failed, index[%zu] is larger than or equal to desc size[%zu]",
             index, desc.size());
         std::string errMsg = acl::AclErrorLogManager::FormatStr("cannot larger than or equal to desc size[%zu]",
             desc.size());
@@ -1457,7 +1457,7 @@ const char *aclmdlGetInputNameByIndex(const aclmdlDesc *modelDesc, size_t index)
 {
     ACL_LOG_INFO("start to execute aclmdlGetInputNameByIndex");
     if (modelDesc == nullptr) {
-        ACL_LOG_INNER_ERROR("[Check][ModelDesc]modelDesc is null");
+        ACL_LOG_ERROR("[Check][ModelDesc]modelDesc is null");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}),
             std::vector<std::string>({"modelDesc"}));
@@ -1472,7 +1472,7 @@ const char *aclmdlGetOutputNameByIndex(const aclmdlDesc *modelDesc, size_t index
     ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlGetOutputNameByIndex");
     if (modelDesc == nullptr) {
-        ACL_LOG_INNER_ERROR("[Check][ModelDesc]modelDesc is null");
+        ACL_LOG_ERROR("[Check][ModelDesc]modelDesc is null");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}),
             std::vector<std::string>({"modelDesc"}));
@@ -1498,7 +1498,7 @@ aclFormat aclmdlGetInputFormat(const aclmdlDesc *modelDesc, size_t index)
     ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlGetInputFormat");
     if (modelDesc == nullptr) {
-        ACL_LOG_INNER_ERROR("[Check][ModelDesc]modelDesc is null");
+        ACL_LOG_ERROR("[Check][ModelDesc]modelDesc is null");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}),
             std::vector<std::string>({"modelDesc"}));
@@ -1513,7 +1513,7 @@ aclFormat aclmdlGetOutputFormat(const aclmdlDesc *modelDesc, size_t index)
     ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlGetOutputFormat");
     if (modelDesc == nullptr) {
-        ACL_LOG_INNER_ERROR("[Check][ModelDesc]modelDesc is null");
+        ACL_LOG_ERROR("[Check][ModelDesc]modelDesc is null");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"params"}),
             std::vector<std::string>({"modelDesc"}));
@@ -1539,7 +1539,7 @@ aclDataType aclmdlGetInputDataType(const aclmdlDesc *modelDesc, size_t index)
     ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlGetInputDataType");
     if (modelDesc == nullptr) {
-        ACL_LOG_INNER_ERROR("[Check][ModelDesc]modelDesc is null");
+        ACL_LOG_ERROR("[Check][ModelDesc]modelDesc is null");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}), std::vector<std::string>({"modelDesc"}));
         return ACL_DT_UNDEFINED;
@@ -1553,7 +1553,7 @@ aclDataType aclmdlGetOutputDataType(const aclmdlDesc *modelDesc, size_t index)
     ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlGetOutputDataType");
     if (modelDesc == nullptr) {
-        ACL_LOG_INNER_ERROR("[Check][ModelDesc]modelDesc is null");
+        ACL_LOG_ERROR("[Check][ModelDesc]modelDesc is null");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}),
             std::vector<std::string>({"modelDesc"}));
@@ -1614,7 +1614,7 @@ aclError aclmdlGetDynamicBatch(const aclmdlDesc *modelDesc, aclmdlBatch *batch)
 
     size_t batchCnt = modelDesc->dynamicBatch.size();
     if (batchCnt > ACL_MAX_BATCH_NUM) {
-        ACL_LOG_INNER_ERROR("[Check][batchCnt]aclmdlGetBatch failed, batch count[%zu] is larger than max batch num[%d]",
+        ACL_LOG_ERROR("[Check][batchCnt]aclmdlGetBatch failed, batch count[%zu] is larger than max batch num[%d]",
             batchCnt, ACL_MAX_BATCH_NUM);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("batch count[%zu] is larger than max batch num[%d]",
             batchCnt, ACL_MAX_BATCH_NUM);

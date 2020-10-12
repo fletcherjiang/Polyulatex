@@ -49,7 +49,7 @@ aclError aclopCompile(const char *opType,
     ACL_REQUIRES_NON_NEGATIVE(numInputs);
     ACL_REQUIRES_NON_NEGATIVE(numOutputs);
     if (compileFlag != ACL_COMPILE_SYS && compileFlag != ACL_COMPILE_UNREGISTERED) {
-        ACL_LOG_INNER_ERROR("[Check][CompileFlag]aclopCompile compile type[%d] not support",
+        ACL_LOG_ERROR("[Check][CompileFlag]aclopCompile compile type[%d] not support",
             static_cast<int32_t>(compileFlag));
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
@@ -85,7 +85,7 @@ aclError aclopCompile(const char *opType,
     aclOp.compileType = static_cast<OpCompileType>(compileFlag);
     if (compileFlag == ACL_COMPILE_UNREGISTERED) {
         if (opPath == nullptr) {
-            ACL_LOG_INNER_ERROR("[Check][CompileFlag]opPath cannot be null while compileFlag is %d",
+            ACL_LOG_ERROR("[Check][CompileFlag]opPath cannot be null while compileFlag is %d",
                 static_cast<int32_t>(compileFlag));
             acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
                 std::vector<std::string>({"param"}),
@@ -109,7 +109,7 @@ aclError aclopCompileAndExecute(const char *opType,
     ACL_REQUIRES_NON_NEGATIVE(numInputs);
     ACL_REQUIRES_NON_NEGATIVE(numOutputs);
     if (compileFlag != ACL_COMPILE_SYS && compileFlag != ACL_COMPILE_UNREGISTERED) {
-        ACL_LOG_INNER_ERROR("[Check][Type]aclopCompile compile type[%d] not support",
+        ACL_LOG_ERROR("[Check][Type]aclopCompile compile type[%d] not support",
             static_cast<int32_t>(compileFlag));
         acl::AclErrorLogManager::ReportInputError(acl::UNSUPPORTED_FEATURE_MSG,
             std::vector<std::string>({"feature", "reason"}),
@@ -145,7 +145,7 @@ aclError aclopCompileAndExecute(const char *opType,
     aclOp.compileType = static_cast<OpCompileType>(compileFlag);
     if (compileFlag == ACL_COMPILE_UNREGISTERED) {
         if (opPath == nullptr) {
-            ACL_LOG_INNER_ERROR("[Check][OpPath]opPath cannot be null while compileFlag is %d",
+            ACL_LOG_ERROR("[Check][OpPath]opPath cannot be null while compileFlag is %d",
                 static_cast<int32_t>(compileFlag));
             acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
                 std::vector<std::string>({"param"}),

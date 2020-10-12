@@ -123,7 +123,7 @@ namespace acl {
         }
         if ((dumpOpSwitch != ACL_DUMP_OP_SWITCH_ON) &&
             (dumpOpSwitch != ACL_DUMP_OP_SWITCH_OFF)) {
-            ACL_LOG_INNER_ERROR("[Check][DumpOpSwitch]dump_op_switch value[%s] is invalid in config, "
+            ACL_LOG_ERROR("[Check][DumpOpSwitch]dump_op_switch value[%s] is invalid in config, "
                 "only supports on/off", dumpOpSwitch.c_str());
             acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
                 std::vector<std::string>({"param", "value", "reason"}),
@@ -133,7 +133,7 @@ namespace acl {
 
         // if dump_list field is null and dump_op_switch is off, can't send dump config
         if ((dumpList.empty()) && (dumpOpSwitch == ACL_DUMP_OP_SWITCH_OFF)) {
-            ACL_LOG_INNER_ERROR("[Check][DumpConfig]dump_list field is null and dump_op_switch is off in config, "
+            ACL_LOG_ERROR("[Check][DumpConfig]dump_list field is null and dump_op_switch is off in config, "
                 "dump config is invalid");
             acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
                 std::vector<std::string>({"param", "value", "reason"}),
@@ -176,7 +176,7 @@ namespace acl {
         for (size_t i = 0; i < len; ++i) {
             if (!std::islower(dumpPath[i]) && !std::isupper(dumpPath[i]) && !std::isdigit(dumpPath[i]) &&
                 pathWhiteList.find(dumpPath[i]) == std::string::npos) {
-                ACL_LOG_INNER_ERROR("[Check][PathWhiteList]invalid dump_path [%s] in dump config at "
+                ACL_LOG_ERROR("[Check][PathWhiteList]invalid dump_path [%s] in dump config at "
                     "location %zu", dumpPath.c_str(), i);
                 std::string errMsg = acl::AclErrorLogManager::FormatStr("dump config at location %zu", i);
                 acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
@@ -198,7 +198,7 @@ namespace acl {
         if (colonPos != std::string::npos) {
             ACL_LOG_INFO("dump_path field contains ip address.");
             if (colonPos + 1 == config.dumpPath.size()) {
-                ACL_LOG_INNER_ERROR("[Check][colonPos]dump_path field is invalid");
+                ACL_LOG_ERROR("[Check][colonPos]dump_path field is invalid");
                 acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
                     std::vector<std::string>({"param", "value", "reason"}),
                     std::vector<std::string>({"dump_path", config.dumpPath, "format is illegal"}));
@@ -230,7 +230,7 @@ namespace acl {
         const nlohmann::json &jsDumpConfig = js.at(ACL_DUMP);
         DumpConfig config = jsDumpConfig;
         if (config.dumpPath.length() > MAX_DUMP_PATH_LENGTH) {
-            ACL_LOG_INNER_ERROR("[Check][dumpPath]the length[%d] of dump_path is larger than "
+            ACL_LOG_ERROR("[Check][dumpPath]the length[%d] of dump_path is larger than "
                 "MAX_DUMP_PATH_LENGTH[%d]", config.dumpPath.length(), MAX_DUMP_PATH_LENGTH);
             std::string errMsg = acl::AclErrorLogManager::FormatStr(
                 "dump_path is larger than MAX_DUMP_PATH_LENGTH[%d]", MAX_DUMP_PATH_LENGTH);
@@ -246,7 +246,7 @@ namespace acl {
         if (isCutDumpPathFlag) {
             config.dumpPath = config.dumpPath.substr(colonPos + 1);
             if (!IsValidDirStr(config.dumpPath)) {
-                ACL_LOG_INNER_ERROR("[Check][ValidDirStr]dump_path[%s] is invalid in dump config",
+                ACL_LOG_ERROR("[Check][ValidDirStr]dump_path[%s] is invalid in dump config",
                     config.dumpPath.c_str());
                 acl::AclErrorLogManager::ReportInputError(acl::INVALID_PATH_MSG,
                     std::vector<std::string>({"path", "reason"}),
@@ -259,7 +259,7 @@ namespace acl {
             char trustedPath[MMPA_MAX_PATH] = {'\0'};
             int32_t ret = mmRealPath(config.dumpPath.c_str(), trustedPath, sizeof(trustedPath));
             if (ret != EN_OK) {
-                ACL_LOG_INNER_ERROR("[Get][RealPath]the dump_path %s is not like a real path, "
+                ACL_LOG_ERROR("[Get][RealPath]the dump_path %s is not like a real path, "
                     "mmRealPath return %d", config.dumpPath.c_str(), ret);
                 acl::AclErrorLogManager::ReportInputError(acl::INVALID_PATH_MSG,
                     std::vector<std::string>({"path", "reason"}),
@@ -269,7 +269,7 @@ namespace acl {
             }
 
             if (mmAccess2(trustedPath, M_R_OK | M_W_OK) != EN_OK) {
-                ACL_LOG_INNER_ERROR("[Check][Permisssion]the dump result path[%s] does't have read and "
+                ACL_LOG_ERROR("[Check][Permisssion]the dump result path[%s] does't have read and "
                     "write permisssion", trustedPath);
                 acl::AclErrorLogManager::ReportInputError(acl::INVALID_PATH_MSG,
                     std::vector<std::string>({"path", "reason"}),
@@ -297,7 +297,7 @@ namespace acl {
         // if dump_path and dump_list is not exist, can't send dump config
         if (jsDumpConfig.find(ACL_DUMP_PATH) == jsDumpConfig.end() ||
             jsDumpConfig.find(ACL_DUMP_LIST) == jsDumpConfig.end()) {
-            ACL_LOG_INNER_ERROR("[Check][jsDumpConfig]dump_path or dump_list field in dump config file "
+            ACL_LOG_ERROR("[Check][jsDumpConfig]dump_path or dump_list field in dump config file "
                 "is not exist");
             acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
                 std::vector<std::string>({"param", "value", "reason"}),
@@ -327,7 +327,7 @@ namespace acl {
         if ((dumpMode != ACL_DUMP_MODE_INPUT) &&
             (dumpMode != ACL_DUMP_MODE_OUTPUT) &&
             (dumpMode != ACL_DUMP_MODE_ALL)) {
-            ACL_LOG_INNER_ERROR("[Check][dumpMode]dump_mode value[%s] error in config, only supports "
+            ACL_LOG_ERROR("[Check][dumpMode]dump_mode value[%s] error in config, only supports "
                 "input/output/all", dumpMode.c_str());
             acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
                 std::vector<std::string>({"param", "value", "reason"}),

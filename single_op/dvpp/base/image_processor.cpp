@@ -2328,7 +2328,7 @@ namespace acl {
     {
         ACL_LOG_DEBUG("begin to destroy notify and stream.");
         if (channelDesc == nullptr) {
-            ACL_LOG_INNER_ERROR("[Check][ChannelDesc]dvpp channel desc is null.");
+            ACL_LOG_ERROR("[Check][ChannelDesc]dvpp channel desc is null.");
             const char *argList[] = {"param"};
             const char *argVal[] = {"channelDesc"};
             acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
@@ -2406,7 +2406,7 @@ namespace acl {
         // valid size
         bool validParam = (size == 0) || (srcBatchPicDescs->dvppBatchPicDescs.batchSize < size);
         if (validParam) {
-            ACL_LOG_INNER_ERROR("[Check][BatchSize]srcBatchPicDescs batchSize less than roiNums size or size = 0, "
+            ACL_LOG_ERROR("[Check][BatchSize]srcBatchPicDescs batchSize less than roiNums size or size = 0, "
                 "batch size = %u, size = %u.", srcBatchPicDescs->dvppBatchPicDescs.batchSize, size);
             std::string convertedStr = std::to_string(srcBatchPicDescs->dvppBatchPicDescs.batchSize);
             std::string errMsg = acl::AclErrorLogManager::FormatStr("less than roiNums size[%u] or size = 0", size);

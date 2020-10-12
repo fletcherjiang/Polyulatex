@@ -233,7 +233,7 @@ acltdtTensorType acltdtGetTensorTypeFromItem(const acltdtDataItem *dataItem)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if (dataItem == nullptr) {
-        ACL_LOG_INNER_ERROR("param [dataItem] must not be null.");
+        ACL_LOG_ERROR("param [dataItem] must not be null.");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}),
             std::vector<std::string>({"dataItem"}));
@@ -246,7 +246,7 @@ aclDataType acltdtGetDataTypeFromItem(const acltdtDataItem *dataItem)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if (dataItem == nullptr) {
-        ACL_LOG_INNER_ERROR("param [dataItem] must not be null.");
+        ACL_LOG_ERROR("param [dataItem] must not be null.");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}),
             std::vector<std::string>({"dataItem"}));
@@ -265,7 +265,7 @@ size_t acltdtGetDataSizeFromItem(const acltdtDataItem *dataItem)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if (dataItem == nullptr) {
-        ACL_LOG_INNER_ERROR("param [dataItem] must not be null.");
+        ACL_LOG_ERROR("param [dataItem] must not be null.");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}),
             std::vector<std::string>({"dataItem"}));
@@ -278,7 +278,7 @@ size_t acltdtGetDimNumFromItem(const acltdtDataItem *dataItem)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if (dataItem == nullptr) {
-        ACL_LOG_INNER_ERROR("param [dataItem] must not be null.");
+        ACL_LOG_ERROR("param [dataItem] must not be null.");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}),
             std::vector<std::string>({"dataItem"}));
@@ -401,7 +401,7 @@ size_t acltdtGetDatasetSize(const acltdtDataset *dataset)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if (dataset == nullptr) {
-        ACL_LOG_INNER_ERROR("dataset is null.");
+        ACL_LOG_ERROR("dataset is null.");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}), std::vector<std::string>({"dataset"}));
         return 0;
@@ -480,7 +480,7 @@ aclError acltdtSendTensor(const acltdtChannelHandle *handle, const acltdtDataset
 
     // -1 represents infinite wait, it is must be -1 now
     if (timeout != -1) {
-        ACL_LOG_INNER_ERROR("only infinite wait is supported, it can only be set to -1, timeout[%d].", timeout);
+        ACL_LOG_ERROR("only infinite wait is supported, it can only be set to -1, timeout[%d].", timeout);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("it can only be set to -1, timeout[%d].", timeout);
         acl::AclErrorLogManager::ReportInputError(acl::UNSUPPORTED_FEATURE_MSG,
             std::vector<std::string>({"feature", "reason"}), std::vector<std::string>({"timeout",
@@ -518,7 +518,7 @@ aclError acltdtReceiveTensor(const acltdtChannelHandle *handle, acltdtDataset *d
 
     // -1 represents infinite wait, it is must be -1 now
     if (timeout != -1) {
-        ACL_LOG_INNER_ERROR("only infinite wait is supported, it can only be set to -1, timeout[%d]", timeout);
+        ACL_LOG_ERROR("only infinite wait is supported, it can only be set to -1, timeout[%d]", timeout);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("it can only be set to -1, timeout[%d].", timeout);
         acl::AclErrorLogManager::ReportInputError(acl::UNSUPPORTED_FEATURE_MSG,
             std::vector<std::string>({"feature", "reason"}), std::vector<std::string>({"timeout", errMsg}));
@@ -526,7 +526,7 @@ aclError acltdtReceiveTensor(const acltdtChannelHandle *handle, acltdtDataset *d
     }
 
     if (handle->recvName.empty()) {
-        ACL_LOG_INNER_ERROR("it is not a receive channel, failed to receive, device is %u, name is %s",
+        ACL_LOG_ERROR("it is not a receive channel, failed to receive, device is %u, name is %s",
             handle->devId, handle->name.c_str());
         std::string errMsg = acl::AclErrorLogManager::FormatStr("failed to receive, device is %u, name is %s",
             handle->devId, handle->name.c_str());
