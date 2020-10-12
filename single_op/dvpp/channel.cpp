@@ -22,10 +22,11 @@ extern "C" {
 aclError acldvppCreateChannel(acldvppChannelDesc *channelDesc)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OTHERS);
+    ACL_STAGES_REG(acl::ACL_STAGE_CREATE, acl::ACL_STAGE_DEFAULT);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_DVPP_CHANNEL);
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
-        ACL_LOG_ERROR("image processor is null.");
+        ACL_LOG_ERROR("[Check][ImageProcessor]image processor is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"imageProcessor"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
@@ -48,10 +49,11 @@ aclError acldvppCreateChannel(acldvppChannelDesc *channelDesc)
 aclError acldvppDestroyChannel(acldvppChannelDesc *channelDesc)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OTHERS);
+    ACL_STAGES_REG(acl::ACL_STAGE_DESTROY, acl::ACL_STAGE_DEFAULT);
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_DVPP_CHANNEL);
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
-        ACL_LOG_ERROR("image processor is null.");
+        ACL_LOG_ERROR("[Check][ImageProcessor]image processor is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"imageProcessor"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,

@@ -24,9 +24,10 @@ aclError acldvppJpegDecodeAsync(acldvppChannelDesc *channelDesc,
                                 aclrtStream stream)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OTHERS);
+    ACL_STAGES_REG(acl::ACL_STAGE_DVPP, acl::ACL_STAGE_DEFAULT);
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
-        ACL_LOG_ERROR("image processor is null.");
+        ACL_LOG_ERROR("[Check][ImageProcessor]image processor is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"imageProcessor"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
@@ -44,9 +45,10 @@ aclError acldvppJpegEncodeAsync(acldvppChannelDesc *channelDesc,
                                 aclrtStream stream)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OTHERS);
+    ACL_STAGES_REG(acl::ACL_STAGE_DVPP, acl::ACL_STAGE_DEFAULT);
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
-        ACL_LOG_ERROR("image processor is null.");
+        ACL_LOG_ERROR("[Check][ImageProcessor]image processor is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"imageProcessor"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
@@ -63,9 +65,10 @@ aclError acldvppJpegGetImageInfo(const void *data,
                                  int32_t *components)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OTHERS);
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
-        ACL_LOG_ERROR("image processor is null.");
+        ACL_LOG_ERROR("[Check][ImageProcessor]image processor is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"imageProcessor"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
@@ -83,9 +86,10 @@ aclError acldvppJpegGetImageInfoV2(const void *data,
                                    acldvppJpegFormat *format)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OTHERS);
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
-        ACL_LOG_ERROR("image processor is null.");
+        ACL_LOG_ERROR("[Check][ImageProcessor]image processor is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"imageProcessor"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
@@ -101,9 +105,10 @@ aclError acldvppJpegGetImageInfoV2(const void *data,
 aclError acldvppJpegPredictEncSize(const acldvppPicDesc *inputDesc, const acldvppJpegeConfig *config, uint32_t *size)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OTHERS);
+    ACL_STAGES_REG(acl::ACL_STAGE_DVPP, acl::ACL_STAGE_DEFAULT);
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
-        ACL_LOG_ERROR("image processor is null.");
+        ACL_LOG_ERROR("[Check][ImageProcessor]image processor is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"imageProcessor"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
@@ -119,9 +124,10 @@ aclError acldvppJpegPredictDecSize(const void *data,
                                    uint32_t *decSize)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OTHERS);
+    ACL_STAGES_REG(acl::ACL_STAGE_DVPP, acl::ACL_STAGE_DEFAULT);
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
-        ACL_LOG_ERROR("image processor is null.");
+        ACL_LOG_ERROR("[Check][ImageProcessor]image processor is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"imageProcessor"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,

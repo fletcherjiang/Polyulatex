@@ -861,7 +861,7 @@ aclError aclmdlUnload(uint32_t modelId)
     ACL_LOG_INFO("call ge interface executor.UnloadModel, modelId[%u]", modelId);
     ge::Status ret = executor.UnloadModel(modelId);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_CALL_ERROR("[Model][Unload]model unload failed, ge result[%u], modelId[%u]", ret, modelId);
+        ACL_LOG_CALL_ERROR("[Unload][Model]model unload failed, ge result[%u], modelId[%u]", ret, modelId);
         return ACL_GET_ERRCODE_GE(ret);
     }
 

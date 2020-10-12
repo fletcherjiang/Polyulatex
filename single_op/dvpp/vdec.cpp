@@ -23,10 +23,11 @@ extern "C" {
 aclError aclvdecCreateChannel(aclvdecChannelDesc *channelDesc)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OTHERS);
+    ACL_STAGES_REG(acl::ACL_STAGE_CREATE, acl::ACL_STAGE_DEFAULT);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_VDEC_CHANNEL);
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
-        ACL_LOG_ERROR("video processor is null.");
+        ACL_LOG_ERROR("[Check][VideoProcessor]video processor is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"videoProcessor"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
@@ -49,10 +50,11 @@ aclError aclvdecCreateChannel(aclvdecChannelDesc *channelDesc)
 aclError aclvdecDestroyChannel(aclvdecChannelDesc *channelDesc)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OTHERS);
+    ACL_STAGES_REG(acl::ACL_STAGE_DESTROY, acl::ACL_STAGE_DEFAULT);
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_VDEC_CHANNEL);
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
-        ACL_LOG_ERROR("video processor is null.");
+        ACL_LOG_ERROR("[Check][VideoProcessor]video processor is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"videoProcessor"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
@@ -73,9 +75,10 @@ aclError aclvdecSendFrame(aclvdecChannelDesc *channelDesc,
                           void *userData)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OTHERS);
+    ACL_STAGES_REG(acl::ACL_STAGE_DVPP, acl::ACL_STAGE_DEFAULT);
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
-        ACL_LOG_ERROR("video processor is null.");
+        ACL_LOG_ERROR("[Check][VideoProcessor]video processor is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"videoProcessor"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
@@ -91,9 +94,10 @@ aclError aclvdecSendSkippedFrame(aclvdecChannelDesc *channelDesc,
                                  void *userData)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OTHERS);
+    ACL_STAGES_REG(acl::ACL_STAGE_DVPP, acl::ACL_STAGE_DEFAULT);
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
-        ACL_LOG_ERROR("video processor is null.");
+        ACL_LOG_ERROR("[Check][VideoProcessor]video processor is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"videoProcessor"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,

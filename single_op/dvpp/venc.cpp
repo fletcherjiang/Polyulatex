@@ -20,10 +20,11 @@ extern "C" {
 aclError aclvencCreateChannel(aclvencChannelDesc *channelDesc)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OTHERS);
+    ACL_STAGES_REG(acl::ACL_STAGE_CREATE, acl::ACL_STAGE_DEFAULT);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_VENC_CHANNEL);
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
-        ACL_LOG_ERROR("video processor is null.");
+        ACL_LOG_ERROR("[Check][VideoProcessor]video processor is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"videoProcessor"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
@@ -40,10 +41,11 @@ aclError aclvencCreateChannel(aclvencChannelDesc *channelDesc)
 aclError aclvencDestroyChannel(aclvencChannelDesc *channelDesc)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OTHERS);
+    ACL_STAGES_REG(acl::ACL_STAGE_DESTROY, acl::ACL_STAGE_DEFAULT);
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_VENC_CHANNEL);
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
-        ACL_LOG_ERROR("video processor is null.");
+        ACL_LOG_ERROR("[Check][VideoProcessor]video processor is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"videoProcessor"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
@@ -61,9 +63,10 @@ aclError aclvencSendFrame(aclvencChannelDesc *channelDesc, acldvppPicDesc *input
     aclvencFrameConfig *config, void *userdata)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OTHERS);
+    ACL_STAGES_REG(acl::ACL_STAGE_DVPP, acl::ACL_STAGE_DEFAULT);
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
-        ACL_LOG_ERROR("video processor is null.");
+        ACL_LOG_ERROR("[Check][VideoProcessor]video processor is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"videoProcessor"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
