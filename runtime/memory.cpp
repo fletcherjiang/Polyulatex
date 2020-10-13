@@ -35,7 +35,7 @@ aclError aclrtMalloc(void **devPtr, size_t size, aclrtMemMallocPolicy policy)
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(devPtr);
     // size must be greater than zero
     if (size == 0) {
-        ACL_LOG_INNER_ERROR("malloc size must be greater than zero");
+        ACL_LOG_ERROR("malloc size must be greater than zero");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"size", std::to_string(size),

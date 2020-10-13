@@ -79,7 +79,7 @@ aclError aclopLoad(const void *model, size_t modelSize)
     ACL_LOG_INFO("start to execute aclopLoad");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(model);
     if (modelSize == 0) {
-        ACL_LOG_INNER_ERROR("[Check][ModelSize]the value of modelSize[%zu] can't be zero", modelSize);
+        ACL_LOG_ERROR("[Check][ModelSize]the value of modelSize[%zu] can't be zero", modelSize);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"modelSize", std::to_string(modelSize), "can't be zero"}));
@@ -176,7 +176,7 @@ aclError aclopExecWithHandle(aclopHandle *handle,
 
     auto &opHandle = *handle->opHandle;
     if (numInputs != opHandle.numInputs) {
-        ACL_LOG_INNER_ERROR("[Check][NumInputs]input num mismatch: expect %d, but %d", opHandle.numInputs, numInputs);
+        ACL_LOG_ERROR("[Check][NumInputs]input num mismatch: expect %d, but %d", opHandle.numInputs, numInputs);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("input num mismatch: expect %d", opHandle.numInputs);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
@@ -186,7 +186,7 @@ aclError aclopExecWithHandle(aclopHandle *handle,
     }
 
     if (numOutputs != opHandle.numOutputs) {
-        ACL_LOG_INNER_ERROR("[Check][NumOutputs]output num mismatch: expect %d, but %d", opHandle.numOutputs, numOutputs);
+        ACL_LOG_ERROR("[Check][NumOutputs]output num mismatch: expect %d, but %d", opHandle.numOutputs, numOutputs);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("input num mismatch: expect %d", opHandle.numOutputs);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
@@ -582,7 +582,7 @@ static aclError AddDataInput(aclTensorDesc *inputDesc,
                              static_cast<::ge::DataType >(inputDesc->dataType));
     size_t tensorSize = inputs->length;
     if (tensorSize <= 0) {
-        ACL_LOG_INNER_ERROR("[Check][TensorSize]tensorSize must be positive, tensorSize = %zu", tensorSize);
+        ACL_LOG_ERROR("[Check][TensorSize]tensorSize must be positive, tensorSize = %zu", tensorSize);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"tensorSize", std::to_string(tensorSize),

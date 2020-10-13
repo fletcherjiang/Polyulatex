@@ -108,7 +108,7 @@ aclError aclrtProcessReport(int32_t timeout)
     // -1 represents infinite wait, tmeout value greater than 0 represents waiting for a fixed time.
     // other value is invalid.
     if ((timeout < -1) || (timeout == 0)) {
-        ACL_LOG_CALL_ERROR("invalid timeout value, timeout[%d]", timeout);
+        ACL_LOG_ERROR("invalid timeout value, timeout[%d]", timeout);
         std::string timeoutStr = acl::AclErrorLogManager::FormatStr("%d", timeout);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG, std::vector<std::string>({"param", "value",
             "reason"}), std::vector<std::string>({"timeout", timeoutStr, "-1 represents infinite wait, "
