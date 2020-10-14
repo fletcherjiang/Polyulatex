@@ -124,15 +124,30 @@ void AclErrorLogManager::ReportInnerError(const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
-    REPORT_INNER_ERROR("EH9999", fmt, ap);
+    char errorMsgStr[LIMIT_PER_MESSAGE] = { '\0' };
+    int32_t ret = vsnprintf_s(errorMsgStr, LIMIT_PER_MESSAGE, LIMIT_PER_MESSAGE - 1, fmt, ap);
+    if (ret == -1) {
+        va_end(ap);
+        ACL_LOG_ERROR("[Call][Vsnprintf]call vsnprintf failed, ret = %d", ret);
+        return;
+    }
     va_end(ap);
+    REPORT_INNER_ERROR("EH9999", errorMsgStr);
 }
+
 void AclErrorLogManager::ReportCallError(const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
-    REPORT_CALL_ERROR("EH9999", fmt, ap);
+    char errorMsgStr[LIMIT_PER_MESSAGE] = { '\0' };
+    int32_t ret = vsnprintf_s(errorMsgStr, LIMIT_PER_MESSAGE, LIMIT_PER_MESSAGE - 1, fmt, ap);
+    if (ret == -1) {
+        va_end(ap);
+        ACL_LOG_ERROR("[Call][Vsnprintf]call vsnprintf failed, ret = %d", ret);
+        return;
+    }
     va_end(ap);
+    REPORT_CALL_ERROR("EH9999", errorMsgStr);
 }
 
 void AclErrorLogManager::ReportInputErrorWithChar(const char *const errorCode, const char *argNames[],
