@@ -22,6 +22,7 @@
 #include <memory>
 #include <mutex>
 #include <string>
+#include <vector>
 #include <utility>
 
 namespace fe {
@@ -77,9 +78,11 @@ class FusionStatisticRecorder {
 
   void UpdateBufferFusionEffectTimes(FusionInfo &fusion_info);
 
-  void GetAndClearFusionInfo(const std::string &session_graph_id, 
+  void GetAndClearFusionInfo(const std::string &session_graph_id,
                              std::map<std::string, FusionInfo> &graph_fusion_info_map,
                              std::map<std::string, FusionInfo> &buffer_fusion_info_map);
+
+  void GetAllSessionAndGraphIdList(std::vector<std::string> &session_graph_id_vec);
 
  private:
   FusionStatisticRecorder();

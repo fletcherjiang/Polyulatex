@@ -129,6 +129,8 @@ class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY AttrHolder {
 
   void CopyAttrsFrom(const AttrHolder &holder);
 
+  void CopyFrom(const AttrHolder &holder);
+
   void Swap(AttrHolder &holder) {
     requiredAttrs_.swap(holder.requiredAttrs_);
     extAttrs_.Swap(holder.extAttrs_);

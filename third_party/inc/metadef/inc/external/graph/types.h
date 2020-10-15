@@ -69,13 +69,13 @@ enum DataType {
   DT_DUAL = 25,            // dual output type
   DT_VARIANT = 26,         // dt_variant type
   DT_BF16 = 27,            // bf16 type
-  // Rollback int4
-  // DT_INT4 = 28,            // int4 type
-  DT_UNDEFINED             // Used to indicate a DataType field has not been set.
+  DT_UNDEFINED = 28,       // Used to indicate a DataType field has not been set.
+  DT_INT4 = 29,            // int4 type
+  DT_MAX                   // Mark the boundaries of data types
 };
 
 inline int GetSizeByDataType(DataType data_type) {
-  static int data_type_size[DT_UNDEFINED] = {
+  static int data_type_size[DT_MAX] = {
       4,   // DT_FLOAT = 0,               float type
       2,   // DT_FLOAT16 = 1,             fp16 type
       1,   // DT_INT8 = 2,                int8 type
@@ -104,11 +104,11 @@ inline int GetSizeByDataType(DataType data_type) {
       5,   // DT_DUAL = 25,               dual output type (float + int8)
       8,   // DT_VARIANT                  variant type
       2,   // DT_BF16 = 27,               bf16 type
-      // Rollback int4
-      // kDataTypeSizeBitOffset + 4,    // DT_INT4 = 28,             int4 type
-           // DT_UNDEFINED    Used to indicate a DataType field has not been set.
+      -1,  // DT_UNDEFINED = 28           Used to indicate a DataType field has not been set.
+      kDataTypeSizeBitOffset + 4,    // DT_INT4 = 29,             int4 type
+           // DT_MAX
   };
-  if (data_type >= DT_UNDEFINED) {
+  if (data_type >= DT_MAX) {
     return -1;
   }
   return data_type_size[data_type];

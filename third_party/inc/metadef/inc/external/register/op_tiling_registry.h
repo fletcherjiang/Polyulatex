@@ -17,21 +17,32 @@
 #ifndef INC_REGISTER_OP_TILING_REGISTRY_H_
 #define INC_REGISTER_OP_TILING_REGISTRY_H_
 
+#include "external/graph/ascend_string.h"
+#include "external/graph/operator.h"
+#include "external/graph/tensor.h"
+#include "external/register/register_error_codes.h"
+#include "external/register/register_types.h"
 #include <functional>
 #include <map>
 #include <sstream>
 #include <string>
 #include <vector>
-#include "external/register/register_types.h"
-#include "external/graph/tensor.h"
-#include "external/register/register_error_codes.h"
+
+extern const char *ATTR_NAME_ATOMIC_CLEAN_WORKSPACE;
 
 #define REGISTER_OP_TILING(optype, opfunc) REGISTER_OP_TILING_UNIQ_HELPER(optype, opfunc, __COUNTER__)
 
 #define REGISTER_OP_TILING_UNIQ_HELPER(optype, opfunc, counter) REGISTER_OP_TILING_UNIQ(optype, opfunc, counter)
 
-#define REGISTER_OP_TILING_UNIQ(optype, opfunc, counter) \
+#define REGISTER_OP_TILING_UNIQ(optype, opfunc, counter)                                                               \
   static OpTilingRegistryInterf g_##optype##TilingRegistryInterf##counter(#optype, opfunc)
+
+#define REGISTER_OP_TILING_V2(optype, opfunc) REGISTER_OP_TILING_UNIQ_HELPER_V2(optype, opfunc, __COUNTER__)
+
+#define REGISTER_OP_TILING_UNIQ_HELPER_V2(optype, opfunc, counter) REGISTER_OP_TILING_UNIQ_V2(optype, opfunc, counter)
+
+#define REGISTER_OP_TILING_UNIQ_V2(optype, opfunc, counter)                                                            \
+  static optiling::utils::OpTilingRegistryInterf_V2 g_##optype##TilingRegistryInterf##counter(#optype, opfunc)
 
 using Status = domi::Status;
 namespace optiling {
@@ -49,15 +60,16 @@ using ByteBuffer = std::stringstream;
 class TeOpVarAttrArgsImpl;
 class TeOpVarAttrArgs {
   friend class VarAttrHelper;
-  public:
-    TeOpVarAttrArgs() = default;
-    ~TeOpVarAttrArgs() = default;
 
-    const uint8_t *GetData(const std::string &name, const std::string &dtype, size_t &size) const;
-  private:
-    std::shared_ptr<TeOpVarAttrArgsImpl> impl_;
+ public:
+  TeOpVarAttrArgs() = default;
+  ~TeOpVarAttrArgs() = default;
+
+  const uint8_t *GetData(const std::string &name, const std::string &dtype, size_t &size) const;
+
+ private:
+  std::shared_ptr<TeOpVarAttrArgsImpl> impl_;
 };
-
 
 struct TeOpTensor {
   std::vector<int64_t> shape;
@@ -110,14 +122,14 @@ class FMK_FUNC_HOST_VISIBILITY OpTilingRegistryInterf {
   static std::map<std::string, OpTilingFunc> &RegisteredOpInterf();
 };
 
-template <class T>
+template<class T>
 ByteBuffer &ByteBufferPut(ByteBuffer &buf, const T &value) {
   buf.write(reinterpret_cast<const char *>(&value), sizeof(value));
   buf.flush();
   return buf;
 }
 
-template <class T>
+template<class T>
 ByteBuffer &ByteBufferGet(ByteBuffer &buf, T &value) {
   buf.read(reinterpret_cast<char *>(&value), sizeof(value));
   return buf;
@@ -125,6 +137,82 @@ ByteBuffer &ByteBufferGet(ByteBuffer &buf, T &value) {
 
 size_t ByteBufferGetAll(ByteBuffer &buf, char *dest, size_t dest_len);
 ByteBuffer &ByteBufferPut(ByteBuffer &buf, const uint8_t *data, size_t dest_len);
+
+namespace utils {
+class OpRunInfoImpl;
+class OpRunInfo {
+ public:
+  OpRunInfo();
+  ~OpRunInfo() = default;
+  OpRunInfo(uint32_t block_dim, bool clear_atomic, uint32_t tiling_key);
+  // Copy
+  OpRunInfo(const OpRunInfo &runinfo);
+  // Move
+  OpRunInfo(OpRunInfo &&runinfo);
+  // Copy
+  OpRunInfo &operator=(const OpRunInfo &runinfo);
+  // Move
+  OpRunInfo &operator=(OpRunInfo &&runinfo);
+
+  void SetBlockDim(uint32_t block_dim);
+  uint32_t GetBlockDim();
+
+  void AddWorkspace(int64_t workspace);
+  size_t GetWorkspaceNum();
+  ge::graphStatus GetWorkspace(size_t idx, int64_t &workspace);
+  ge::graphStatus GetAllWorkspaces(std::vector<int64_t> &workspace);
+
+  template<class T>
+  void AddTilingData(const T &value) {
+    AddTilingData(reinterpret_cast<const char *>(&value), sizeof(value));
+  }
+  void AddTilingData(const char *value, size_t size);
+  ByteBuffer &GetAllTilingData();
+  void InternelSetTiling(ByteBuffer &value);
+
+  void SetClearAtomic(bool clear_atomic);
+  bool GetClearAtomic() const;
+
+  void SetTilingKey(uint32_t tiling_key);
+  uint32_t GetTilingKey() const;
+
+ private:
+  std::shared_ptr<OpRunInfoImpl> impl_;
+};
+
+class OpCompileInfoImpl;
+class OpCompileInfo {
+ public:
+  OpCompileInfo();
+  ~OpCompileInfo() = default;
+  OpCompileInfo(const ge::AscendString &key, const ge::AscendString &value);
+  // Copy
+  OpCompileInfo(const OpCompileInfo &compileinfo);
+  // Move
+  OpCompileInfo(OpCompileInfo &&compileinfo);
+  // Copy
+  OpCompileInfo &operator=(const OpCompileInfo &compileinfo);
+  // Move
+  OpCompileInfo &operator=(OpCompileInfo &&compileinfo);
+
+  void SetKey(const ge::AscendString &key);
+  const ge::AscendString &GetKey() const;
+
+  void SetValue(const ge::AscendString &value);
+  const ge::AscendString &GetValue() const;
+
+ private:
+  std::shared_ptr<OpCompileInfoImpl> impl_;
+};
+using OpTilingFuncV2 = std::function<bool(const ge::Operator &, const OpCompileInfo &, OpRunInfo &)>;
+using OpTilingFuncV2Ptr = bool (*)(const ge::Operator &, const OpCompileInfo &, OpRunInfo &);
+class FMK_FUNC_HOST_VISIBILITY OpTilingRegistryInterf_V2 {
+ public:
+  OpTilingRegistryInterf_V2(std::string op_type, OpTilingFuncV2 func);
+  ~OpTilingRegistryInterf_V2() = default;
+  static std::map<std::string, OpTilingFuncV2> &RegisteredOpInterf();
+};
+}  // namespace utils
 }  // namespace optiling
 
 #endif  // INC_REGISTER_OP_TILING_REGISTRY_H_

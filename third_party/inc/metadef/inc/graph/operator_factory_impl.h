@@ -25,6 +25,23 @@
 #include "register/infer_data_slice_registry.h"
 
 namespace ge {
+struct InferValueRangePara {
+ public:
+  InferValueRangePara() = default;
+  InferValueRangePara(WHEN_CALL call, bool cpu_kernel, InferValueRangeFunc func) {
+    is_initialized = true;
+    use_cpu_kernel = cpu_kernel;
+    when_call = call;
+    infer_value_func = func;
+  }
+  ~InferValueRangePara() = default;
+ public:
+  bool is_initialized = false;
+  bool use_cpu_kernel = false;
+  WHEN_CALL when_call = INPUT_IS_DYNAMIC;
+  InferValueRangeFunc infer_value_func = nullptr;
+};
+
 class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY OperatorFactoryImpl {
  public:
   static Operator CreateOperator(const std::string &operator_name, const std::string &operator_type);
@@ -36,6 +53,8 @@ class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY OperatorFactoryImpl {
   static InferShapeFunc GetInferShapeFunc(const std::string &operator_type);
 
   static InferFormatFunc GetInferFormatFunc(const std::string &operator_type);
+
+  static InferValueRangePara GetInferValueRangePara(const std::string &operator_type);
 
   static VerifyFunc GetVerifyFunc(const std::string &operator_type);
 
@@ -54,12 +73,20 @@ class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY OperatorFactoryImpl {
   static graphStatus RegisterInferDataSliceFunc(const std::string &operator_type,
                                                 InferDataSliceFunc const infer_data_slice_func);
 
+  static graphStatus RegisterInferValueRangeFunc(const std::string &operator_type);
+
+  static graphStatus RegisterInferValueRangeFunc(const std::string &operator_type,
+                                                 WHEN_CALL when_call,
+                                                 const bool use_cpu_kernel,
+                                                 const InferValueRangeFunc &infer_value_range_func);
+
   static shared_ptr<std::map<string, OpCreator>> operator_creators_;
   static shared_ptr<std::map<string, OpCreatorV2>> operator_creators_v2_;
   static shared_ptr<std::map<string, InferShapeFunc>> operator_infershape_funcs_;
   static shared_ptr<std::map<string, InferFormatFunc>> operator_inferformat_funcs_;
   static shared_ptr<std::map<string, VerifyFunc>> operator_verify_funcs_;
   static shared_ptr<std::map<string, InferDataSliceFunc>> operator_infer_data_slice_funcs_;
+  static shared_ptr<std::map<string, InferValueRangePara>> operator_infer_value_range_paras_;
 };
 }  // namespace ge
 

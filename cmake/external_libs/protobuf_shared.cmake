@@ -11,21 +11,21 @@ if ((${CMAKE_INSTALL_PREFIX} STREQUAL /usr/local) OR
     message(STATUS "No install prefix selected, default to ${CMAKE_INSTALL_PREFIX}.")
 endif()
 if (ACL_PB_PKG)
-	set(REQ_URL "${ACL_PB_PKG}/libs/protobuf/v3.8.0.tar.gz")
+	set(REQ_URL "${ACL_PB_PKG}/libs/protobuf/v3.13.0.tar.gz")
 else()
     if (ENABLE_GITEE)
-        set(REQ_URL "https://gitee.com/mirrors/protobuf_source/repository/archive/v3.8.0.tar.gz")
-        set(MD5 "eba86ae9f07ba5cfbaf8af3bc4e84236")
+        set(REQ_URL "https://gitee.com/mirrors/protobuf_source/repository/archive/v3.13.0.tar.gz")
+        set(MD5 "f4489cb88922ad9c58cbe3308d59cee5")
     else()
-        set(REQ_URL "https://github.com/protocolbuffers/protobuf/archive/v3.8.0.tar.gz")
-        set(MD5 "3d9e32700639618a4d2d342c99d4507a")
+        set(REQ_URL "https://github.com/protocolbuffers/protobuf/archive/v3.13.0.tar.gz")
+        set(MD5 "1a6274bc4a65b55a6fa70e264d796490")
     endif ()
 endif()
 
 set(protobuf_CXXFLAGS "-Wno-maybe-uninitialized -Wno-unused-parameter -fPIC -fstack-protector-all -D_FORTIFY_SOURCE=2 -D_GLIBCXX_USE_CXX11_ABI=0 -O2 -Dgoogle=ascend_private")
 set(protobuf_LDFLAGS "-Wl,-z,relro,-z,now,-z,noexecstack")
 ExternalProject_Add(protobuf_build
-                    URL ${REQ_URL} 
+                    URL ${REQ_URL}
                     CONFIGURE_COMMAND ${CMAKE_COMMAND}
                     -Dprotobuf_WITH_ZLIB=OFF
                     -DCMAKE_INSTALL_LIBDIR=${CMAKE_INSTALL_LIBDIR}
@@ -57,7 +57,7 @@ target_include_directories(ascend_protobuf INTERFACE ${PROTOBUF_SHARED_PKG_DIR}/
 set(INSTALL_BASE_DIR "")
 set(INSTALL_LIBRARY_DIR lib)
 
-install(FILES ${PROTOBUF_SHARED_PKG_DIR}/${CMAKE_INSTALL_LIBDIR}/ascend_protobuf.so.3.8.0.0 OPTIONAL
+install(FILES ${PROTOBUF_SHARED_PKG_DIR}/${CMAKE_INSTALL_LIBDIR}/ascend_protobuf.so.3.13.0.0 OPTIONAL
         DESTINATION ${INSTALL_LIBRARY_DIR})
 install(FILES ${PROTOBUF_SHARED_PKG_DIR}/${CMAKE_INSTALL_LIBDIR}/ascend_protobuf.so OPTIONAL
         DESTINATION ${INSTALL_LIBRARY_DIR})

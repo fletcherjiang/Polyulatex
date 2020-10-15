@@ -103,7 +103,7 @@ class TuningUtils {
   static graphStatus CreateDataNode(NodePtr &node, NodePtr &data_node);
   static graphStatus CreateNetOutput(NodePtr &node, NodePtr &out_node);
   static graphStatus AddAttrToDataNodeForMergeGraph(const NodePtr &pld, NodePtr &data_node);
-  static graphStatus AddAttrToNetOutputForMergeGraph(const NodePtr &end, NodePtr &out_node);
+  static graphStatus AddAttrToNetOutputForMergeGraph(const NodePtr &end, NodePtr &out_node, int64_t index);
   static void DumpGraphToPath(ComputeGraphPtr &exe_graph, int64_t index,
                               bool is_tuning_graph, std::string path);
 
@@ -114,15 +114,11 @@ class TuningUtils {
   static graphStatus MergeSubGraph(ComputeGraphPtr &graph);
   // Deletes new data and output nodes added by call `MakeExeGraph()` func in part 1
   static graphStatus RemoveDataNetoutputEdge(ComputeGraphPtr &graph);
-  static graphStatus GetInAndOutAnchorPair(NodePtr &data_node,
-                                           NodePtr &out_node,
-                                           AnchorPtr &dest_in_anchor,
-                                           AnchorPtr &src_out_anchor);
   static graphStatus HandleContinuousInputNodeNextData(NodePtr &node);
-  static NodePtr FindNode(const std::string &name);
+  static NodePtr FindNode(const std::string &name, int64_t &in_index);
 
-  static NodeNametoNodeNameMap data_2_netoutput_;
-  static NodetoNodeNameMap data_node_2_netoutput_;
+  static NodeNametoNodeNameMap data_2_end_;
+  static NodetoNodeNameMap data_node_2_end_node_;
   static NodetoNodeMap data_node_2_netoutput_node_;
   static NodeVec netoutput_nodes_;
   static NodeVec merged_graph_nodes_;

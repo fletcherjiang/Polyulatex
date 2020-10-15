@@ -30,7 +30,13 @@ using OpCreator = std::function<Operator(const std::string &)>;
 using OpCreatorV2 = std::function<Operator(const AscendString &)>;
 using InferShapeFunc = std::function<graphStatus(Operator &)>;
 using InferFormatFunc = std::function<graphStatus(Operator &)>;
+using InferValueRangeFunc = std::function<graphStatus(Operator &)>;
 using VerifyFunc = std::function<graphStatus(Operator &)>;
+
+enum WHEN_CALL {
+  INPUT_IS_DYNAMIC = 0,
+  INPUT_HAS_VALUE_RANGE = 1
+};
 
 class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY OperatorFactory {
  public:
@@ -72,6 +78,14 @@ class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY InferFormatFuncRegister {
   InferFormatFuncRegister(const std::string &operator_type, const InferFormatFunc &infer_format_func);
   InferFormatFuncRegister(const char *operator_type, const InferFormatFunc &infer_format_func);
   ~InferFormatFuncRegister() = default;
+};
+
+class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY InferValueRangeFuncRegister {
+ public:
+  InferValueRangeFuncRegister(const char *operator_type, WHEN_CALL when_call,
+                              const InferValueRangeFunc &infer_value_range_func);
+  InferValueRangeFuncRegister(const char *operator_type);
+  ~InferValueRangeFuncRegister() = default;
 };
 
 class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY VerifyFuncRegister {

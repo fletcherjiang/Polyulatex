@@ -28,6 +28,9 @@ namespace ge {
 
 using std::shared_ptr;
 
+class BufferImpl;
+using BufferImplPtr = std::shared_ptr<BufferImpl>;
+
 class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY Buffer {
  public:
   Buffer();
@@ -35,7 +38,7 @@ class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY Buffer {
 
   explicit Buffer(std::size_t bufferSize, std::uint8_t defualtVal = 0);
 
-  ~Buffer() = default;
+  ~Buffer();
 
   Buffer &operator=(const Buffer &other);
   static Buffer CopyFrom(const std::uint8_t *data, std::size_t bufferSize);
@@ -46,20 +49,14 @@ class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY Buffer {
   void ClearBuffer();
 
   // For compatibility
-  inline const std::uint8_t *data() const { return GetData(); }
-  inline std::uint8_t *data() { return GetData(); }  // lint !e659
-  inline std::size_t size() const { return GetSize(); }
-  inline void clear() { return ClearBuffer(); }
-  uint8_t operator[](size_t index) const {                // lint !e1022 !e1042
-    if (buffer_ != nullptr && index < buffer_->size()) {  // lint !e574
-      return (uint8_t)(*buffer_)[index];
-    }
-    return 0xff;
-  }
+  const std::uint8_t *data() const;
+  std::uint8_t *data();
+  std::size_t size() const;
+  void clear();
+  uint8_t operator[](size_t index) const;
 
  private:
-  GeIrProtoHelper<proto::AttrDef> data_;
-  std::string *buffer_ = nullptr;
+  BufferImplPtr impl_;
 
   // Create from protobuf obj
   Buffer(const ProtoMsgOwner &protoOnwer, proto::AttrDef *buffer);
@@ -72,10 +69,10 @@ class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY Buffer {
 
 class BufferUtils {
  public:
-  static Buffer CreateShareFrom(Buffer &other);
+  static Buffer CreateShareFrom(const Buffer &other);
   static Buffer CreateCopyFrom(const Buffer &other);  //lint !e148
   static Buffer CreateCopyFrom(const std::uint8_t *data, std::size_t buffer_size);  //lint !e148
-  static void ShareFrom(Buffer &from, Buffer &to);
+  static void ShareFrom(const Buffer &from, Buffer &to);
   static void CopyFrom(const Buffer &from, Buffer &to);
 };
 }  // namespace ge

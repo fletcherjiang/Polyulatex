@@ -74,6 +74,9 @@ using OutControlAnchorPtr = std::shared_ptr<OutControlAnchor>;
 
 using ConstAnchor = const Anchor;
 
+class AnchorImpl;
+using AnchorImplPtr = std::shared_ptr<AnchorImpl>;
+
 class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY Anchor : public std::enable_shared_from_this<Anchor> {
   friend class AnchorUtils;
 
@@ -84,7 +87,7 @@ class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY Anchor : public std::enable
 
   Anchor(const NodePtr& ownerNode, int idx);
 
-  virtual ~Anchor() = default;
+  virtual ~Anchor();
 
  protected:
   // Whether the two anchor is equal
@@ -121,12 +124,7 @@ class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY Anchor : public std::enable
   void SetIdx(int index);
 
  protected:
-  // All peer anchors connected to current anchor
-  vector<std::weak_ptr<Anchor>> peer_anchors_;
-  // The owner node of anchor
-  std::weak_ptr<Node> owner_node_;
-  // The index of current anchor
-  int idx_;
+  AnchorImplPtr impl_;
   template <class T>
   static Anchor::TYPE TypeOf() {
     static_assert(std::is_base_of<Anchor, T>::value, "T must be a Anchor!");
@@ -242,7 +240,7 @@ class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY InControlAnchor : public Co
 
   // Get  source out control anchors
   Vistor<OutControlAnchorPtr> GetPeerOutControlAnchors() const;
-  bool IsPeerOutAnchorsEmpty() const { return peer_anchors_.empty(); }
+  bool IsPeerOutAnchorsEmpty() const;
 
   // Get  source out data anchors
   Vistor<OutDataAnchorPtr> GetPeerOutDataAnchors() const;

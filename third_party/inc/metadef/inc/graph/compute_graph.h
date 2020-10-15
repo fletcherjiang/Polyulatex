@@ -37,6 +37,9 @@ using ConstComputeGraph = const ComputeGraph;
 class OperatorImpl;
 using OperatorImplPtr = std::shared_ptr<OperatorImpl>;
 
+class ComputeGraphImpl;
+using ComputeGraphImplPtr = std::shared_ptr<ComputeGraphImpl>;
+
 using NodeFilter = std::function<bool(const Node &)>;
 using GraphFilter = std::function<bool(const Node &, const char *, const ComputeGraphPtr &)>;
 
@@ -49,6 +52,8 @@ class ComputeGraph : public std::enable_shared_from_this<ComputeGraph>, public A
 
   explicit ComputeGraph(const std::string &name);
   ~ComputeGraph() override;
+  ComputeGraph(const ge::ComputeGraph&);
+  ComputeGraph(ge::ComputeGraph&&);
 
   std::string GetName() const;
   void SetName(const std::string &name);
@@ -124,7 +129,7 @@ class ComputeGraph : public std::enable_shared_from_this<ComputeGraph>, public A
   void TopologicalSorting(std::function<bool (const NodePtr &, const NodePtr &)> comp);
   graphStatus TopologicalSorting();
   bool IsValid() const;
-  void InValid() { is_valid_flag_ = false; }
+  void InValid();
   void Dump() const;
 
   void Swap(ComputeGraph &graph);
@@ -137,44 +142,36 @@ class ComputeGraph : public std::enable_shared_from_this<ComputeGraph>, public A
   graphStatus InsertEventNodes();
   graphStatus InsertGraphEvents();
   bool operator==(const ComputeGraph &r_compute_graph) const;
+  ComputeGraph& operator=(ge::ComputeGraph compute_graph);
 
   /*lint +e504*/
-  const std::map<std::vector<std::string>, std::vector<std::string>> &GetShareParamLayer() const {
-    return params_share_map_;
-  }
+  const std::map<std::vector<std::string>, std::vector<std::string>> &GetShareParamLayer() const;
 
-  void SetShareParamLayer(const std::map<std::vector<std::string>, std::vector<std::string>> params_share_map) {
-    params_share_map_ = params_share_map;
-  }
+  void SetShareParamLayer(const std::map<std::vector<std::string>, std::vector<std::string>> params_share_map);
 
-  void SetInputsOrder(const std::vector<std::string> &inputs_order) { inputs_order_ = inputs_order; }
+  void SetInputsOrder(const std::vector<std::string> &inputs_order);
 
-  void SetGraphOutNodes(std::map<std::string, std::vector<int32_t>> out_nodes_map) { out_nodes_map_ = out_nodes_map; }
+  void SetGraphOutNodes(std::map<std::string, std::vector<int32_t>> out_nodes_map);
 
-  void AppendGraphOutNodes(std::map<std::string, std::vector<int32_t>> out_nodes_map) {
-    for (auto &item : out_nodes_map) {
-      (void)out_nodes_map_.emplace(item.first, item.second);
-    }
-  }
+  void AppendGraphOutNodes(std::map<std::string, std::vector<int32_t>> out_nodes_map);
 
   shared_ptr<ComputeGraph> GetParentGraph();
   void SetParentGraph(const shared_ptr<ComputeGraph> &parent);
   shared_ptr<Node> GetParentNode();
   void SetParentNode(const shared_ptr<Node> &parent);
 
-  const std::map<std::string, std::vector<int32_t>> &GetGraphOutNodes() const { return out_nodes_map_; }
+  const std::map<std::string, std::vector<int32_t>> &GetGraphOutNodes() const;
+  void SetOrigGraph(ComputeGraphPtr orig_graph);
 
-  void SetOrigGraph(ComputeGraphPtr orig_graph) { origGraph_ = orig_graph; }
-
-  ComputeGraphPtr GetOrigGraph(void) { return origGraph_; }
-  void SetOutputSize(uint32_t size) { output_size_ = size; }
-  uint32_t GetOutputSize() const { return output_size_; }
-  void SetInputSize(uint32_t size) { input_size_ = size; }
-  uint32_t GetInputSize() const { return input_size_; }
+  ComputeGraphPtr GetOrigGraph(void);
+  void SetOutputSize(uint32_t size);
+  uint32_t GetOutputSize() const;
+  void SetInputSize(uint32_t size);
+  uint32_t GetInputSize() const;
 
   // false: known shape  true: unknow shape
-  bool GetGraphUnknownFlag() const { return is_unknown_shape_graph_; }
-  void SetGraphUnknownFlag(bool flag) { is_unknown_shape_graph_ = flag; }
+  bool GetGraphUnknownFlag() const;
+  void SetGraphUnknownFlag(bool flag);
 
   ///
   /// Set is need train iteration.
@@ -182,7 +179,7 @@ class ComputeGraph : public std::enable_shared_from_this<ComputeGraph>, public A
   /// times(according variant "npu_runconfig/iterations_per_loop").
   /// @param need_iteration is need iteration
   ///
-  void SetNeedIteration(bool need_iteration) { need_iteration_ = need_iteration; }
+  void SetNeedIteration(bool need_iteration);
 
   void SetUserDefOutput(const std::string &output_name);
 
@@ -192,42 +189,43 @@ class ComputeGraph : public std::enable_shared_from_this<ComputeGraph>, public A
   /// Get is need train iteration.
   /// @return is need iteration
   ///
-  bool GetNeedIteration() const { return need_iteration_; }
+  bool GetNeedIteration() const;
 
-  void SetGraphOpName(const std::map<uint32_t, std::string> &op_name_map) { op_name_map_ = op_name_map; }
-  const std::map<uint32_t, std::string> &GetGraphOpName() const { return op_name_map_; }
+  void SetGraphOpName(const std::map<uint32_t, std::string> &op_name_map);
+  const std::map<uint32_t, std::string> &GetGraphOpName() const;
 
   const std::map<OperatorImplPtr, NodePtr> &GetAllNodesInfo() const;
 
-  void SetAllNodesInfo(const std::map<OperatorImplPtr, NodePtr> &nodes) { all_nodes_infos_ = nodes; }
+  void SetAllNodesInfo(const std::map<OperatorImplPtr, NodePtr> &nodes);
 
-  void SetGraphOutNodesInfo(std::vector<std::pair<NodePtr, int32_t>> &out_nodes_info) {
-    output_nodes_info_ = out_nodes_info;
-  }
+  void SetGraphOutNodesInfo(std::vector<std::pair<NodePtr, int32_t>> &out_nodes_info);
+  void AppendGraphOutNodesInfo(std::vector<std::pair<NodePtr, int32_t>> &out_nodes_info);
+  const std::vector<std::pair<NodePtr, int32_t>> &GetGraphOutNodesInfo() const;
 
-  void AppendGraphOutNodesInfo(std::vector<std::pair<NodePtr, int32_t>> &out_nodes_info) {
-    output_nodes_info_.insert(output_nodes_info_.end(), out_nodes_info.begin(), out_nodes_info.end());
-  }
+  void SetGraphTargetNodesInfo(const std::vector<NodePtr> &target_nodes_info);
+  const std::vector<NodePtr> &GetGraphTargetNodesInfo() const;
 
-  const std::vector<std::pair<NodePtr, int32_t>> &GetGraphOutNodesInfo() const { return output_nodes_info_; }
+  void SetSessionID(uint64_t session_id);
+  uint64_t GetSessionID() const;
 
-  void SetGraphTargetNodesInfo(const std::vector<NodePtr> &target_nodes_info) {
-    target_nodes_info_ = target_nodes_info;
-  }
-  const std::vector<NodePtr> &GetGraphTargetNodesInfo() const { return target_nodes_info_; }
+  void SetGraphID(uint32_t graph_id);
+  uint32_t GetGraphID() const;
 
-  void SetSessionID(uint64_t session_id) { session_id_ = session_id; }
-  uint64_t GetSessionID() const { return session_id_; }
+  void SaveDataFormat(ge::Format data_format);
+  ge::Format GetDataFormat() const;
+  bool IsSummaryGraph() const;
+  void SetSummaryFlag(bool is_summary_graph);
 
-  void SetGraphID(uint32_t graph_id) { graph_id_ = graph_id; }
-  uint32_t GetGraphID() const { return graph_id_; }
-
-  void SaveDataFormat(ge::Format data_format) { data_format_ = data_format; }
-  ge::Format GetDataFormat() const { return data_format_; }
-  bool IsSummaryGraph() const { return is_summary_graph_; }
-  void SetSummaryFlag(bool is_summary_graph) { is_summary_graph_ = is_summary_graph; }
-  // Graph Before BFE
-  ComputeGraphPtr origGraph_;
+  /// nodes like : (a) <--- (c) ---> (b)
+  /// node a and b have only one parent node c, and a is connected to c firstly
+  /// topo order of DFS is `c, b, a` with `dfs_reverse=false` as default
+  /// in same case, user could get `c, a, b` with `dfs_reverse=true`
+  graphStatus TopologicalSortingGraph(bool dfs_reverse = false);
+  /**
+   *  Move Send Event nodes after it`s control node
+   *  Move Recv Event nodes before it`s control node
+   */
+  graphStatus ReorderEventNodes();
 
  protected:
   ProtoAttrMapHelper MutableAttrMap() override;
@@ -240,11 +238,7 @@ class ComputeGraph : public std::enable_shared_from_this<ComputeGraph>, public A
                                     std::deque<NodePtr> &stack);
   graphStatus CollectBreadthOutNode(const NodePtr &node, std::map<NodePtr, uint32_t> &map_in_edge_num,
                                     std::map<string, NodePtr> &breadth_node_map);
-  /// nodes like : (a) <--- (c) ---> (b)
-  /// node a and b have only one parent node c, and a is connected to c firstly
-  /// topo order of DFS is `c, b, a` with `dfs_reverse=false` as default
-  /// in same case, user could get `c, a, b` with `dfs_reverse=true`
-  graphStatus TopologicalSortingGraph(bool dfs_reverse = false);
+
   graphStatus SortNodes(std::vector<NodePtr> &stack, std::map<NodePtr, uint32_t> &mapInEdgeNum);
   Vistor<NodePtr> AllGraphNodes(std::vector<ComputeGraphPtr> &subgraphs) const;
   Vistor<NodePtr> GetAllNodes(const NodeFilter &node_filter, const GraphFilter &graph_filter) const;
@@ -257,79 +251,26 @@ class ComputeGraph : public std::enable_shared_from_this<ComputeGraph>, public A
                                  const std::vector<NodePtr> &l_node_ptr_vector) const;
 
   void SetNodesOwner();
-
-  /**
-   *  Move Send Event nodes after it`s control node
-   *  Move Recv Event nodes before it`s control node
-   */
-  graphStatus ReorderEventNodes();
-
   /**
    *  To improve preformace of list.size(), we should keep counter on nodes_.size()
    *  Use follow function to add/erase node from nodes_
    */
-  inline void EraseFromNodeList(const std::list<NodePtr>::iterator position) {
-    (void) nodes_.erase(position);
-    --direct_nodes_size_;
-  }
+  void EraseFromNodeList(const std::list<NodePtr>::iterator position);
 
-  inline void InsertToNodeList(const std::list<NodePtr>::iterator position, const NodePtr &node) {
-    (void) nodes_.insert(position, node);
-    ++direct_nodes_size_;
-  }
+  void InsertToNodeList(const std::list<NodePtr>::iterator position, const NodePtr &node);
 
-  inline void PushBackToNodeList(const NodePtr &node) {
-    (void) nodes_.push_back(node);
-    ++direct_nodes_size_;
-  }
+  void PushBackToNodeList(const NodePtr &node);
 
-  inline void EmplaceBackToNodeList(const NodePtr &node) {
-    (void) nodes_.emplace_back(node);
-    ++direct_nodes_size_;
-  }
+  void EmplaceBackToNodeList(const NodePtr &node);
 
-  inline void ClearNodeList() {
-    (void) nodes_.clear();
-    direct_nodes_size_ = 0;
-  }
+  void ClearNodeList();
 
   friend class ModelSerializeImp;
   friend class GraphDebugImp;
   friend class OnnxUtils;
   friend class TuningUtils;
 
-  std::string name_;
-  uint32_t graph_id_ = 0;
-  ProtoAttrMapHelper attrs_;
-  std::list<NodePtr> nodes_;
-  size_t direct_nodes_size_ = 0;
-  std::map<OperatorImplPtr, NodePtr> all_nodes_infos_;
-  std::vector<NodePtr> target_nodes_info_;
-
-  std::vector<NodePtr> input_nodes_;
-  std::vector<std::string> inputs_order_;
-  uint32_t input_size_ = 1;
-  std::map<std::string, std::vector<int32_t>> out_nodes_map_;
-  uint32_t output_size_ = 1;
-  std::vector<std::pair<NodePtr, int32_t>> output_nodes_info_;
-
-  std::vector<std::shared_ptr<ComputeGraph>> sub_graph_;
-  std::map<std::string, std::shared_ptr<ComputeGraph>> names_to_subgraph_;
-  std::weak_ptr<ComputeGraph> parent_graph_;
-  std::weak_ptr<Node> parent_node_;
-
-  // the members followed should not in the ComputeGraph class
-  bool is_valid_flag_;
-  bool is_summary_graph_ = false;
-  // Indicates whether it is need iteration
-  bool need_iteration_ = false;
-  std::map<std::vector<std::string>, std::vector<std::string>> params_share_map_;
-  // TaskIdx -> op_name Map
-  std::map<uint32_t, std::string> op_name_map_;
-  uint64_t session_id_ = 0;
-  ge::Format data_format_ = ge::FORMAT_ND;
-  // unknown graph indicator, default is false, mean known shape
-  bool is_unknown_shape_graph_ = false;
+  ComputeGraphImplPtr impl_;
 };
 }  // namespace ge
 #endif  // INC_GRAPH_COMPUTE_GRAPH_H_

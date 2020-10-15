@@ -28,10 +28,22 @@
 #include "graph/types.h"
 
 namespace ge {
+class GeShapeImpl;
+using GeShapeImplPtr = std::shared_ptr<GeShapeImpl>;
+
+class TensorDataImpl;
+using TensorDataImplPtr = std::shared_ptr<TensorDataImpl>;
+
+class GeTensorDescImpl;
+using GeTensorDescImplPtr = std::shared_ptr<GeTensorDescImpl>;
+
+class GeTensorImpl;
+using GeTensorImplPtr = std::shared_ptr<GeTensorImpl>;
+
 class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY GeShape {
  public:
   GeShape();
-  ~GeShape() = default;
+  ~GeShape();
   explicit GeShape(std::vector<int64_t> s);
 
   size_t GetDimNum() const;
@@ -61,12 +73,13 @@ class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY GeShape {
   GeShape &operator=(GeShape &&other);
 
  private:
-  GeIrProtoHelper<proto::ShapeDef> shape_def_;
+  GeShapeImplPtr impl_;
   friend class GeTensorDesc;
+  friend class GeTensorDescImpl;
   // Create from proto obj
   GeShape(const ProtoMsgOwner &protoOnwer, proto::ShapeDef *protoMsg);
 
-  void RefTo(const GeShape &shape) { shape_def_ = shape.shape_def_; }
+  void RefTo(const GeShape &shape);
 };
 
 class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY GeTensorDesc : public AttrHolder {
@@ -80,7 +93,7 @@ class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY GeTensorDesc : public AttrH
   GeTensorDesc(const GeTensorDesc &desc);
   GeTensorDesc(GeTensorDesc &&desc);
 
-  ~GeTensorDesc() = default;
+  ~GeTensorDesc();
   bool operator==(const GeTensorDesc &r_ge_tensor_desc) const;
 
   void Update(GeShape shape, Format format = FORMAT_ND, DataType dt = DT_FLOAT);
@@ -139,55 +152,45 @@ class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY GeTensorDesc : public AttrH
   using AttrHolder::HasAttr;
   using AttrHolder::SetAttr;
 
-  void Init();
-
   // Create from proto obj
   GeTensorDesc(const ProtoMsgOwner &protoOnwer, proto::TensorDescriptor *protoMsg);
   friend class GeTensor;
+  friend class GeTensorImpl;
   friend class GeAttrValueImp;
   friend class ModelSerializeImp;
   friend class OnnxUtils;
 
-  GeIrProtoHelper<proto::TensorDescriptor> tensor_descriptor_;
-  // Reference from tensorDescriptor_, do not direct use
-  mutable GeShape __shape_;
+  GeTensorDescImplPtr impl_;
 
-  void RefTo(const GeTensorDesc &tensorDesc) { tensor_descriptor_ = tensorDesc.tensor_descriptor_; }
+  void RefTo(const GeTensorDesc &tensorDesc);
   GeShape &ShapeReference() const;
 };
 
 class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TensorData {
  public:
-  TensorData() = default;
-  ~TensorData() = default;
+  TensorData();
+  ~TensorData();
 
   graphStatus SetData(std::vector<uint8_t> &&data);
   graphStatus SetData(const std::vector<uint8_t> &data);
   graphStatus SetData(const Buffer &data);
   graphStatus SetData(const TensorData &data);
   graphStatus SetData(const uint8_t *data, size_t size);
+  graphStatus SetData(uint8_t *data, size_t size, const AlignedPtr::Deleter &delete_fuc);  /*lint !e148*/
 
   const uint8_t *MallocAlignedPtr(size_t size);
 
-  inline const std::uint8_t *data() const { return GetData(); }
-  inline std::uint8_t *data() { return GetData(); }
-  inline std::size_t size() const { return GetSize(); }
-  inline void clear() {
-    aligned_ptr_.reset();
-    length_ = 0;
-  }
-  uint8_t operator[](size_t index) const {
-    if (aligned_ptr_ != nullptr && index < length_) {
-      return *(aligned_ptr_->MutableGet() + index);
-    }
-    return 0xff;
-  }
+  const std::uint8_t *data() const;
+  std::uint8_t *data();
+  std::size_t size() const;
+  void clear();
+  uint8_t operator[](size_t index) const;
 
   std::size_t GetSize() const;
   const std::uint8_t *GetData() const;
   std::uint8_t *GetData();
 
-  const std::shared_ptr<AlignedPtr> &GetAlignedPtr() { return aligned_ptr_; }
+  const std::shared_ptr<AlignedPtr> &GetAlignedPtr();
 
   // share data, share tensor_descriptor/aligned_ptr
   // replace using TensorUtils::ShareTensorData(const TensorData &from, TensorData &to)
@@ -200,15 +203,11 @@ class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TensorData {
   void SetData(std::shared_ptr<AlignedPtr> aligned_ptr, size_t size);
  private:
   friend class GeTensor;
+  friend class GeTensorImpl;
   friend class GeAttrValueImp;
   friend class ModelSerializeImp;
   friend class TensorUtils;
-  GeIrProtoHelper<proto::TensorDescriptor> tensor_descriptor_;
-  std::shared_ptr<AlignedPtr> aligned_ptr_ = nullptr;
-  size_t length_ = 0;
-  // functions data() & mutable_data() return address of invalid_data_ when length_ is 0
-  // defined for coding convenience
-  static uint32_t invalid_data_;
+  TensorDataImplPtr impl_;
 };
 
 class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY GeTensor {
@@ -220,34 +219,30 @@ class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY GeTensor {
   explicit GeTensor(const GeTensorDesc &tensorDesc, const uint8_t *data, size_t size);
   explicit GeTensor(GeTensorDesc &&tensorDesc, std::vector<uint8_t> &&data);
   explicit GeTensor(const GeTensorDesc &tensorDesc, size_t size);
-  ~GeTensor() = default;
+  ~GeTensor();
 
   GeTensorDesc GetTensorDesc() const;
   GeTensorDesc &MutableTensorDesc();
   void SetTensorDesc(const GeTensorDesc &tensorDesc);
 
-  std::shared_ptr<AlignedPtr> GetAlignedPtr() { return tensor_data_.aligned_ptr_; }
+  std::shared_ptr<AlignedPtr> GetAlignedPtr();
 
-  const TensorData &GetData() const { return tensor_data_; }
-  TensorData &MutableData() { return tensor_data_; }
+  const TensorData &GetData() const;
+  TensorData &MutableData();
 
   graphStatus SetData(std::vector<uint8_t> &&data);
   graphStatus SetData(const std::vector<uint8_t> &data);
   graphStatus SetData(const Buffer &data);
   graphStatus SetData(const uint8_t *data, size_t size);
   graphStatus SetData(const TensorData &data);
-
+  graphStatus SetData(uint8_t *data, size_t size, const AlignedPtr::Deleter &delete_fuc);
 
   void ClearData();
-
   GeTensor Clone() const;
-
 
   // zero copy SetData
   // replace using TensorUtils::ShareAlignedPtr
-  void SetData(std::shared_ptr<AlignedPtr> aligned_ptr, size_t size) {
-    tensor_data_.SetData(std::move(aligned_ptr), size);
-  }
+  void SetData(std::shared_ptr<AlignedPtr> aligned_ptr, size_t size);
   // zero copy construction, share aligned_ptr, do not share tensor_desc
   // replace using TensorUtils::CreateShareTensor
   GeTensor(const GeTensorDesc &td, std::shared_ptr<AlignedPtr> aligned_ptr, size_t size);
@@ -267,11 +262,8 @@ class GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY GeTensor {
   // Create from proto obj
   GeTensor(const ProtoMsgOwner &protoOnwer, proto::TensorDef *protoMsg);
   void BuildAlignerPtrWithProtoData();
-  GeIrProtoHelper<proto::TensorDef> tensor_def_;
-  // Reference from tensor_data_, do not direct use
-  mutable GeTensorDesc __desc_;
+  GeTensorImplPtr impl_;
   GeTensorDesc &DescReference() const;
-  TensorData tensor_data_;
 };
 }  // namespace ge
 #endif  // INC_GRAPH_GE_TENSOR_H_

@@ -26,6 +26,18 @@
 namespace ge {
 // Op types of Const like Opps.
 extern const std::set<std::string> kConstOpTypes;
+
+// Op types of Enter like Opps.
+extern const std::set<std::string> kEnterOpTypes;
+// Op types of Merge like Opps.
+extern const std::set<std::string> kMergeOpTypes;
+// Op types of Switch like Opps.
+extern const std::set<std::string> kSwitchOpTypes;
+// Op types of NextIteration like Opps.
+extern const std::set<std::string> kNextIterationOpTypes;
+// Op types of Exit like Opps.
+extern const std::set<std::string> kExitOpTypes;
+
 // Op types of If like Opps.
 extern const std::set<std::string> kIfOpTypes;
 // Op types of While like Opps.

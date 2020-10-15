@@ -64,6 +64,6 @@ class ProtoTypePassRegistrar {
 #define REGISTER_PROTOTYPE_PASS_UNIQ(ctr, pass_name, pass, fmk_type)                         \
   static ::ge::ProtoTypePassRegistrar register_prototype_pass##ctr __attribute__((unused)) = \
       ::ge::ProtoTypePassRegistrar(                                                          \
-          pass_name, []() -> ::ge::ProtoTypeBasePass * { return new (std::nothrow) pass(); }, fmk_type)
+          pass_name, []()->::ge::ProtoTypeBasePass * { return new (std::nothrow) pass(); }, fmk_type)
 }  // namespace ge
 #endif  // METADEF_PROTOTYPE_PASS_REGISTRY_H

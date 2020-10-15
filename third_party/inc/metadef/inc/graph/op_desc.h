@@ -52,6 +52,9 @@ class GeAttrValue;
 
 using ConstOpDesc = const OpDesc;
 
+class OpDescImpl;
+using OpDescImplPtr = std::shared_ptr<OpDescImpl>;
+
 enum SubgraphType {
   kStatic,
   kDynamic,
@@ -69,11 +72,16 @@ class OpDesc : public std::enable_shared_from_this<OpDesc>, public AttrHolder {
 
   OpDesc(const string &name, const string &type);
 
+  OpDesc(const OpDesc &op_desc);
+
+  OpDesc(OpDesc &&op_desc);
+
   OpDesc();
 
   ~OpDesc();
 
   bool operator==(const OpDesc &r_op_desc) const;
+  OpDesc& operator=(OpDesc op_desc);
 
   string GetName() const;
 
@@ -299,38 +307,7 @@ class OpDesc : public std::enable_shared_from_this<OpDesc>, public AttrHolder {
   bool OpDescAttrsAreEqual(const OpDesc &r_op_desc) const;
   bool OpDescGenTensorDescsAreEqual(const OpDesc &r_op_desc) const;
 
-  GeIrProtoHelper<ge::proto::OpDef> op_def_;
-  std::vector<std::string> subgraph_instance_names_;
-
-  // subgraph names to index, for a `if` operator:
-  // then_branch: 0
-  // else_branch: 1
-  // or for a `case` node:
-  // branches0: 0
-  // branches1: 1
-  // branches2: 2
-  std::map<std::string, uint32_t> subgraph_names_to_index_;
-
-  // subgraph ir names to type, for a `if` operator:
-  // then_branch: static
-  // else_branch: static
-  // or for a `case` op:
-  // branches: dynamic
-  std::map<std::string, SubgraphType> subgraph_ir_names_to_type_;
-
-  vector<GeTensorDescPtr> inputs_desc_{};
-  map<string, uint32_t> input_name_idx_{};
-  vector<string> register_input_name_{};
-  std::set<string> optional_input_names_{};
-  vector<GeTensorDescPtr> outputs_desc_{};
-  map<string, uint32_t> output_name_idx_{};
-  vector<string> register_output_name_{};
-  std::function<graphStatus(Operator &)> infer_func_ = nullptr;
-  std::function<graphStatus(Operator &)> infer_format_func_ = nullptr;
-  std::function<graphStatus(Operator &)> verifier_func_ = nullptr;
-  std::function<graphStatus(Operator &)> infer_data_slice_func_ = nullptr;
-  string op_kernel_lib_name_;
-  string engine_name_;
+  OpDescImplPtr impl_;
   friend class OpDescUtils;
   friend class ModelSerializeImp;
   friend class AttrUtils;
