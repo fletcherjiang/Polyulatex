@@ -464,6 +464,13 @@ std::map<string, GeAttrValue> g_geAttrMap;
         return true;
     }
 
+    TensorData::TensorData()
+    {
+
+    }
+
+    TensorData::~TensorData() = default;
+
     std::uint8_t *TensorData::GetData()
     {
         return nullptr;
@@ -548,6 +555,8 @@ std::map<string, GeAttrValue> g_geAttrMap;
     GeTensorDesc::GeTensorDesc(GeShape, Format, DataType)
     {
     }
+
+    GeTensorDesc::~GeTensorDesc() = default;
 
     ProtoAttrMapHelper GeTensorDesc::MutableAttrMap()
     {
@@ -646,6 +655,12 @@ std::map<string, GeAttrValue> g_geAttrMap;
 
     GeTensor::GeTensor(const GeTensorDesc &tensorDesc, const uint8_t *data, size_t size)
     {
+    }
+
+    GeTensor::~GeTensor() = default;
+
+    const TensorData &GeTensor::GetData() const {
+        return TensorData();
     }
 
     GeTensorDesc GeTensor::GetTensorDesc() const
@@ -877,6 +892,8 @@ std::map<string, GeAttrValue> g_geAttrMap;
     GeShape::GeShape(GeShape const&)
     {
     }
+
+    GeShape::~GeShape() = default;
 
     graphStatus AttrHolder::SetAttr(const string& name, const GeAttrValue& value)
     {
