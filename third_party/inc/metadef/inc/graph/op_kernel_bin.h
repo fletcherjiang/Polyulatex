@@ -42,6 +42,7 @@ class OpKernelBin {
 
 using OpKernelBinPtr = std::shared_ptr<OpKernelBin>;
 const char *const OP_EXTATTR_NAME_TBE_KERNEL = "tbeKernel";
+const char *const OP_EXTATTR_NAME_THREAD_TBE_KERNEL = "thread_tbeKernel";
 const char *const OP_EXTATTR_CUSTAICPU_KERNEL = "cust_aicpu_kernel";
 }  // namespace ge
 

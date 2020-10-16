@@ -39,7 +39,8 @@ class AlignedPtr {
 
   static std::shared_ptr<AlignedPtr> BuildFromAllocFunc(const AlignedPtr::Allocator &alloc_func,
                                                         const AlignedPtr::Deleter &delete_func);
-
+  static std::shared_ptr<AlignedPtr> BuildFromData(uint8_t *data,
+                                                   const AlignedPtr::Deleter &delete_func);  /*lint !e148*/
  private:
   std::unique_ptr<uint8_t[], AlignedPtr::Deleter> base_ = nullptr;
   uint8_t *aligned_addr_ = nullptr;

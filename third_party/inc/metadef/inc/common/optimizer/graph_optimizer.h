@@ -71,6 +71,9 @@ class GraphOptimizer {
 
   // op compile
   virtual Status OptimizeFusedGraphAfterGraphSlice(ComputeGraph &graph) { return SUCCESS; }
+
+  // optimize whole graph, using after stage1
+  virtual Status OptimizeAfterStage1(ComputeGraph &graph) { return SUCCESS; }
 };
 }  // namespace ge
 /*lint +e148*/

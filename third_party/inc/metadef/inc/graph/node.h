@@ -73,9 +73,12 @@ typedef std::vector<std::multimap<std::string, ge::AnchorPtr>> kFusionDataFlowVe
 // Node is a component of ComputeGraph
 class Node : public std::enable_shared_from_this<Node> {
   friend class ComputeGraph;
+  friend class ComputeGraphImpl;
   friend class ModelSerializeImp;
 
  public:
+  class NodeImpl;
+  using NodeImplPtr = std::shared_ptr<NodeImpl>;
   template <class T>
   using Vistor = RangeVistor<T, std::shared_ptr<ConstNode>>;
   ~Node();
@@ -84,7 +87,7 @@ class Node : public std::enable_shared_from_this<Node> {
   bool operator==(const Node &r_node) const;
 
  protected:
-  Node() = default;
+  Node();
   Node(const OpDescPtr &op, const ComputeGraphPtr &ownerGraph);
 
  public:
@@ -95,7 +98,7 @@ class Node : public std::enable_shared_from_this<Node> {
 
   ComputeGraphPtr GetOwnerComputeGraph() const;
   graphStatus SetOwnerComputeGraph(const ComputeGraphPtr &graph);
-  graphStatus SetAnyOwnerComputeGraph(const ComputeGraphPtr &graph);
+  graphStatus ClearOwnerGraph(const ComputeGraphPtr &graph);
 
   Vistor<InDataAnchorPtr> GetAllInDataAnchors() const;
   Vistor<OutDataAnchorPtr> GetAllOutDataAnchors() const;
@@ -152,35 +155,27 @@ class Node : public std::enable_shared_from_this<Node> {
 
   graphStatus AddLinkFromForParse(const NodePtr &input_node);
 
-  void AddSendEventId(uint32_t event_id) { send_event_id_list_.push_back(event_id); }
+  void AddSendEventId(uint32_t event_id);
 
-  void AddRecvEventId(uint32_t event_id) { recv_event_id_list_.push_back(event_id); }
+  void AddRecvEventId(uint32_t event_id);
 
-  const std::vector<uint32_t> &GetSendEventIdList() const { return send_event_id_list_; }
+  const std::vector<uint32_t> &GetSendEventIdList() const;
 
-  const std::vector<uint32_t> &GetRecvEventIdList() const { return recv_event_id_list_; }
-  void GetFusionInputFlowList(kFusionDataFlowVec_t &fusion_input_list) {
-    fusion_input_list = fusion_input_dataflow_list_;
-  }
+  const std::vector<uint32_t> &GetRecvEventIdList() const;  /*lint !e148*/
 
-  void GetFusionOutputFlowList(kFusionDataFlowVec_t &fusion_output_list) {
-    fusion_output_list = fusion_output_dataflow_list_;
-  }
+  void GetFusionInputFlowList(kFusionDataFlowVec_t &fusion_input_list);
 
-  void SetFusionInputFlowList(kFusionDataFlowVec_t &fusion_input_list) {
-    fusion_input_dataflow_list_ = fusion_input_list;
-  }
+  void GetFusionOutputFlowList(kFusionDataFlowVec_t &fusion_output_list);
 
-  void SetFusionOutputFlowList(kFusionDataFlowVec_t &fusion_output_list) {
-    fusion_output_dataflow_list_ = fusion_output_list;
-  }
+  void SetFusionInputFlowList(kFusionDataFlowVec_t &fusion_input_list);
 
-  bool GetHostNode() const { return host_node_; }
-  void SetHostNode(bool is_host) { host_node_ = is_host; }
+  void SetFusionOutputFlowList(kFusionDataFlowVec_t &fusion_output_list);
 
-  void SetOrigNode(const NodePtr &orignode) { orig_node_ = orignode; }
+  bool GetHostNode() const;
+  void SetHostNode(bool is_host);
 
-  NodePtr GetOrigNode() { return orig_node_; }
+  void SetOrigNode(const NodePtr &orignode);
+  NodePtr GetOrigNode();
 
  private:
   bool NodeMembersAreEqual(const Node &r_node) const;
@@ -188,23 +183,7 @@ class Node : public std::enable_shared_from_this<Node> {
   bool NodeInConnectsAreEqual(const Node &r_node) const;
   bool NodeOutConnectsAreEqual(const Node &r_node) const;
   bool NodeAnchorIsEqual(const AnchorPtr &l_anchor, const AnchorPtr &r_anchor, size_t i) const;
-  OpDescPtr op_;
-  std::weak_ptr<ComputeGraph> owner_graph_;
-  vector<InDataAnchorPtr> in_data_anchors_;
-  vector<OutDataAnchorPtr> out_data_anchors_;
-  InControlAnchorPtr in_control_anchor_;
-  OutControlAnchorPtr out_control_anchor_;
-  map<string, GeAttrValue> attrs_;  // lint !e1073
-  bool has_init_{false};
-  bool host_node_{false};
-  bool anchor_status_updated_{false};
-  std::vector<uint32_t> send_event_id_list_;
-  std::vector<uint32_t> recv_event_id_list_;
-
-  kFusionDataFlowVec_t fusion_input_dataflow_list_;
-  kFusionDataFlowVec_t fusion_output_dataflow_list_;
-
-  NodePtr orig_node_;
+  NodeImplPtr impl_;
   friend class NodeUtils;
   friend class OnnxUtils;
   friend class TuningUtils;

@@ -52,64 +52,35 @@ int FormatErrorMessage(char *str_dst, size_t dst_max, const char *format, ...);
 #define REPORT_ENV_ERROR(error_code, key, value)                                            \
   ErrorManager::GetInstance().ATCReportErrMessage(error_code, key, value)
 
-#define REPORT_INNER_ERROR(error_code, fmt, ...)                                                 \
-do {                                                                                             \
-  char error_message_str[LIMIT_PER_MESSAGE] = {0};                                               \
-  error_message::FormatErrorMessage(error_message_str, LIMIT_PER_MESSAGE, fmt, ##__VA_ARGS__);   \
-  error_message::FormatErrorMessage(                                                             \
-          error_message_str, LIMIT_PER_MESSAGE, "%s[FUNC:%s][FILE:%s][LINE:%d]",                 \
-          error_message_str, __FUNCTION__, TRIM_PATH(__FILE__), __LINE__);                       \
-  ErrorManager::GetInstance().ReportInterErrMessage(error_code, std::string(error_message_str)); \
+#define REPORT_INNER_ERROR(error_code, fmt, ...)                                                         \
+do {                                                                                                     \
+  char error_message_str[LIMIT_PER_MESSAGE] = {0};                                                       \
+  if (error_message::FormatErrorMessage(error_message_str, LIMIT_PER_MESSAGE, fmt, ##__VA_ARGS__) < 0) { \
+    break;                                                                                               \
+  }                                                                                                      \
+  if (error_message::FormatErrorMessage(                                                                 \
+          error_message_str, LIMIT_PER_MESSAGE, "%s[FUNC:%s][FILE:%s][LINE:%d]",                         \
+          error_message_str, __FUNCTION__, TRIM_PATH(__FILE__), __LINE__) < 0) {                         \
+    break;                                                                                               \
+  }                                                                                                      \
+  ErrorManager::GetInstance().ReportInterErrMessage(error_code, std::string(error_message_str));         \
 } while (0)
 
 #define REPORT_CALL_ERROR(error_code, fmt, ...)                                                  \
 do {                                                                                             \
-  char error_message_str[LIMIT_PER_MESSAGE] = {0};                                               \
-  error_message::FormatErrorMessage(error_message_str, LIMIT_PER_MESSAGE, fmt, ##__VA_ARGS__);   \
-  error_message::FormatErrorMessage(                                                             \
-          error_message_str, LIMIT_PER_MESSAGE, "%s[FUNC:%s][FILE:%s][LINE:%d]",                 \
-          error_message_str, __FUNCTION__, TRIM_PATH(__FILE__), __LINE__);                       \
-  ErrorManager::GetInstance().ReportInterErrMessage(error_code, std::string(error_message_str)); \
+  char error_message_str[LIMIT_PER_MESSAGE] = {0};                                                       \
+  if (error_message::FormatErrorMessage(error_message_str, LIMIT_PER_MESSAGE, fmt, ##__VA_ARGS__) < 0) { \
+    break;                                                                                               \
+  }                                                                                                      \
+  if (error_message::FormatErrorMessage(                                                                 \
+          error_message_str, LIMIT_PER_MESSAGE, "%s[FUNC:%s][FILE:%s][LINE:%d]",                         \
+          error_message_str, __FUNCTION__, TRIM_PATH(__FILE__), __LINE__) < 0) {                         \
+    break;                                                                                               \
+  }                                                                                                      \
+  ErrorManager::GetInstance().ReportInterErrMessage(error_code, std::string(error_message_str));         \
 } while (0)
 
 namespace error_message {
-  // first stage
-  constexpr char const *kInitialize   = "INIT";
-  constexpr char const *kModelCompile = "COMP";
-  constexpr char const *kModelLoad    = "LOAD";
-  constexpr char const *kModelExecute = "EXEC";
-  constexpr char const *kFinalize     = "FINAL";
-
-  // SecondStage
-  // INITIALIZE
-  constexpr char const *kParser               = "PARSER";
-  constexpr char const *kOpsProtoInit         = "OPS_PRO";
-  constexpr char const *kSystemInit           = "SYS";
-  constexpr char const *kEngineInit           = "ENGINE";
-  constexpr char const *kOpsKernelInit        = "OPS_KER";
-  constexpr char const *kOpsKernelBuilderInit = "OPS_KER_BLD";
-  // MODEL_COMPILE
-  constexpr char const *kPrepareOptimize    = "PRE_OPT";
-  constexpr char const *kOriginOptimize     = "ORI_OPT";
-  constexpr char const *kSubGraphOptimize   = "SUB_OPT";
-  constexpr char const *kMergeGraphOptimize = "MERGE_OPT";
-  constexpr char const *kPreBuild           = "PRE_BLD";
-  constexpr char const *kStreamAlloc        = "STM_ALLOC";
-  constexpr char const *kMemoryAlloc        = "MEM_ALLOC";
-  constexpr char const *kTaskGenerate       = "TASK_GEN";
-  // COMMON
-  constexpr char const *kOther = "DEFAULT";
-
-  struct Context {
-    uint64_t work_stream_id;
-    std::string first_stage;
-    std::string second_stage;
-    std::string log_header;
-  };
-}
-
-// old, will be delete after all caller transfer to new
-namespace ErrorMessage {
   // first stage
   constexpr char const *kInitialize   = "INIT";
   constexpr char const *kModelCompile = "COMP";
@@ -231,10 +202,8 @@ class ErrorManager {
 
   const std::string &GetLogHeader();
 
-  ErrorMessage::Context &GetErrorContext();
   error_message::Context &GetErrorManagerContext();
 
-  void SetErrorContext(ErrorMessage::Context error_context);
   void SetErrorContext(error_message::Context error_context);
 
   void SetStage(const std::string &first_stage, const std::string &second_stage);
