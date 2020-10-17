@@ -31,12 +31,13 @@ namespace {
         ACL_REQUIRES_NOT_NULL(src);
         ACL_REQUIRES_NOT_NULL(dst);
         if (srcLen > dstLen) {
-            ACL_LOG_ERROR("src length=%zu is larger than dst length=%zu when memcpy", srcLen, dstLen);
+            ACL_LOG_INNER_ERROR("[Check][Len]src length=%zu is larger than dst length=%zu when memcpy", srcLen, dstLen);
             return ACL_ERROR_INVALID_PARAM;
         }
         auto ret = memcpy_s(dst, dstLen, src, srcLen);
         if (ret != EOK) {
-            ACL_LOG_ERROR("call memcpy failed, result=%d, srcLen=%zu, dstLen=%zu", ret, srcLen, dstLen);
+            ACL_LOG_INNER_ERROR("[Call][MemCpy]call memcpy failed, result=%d, srcLen=%zu, dstLen=%zu",
+                ret, srcLen, dstLen);
             return ACL_ERROR_FAILURE;
         }
 
@@ -49,7 +50,7 @@ namespace {
         uint64_t threadId = 0;
         aclError ret = CopyVencChannelDescParam(param, length, static_cast<void *>(&threadId), sizeof(uint64_t));
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("memcpy value failed, ret=%d.", ret);
+            ACL_LOG_INNER_ERROR("[Call][Memcpy]memcpy value failed, ret=%d.", ret);
             return ret;
         }
         return aclvencSetChannelDescThreadId(channelDesc, threadId);
@@ -61,7 +62,7 @@ namespace {
         aclvencCallback callback = nullptr;
         aclError ret = CopyVencChannelDescParam(param, length, static_cast<void *>(&callback), sizeof(size_t));
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("memcpy value failed, ret=%d.", ret);
+            ACL_LOG_INNER_ERROR("[Call][Memcpy]memcpy value failed, ret=%d.", ret);
             return ret;
         }
         return aclvencSetChannelDescCallback(channelDesc, callback);
@@ -74,7 +75,7 @@ namespace {
         aclError ret = CopyVencChannelDescParam(param, length, static_cast<void *>(&picFormat),
             sizeof(acldvppPixelFormat));
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("memcpy value failed, ret=%d.", ret);
+            ACL_LOG_INNER_ERROR("[Call][Memcpy]memcpy value failed, ret=%d.", ret);
             return ret;
         }
         return aclvencSetChannelDescPicFormat(channelDesc, picFormat);
@@ -87,7 +88,7 @@ namespace {
         aclError ret = CopyVencChannelDescParam(param, length, static_cast<void *>(&enType),
             sizeof(acldvppStreamFormat));
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("memcpy value failed, ret=%d.", ret);
+            ACL_LOG_INNER_ERROR("[Call][Memcpy]memcpy value failed, ret=%d.", ret);
             return ret;
         }
         return aclvencSetChannelDescEnType(channelDesc, enType);
@@ -99,7 +100,7 @@ namespace {
         uint32_t picWidth = 0;
         aclError ret = CopyVencChannelDescParam(param, length, static_cast<void *>(&picWidth), sizeof(uint32_t));
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("memcpy value failed, ret=%d.", ret);
+            ACL_LOG_INNER_ERROR("[Call][Memcpy]memcpy value failed, ret=%d.", ret);
             return ret;
         }
         return aclvencSetChannelDescPicWidth(channelDesc, picWidth);
@@ -111,7 +112,7 @@ namespace {
         uint32_t picHeight = 0;
         aclError ret = CopyVencChannelDescParam(param, length, static_cast<void *>(&picHeight), sizeof(uint32_t));
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("memcpy value failed, ret=%d.", ret);
+            ACL_LOG_INNER_ERROR("[Call][Memcpy]memcpy value failed, ret=%d.", ret);
             return ret;
         }
         return aclvencSetChannelDescPicHeight(channelDesc, picHeight);
@@ -124,7 +125,7 @@ namespace {
         aclError ret = CopyVencChannelDescParam(param, length, static_cast<void *>(&keyFrameInterval),
             sizeof(uint32_t));
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("memcpy value failed, ret=%d.", ret);
+            ACL_LOG_INNER_ERROR("[Call][Memcpy]memcpy value failed, ret=%d.", ret);
             return ret;
         }
         return aclvencSetChannelDescKeyFrameInterval(channelDesc, keyFrameInterval);
@@ -136,7 +137,7 @@ namespace {
         void *bufAddr = nullptr;
         aclError ret = CopyVencChannelDescParam(param, length, static_cast<void *>(&bufAddr), sizeof(size_t));
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("memcpy value failed, ret=%d.", ret);
+            ACL_LOG_INNER_ERROR("[Call][Memcpy]memcpy value failed, ret=%d.", ret);
             return ret;
         }
         return aclvencSetChannelDescBufAddr(channelDesc, bufAddr);
@@ -148,7 +149,7 @@ namespace {
         uint32_t bufSize = 0;
         aclError ret = CopyVencChannelDescParam(param, length, static_cast<void *>(&bufSize), sizeof(uint32_t));
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("memcpy value failed, ret=%d.", ret);
+            ACL_LOG_INNER_ERROR("[Call][Memcpy]memcpy value failed, ret=%d.", ret);
             return ret;
         }
         return aclvencSetChannelDescBufSize(channelDesc, bufSize);
@@ -160,7 +161,7 @@ namespace {
         uint32_t rcMode = 0;
         aclError ret = CopyVencChannelDescParam(param, length, static_cast<void *>(&rcMode), sizeof(uint32_t));
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("memcpy value failed, ret=%d.", ret);
+            ACL_LOG_INNER_ERROR("[Call][Memcpy]memcpy value failed, ret=%d.", ret);
             return ret;
         }
         return aclvencSetChannelDescRcMode(channelDesc, rcMode);
@@ -172,7 +173,7 @@ namespace {
         uint32_t srcRate = 0;
         aclError ret = CopyVencChannelDescParam(param, length, static_cast<void *>(&srcRate), sizeof(uint32_t));
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("memcpy value failed, ret=%d.", ret);
+            ACL_LOG_INNER_ERROR("[Call][Memcpy]memcpy value failed, ret=%d.", ret);
             return ret;
         }
         return aclvencSetChannelDescSrcRate(channelDesc, srcRate);
@@ -184,7 +185,7 @@ namespace {
         uint32_t maxBitRate = 0;
         aclError ret = CopyVencChannelDescParam(param, length, static_cast<void *>(&maxBitRate), sizeof(uint32_t));
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("memcpy value failed, ret=%d.", ret);
+            ACL_LOG_INNER_ERROR("[Call][Memcpy]memcpy value failed, ret=%d.", ret);
             return ret;
         }
         return aclvencSetChannelDescMaxBitRate(channelDesc, maxBitRate);
@@ -196,12 +197,12 @@ namespace {
         uint32_t ipProp = 0;
         aclError ret = CopyVencChannelDescParam(param, length, static_cast<void *>(&ipProp), sizeof(uint32_t));
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("memcpy value failed, ret=%d.", ret);
+            ACL_LOG_INNER_ERROR("[Call][Memcpy]memcpy value failed, ret=%d.", ret);
             return ret;
         }
         auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
         if (videoProcessor == nullptr) {
-            ACL_LOG_ERROR("video processor is null.");
+            ACL_LOG_INNER_ERROR("[Check][Videoprocessor]video processor is null.");
             return ret;
         }
         return videoProcessor->aclvencSetChannelDescIPProp(channelDesc, ipProp);
@@ -213,7 +214,7 @@ namespace {
         uint64_t threadId = aclvencGetChannelDescThreadId(channelDesc);
         aclError ret = CopyVencChannelDescParam(static_cast<const void *>(&threadId), sizeof(uint64_t), param, length);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("memcpy value failed, ret=%d.", ret);
+            ACL_LOG_INNER_ERROR("[Call][Memcpy]memcpy value failed, ret=%d.", ret);
             return ret;
         }
         *paramRetSize = sizeof(uint64_t);
@@ -227,7 +228,7 @@ namespace {
         aclvencCallback callback = aclvencGetChannelDescCallback(channelDesc);
         aclError ret = CopyVencChannelDescParam(static_cast<const void *>(&callback), sizeof(size_t), param, length);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("memcpy value failed, ret=%d.", ret);
+            ACL_LOG_INNER_ERROR("[Call][Memcpy]memcpy value failed, ret=%d.", ret);
             return ret;
         }
         *paramRetSize = sizeof(size_t);
@@ -242,7 +243,7 @@ namespace {
         aclError ret = CopyVencChannelDescParam(static_cast<const void *>(&picFormat), sizeof(acldvppPixelFormat),
             param, length);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("memcpy value failed, ret=%d.", ret);
+            ACL_LOG_INNER_ERROR("[Call][Memcpy]memcpy value failed, ret=%d.", ret);
             return ret;
         }
         *paramRetSize = sizeof(acldvppPixelFormat);
@@ -257,7 +258,7 @@ namespace {
         aclError ret = CopyVencChannelDescParam(static_cast<const void *>(&enType), sizeof(acldvppStreamFormat),
             param, length);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("memcpy value failed, ret=%d.", ret);
+            ACL_LOG_INNER_ERROR("[Call][Memcpy]memcpy value failed, ret=%d.", ret);
             return ret;
         }
         *paramRetSize = sizeof(acldvppStreamFormat);
@@ -271,7 +272,7 @@ namespace {
         uint32_t picWidth = aclvencGetChannelDescPicWidth(channelDesc);
         aclError ret = CopyVencChannelDescParam(static_cast<const void *>(&picWidth), sizeof(uint32_t), param, length);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("memcpy value failed, ret=%d.", ret);
+            ACL_LOG_INNER_ERROR("[Call][Memcpy]memcpy value failed, ret=%d.", ret);
             return ret;
         }
         *paramRetSize = sizeof(uint32_t);
@@ -285,7 +286,7 @@ namespace {
         uint32_t picHeight = aclvencGetChannelDescPicHeight(channelDesc);
         aclError ret = CopyVencChannelDescParam(static_cast<const void *>(&picHeight), sizeof(uint32_t), param, length);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("memcpy value failed, ret=%d.", ret);
+            ACL_LOG_INNER_ERROR("[Call][Memcpy]memcpy value failed, ret=%d.", ret);
             return ret;
         }
         *paramRetSize = sizeof(uint32_t);
@@ -300,7 +301,7 @@ namespace {
         aclError ret = CopyVencChannelDescParam(static_cast<const void *>(&keyFrameInterval), sizeof(uint32_t),
             param, length);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("memcpy value failed, ret=%d.", ret);
+            ACL_LOG_INNER_ERROR("[Call][Memcpy]memcpy value failed, ret=%d.", ret);
             return ret;
         }
         *paramRetSize = sizeof(uint32_t);
@@ -313,7 +314,7 @@ namespace {
     {
         auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
         if (videoProcessor == nullptr) {
-            ACL_LOG_ERROR("video processor is null.");
+            ACL_LOG_INNER_ERROR("[Check][VideoProcessor]video processor is null.");
             return ACL_ERROR_INTERNAL_ERROR;
         }
         bool isSupport = false;
@@ -324,7 +325,7 @@ namespace {
 
         aclError ret = CopyVencChannelDescParam(static_cast<const void *>(&bufAddr), sizeof(size_t), param, length);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("memcpy value failed, ret=%d.", ret);
+            ACL_LOG_INNER_ERROR("[Call][Memcpy]memcpy value failed, ret=%d.", ret);
             return ret;
         }
         *paramRetSize = sizeof(size_t);
@@ -337,7 +338,7 @@ namespace {
     {
         auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
         if (videoProcessor == nullptr) {
-            ACL_LOG_ERROR("video processor is null.");
+            ACL_LOG_INNER_ERROR("[Check][VideoProcessor]video processor is null.");
             return ACL_ERROR_INTERNAL_ERROR;
         }
         bool isSupport = false;
@@ -348,7 +349,7 @@ namespace {
 
         aclError ret = CopyVencChannelDescParam(static_cast<const void *>(&bufSize), sizeof(uint32_t), param, length);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("memcpy value failed, ret=%d.", ret);
+            ACL_LOG_INNER_ERROR("[Call][Memcpy]memcpy value failed, ret=%d.", ret);
             return ret;
         }
         *paramRetSize = sizeof(uint32_t);
@@ -361,7 +362,7 @@ namespace {
     {
         auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
         if (videoProcessor == nullptr) {
-            ACL_LOG_ERROR("video processor is null.");
+            ACL_LOG_INNER_ERROR("[Check][VideoProcessor]video processor is null.");
             return ACL_ERROR_INTERNAL_ERROR;
         }
         bool isSupport = false;
@@ -372,7 +373,7 @@ namespace {
 
         aclError ret = CopyVencChannelDescParam(static_cast<const void *>(&rcMode), sizeof(uint32_t), param, length);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("memcpy value failed, ret=%d.", ret);
+            ACL_LOG_INNER_ERROR("[Call][MemCpy]memcpy value failed, ret=%d.", ret);
             return ret;
         }
         *paramRetSize = sizeof(uint32_t);
@@ -385,7 +386,7 @@ namespace {
     {
         auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
         if (videoProcessor == nullptr) {
-            ACL_LOG_ERROR("video processor is null.");
+            ACL_LOG_INNER_ERROR("[Check][Videoprocessor]video processor is null.");
             return ACL_ERROR_INTERNAL_ERROR;
         }
         bool isSupport = false;
@@ -396,7 +397,7 @@ namespace {
 
         aclError ret = CopyVencChannelDescParam(static_cast<const void *>(&srcRate), sizeof(uint32_t), param, length);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("memcpy value failed, ret=%d.", ret);
+            ACL_LOG_INNER_ERROR("[Call][Memcpy]memcpy value failed, ret=%d.", ret);
             return ret;
         }
         *paramRetSize = sizeof(uint32_t);
@@ -409,7 +410,7 @@ namespace {
     {
         auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
         if (videoProcessor == nullptr) {
-            ACL_LOG_ERROR("video processor is null.");
+            ACL_LOG_INNER_ERROR("[Check][VideoProcessor]video processor is null.");
             return ACL_ERROR_INTERNAL_ERROR;
         }
         bool isSupport = false;
@@ -420,7 +421,7 @@ namespace {
         aclError ret = CopyVencChannelDescParam(static_cast<const void *>(&maxBitRate), sizeof(uint32_t),
             param, length);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("memcpy value failed, ret=%d.", ret);
+            ACL_LOG_INNER_ERROR("[Call][Memcpy]memcpy value failed, ret=%d.", ret);
             return ret;
         }
         *paramRetSize = sizeof(uint32_t);
@@ -433,7 +434,7 @@ namespace {
     {
         auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
         if (videoProcessor == nullptr) {
-            ACL_LOG_ERROR("video processor is null.");
+            ACL_LOG_INNER_ERROR("[Check][VideoProcessor]video processor is null.");
             return ACL_ERROR_INTERNAL_ERROR;
         }
         bool isSupport = false;
@@ -444,7 +445,7 @@ namespace {
 
         aclError ret = CopyVencChannelDescParam(static_cast<const void *>(&ipProp), sizeof(uint32_t), param, length);
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("memcpy value failed, ret=%d.", ret);
+            ACL_LOG_INNER_ERROR("[Call][Memcpy]memcpy value failed, ret=%d.", ret);
             return ret;
         }
         *paramRetSize = sizeof(uint32_t);
@@ -491,7 +492,7 @@ static aclError GetAlignedSize(size_t size, size_t &alignedSize)
 {
     // check overflow, the max value of size must be less than 0xFFFFFFFFFFFFFFFF-32*2
     if (size + DATA_MEMORY_ALIGN_SIZE * 2 < size) {
-        ACL_LOG_ERROR("size too large: %zu", size);
+        ACL_LOG_INNER_ERROR("[Check][Size]size too large: %zu", size);
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -511,7 +512,7 @@ aclError acldvppMalloc(void **devPtr, size_t size)
 
     rtError_t rtErr = rtDvppMalloc(devPtr, alignedSize);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("alloc device memory for dvpp failed, result = %d", rtErr);
+        ACL_LOG_CALL_ERROR("alloc device memory for dvpp failed, result = %d", rtErr);
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     ACL_ADD_APPLY_SUCCESS_COUNT(ACL_STATISTICS_DVPP_MALLOC_FREE);
@@ -527,7 +528,7 @@ aclError acldvppFree(void *devPtr)
 
     rtError_t rtErr = rtDvppFree(devPtr);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_ERROR("free device memory for dvpp failed, result = %d", rtErr);
+        ACL_LOG_CALL_ERROR("free device memory for dvpp failed, result = %d", rtErr);
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     ACL_ADD_RELEASE_SUCCESS_COUNT(ACL_STATISTICS_DVPP_MALLOC_FREE);
@@ -540,7 +541,7 @@ acldvppPicDesc *acldvppCreatePicDesc()
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_DVPP_PIC_DESC);
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
-        ACL_LOG_ERROR("image processor is null.");
+        ACL_LOG_INNER_ERROR("[Check][Imageprocessor]image processor is null.");
         return nullptr;
     }
     auto aclPicDesc = imageProcessor->acldvppCreatePicDesc();
@@ -556,7 +557,7 @@ aclError acldvppDestroyPicDesc(acldvppPicDesc *picDesc)
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_DVPP_PIC_DESC);
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
-        ACL_LOG_ERROR("image processor is null.");
+        ACL_LOG_INNER_ERROR("[Check][Imageprocessor]image processor is null.");
         return ACL_ERROR_INTERNAL_ERROR;
     }
     aclError aclRet = imageProcessor->acldvppDestroyPicDesc(picDesc);
@@ -719,7 +720,7 @@ acldvppRoiConfig *acldvppCreateRoiConfig(uint32_t left,
     }
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
-        ACL_LOG_ERROR("image processor is null.");
+        ACL_LOG_INNER_ERROR("[Check][Imageprocessor]image processor is null.");
         return nullptr;
     }
     auto aclRoiConfig = imageProcessor->acldvppCreateRoiConfig(left, right, top, bottom);
@@ -735,7 +736,7 @@ aclError acldvppDestroyRoiConfig(acldvppRoiConfig *roiConfig)
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_DVPP_ROI_CONFIG);
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
-        ACL_LOG_ERROR("image processor is null.");
+        ACL_LOG_INNER_ERROR("[Check][Imageprocessor]image processor is null.");
         return ACL_ERROR_INTERNAL_ERROR;
     }
     aclError aclRet = imageProcessor->acldvppDestroyRoiConfig(roiConfig);
@@ -750,6 +751,11 @@ aclError acldvppSetRoiConfigLeft(acldvppRoiConfig *config, uint32_t left)
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(config);
     if (left > UINT16_MAX) {
         ACL_LOG_ERROR("param great than UINT16_MAX.");
+        std::string leftStr = std::to_string(left);
+        const char *argList[] = {"param", "value", "reason"};
+        const char *argVal[] = {"left", leftStr.c_str(), "great than UINT16_MAX"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_PARAM_MSG,
+            argList, argVal, 3);
         return ACL_ERROR_INVALID_PARAM;
     }
     config->dvppRoiConfig.leftOffset = static_cast<uint16_t>(left);
@@ -1114,7 +1120,7 @@ uint32_t aclvdecGetChannelDescRefFrameNum(const aclvdecChannelDesc *channelDesc)
 {
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
-        ACL_LOG_ERROR("video processor is null.");
+        ACL_LOG_INNER_ERROR("[Check][VideoProcessor]video processor is null.");
         return 0;
     }
     return videoProcessor->aclvdecGetChannelDescRefFrameNum(channelDesc);
@@ -1127,7 +1133,7 @@ acldvppStreamDesc *acldvppCreateStreamDesc()
     ACL_LOG_INFO("start to execute acldvppCreateStreamDesc");
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
-        ACL_LOG_ERROR("video processor is null.");
+        ACL_LOG_INNER_ERROR("[Check][VideoProcessor]video processor is null.");
         return nullptr;
     }
     auto aclDvppStreamDesc = videoProcessor->acldvppCreateStreamDesc();
@@ -1143,7 +1149,7 @@ aclError acldvppDestroyStreamDesc(acldvppStreamDesc *streamDesc)
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_DVPP_STREAM_DESC);
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
-        ACL_LOG_ERROR("video processor is null.");
+        ACL_LOG_INNER_ERROR("[Check][VideoProcessor]video processor is null.");
         return ACL_ERROR_INTERNAL_ERROR;
     }
     auto aclRet = videoProcessor->acldvppDestroyStreamDesc(streamDesc);
@@ -1391,12 +1397,12 @@ aclError aclvencSetChannelDescThreadId(aclvencChannelDesc *channelDesc, uint64_t
 aclError aclvencSetChannelDescCallback(aclvencChannelDesc *channelDesc, aclvencCallback callback)
 {
     if (channelDesc == nullptr) {
-        ACL_LOG_ERROR("channelDesc is null.");
+        ACL_LOG_INNER_ERROR("[Check][channelDesc]channelDesc is null.");
         return ACL_ERROR_INVALID_PARAM;
     }
 
     if (callback == nullptr) {
-        ACL_LOG_ERROR("aclvencCallback is null.");
+        ACL_LOG_INNER_ERROR("[Check][Callback]callback is null.");
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -1407,7 +1413,7 @@ aclError aclvencSetChannelDescCallback(aclvencChannelDesc *channelDesc, aclvencC
 aclError aclvencSetChannelDescEnType(aclvencChannelDesc *channelDesc, acldvppStreamFormat enType)
 {
     if (channelDesc == nullptr) {
-        ACL_LOG_ERROR("channelDesc is null.");
+        ACL_LOG_INNER_ERROR("[Check][channelDesc]channelDesc is null.");
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -1419,7 +1425,7 @@ aclError aclvencSetChannelDescPicFormat(aclvencChannelDesc *channelDesc, acldvpp
 {
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
-        ACL_LOG_ERROR("video processor is null.");
+        ACL_LOG_INNER_ERROR("[Check][Videoprocessor]Videoprocessor is null.");
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return videoProcessor->aclvencSetChannelDescPicFormat(channelDesc, picFormat);
@@ -1428,7 +1434,7 @@ aclError aclvencSetChannelDescPicFormat(aclvencChannelDesc *channelDesc, acldvpp
 aclError aclvencSetChannelDescPicWidth(aclvencChannelDesc *channelDesc, uint32_t picWidth)
 {
     if (channelDesc == nullptr) {
-        ACL_LOG_ERROR("channelDesc is null.");
+        ACL_LOG_INNER_ERROR("[Check][channelDesc]channelDesc is null.");
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -1439,7 +1445,7 @@ aclError aclvencSetChannelDescPicWidth(aclvencChannelDesc *channelDesc, uint32_t
 aclError aclvencSetChannelDescPicHeight(aclvencChannelDesc *channelDesc, uint32_t picHeight)
 {
     if (channelDesc == nullptr) {
-        ACL_LOG_ERROR("channelDesc is null.");
+         ACL_LOG_INNER_ERROR("[Check][channelDesc]channelDesc is null.");
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -1450,7 +1456,7 @@ aclError aclvencSetChannelDescPicHeight(aclvencChannelDesc *channelDesc, uint32_
 aclError aclvencSetChannelDescKeyFrameInterval(aclvencChannelDesc *channelDesc, uint32_t keyFrameInterval)
 {
     if (channelDesc == nullptr) {
-        ACL_LOG_ERROR("channelDesc is null.");
+        ACL_LOG_INNER_ERROR("[Check][channelDesc]channelDesc is null.");
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -1462,7 +1468,7 @@ aclError aclvencSetChannelDescBufAddr(aclvencChannelDesc *channelDesc, void *buf
 {
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
-        ACL_LOG_ERROR("video processor is null.");
+        ACL_LOG_INNER_ERROR("[Check][Videoprocessor]video processor is null.");
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return videoProcessor->aclvencSetChannelDescBufAddr(channelDesc, bufAddr);
@@ -1472,7 +1478,7 @@ aclError aclvencSetChannelDescRcMode(aclvencChannelDesc *channelDesc, uint32_t r
 {
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
-        ACL_LOG_ERROR("video processor is null.");
+        ACL_LOG_INNER_ERROR("[Check][Videoprocessor]video processor is null.");
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return videoProcessor->aclvencSetChannelDescRcMode(channelDesc, rcMode);
@@ -1482,7 +1488,7 @@ aclError aclvencSetChannelDescSrcRate(aclvencChannelDesc *channelDesc, uint32_t 
 {
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
-        ACL_LOG_ERROR("video processor is null.");
+        ACL_LOG_INNER_ERROR("[Check][Videoprocessor]video processor is null.");
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return videoProcessor->aclvencSetChannelDescSrcRate(channelDesc, srcRate);
@@ -1492,7 +1498,7 @@ aclError aclvencSetChannelDescMaxBitRate(aclvencChannelDesc *channelDesc, uint32
 {
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
-        ACL_LOG_ERROR("video processor is null.");
+        ACL_LOG_INNER_ERROR("[Check][Videoprocessor]video processor is null.");
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return videoProcessor->aclvencSetChannelDescMaxBitRate(channelDesc, maxBitRate);
@@ -1502,7 +1508,7 @@ aclError aclvencSetChannelDescBufSize(aclvencChannelDesc *channelDesc, uint32_t 
 {
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
-        ACL_LOG_ERROR("video processor is null.");
+        ACL_LOG_INNER_ERROR("[Check][videoProcessor]channelDesc is null");
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return videoProcessor->aclvencSetChannelDescBufSize(channelDesc, bufSize);
@@ -1514,6 +1520,11 @@ aclError aclvencSetChannelDescParam(aclvencChannelDesc *channelDesc,
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(param);
     if (g_vencSetParamFuncMap.find(paramType) == g_vencSetParamFuncMap.end()) {
         ACL_LOG_ERROR("invalid venc channelDesc parameter type %d.", static_cast<int32_t>(paramType));
+        std::string paramTypeStr = std::to_string(static_cast<int32_t>(paramType));
+        const char *argList[] = {"param", "value", "reason"};
+        const char *argVal[] = {"parameter type", paramTypeStr.c_str(), ""};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_PARAM_MSG,
+            argList, argVal, 3);
         return ACL_ERROR_INVALID_PARAM;
     }
     return g_vencSetParamFuncMap[paramType](channelDesc, length, param);
@@ -1523,7 +1534,7 @@ uint32_t aclvencGetChannelDescBufSize(const aclvencChannelDesc *channelDesc)
 {
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
-        ACL_LOG_ERROR("video processor is null.");
+        ACL_LOG_INNER_ERROR("[Check][videoProcessor]channelDesc is null");
         return 0;
     }
     bool isSupport = false;
@@ -1534,7 +1545,7 @@ void *aclvencGetChannelDescBufAddr(const aclvencChannelDesc *channelDesc)
 {
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
-        ACL_LOG_ERROR("video processor is null.");
+        ACL_LOG_INNER_ERROR("[Check][videoProcessor]channelDesc is null");
         return nullptr;
     }
     bool isSupport = false;
@@ -1544,7 +1555,7 @@ void *aclvencGetChannelDescBufAddr(const aclvencChannelDesc *channelDesc)
 uint32_t aclvencGetChannelDescChannelId(const aclvencChannelDesc *channelDesc)
 {
     if (channelDesc == nullptr) {
-        ACL_LOG_ERROR("channelDesc is null");
+        ACL_LOG_INNER_ERROR("[Check][ChannelDesc]channelDesc is null");
         return 0; // default 0
     }
     return channelDesc->vencDesc.channelId;
@@ -1553,7 +1564,7 @@ uint32_t aclvencGetChannelDescChannelId(const aclvencChannelDesc *channelDesc)
 uint64_t aclvencGetChannelDescThreadId(const aclvencChannelDesc *channelDesc)
 {
     if (channelDesc == nullptr) {
-        ACL_LOG_ERROR("channelDesc is null");
+        ACL_LOG_INNER_ERROR("[Check][ChannelDesc]channelDesc is null");
         return 0; // default 0
     }
     return channelDesc->threadId;
@@ -1562,7 +1573,7 @@ uint64_t aclvencGetChannelDescThreadId(const aclvencChannelDesc *channelDesc)
 aclvencCallback aclvencGetChannelDescCallback(const aclvencChannelDesc *channelDesc)
 {
     if (channelDesc == nullptr) {
-        ACL_LOG_ERROR("channelDesc or callback is null");
+        ACL_LOG_INNER_ERROR("[Check][ChannelDesc]channelDesc or callback is null.");
         return nullptr; // default null
     }
     return channelDesc->callback;
@@ -1571,7 +1582,7 @@ aclvencCallback aclvencGetChannelDescCallback(const aclvencChannelDesc *channelD
 acldvppStreamFormat aclvencGetChannelDescEnType(const aclvencChannelDesc *channelDesc)
 {
     if (channelDesc == nullptr) {
-        ACL_LOG_ERROR("channelDesc is null");
+        ACL_LOG_INNER_ERROR("[Check][ChannelDesc]channelDesc is null.");
         return H265_MAIN_LEVEL; // default H265_MAIN_LEVEL
     }
     return static_cast<acldvppStreamFormat>(channelDesc->vencDesc.enType);
@@ -1580,7 +1591,7 @@ acldvppStreamFormat aclvencGetChannelDescEnType(const aclvencChannelDesc *channe
 acldvppPixelFormat aclvencGetChannelDescPicFormat(const aclvencChannelDesc *channelDesc)
 {
     if (channelDesc == nullptr) {
-        ACL_LOG_ERROR("channelDesc is null");
+        ACL_LOG_INNER_ERROR("[Check][ChannelDesc]channelDesc is null.");
         return PIXEL_FORMAT_YUV_SEMIPLANAR_420; // default PIXEL_FORMAT_YUV_SEMIPLANAR_420
     }
     return static_cast<acldvppPixelFormat>(channelDesc->vencDesc.picFormat);
@@ -1589,7 +1600,7 @@ acldvppPixelFormat aclvencGetChannelDescPicFormat(const aclvencChannelDesc *chan
 uint32_t aclvencGetChannelDescPicWidth(const aclvencChannelDesc *channelDesc)
 {
     if (channelDesc == nullptr) {
-        ACL_LOG_ERROR("channelDesc is null");
+        ACL_LOG_INNER_ERROR("[Check][ChannelDesc]channelDesc is null.");
         return 0; // default 0
     }
     return channelDesc->vencDesc.picWidth;
@@ -1598,7 +1609,7 @@ uint32_t aclvencGetChannelDescPicWidth(const aclvencChannelDesc *channelDesc)
 uint32_t aclvencGetChannelDescPicHeight(const aclvencChannelDesc *channelDesc)
 {
     if (channelDesc == nullptr) {
-        ACL_LOG_ERROR("channelDesc is null");
+        ACL_LOG_INNER_ERROR("[Check][ChannelDesc]channelDesc is null.");
         return 0; // default 0
     }
     return channelDesc->vencDesc.picHeight;
@@ -1607,7 +1618,7 @@ uint32_t aclvencGetChannelDescPicHeight(const aclvencChannelDesc *channelDesc)
 uint32_t aclvencGetChannelDescKeyFrameInterval(const aclvencChannelDesc *channelDesc)
 {
     if (channelDesc == nullptr) {
-        ACL_LOG_ERROR("channelDesc is null");
+        ACL_LOG_INNER_ERROR("[Check][ChannelDesc]channelDesc is null.");
         return 0; // default 0
     }
     return channelDesc->vencDesc.keyFrameInterval;
@@ -1617,7 +1628,7 @@ uint32_t aclvencGetChannelDescRcMode(const aclvencChannelDesc *channelDesc)
 {
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
-        ACL_LOG_ERROR("video processor is null.");
+        ACL_LOG_INNER_ERROR("[Check][VideoProcessor]video processor is null.");
         return 0;
     }
     bool isSupport = false;
@@ -1628,7 +1639,7 @@ uint32_t aclvencGetChannelDescSrcRate(const aclvencChannelDesc *channelDesc)
 {
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
-        ACL_LOG_ERROR("video processor is null.");
+        ACL_LOG_INNER_ERROR("[Check][VideoProcessor]video processor is null.");
         return 0;
     }
     bool isSupport = false;
@@ -1639,7 +1650,7 @@ uint32_t aclvencGetChannelDescMaxBitRate(const aclvencChannelDesc *channelDesc)
 {
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
-        ACL_LOG_ERROR("video processor is null.");
+        ACL_LOG_INNER_ERROR("[Check][VideoProcessor]video processor is null.");
         return 0;
     }
     bool isSupport = false;
@@ -1671,7 +1682,11 @@ uint8_t aclvencGetFrameConfigForceIFrame(const aclvencFrameConfig *config)
 {
     ACL_LOG_DEBUG("start to execute aclvencGetFrameConfigForceIFrame");
     if (config == nullptr) {
-        ACL_LOG_ERROR("config is null");
+        ACL_LOG_ERROR("[Check][Config]config is null");
+        const char *argList[] = {"param"};
+        const char *argVal[] = {"config"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+            argList, argVal, 1);
         return 0; // default 0
     }
     return config->vencFrameConfig.forceIFrame;
@@ -1700,7 +1715,14 @@ acldvppBatchPicDesc *acldvppCreateBatchPicDesc(uint32_t batchSize)
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_DVPP_BATCH_PIC_DESC);
     // dvpp kernel process max pictures number is 128
     if (batchSize == 0 || batchSize > BATCH_MAX_SIZE) {
-        ACL_LOG_ERROR("param batchSize is 0 or greater than %u, batch size = %u.", BATCH_MAX_SIZE, batchSize);
+        ACL_LOG_ERROR("[Check][batchSize]param batchSize is 0 or greater than %u, "
+            "batch size = %u.", BATCH_MAX_SIZE, batchSize);
+        std::string batchSizeStr = std::to_string(batchSize);
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("is 0 or greater than %u", BATCH_MAX_SIZE);
+        const char *argList[] = {"param", "value", "reason"};
+        const char *argVal[] = {"batchSize", batchSizeStr.c_str(), errMsg.c_str()};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_PARAM_MSG,
+            argList, argVal, 3);
         return nullptr;
     }
 
@@ -1709,7 +1731,7 @@ acldvppBatchPicDesc *acldvppCreateBatchPicDesc(uint32_t batchSize)
     size_t pageSize = mmGetPageSize();
     void *aclBatchPicAddr = mmAlignMalloc(hostSize, pageSize);
     if (aclBatchPicAddr == nullptr) {
-        ACL_LOG_ERROR("malloc acldvppBatchPicDesc failed.");
+        ACL_LOG_INNER_ERROR("[Check][BatchPicAddr]malloc acldvppBatchPicDesc failed.");
         return nullptr;
     }
     acldvppBatchPicDesc *batchPicDesc = new (aclBatchPicAddr)acldvppBatchPicDesc;
@@ -1717,7 +1739,7 @@ acldvppBatchPicDesc *acldvppCreateBatchPicDesc(uint32_t batchSize)
     batchPicDesc->aclDvppPicDescs = new (std::nothrow)acldvppPicDesc[batchSize];
     if (batchPicDesc->aclDvppPicDescs == nullptr) {
         ACL_ALIGN_FREE(aclBatchPicAddr);
-        ACL_LOG_ERROR("create acldvppPicDesc failed. batch size=%u.", batchSize);
+        ACL_LOG_INNER_ERROR("[Create][dvppPicDesc]create acldvppPicDesc failed. batch size=%u.", batchSize);
         return nullptr;
     }
 
@@ -1744,12 +1766,18 @@ acldvppPicDesc *acldvppGetPicDesc(acldvppBatchPicDesc *batchPicDesc, uint32_t in
 {
     if (batchPicDesc == nullptr) {
         ACL_LOG_ERROR("param batchPicDesc is nullptr.");
+        
         return nullptr;
     }
 
     if (index >= batchPicDesc->dvppBatchPicDescs.batchSize) {
-        ACL_LOG_ERROR("index Out of bounds. index=%u, but batchsize=%u.", index,
+        ACL_LOG_ERROR("[Check][Index]index Out of bounds. index=%u, but batchsize=%u.", index,
                       batchPicDesc->dvppBatchPicDescs.batchSize);
+        std::string indexStr = std::to_string(index);
+        const char *argList[] = {"param", "value", "reason"};
+        const char *argVal[] = {"left", indexStr.c_str(), "index Out of bounds"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_PARAM_MSG,
+            argList, argVal, 3);
         return nullptr;
     }
 
@@ -1774,7 +1802,7 @@ acldvppLutMap *acldvppCreateLutMap()
 {
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
-        ACL_LOG_ERROR("image processor is null.");
+        ACL_LOG_INNER_ERROR("[Check][ImageProcessor]image processor is null.");
         return nullptr;
     }
     return imageProcessor->acldvppCreateLutMap();
@@ -1784,7 +1812,7 @@ aclError acldvppDestroyLutMap(acldvppLutMap *lutMap)
 {
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
-        ACL_LOG_ERROR("image processor is null.");
+        ACL_LOG_INNER_ERROR("[Check][ImageProcessor]image processor is null.");
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return imageProcessor->acldvppDestroyLutMap(lutMap);
@@ -1794,7 +1822,7 @@ uint32_t acldvppGetLutMapDims(const acldvppLutMap *lutMap)
 {
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
-        ACL_LOG_ERROR("image processor is null.");
+        ACL_LOG_INNER_ERROR("[Check][ImageProcessor]image processor is null.");
         return 0;
     }
     return imageProcessor->acldvppGetLutMapDims(lutMap);
@@ -1804,7 +1832,7 @@ aclError acldvppGetLutMapData(const acldvppLutMap *lutMap, uint32_t dim, uint8_t
 {
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
-        ACL_LOG_ERROR("image processor is null.");
+        ACL_LOG_INNER_ERROR("[Check][ImageProcessor]image processor is null.");
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return imageProcessor->acldvppGetLutMapData(lutMap, dim, data, len);
@@ -1814,7 +1842,7 @@ uint32_t aclvdecGetChannelDescOutMode(const aclvdecChannelDesc *channelDesc)
 {
     ACL_LOG_DEBUG("start to execute aclvdecGetChannelDescOutMode");
     if (channelDesc == nullptr) {
-        ACL_LOG_ERROR("channelDesc is null.");
+        ACL_LOG_INNER_ERROR("[Check][Channeldesc]channelDesc is null.");
         return 0; // default 0
     }
 
@@ -1825,7 +1853,7 @@ acldvppBorderConfig *acldvppCreateBorderConfig()
 {
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
-        ACL_LOG_ERROR("image processor is null.");
+        ACL_LOG_INNER_ERROR("[Check][imageProcessor]image processor is null.");
         return nullptr;
     }
     return imageProcessor->acldvppCreateBorderConfig();
@@ -1836,6 +1864,13 @@ aclError acldvppSetBorderConfigValue(acldvppBorderConfig *borderConfig, uint32_t
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(borderConfig);
     if (index >= DVPP_MAKE_BORDER_MAX_COMPONENT) {
         ACL_LOG_ERROR("index[%u] should be smaller than array[%u]", index, DVPP_MAKE_BORDER_MAX_COMPONENT);
+        std::string indexStr = std::to_string(index);
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("should be smaller than array"
+            "[%u]", DVPP_MAKE_BORDER_MAX_COMPONENT);
+        const char *argList[] = {"param", "value", "reason"};
+        const char *argVal[] = {"left", indexStr.c_str(), errMsg.c_str()};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_PARAM_MSG,
+            argList, argVal, 3);
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -1855,6 +1890,12 @@ aclError acldvppSetBorderConfigTop(acldvppBorderConfig *borderConfig, uint32_t t
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(borderConfig);
     if (top > UINT16_MAX) {
         ACL_LOG_ERROR("the param of top[%u] can't be larger than UINT16_MAX[%u]", top, UINT16_MAX);
+        std::string topStr = std::to_string(top);
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("can't be larger than UINT16_MAX[%u]", UINT16_MAX);
+        const char *argList[] = {"param", "value", "reason"};
+        const char *argVal[] = {"left", topStr.c_str(), errMsg.c_str()};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_PARAM_MSG,
+            argList, argVal, 3);
         return ACL_ERROR_INVALID_PARAM;
     }
     borderConfig->dvppBorderConfig.top = static_cast<uint16_t>(top);
@@ -1866,6 +1907,12 @@ aclError acldvppSetBorderConfigBottom(acldvppBorderConfig *borderConfig, uint32_
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(borderConfig);
     if (bottom > UINT16_MAX) {
         ACL_LOG_ERROR("the param of bottom[%u] can't be larger than UINT16_MAX[%u]", bottom, UINT16_MAX);
+        std::string bottomStr = std::to_string(bottom);
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("can't be larger than UINT16_MAX[%u]", UINT16_MAX);
+        const char *argList[] = {"param", "value", "reason"};
+        const char *argVal[] = {"left", bottomStr.c_str(), errMsg.c_str()};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_PARAM_MSG,
+            argList, argVal, 3);
         return ACL_ERROR_INVALID_PARAM;
     }
     borderConfig->dvppBorderConfig.bottom = static_cast<uint16_t>(bottom);
@@ -1877,6 +1924,12 @@ aclError acldvppSetBorderConfigLeft(acldvppBorderConfig *borderConfig, uint32_t 
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(borderConfig);
     if (left > UINT16_MAX) {
         ACL_LOG_ERROR("the param of left[%u] can't be larger than UINT16_MAX[%u]", left, UINT16_MAX);
+        std::string leftStr = std::to_string(left);
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("can't be larger than UINT16_MAX[%u]", UINT16_MAX);
+        const char *argList[] = {"param", "value", "reason"};
+        const char *argVal[] = {"left", leftStr.c_str(), errMsg.c_str()};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_PARAM_MSG,
+            argList, argVal, 3);
         return ACL_ERROR_INVALID_PARAM;
     }
     borderConfig->dvppBorderConfig.left = static_cast<uint16_t>(left);
@@ -1888,6 +1941,12 @@ aclError acldvppSetBorderConfigRight(acldvppBorderConfig *borderConfig, uint32_t
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(borderConfig);
     if (right > UINT16_MAX) {
         ACL_LOG_ERROR("the param of right[%u] can't be larger than UINT16_MAX[%u]", right, UINT16_MAX);
+        std::string rightStr = std::to_string(right);
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("can't be larger than UINT16_MAX[%u]", UINT16_MAX);
+        const char *argList[] = {"param", "value", "reason"};
+        const char *argVal[] = {"right", rightStr.c_str(), errMsg.c_str()};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_PARAM_MSG,
+            argList, argVal, 3);
         return ACL_ERROR_INVALID_PARAM;
     }
     borderConfig->dvppBorderConfig.right = static_cast<uint16_t>(right);
@@ -1897,7 +1956,11 @@ aclError acldvppSetBorderConfigRight(acldvppBorderConfig *borderConfig, uint32_t
 double acldvppGetBorderConfigValue(const acldvppBorderConfig *borderConfig, uint32_t index)
 {
     if (borderConfig == nullptr) {
-        ACL_LOG_ERROR("border config is null.");
+        ACL_LOG_ERROR("[Check][Borderconfig]border config is null.");
+        const char *argList[] = {"param"};
+        const char *argVal[] = {"borderConfig"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+            argList, argVal, 1);
         return -1;
     }
     if (index >= DVPP_MAKE_BORDER_MAX_COMPONENT) {
@@ -1911,7 +1974,7 @@ double acldvppGetBorderConfigValue(const acldvppBorderConfig *borderConfig, uint
 acldvppBorderType acldvppGetBorderConfigBorderType(const acldvppBorderConfig *borderConfig)
 {
     if (borderConfig == nullptr) {
-        ACL_LOG_ERROR("border config is null.");
+        ACL_LOG_ERROR("[Check][Borderconfig]border config is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"borderConfig"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
@@ -1925,7 +1988,7 @@ acldvppBorderType acldvppGetBorderConfigBorderType(const acldvppBorderConfig *bo
 uint32_t acldvppGetBorderConfigTop(const acldvppBorderConfig *borderConfig)
 {
     if (borderConfig == nullptr) {
-        ACL_LOG_ERROR("border config is null.");
+        ACL_LOG_ERROR("[Check][BorderConfig]border config is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"borderConfig"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
@@ -1939,7 +2002,7 @@ uint32_t acldvppGetBorderConfigTop(const acldvppBorderConfig *borderConfig)
 uint32_t acldvppGetBorderConfigBottom(const acldvppBorderConfig *borderConfig)
 {
     if (borderConfig == nullptr) {
-        ACL_LOG_ERROR("border config is null.");
+        ACL_LOG_ERROR("[Check][BorderConfig]border config is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"borderConfig"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
@@ -1953,7 +2016,7 @@ uint32_t acldvppGetBorderConfigBottom(const acldvppBorderConfig *borderConfig)
 uint32_t acldvppGetBorderConfigLeft(const acldvppBorderConfig *borderConfig)
 {
     if (borderConfig == nullptr) {
-        ACL_LOG_ERROR("border config is null.");
+        ACL_LOG_ERROR("[Check][BorderConfig]border config is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"borderConfig"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
@@ -1967,7 +2030,7 @@ uint32_t acldvppGetBorderConfigLeft(const acldvppBorderConfig *borderConfig)
 uint32_t acldvppGetBorderConfigRight(const acldvppBorderConfig *borderConfig)
 {
     if (borderConfig == nullptr) {
-        ACL_LOG_ERROR("border config is null.");
+        ACL_LOG_ERROR("[Check][BorderConfig]border config is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"borderConfig"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
@@ -1982,7 +2045,7 @@ aclError acldvppDestroyBorderConfig(acldvppBorderConfig *borderConfig)
 {
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
-        ACL_LOG_ERROR("image processor is null.");
+        ACL_LOG_ERROR("[Check][ImageProcessor]image processor is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"imageProcessor"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
@@ -2015,7 +2078,7 @@ aclError aclvdecSetChannelDescOutPicWidth(aclvdecChannelDesc *channelDesc, uint3
 {
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
-        ACL_LOG_ERROR("video processor is null.");
+        ACL_LOG_ERROR("[Check][VideoProcessor]video processor is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"videoProcessor"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
@@ -2029,7 +2092,7 @@ aclError aclvdecSetChannelDescOutPicHeight(aclvdecChannelDesc *channelDesc, uint
 {
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
-        ACL_LOG_ERROR("video processor is null.");
+        ACL_LOG_ERROR("[Check][VideoProcessor]video processor is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"videoProcessor"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
@@ -2043,7 +2106,7 @@ aclError aclvdecSetChannelDescRefFrameNum(aclvdecChannelDesc *channelDesc, uint3
 {
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
-        ACL_LOG_ERROR("video processor is null.");
+        ACL_LOG_ERROR("[Check][VideoProcessor]video processor is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"videoProcessor"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
@@ -2057,7 +2120,7 @@ aclError aclvdecSetChannelDescOutPicFormat(aclvdecChannelDesc *channelDesc, acld
 {
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
-        ACL_LOG_ERROR("video processor is null.");
+        ACL_LOG_ERROR("[Check][VideoProcessor]video processor is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"videoProcessor"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
@@ -2071,7 +2134,7 @@ aclError aclvdecSetChannelDescChannelId(aclvdecChannelDesc *channelDesc, uint32_
 {
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
-        ACL_LOG_ERROR("video processor is null.");
+        ACL_LOG_ERROR("[Check][VideoProcessor]video processor is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"videoProcessor"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
@@ -2085,7 +2148,7 @@ aclError aclvdecSetChannelDescBitDepth(aclvdecChannelDesc *channelDesc, uint32_t
 {
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
-        ACL_LOG_ERROR("video processor is null.");
+        ACL_LOG_ERROR("[Check][VideoProcessor]video processor is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"videoProcessor"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
@@ -2099,7 +2162,7 @@ uint32_t aclvdecGetChannelDescBitDepth(const aclvdecChannelDesc *channelDesc)
 {
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
-        ACL_LOG_ERROR("video processor is null.");
+        ACL_LOG_ERROR("[Check][VideoProcessor]video processor is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"videoProcessor"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
@@ -2113,7 +2176,7 @@ acldvppHist* acldvppCreateHist()
 {
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
-        ACL_LOG_ERROR("image processor is null.");
+        ACL_LOG_ERROR("[Check][Imageprocessor]image processor is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"imageProcessor"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
@@ -2127,7 +2190,7 @@ aclError acldvppDestroyHist(acldvppHist *hist)
 {
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
-        ACL_LOG_ERROR("image processor is null.");
+        ACL_LOG_ERROR("[Check][Imageprocessor]image processor is null.");
         return ACL_ERROR_INTERNAL_ERROR;
     }
     return imageProcessor->acldvppDestroyHist(hist);
@@ -2137,7 +2200,7 @@ uint32_t acldvppGetHistDims(acldvppHist *hist)
 {
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
-        ACL_LOG_ERROR("image processor is null.");
+        ACL_LOG_ERROR("[Check][Imageprocessor]image processor is null.");
 
         const char *argList[] = {"param"};
         const char *argVal[] = {"imageProcessor"};
@@ -2152,7 +2215,7 @@ aclError acldvppGetHistData(acldvppHist *hist, uint32_t dim, uint32_t **data, ui
 {
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
-        ACL_LOG_ERROR("image processor is null.");
+        ACL_LOG_ERROR("[Check][Imageprocessor]image processor is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"imageProcessor"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
@@ -2166,7 +2229,7 @@ uint32_t acldvppGetHistRetCode(acldvppHist* hist)
 {
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
-        ACL_LOG_ERROR("image processor is null.");
+        ACL_LOG_ERROR("[Check][Imageprocessor]image processor is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"imageProcessor"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
@@ -2180,7 +2243,7 @@ aclError acldvppClearHist(acldvppHist *hist)
 {
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
-        ACL_LOG_ERROR("image processor is null.");
+        ACL_LOG_ERROR("[Check][Imageprocessor]image processor is null.");
         const char *argList[] = {"param"};
         const char *argVal[] = {"imageProcessor"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,

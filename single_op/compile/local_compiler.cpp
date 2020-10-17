@@ -86,7 +86,7 @@ aclError LocalCompiler::OnlineCompile(CompileParam &param, std::shared_ptr<void>
     }
 
     if (geRet != SUCCESS) {
-        ACL_LOG_CALL_ERROR("[BuildSingleOpModel][Ge]call ge interface generator.BuildSingleOpModel failed. "
+        ACL_LOG_CALL_ERROR("[Build][SingleOpModel]call ge interface generator.BuildSingleOpModel failed. "
             "ge result = %u", geRet);
         return ACL_GET_ERRCODE_GE(geRet);
     }

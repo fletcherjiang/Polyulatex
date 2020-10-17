@@ -242,6 +242,14 @@ inline bool IsInfoLogEnabled()
         } \
     while (0)
 
+#define ACL_REQUIRES_NOT_NULL_WITH_INNER_REPORT(val) \
+    do { \
+        if ((val) == nullptr) { \
+            ACL_LOG_INNER_ERROR("[Check][%s]param must not be null.", #val); \
+            return ACL_ERROR_INVALID_PARAM; } \
+        } \
+    while (0)
+
 #define ACL_REQUIRES_NOT_NULL_RET_NULL(val) \
     do { \
         if ((val) == nullptr) { \
@@ -381,7 +389,7 @@ inline bool IsInfoLogEnabled()
         if (exp) { \
             ACL_LOG_WARN(__VA_ARGS__); \
         } else { \
-            ACL_LOG_ERROR(__VA_ARGS__); \
+            ACL_LOG_INNER_ERROR(__VA_ARGS__); \
         } \
     } \
     while (0)

@@ -844,7 +844,8 @@ aclError OpModelManager::MatchDynamicOpModel(const AclOp &aclOp, OpModel &opMode
             }
         }
     }
-    ACL_CHECK_WITH_MESSAGE_AND_NO_RETURN(aclOp.isCompile, "MatchOpModel fail from static map or dynamic map");
+    ACL_CHECK_WITH_MESSAGE_AND_NO_RETURN(aclOp.isCompile, "[Match][OpModel]MatchOpModel fail from static"
+        " map or dynamic map");
     return ACL_ERROR_OP_NOT_FOUND;
 }
 

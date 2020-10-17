@@ -289,7 +289,7 @@ static aclError ModelLoadFromFileWithQ(const char *modelPath, uint32_t *modelId,
     ACL_LOG_INFO("call ge interface executor.LoadDataFromFile");
     ge::Status ret = geExecutor.LoadDataFromFile(path, modelData);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_CALL_ERROR("[Model][FromFile]load model from file[%s], ge result[%u], failed", modelPath, ret);
+        ACL_LOG_CALL_ERROR("[Load][FromFile]load model from file[%s], ge result[%u], failed", modelPath, ret);
         ACL_DELETE_ARRAY(modelData.model_data);
         return ACL_GET_ERRCODE_GE(ret);
     }
@@ -300,7 +300,7 @@ static aclError ModelLoadFromFileWithQ(const char *modelPath, uint32_t *modelId,
     ACL_LOG_INFO("call ge interface executor.LoadModelWithQ");
     ret = geExecutor.LoadModelWithQ(id, modelData, inputQVec, outputQVec);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_CALL_ERROR("[Model][WithQ]execute LoadModelWithQ failed, ge result[%u]", ret);
+        ACL_LOG_CALL_ERROR("[Load][WithQ]execute LoadModelWithQ failed, ge result[%u]", ret);
         ACL_DELETE_ARRAY(modelData.model_data);
         return ACL_GET_ERRCODE_GE(ret);
     }
@@ -342,7 +342,7 @@ static aclError ModelLoadFromMemWithQ(const void *model, size_t modelSize, uint3
     ACL_LOG_INFO("call ge interface executor.LoadModelWithQ, modelSize[%zu]", modelSize);
     ge::Status ret = executor.LoadModelWithQ(id, data, inputQVec, outputQVec);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_CALL_ERROR("[Model][WithQ]load model with Q, ge result[%u], failed", ret);
+        ACL_LOG_CALL_ERROR("[Load][WithQ]load model with Q, ge result[%u], failed", ret);
         return ACL_GET_ERRCODE_GE(ret);
     }
 
@@ -1444,7 +1444,7 @@ const char *aclmdlGetOpAttr(aclmdlDesc *modelDesc, const char *opName, const cha
     std::string attrValue;
     ge::Status ret = executor.GetOpAttr(modelId, opNameStr, attrStr, attrValue);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_CALL_ERROR("Execute GetOpAttr failed, ge result[%u], modelId[%u]", ret, modelId);
+        ACL_LOG_CALL_ERROR("[Get][Opattr]Execute GetOpAttr failed, ge result[%u], modelId[%u]", ret, modelId);
         return nullptr;
     }
     ACL_LOG_INFO("Execute aclmdlGetOpAttr successfully, opName is [%s], the value of attr[%s] is %s", opName, attr,
@@ -1455,6 +1455,7 @@ const char *aclmdlGetOpAttr(aclmdlDesc *modelDesc, const char *opName, const cha
 
 const char *aclmdlGetInputNameByIndex(const aclmdlDesc *modelDesc, size_t index)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlGetInputNameByIndex");
     if (modelDesc == nullptr) {
         ACL_LOG_ERROR("[Check][ModelDesc]modelDesc is null");

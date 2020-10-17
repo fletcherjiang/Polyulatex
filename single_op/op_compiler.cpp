@@ -46,6 +46,7 @@ aclError aclopCompile(const char *opType,
                       const char *opPath)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
+    ACL_STAGES_REG(acl::ACL_STAGE_COMP, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NON_NEGATIVE(numInputs);
     ACL_REQUIRES_NON_NEGATIVE(numOutputs);
     if (compileFlag != ACL_COMPILE_SYS && compileFlag != ACL_COMPILE_UNREGISTERED) {
@@ -105,6 +106,7 @@ aclError aclopCompileAndExecute(const char *opType,
     const char *opPath, aclrtStream stream)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
+    ACL_STAGES_REG(acl::ACL_STAGE_COMP_AND_EXEC, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclopCompileAndExecute");
     ACL_REQUIRES_NON_NEGATIVE(numInputs);
     ACL_REQUIRES_NON_NEGATIVE(numOutputs);
@@ -167,6 +169,7 @@ aclError aclopCompileAndExecute(const char *opType,
 
 aclError aclSetCompileopt(aclCompileOpt opt, const char *value)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_COMP, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclSetCompileopt");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(value);
     std::string optStr = compileOptMap.find(opt) != compileOptMap.end() ? compileOptMap[opt] : "";
@@ -183,6 +186,7 @@ aclError aclSetCompileopt(aclCompileOpt opt, const char *value)
 
 aclError aclopSetCompileFlag(aclOpCompileFlag flag)
 {
+    ACL_STAGES_REG(acl::ACL_STAGE_COMP, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclopSetCompileFlag, flag is %d", static_cast<int32_t>(flag));
     OpCompileProcessor::GetInstance().SetCompileFlag(static_cast<int32_t>(flag));
     return ACL_SUCCESS;

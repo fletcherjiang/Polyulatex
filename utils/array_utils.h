@@ -25,10 +25,10 @@ aclError CheckPtrArray(int size, const T *const *arr)
         return ACL_SUCCESS;
     }
 
-    ACL_REQUIRES_NOT_NULL(arr);
+    ACL_REQUIRES_NOT_NULL_WITH_INNER_REPORT(arr);
     for (int32_t i = 0; i < size; ++i) {
         if (arr[i] == nullptr) {
-            ACL_LOG_ERROR("[Check][arr]element at index %d is NULL", i);
+            ACL_LOG_INNER_ERROR("[Check][Arr]element at index %d is NULL", i);
             return ACL_ERROR_INVALID_PARAM;
         }
     }
@@ -43,10 +43,10 @@ aclError CheckPtrArray(int size, T *const *arr)
         return ACL_SUCCESS;
     }
 
-    ACL_REQUIRES_NOT_NULL(arr);
+    ACL_REQUIRES_NOT_NULL_WITH_INNER_REPORT(arr);
     for (int32_t idx = 0; idx < size; ++idx) {
         if (arr[idx] == nullptr) {
-            ACL_LOG_ERROR("[Check][element]element at index %d is NULL", idx);
+            ACL_LOG_INNER_ERROR("[Check][Element]element at index %d is NULL", idx);
             return ACL_ERROR_INVALID_PARAM;
         }
     }

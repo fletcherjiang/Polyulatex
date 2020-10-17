@@ -313,7 +313,7 @@ namespace acl {
         }
 
         if (!CheckDumpPath(js)) {
-            ACL_LOG_INNER_ERROR("dump_path field in dump config is invalid");
+            ACL_LOG_INNER_ERROR("[Check][DumpPath]dump_path field in dump config is invalid");
             return false;
         }
 
