@@ -391,6 +391,9 @@ target_link_directories(ascendcl_static PRIVATE
 
 target_link_libraries(ascendcl_static PRIVATE
     $<BUILD_INTERFACE:intf_pub>
+    $<BUILD_INTERFACE:mmpa_headers>
+    $<BUILD_INTERFACE:msprof_headers>
+    $<BUILD_INTERFACE:slog_headers>
     c_sec
     json
     ascend_protobuf
@@ -711,6 +714,7 @@ target_link_options(acl_dvpp PRIVATE
 
 target_link_libraries(acl_dvpp PRIVATE
     $<BUILD_INTERFACE:intf_pub>
+    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:$<BUILD_INTERFACE:mmpa_headers>>
     $<$<NOT:$<STREQUAL:${PRODUCT},npuf10>>:static_turbojpeg>
     static_mmpa
     -Wl,--no-as-needed
