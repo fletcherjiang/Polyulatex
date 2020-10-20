@@ -31,9 +31,8 @@ namespace {
     const std::string ACL_DUMP_MODE_INPUT = "input";
     const std::string ACL_DUMP_MODE_OUTPUT = "output";
     const std::string ACL_DUMP_MODE_ALL = "all";
-    const std::string ACL_DUMP_STATUS_ON = "on";
-    const std::string ACL_DUMP_OP_SWITCH_ON = "on";
-    const std::string ACL_DUMP_OP_SWITCH_OFF = "off";
+    const std::string ACL_DUMP_STATUS_SWITCH_ON = "on";
+    const std::string ACL_DUMP_STATUS_SWITCH_OFF = "off";
     const std::string ACL_DUMP_MODEL_NAME = "model_name";
     const std::string ACL_DUMP_LAYER = "layer";
     const std::string ACL_DUMP_PATH = "dump_path";
@@ -79,7 +78,7 @@ namespace acl {
         } else {
             // dump_op_switch is an optional field, valid values include on/off
             // default value is off
-            config.dumpOpSwitch = ACL_DUMP_OP_SWITCH_OFF;
+            config.dumpOpSwitch = ACL_DUMP_STATUS_SWITCH_OFF;
         }
     }
 
@@ -119,10 +118,10 @@ namespace acl {
         if (jsDumpConfig.find(ACL_DUMP_OP_SWITCH) != jsDumpConfig.end()) {
             dumpOpSwitch = jsDumpConfig.at(ACL_DUMP_OP_SWITCH).get<std::string>();
         } else {
-            dumpOpSwitch = ACL_DUMP_OP_SWITCH_OFF;
+            dumpOpSwitch = ACL_DUMP_STATUS_SWITCH_OFF;
         }
-        if ((dumpOpSwitch != ACL_DUMP_OP_SWITCH_ON) &&
-            (dumpOpSwitch != ACL_DUMP_OP_SWITCH_OFF)) {
+        if ((dumpOpSwitch != ACL_DUMP_STATUS_SWITCH_ON) &&
+            (dumpOpSwitch != ACL_DUMP_STATUS_SWITCH_OFF)) {
             ACL_LOG_ERROR("[Check][DumpOpSwitch]dump_op_switch value[%s] is invalid in config, "
                 "only supports on/off", dumpOpSwitch.c_str());
             acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
@@ -132,7 +131,7 @@ namespace acl {
         }
 
         // if dump_list field is null and dump_op_switch is off, can't send dump config
-        if ((dumpList.empty()) && (dumpOpSwitch == ACL_DUMP_OP_SWITCH_OFF)) {
+        if ((dumpList.empty()) && (dumpOpSwitch == ACL_DUMP_STATUS_SWITCH_OFF)) {
             ACL_LOG_ERROR("[Check][DumpConfig]dump_list field is null and dump_op_switch is off in config, "
                 "dump config is invalid");
             acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
@@ -144,7 +143,7 @@ namespace acl {
 
         bool isValidDumpList = false;
         // if dump_op_switch is off and dump_list is not null but all field illegal, can't send dump config
-        if (dumpOpSwitch == ACL_DUMP_OP_SWITCH_OFF) {
+        if (dumpOpSwitch == ACL_DUMP_STATUS_SWITCH_OFF) {
             for (size_t i = 0; i < dumpList.size(); ++i) {
                 if (dumpList[i].modelName.empty()) {
                     continue;
@@ -357,7 +356,7 @@ namespace acl {
         DumpConfig config = jsDumpConfig;
         dumpConfig.dump_path = config.dumpPath;
         dumpConfig.dump_mode = config.dumpMode;
-        dumpConfig.dump_status = ACL_DUMP_STATUS_ON;
+        dumpConfig.dump_status = ACL_DUMP_STATUS_SWITCH_ON;
         dumpConfig.dump_op_switch = config.dumpOpSwitch;
         ge::ModelDumpConfig modelDumpConfig;
         for (size_t i = 0; i < config.dumpList.size(); ++i) {
@@ -539,8 +538,20 @@ aclError aclmdlFinalizeDump()
         return ACL_ERROR_DUMP_ALREADY_RUN;
     }
 
+    ge::DumpConfig dumpConfig;
+    ge::GeExecutor geExecutor;
     std::unique_lock<std::mutex> lk(aclDumpMutex);
     if (aclmdlInitDumpFlag) {
+        // clear dump config
+        dumpConfig.dump_status = ACL_DUMP_STATUS_SWITCH_OFF;
+        dumpConfig.dump_debug = ACL_DUMP_STATUS_SWITCH_OFF;
+        ge::Status geRet = geExecutor.SetDump(dumpConfig);
+        if (geRet != ge::SUCCESS) {
+            ACL_LOG_CALL_ERROR("[Clear][DumpConfig]Clear dump config failed, ge result = %d", geRet);
+            return ACL_GET_ERRCODE_GE(geRet);
+        }
+
+        // interrupt dump server
         int adxRet = AdxDataDumpServerUnInit();
         if (adxRet != ADX_ERROR_NONE) {
             ACL_LOG_CALL_ERROR("[AdxDataDumpServer][UnInit]generate dump file failed in disk, adx result = %d", adxRet);
