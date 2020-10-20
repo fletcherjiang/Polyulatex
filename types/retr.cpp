@@ -51,7 +51,8 @@ aclfvInitPara *aclfvCreateInitPara(uint64_t fsNum)
             fsNum, INIT_MAX_NUM);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("should not be equal 0 or greater than %llu.",
             INIT_MAX_NUM);
-        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG, std::vector<std::string>({"param", "value", "reason"}),
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
+            std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"fsNum", std::to_string(fsNum), errMsg}));
         return nullptr;
     }
@@ -93,7 +94,8 @@ aclError aclfvSet1NTopNum(aclfvInitPara *initPara, uint32_t maxTopNumFor1N)
     // maxTopNumFor1N need in [2, 4800]
     if (maxTopNumFor1N < 2 || maxTopNumFor1N > 4800) {
         ACL_LOG_ERROR("[Check][MaxTopNumFor1N]maxTopNumFor1N[%u] should be between in [2, 4800].", maxTopNumFor1N);
-        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG, std::vector<std::string>({"param", "value", "reason"}),
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
+            std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"maxTopNumFor1N", std::to_string(maxTopNumFor1N),
             "should be between in [2, 4800]"}));
         return ACL_ERROR_INVALID_PARAM;
@@ -110,7 +112,8 @@ aclError aclfvSetNMTopNum(aclfvInitPara *initPara, uint32_t maxTopNumForNM)
     // maxTopNumForNM need in [500, 4800]
     if (maxTopNumForNM < 500 || maxTopNumForNM > 4800) {
         ACL_LOG_ERROR("[Check][MaxTopNumForNM]maxTopNumForNM[%u] should be between in [500, 4800].", maxTopNumForNM);
-        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG, std::vector<std::string>({"param", "value", "reason"}),
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG, 
+            std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"maxTopNumForNM", std::to_string(maxTopNumForNM),
             "should be between in [500, 4800]"}));
         return ACL_ERROR_INVALID_PARAM;
@@ -134,7 +137,8 @@ aclfvFeatureInfo *aclfvCreateFeatureInfo(uint32_t id0, uint32_t id1, uint32_t of
 
     if (id0 > RETR_REPO_RANGE_MAX || id1 > RETR_REPO_RANGE_MAX) {
         ACL_LOG_ERROR("[Check][Id]id0:%u or id1:%u is not in range[0-%u].", id0, id1, RETR_REPO_RANGE_MAX);
-        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG, std::vector<std::string>({"param", "value", "reason"}),
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
+            std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"id0", std::to_string(id0), "should be between in [500, 4800]"}));
         return nullptr;
     }
@@ -142,7 +146,8 @@ aclfvFeatureInfo *aclfvCreateFeatureInfo(uint32_t id0, uint32_t id1, uint32_t of
     if (featureLen != RETR_SHORT_FEATURE_LENGTH_36_B) {
         ACL_LOG_ERROR("[Check][featureLen]featureLen:%u should be %u.", featureLen,
             RETR_SHORT_FEATURE_LENGTH_36_B);
-        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG, std::vector<std::string>({"param", "value", "reason"}),
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
+            std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"featureLen", std::to_string(featureLen), "should be between in [500, 4800]"}));
         return nullptr;
     }
@@ -154,10 +159,8 @@ aclfvFeatureInfo *aclfvCreateFeatureInfo(uint32_t id0, uint32_t id1, uint32_t of
     }
 
     if (featureDataLen != featureLen * featureCount) {
-        ACL_LOG_INNER_ERROR("[Check][FeatureDataLen]featureDataLen:%u should be equal to featureLen:%u * featureCount:%u.",
-            featureDataLen,
-            featureLen,
-            featureCount);
+        ACL_LOG_INNER_ERROR("[Check][FeatureDataLen]featureDataLen:%u should be equal to "
+            "featureLen:%u * featureCount:%u.", featureDataLen, featureLen, featureCount);
         return nullptr;
     }
 
@@ -215,7 +218,8 @@ aclfvRepoRange *aclfvCreateRepoRange(uint32_t id0Min, uint32_t id0Max, uint32_t 
         ACL_LOG_ERROR("[Check][Id]id0Min:%u or id0Max:%u of repoRange is not in range[0-%u] or "
             "id0Min is greater than id0Max.", id0Min, id0Max, RETR_REPO_RANGE_MAX);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("%u, %u", id0Min, id0Max);
-        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG, std::vector<std::string>({"param", "value", "reason"}),
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
+            std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"id0Min, id0Max", errMsg,
             "repoRange is not in range or id0Min is greater than id0Max"}));
         return nullptr;

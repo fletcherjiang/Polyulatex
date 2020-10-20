@@ -821,7 +821,8 @@ static aclError CheckAippDataIndex(uint32_t modelId, size_t index, aclmdlDesc* m
         size_t indexInModel;
         auto mdlRet = aclmdlGetInputIndexByName(modelDesc, ACL_DYNAMIC_AIPP_NAME, &indexInModel);
         if (mdlRet != ACL_SUCCESS) {
-            ACL_LOG_INNER_ERROR("[Get][InputIndex]the model is not a dynamic aipp model, there is no dynamic aipp node");
+            ACL_LOG_INNER_ERROR("[Get][InputIndex]the model is not a dynamic aipp model, there is no dynamic aipp "
+                "node");
             return mdlRet;
         }
         if (indexInModel != index) {
@@ -1165,9 +1166,9 @@ aclError aclmdlGetFirstAippInfo(uint32_t modelId, size_t index, aclAippInfo *aip
 
     ACL_LOG_DEBUG("GetAllAippInputOutputDims success");
     if ((shapeCount > ACL_MAX_SHAPE_COUNT) || (shapeCount != inputDims.size()) || (shapeCount != outputDims.size())) {
-        ACL_LOG_INNER_ERROR("[Check][Params]shapeCount[%zu] should be smaller than ACL_MAX_SHAPE_COUNT(128) and it should "
-                      "be equal to size of inputDims[%zu], size of outputDims[%zu]",
-                      shapeCount, inputDims.size(), outputDims.size());
+        ACL_LOG_INNER_ERROR("[Check][Params]shapeCount[%zu] should be smaller than ACL_MAX_SHAPE_COUNT(128) and it "
+            "should be equal to size of inputDims[%zu], size of outputDims[%zu]",
+            shapeCount, inputDims.size(), outputDims.size());
         return ACL_ERROR_GE_FAILURE;
     }
     for (size_t i = 0 ; i < shapeCount; i++) {

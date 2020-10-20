@@ -155,7 +155,8 @@ namespace {
     {
         ACL_LOG_INFO("start to execute CheckMdlLoadSizeAttr");
         if (valueSize != sizeof(size_t)) {
-            ACL_LOG_INNER_ERROR("[Check][ValueSize]valueSize[%zu] is invalid, it should be %zu", valueSize, sizeof(size_t));
+            ACL_LOG_INNER_ERROR("[Check][ValueSize]valueSize[%zu] is invalid, it should be %zu",
+                valueSize, sizeof(size_t));
             return ACL_ERROR_INVALID_PARAM;
         }
         ACL_LOG_INFO("successfully execute CheckMdlLoadSizeAttr");
@@ -214,7 +215,8 @@ namespace {
     {
         ACL_LOG_INFO("start to execute CheckMdlLoadPtrAttr");
         if (valueSize != sizeof(void *)) {
-            ACL_LOG_INNER_ERROR("[Check][ValueSize]valueSize[%zu] is invalid, it should be %zu", valueSize, sizeof(void *));
+            ACL_LOG_INNER_ERROR("[Check][ValueSize]valueSize[%zu] is invalid, it should be %zu",
+                valueSize, sizeof(void *));
             return ACL_ERROR_INVALID_PARAM;
         }
         ACL_LOG_INFO("successfully execute CheckMdlLoadPtrAttr");

@@ -144,7 +144,8 @@ aclError aclrtGetGroupInfoDetail(const aclrtGroupInfo *groupInfo, int32_t groupI
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     if ((groupIndex < 0) || (static_cast<uint32_t>(groupIndex) >= count)) {
-        ACL_LOG_INNER_ERROR("the index value of group is invalid, groupIndex = %d, not in range [0, %u)", groupIndex, count);
+        ACL_LOG_INNER_ERROR("the index value of group is invalid, groupIndex = %d, not in range [0, %u)",
+            groupIndex, count);
         return ACL_ERROR_INVALID_PARAM;
     }
 

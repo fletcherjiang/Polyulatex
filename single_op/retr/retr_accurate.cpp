@@ -159,7 +159,8 @@ aclError AclFvAccurate::AccurateDelOrModify(aclAccurateType typeAccurate, aclfvF
         return ACL_ERROR_RT_FAILURE;
     }
     if (featureInfo->retrFeatureInfo.retCode != 0) {
-        ACL_LOG_INNER_ERROR("execute aclfvAccurateDelOrModify failed, result = %d.", featureInfo->retrFeatureInfo.retCode);
+        ACL_LOG_INNER_ERROR("execute aclfvAccurateDelOrModify failed, result = %d.",
+            featureInfo->retrFeatureInfo.retCode);
         (void)rtEventDestroy(static_cast<rtEvent_t>(notify_));
         return ACL_ERROR_FAILURE;
     }

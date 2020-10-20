@@ -171,7 +171,8 @@ aclError aclrtCreateNotify(int32_t deviceId, aclrtNotify *notify)
     rtNotify_t rtNotify = nullptr;
     rtError_t rtErr = rtNotifyCreate(deviceId, &rtNotify);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_CALL_ERROR("create notify for device %d failed, runtime result = %d", deviceId, static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("create notify for device %d failed, runtime result = %d",
+            deviceId, static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
 
