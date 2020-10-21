@@ -404,33 +404,6 @@ namespace acl {
                                                uint32_t size,
                                                acldvppPicDesc *outputDesc,
                                                aclrtStream stream);
-        /**
-         * Read word.
-         * @param pStart[in] image data pointer
-         * @param pos[in] the offset of image data
-         * @return uint16_t
-         */
-        uint16_t ReadWord(const unsigned char* const pStart, uint32_t& pos);
-
-        /**
-         * inner function in HandleExifProtocol
-         */
-        bool GetOrientationValue(uint32_t ifd0StartIndex, uint16_t endianValue, const uint8_t* inputAddr,
-                                 uint16_t app1Size, uint16_t &orientation);
-
-        /**
-         * inner function in JudgeNeedOrientation
-         */
-        bool HandleExifProtocol(uint32_t endianOffset, uint16_t endianValue, const uint8_t* inputData,
-                                uint16_t app1Size, uint16_t &orientation);
-
-        /**
-         * Judge orientation image.
-         * @param data[in] image data in host memory
-         * @param jpegdDataSize[in] the size of image data
-         * @return ACL_SUCCESS for ok, others for fail
-         */
-        bool JudgeNeedOrientation(const unsigned char *data, uint32_t jpegdDataSize);
 
         /**
          * Get image width and height of jpeg.

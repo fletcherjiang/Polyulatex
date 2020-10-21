@@ -24,22 +24,15 @@
 namespace acl {
     namespace dvpp {
         namespace {
-            const uint32_t NUM_2 = 2;
-            const uint32_t APP1_MAKER = 0xFFE1;
-            const uint32_t EXIF0_MAKER = 0x4578;
-            const uint32_t EXIF1_MAKER = 0x6966;
-            const uint32_t EXIF2_MAKER = 0;
-            const uint32_t BIG_ENDIAN_MAKER = 0x4D4D;
-            const uint32_t LITTLE_ENDIAN_MAKER = 0x4949;
-            const uint32_t START_OF_SCAN_MAKER = 0xFFDA;
-            const uint32_t EIGHT_BITS_OFFSET = 8;
-            const uint32_t JPEG_MARK = 0xff;
-            const uint16_t BIG_ORIENTATION_MARKER = 0x0112;
-            const uint32_t LITTLE_ORIENTATION_MARKER = 0x1201;
-            const uint32_t JUMP_BYTE_NUM = 3;
-            const uint32_t TWO_BYTE_OFFSET = 2;
-            const uint32_t IFD_OFFSET = 0xA;
-            const uint32_t IFD_ALL_OFFSET = 0xC;
+            const char EXIF_HEADER[6] = {'E', 'x', 'i', 'f', 0, 0};
+            const char TIFF_HEADER_LE[4] = {0x49, 0x49, 0x2a, 0x00};
+            const char TIFF_HEADER_BE[4] = {0x4d, 0x4d, 0x00, 0x2a};
+            #define EXIF_MARKER (JPEG_APP0 + 1)
+            #define TIFF_LITTLE_ENDIAN 0X4949
+            #define TIFF_BIG_ENDIAN 0X4d4d
+            #define TIFF_ORIENTATION_TAG 0X0112
+            #define JPEG_RAW_FORMAT_UNSUPPORT (-1)
+
             enum OrientationValue {
                 ORIENTATION_1 = 1,
                 ORIENTATION_2,
@@ -97,6 +90,87 @@ namespace acl {
                     }
                 }
                 return isValidFormat;
+            }
+            uint16_t GetU16(uint8_t *data, uint16_t endian)
+            {
+                if (endian == TIFF_BIG_ENDIAN) {
+                    return ((uint16_t)data[0]) << 8 | data[1];
+                } else {
+                    return ((uint16_t)data[1]) << 8 | data[0];
+                }
+            }
+            uint32_t GetU32(uint8_t *data, uint16_t endian)
+            {
+                if (endian == TIFF_BIG_ENDIAN) {
+                    return ((uint32_t)data[0]) << 24 | ((uint32_t)data[1]) << 16 | ((uint32_t)data[2]) << 8 | data[3];
+                } else {
+                    return ((uint32_t)data[3]) << 24 | ((uint32_t)data[2]) << 16 | ((uint32_t)data[1]) << 8 | data[0];
+                }
+            }
+            jpeg_saved_marker_ptr JpegdFindExifMarker(j_decompress_ptr cinfo)
+            {
+                jpeg_saved_marker_ptr tmpMarker = cinfo->marker_list;
+                while (tmpMarker != nullptr) {
+                    // 6 means ignore EXIF heder
+                    if ((tmpMarker->marker == EXIF_MARKER) && (tmpMarker->data_length >= 6) &&
+                       !memcmp(tmpMarker->data, EXIF_HEADER, 6)) {
+                        return tmpMarker;
+                    }
+                    tmpMarker = tmpMarker->next;
+                }
+                return nullptr;
+            }
+            bool JudgeNeedOrientation(j_decompress_ptr cinfo)
+            {
+                jpeg_saved_marker_ptr exifMarker = JpegdFindExifMarker(cinfo);
+                if (exifMarker == nullptr) {
+                    return false;
+                }
+                uint16_t orientation = 0;
+                uint32_t pos = 6; // 6 means ignore EXIF heder
+                uint16_t endian = 0;
+
+                // 8 means TIFF header
+                if ((pos + 8) > exifMarker->data_length) {
+                    return false;
+                }
+                if (!memcmp(&exifMarker->data[pos], TIFF_HEADER_LE, 4)) {
+                    endian = TIFF_LITTLE_ENDIAN;
+                } else if (!memcmp(&exifMarker->data[pos], TIFF_HEADER_BE, 4)) {
+                    endian = TIFF_LITTLE_ENDIAN;
+                } else {
+                    return false;
+                }
+
+                pos += GetU32(&exifMarker->data[pos] + 4, endian);
+                if ((pos + 2) > exifMarker->data_length) {
+                    return false;
+                }
+                uint16_t entries = GetU16(&exifMarker->data[pos], endian);
+                pos += 2;
+
+                if ((pos + entries * 12) > exifMarker->data_length) {
+                    return false;
+                }
+
+                while (entries--) {
+                    uint16_t tag = GetU16(&exifMarker->data[pos], endian);
+                    if (tag == TIFF_ORIENTATION_TAG) {
+                        uint16_t format = GetU16(&exifMarker->data[pos + 2], endian);
+                        uint16_t count = GetU32(&exifMarker->data[pos + 4], endian);
+                        if ((format != 3) || (count != 1)) {
+                            return false;
+                        }
+                        orientation = GetU16(&exifMarker->data[pos + 8], endian);
+                    }
+                    pos += 12;
+                }
+                ACL_LOG_INFO("orientation is %d", orientation);
+                if ((orientation >= ORIENTATION_5) && (orientation <= ORIENTATION_8)) {
+                    ACL_LOG_INFO("This image need orientation");
+                    return true;
+                }
+                return false;
             }
         }
 
@@ -1588,116 +1662,6 @@ namespace acl {
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
 
-    uint16_t ImageProcessor::ReadWord(const unsigned char* const pStart, uint32_t& pos)
-    {
-        pos += TWO_BYTE_OFFSET;
-        return ((uint16_t)((*(pStart + pos - 2)) << 8)) | ((uint16_t) * (pStart + pos - 1));
-    }
-
-    bool ImageProcessor::GetOrientationValue(uint32_t ifd0StartIndex, uint16_t endianValue, const uint8_t* inputAddr,
-                                             uint16_t app1Size, uint16_t &orientation)
-    {
-        uint16_t segmentType = 0;
-        uint32_t index = ifd0StartIndex;
-        uint32_t byteCount = 0;
-        if (endianValue == BIG_ENDIAN_MAKER) {
-            do {
-                segmentType = ReadWord(inputAddr, index);
-                if (segmentType == 0x8769) {
-                    break;
-                }
-                if (segmentType == BIG_ORIENTATION_MARKER) {
-                    index = index + JUMP_BYTE_NUM * TWO_BYTE_OFFSET;
-                    uint16_t val = ReadWord(inputAddr, index);
-                    orientation = val & 0xFF;
-                    return true;
-                }
-                index = index + IFD_OFFSET;
-                byteCount = byteCount + IFD_ALL_OFFSET;
-            } while ((segmentType != BIG_ORIENTATION_MARKER) && (byteCount + NUM_2 < app1Size));
-        } else if (endianValue == LITTLE_ENDIAN_MAKER) {
-            do {
-                segmentType = ReadWord(inputAddr, index);
-                if (segmentType == 0x6987) {
-                    break;
-                }
-                if (segmentType == LITTLE_ORIENTATION_MARKER) {
-                    index = index + JUMP_BYTE_NUM * TWO_BYTE_OFFSET;
-                    uint16_t val = ReadWord(inputAddr, index);
-                    orientation = val >> EIGHT_BITS_OFFSET;
-                    return true;
-                }
-                index = index + IFD_OFFSET;
-                byteCount = byteCount + IFD_ALL_OFFSET;
-            } while ((segmentType != LITTLE_ORIENTATION_MARKER) && (byteCount + NUM_2 < app1Size));
-        }
-        return false;
-    }
-
-    bool ImageProcessor::HandleExifProtocol(uint32_t endianOffset, uint16_t endianValue, const uint8_t* inputData,
-                                            uint16_t app1Size, uint16_t &orientation)
-    {
-        uint32_t tmpIndex = endianOffset + TWO_BYTE_OFFSET;
-        uint32_t endianToIfd0Length = 0;
-        uint32_t ifd0StartIndex = 0;
-        if (endianValue == BIG_ENDIAN_MAKER) {
-            tmpIndex = tmpIndex + TWO_BYTE_OFFSET;
-            endianToIfd0Length = ReadWord(inputData, tmpIndex);
-            ifd0StartIndex = endianOffset + endianToIfd0Length;
-        } else if (endianValue == LITTLE_ENDIAN_MAKER) {
-            endianToIfd0Length = ReadWord(inputData, tmpIndex);
-            endianToIfd0Length = endianToIfd0Length >> EIGHT_BITS_OFFSET;
-            ifd0StartIndex = endianOffset + endianToIfd0Length;
-        }
-        bool res = GetOrientationValue(ifd0StartIndex, endianValue, inputData, app1Size, orientation);
-        return res;
-    }
-
-    bool ImageProcessor::JudgeNeedOrientation(const unsigned char *data, uint32_t jpegdDataSize)
-    {
-        uint16_t orientation = ORIENTATION_1;
-        uint16_t segmentType = 0;
-        uint32_t uiSOS = TWO_BYTE_OFFSET;
-        while (segmentType != START_OF_SCAN_MAKER && (uiSOS + TWO_BYTE_OFFSET) < jpegdDataSize) {
-            segmentType = ReadWord(data, uiSOS);
-            if ((segmentType >> EIGHT_BITS_OFFSET) != JPEG_MARK) {
-                break;
-            }
-
-            if (segmentType == APP1_MAKER) {
-                uint16_t app1Size = ReadWord(data, uiSOS);
-                segmentType = ReadWord(data, uiSOS);
-                if (segmentType == EXIF0_MAKER) {
-                    int exif1Mark = ReadWord(data, uiSOS);
-                    int exif2Mark = ReadWord(data, uiSOS);
-                    if (!(exif1Mark == EXIF1_MAKER) && !(exif2Mark == EXIF2_MAKER)) {
-                        ACL_LOG_WARN("exif marker is error.");
-                        break;
-                    }
-                }
-                uint16_t endianValue = ReadWord(data, uiSOS);
-                uint32_t endianOffset = uiSOS;
-                if (!(endianValue == BIG_ENDIAN_MAKER) && !(endianValue == LITTLE_ENDIAN_MAKER)) {
-                    ACL_LOG_WARN("endian marker is either big endian or little endian.");
-                    break;
-                }
-                bool res = HandleExifProtocol(endianOffset, endianValue, data, app1Size, orientation);
-                if (res) {
-                    break;
-                }
-            }
-
-            uint32_t size = ReadWord(data, uiSOS);
-            uiSOS += (size - TWO_BYTE_OFFSET);
-        }
-        ACL_LOG_INFO("orientation is %d", orientation);
-        if ((orientation >= ORIENTATION_5) && (orientation <= ORIENTATION_8)) {
-            ACL_LOG_INFO("This image need orientation.");
-            return true;
-        }
-        return false;
-    }
-
     aclError ImageProcessor::acldvppJpegGetImageInfo(const void *data,
                                                      uint32_t size,
                                                      uint32_t *width,
@@ -1712,12 +1676,12 @@ namespace acl {
             ACL_LOG_INFO("no need to get jpeg info");
             return ACL_SUCCESS;
         }
-        bool needOrientation = JudgeNeedOrientation(reinterpret_cast<const unsigned char *>(data), size);
         struct jpeg_decompress_struct libjpegHandler;
         struct jpeg_error_mgr libjpegErrorMsg;
         libjpegHandler.err = jpeg_std_error(&libjpegErrorMsg);
         libjpegErrorMsg.error_exit = AcldvppLibjpegErrorExit;
         jpeg_create_decompress(&libjpegHandler);
+        jpeg_save_markers(&libjpegHandler, EXIF_MARKER, 0xffff);
         try {
             jpeg_mem_src(&libjpegHandler, reinterpret_cast<const unsigned char *>(data), size);
             jpeg_read_header(&libjpegHandler, TRUE);
@@ -1725,6 +1689,7 @@ namespace acl {
             jpeg_destroy_decompress(&libjpegHandler);
             return ACL_ERROR_FAILURE;
         }
+        bool needOrientation = JudgeNeedOrientation(&libjpegHandler);
         if (width != nullptr) {
             *width = needOrientation ? static_cast<uint32_t>(libjpegHandler.image_height) :
                 static_cast<uint32_t>(libjpegHandler.image_width);
@@ -1823,15 +1788,16 @@ namespace acl {
             ACL_ERROR_FORMAT_NOT_MATCH, "output acldvppPicDesc format verify failed, format = %d.",
             static_cast<int32_t>(outputPixelFormat));
         aclError ret = ACL_SUCCESS;
-        bool needOrientation = JudgeNeedOrientation(reinterpret_cast<const unsigned char *>(data), dataSize);
         struct jpeg_decompress_struct libjpegHandler;
         struct jpeg_error_mgr libjpegErrorMsg;
         libjpegHandler.err = jpeg_std_error(&libjpegErrorMsg);
         libjpegErrorMsg.error_exit = AcldvppLibjpegErrorExit;
         jpeg_create_decompress(&libjpegHandler);
+        jpeg_save_markers(&libjpegHandler, EXIF_MARKER, 0xffff);
         try {
             jpeg_mem_src(&libjpegHandler, reinterpret_cast<const unsigned char *>(data), dataSize);
             jpeg_read_header(&libjpegHandler, TRUE);
+            bool needOrientation = JudgeNeedOrientation(&libjpegHandler);
             uint32_t width = needOrientation ? static_cast<uint32_t>(libjpegHandler.image_height) :
                 static_cast<uint32_t>(libjpegHandler.image_width);
             uint32_t height = needOrientation ? static_cast<uint32_t>(libjpegHandler.image_width) :
