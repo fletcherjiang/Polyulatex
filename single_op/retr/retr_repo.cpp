@@ -279,7 +279,8 @@ aclError AclFvRepo::Add(aclfvSearchType type, aclfvFeatureInfo *featureInfo)
         return ACL_ERROR_RT_FAILURE;
     }
     if (featureInfo->retrFeatureInfo.retCode != 0) {
-        ACL_LOG_INNER_ERROR("[Exec][RepoAdd]execute aclfvRepoAdd failed, result = %d.", featureInfo->retrFeatureInfo.retCode);
+        ACL_LOG_INNER_ERROR("[Exec][RepoAdd]execute aclfvRepoAdd failed, result = %d.",
+            featureInfo->retrFeatureInfo.retCode);
         (void)rtEventDestroy(static_cast<rtEvent_t>(notify_));
         return ACL_ERROR_FAILURE;
     }
@@ -403,7 +404,8 @@ aclError AclFvRepo::Del(aclfvSearchType type, aclfvRepoRange *repoRange)
         return ACL_ERROR_RT_FAILURE;
     }
     if (repoRange->retrRepoRange.retCode != 0) {
-        ACL_LOG_INNER_ERROR("[Exec][RepoDel]execute aclfvRepoDel failed, result = %d.", repoRange->retrRepoRange.retCode);
+        ACL_LOG_INNER_ERROR("[Exec][RepoDel]execute aclfvRepoDel failed, result = %d.",
+            repoRange->retrRepoRange.retCode);
         (void)rtEventDestroy(static_cast<rtEvent_t>(notify_));
         return ACL_ERROR_FAILURE;
     }

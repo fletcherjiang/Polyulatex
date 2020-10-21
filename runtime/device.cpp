@@ -186,7 +186,8 @@ aclError aclrtSynchronizeDevice()
     ACL_LOG_INFO("start to execute aclrtSynchronizeDevice");
     rtError_t rtErr = rtDeviceSynchronize();
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_CALL_ERROR("wait for compute device to finish failed, runtime result = %d.", static_cast<int32_t>(rtErr));
+        ACL_LOG_CALL_ERROR("wait for compute device to finish failed, runtime result = %d.",
+            static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
     ACL_LOG_INFO("device synchronize successfully.");

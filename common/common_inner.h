@@ -11,6 +11,8 @@
 #ifndef ACL_COMMON_INNER_API_H_
 #define ACL_COMMON_INNER_API_H_
 
+#include "acl/acl_base.h"
+
 constexpr size_t SOC_VERSION_LEN = 128;
 
 std::string GetSocVersion();

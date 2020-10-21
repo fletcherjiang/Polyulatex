@@ -1,3 +1,13 @@
+/**
+* @file libjpeg_lhisi_stub.cpp
+*
+* Copyright (c) Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+*/
+
 #include <cstdint>
 #include <cstdio>
 #include "utils/acl_jpeglib.h"

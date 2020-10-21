@@ -33,15 +33,15 @@ aclError AippInputFormatCheck(enum CceAippInputFormat inputFormat, std::string s
             (inputFormat != CCE_RGB888_U8) && (inputFormat != CCE_YUV400_U8));
         if (flag) {
             ACL_LOG_INNER_ERROR("[Check][InputFormat]Ascend310 Ascend910 only support YUV420SP_U8,XRGB8888_U8,"
-                          "RGB888_U8,YUV400_U8, cceInputFormat = %d", static_cast<int32_t>(inputFormat));
+                "RGB888_U8,YUV400_U8, cceInputFormat = %d", static_cast<int32_t>(inputFormat));
             return ACL_ERROR_INVALID_PARAM;
         }
     } else if ((socVersion == "Ascend610") || (socVersion == "Ascend710") || (socVersion == "Ascend615")) {
         flag = ((inputFormat != CCE_YUV420SP_U8) && (inputFormat != CCE_XRGB8888_U8) &&
             (inputFormat != CCE_RGB888_U8) && (inputFormat != CCE_YUV400_U8));
         if (flag) {
-            ACL_LOG_INNER_ERROR("[Check][InputFormat]Ascend610 Ascend710 and Ascend615 only support YUV420SP_U8,XRGB8888_U8,"
-                          "RGB888_U8,YUV400_U8, cce_inputFormat = %d", static_cast<int32_t>(inputFormat));
+            ACL_LOG_INNER_ERROR("[Check][InputFormat]Ascend610 Ascend710 and Ascend615 only support YUV420SP_U8, "
+                "XRGB8888_U8, RGB888_U8,YUV400_U8, cce_inputFormat = %d", static_cast<int32_t>(inputFormat));
             return ACL_ERROR_INVALID_PARAM;
         }
     } else if (socVersionForLhisi.find(socVersion) != socVersionForLhisi.end()) {
@@ -82,7 +82,8 @@ aclError AippSrcImageSizeCheck(enum CceAippInputFormat inputFormat,
     } else if (flag) {
         // determine whether it is even
         if (srcImageSizeW % 2 != 0) {
-            ACL_LOG_INNER_ERROR("[Check][Params]srcImageSizeW[%d] must be even for YUV422SP_U8 and YUYV_U8!", srcImageSizeW);
+            ACL_LOG_INNER_ERROR("[Check][Params]srcImageSizeW[%d] must be even for YUV422SP_U8 and YUYV_U8!",
+                srcImageSizeW);
             return ACL_ERROR_INVALID_PARAM;
         }
     }
@@ -261,7 +262,8 @@ aclError AippCropSizeCheck(const aclmdlAIPP *aippParmsSet, std::string &socVersi
         // determine whether it is even
         flag = (cropStartPosW % 2 != 0);
         if (flag) {
-            ACL_LOG_INNER_ERROR("[Check][Params]cropStartPosW[%d] must be even for YUV422SP_U8 and YUYV_U8!", cropStartPosW);
+            ACL_LOG_INNER_ERROR("[Check][Params]cropStartPosW[%d] must be even for YUV422SP_U8 and YUYV_U8!",
+                cropStartPosW);
             return ACL_ERROR_INVALID_PARAM;
         }
         flag = isLhisi && (cropSizeW % 2 != 0);
@@ -323,14 +325,14 @@ aclError GetAippOutputHW(const aclmdlAIPP *aippParmsSet, int32_t batchIndex, std
         if ((socVersion == "Ascend310") || (socVersion == "Ascend610") || (socVersion == "Ascend710") ||
             (socVersion == "Ascend615") || (strncmp(socVersion.c_str(), "Ascend910", strlen("Ascend910")) == 0)) {
             if (aippOutputW > 1080) {
-                ACL_LOG_INNER_ERROR("[Check][Params]after padding, aipp output W[%d] should be less than or equal to 1080 "
-                              "for Ascend310, Ascend610, Ascend710, Ascend615, Ascend910", aippOutputW);
+                ACL_LOG_INNER_ERROR("[Check][Params]after padding, aipp output W[%d] should be less than or equal to "
+                    "1080 for Ascend310, Ascend610, Ascend710, Ascend615, Ascend910", aippOutputW);
                 return ACL_ERROR_INVALID_PARAM;
             }
         } else if (socVersionForLhisi.find(socVersion) != socVersionForLhisi.end()) {
             if (aippOutputW > 4096) {
-                ACL_LOG_INNER_ERROR("[Check][Params]after padding, aipp output W[%d] should be less than or equal to 4096 "
-                              "for Hi3796CV300ES, Hi3796CV300CS, SD3403", aippOutputW);
+                ACL_LOG_INNER_ERROR("[Check][Params]after padding, aipp output W[%d] should be less than or equal to "
+                    "4096 for Hi3796CV300ES, Hi3796CV300CS, SD3403", aippOutputW);
                 return ACL_ERROR_INVALID_PARAM;
             }
         }

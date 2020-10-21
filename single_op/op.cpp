@@ -457,7 +457,8 @@ static aclError LoadOpsProto()
     ACL_LOG_INFO("LoadOpsProtoLib begin");
     string opsprotoPath;
     if (!GetOpsProtoPath(opsprotoPath)) {
-        ACL_LOG_INNER_ERROR("[Check][ProtoPath]The environment variable(ASCEND_OPP_PATH) is not set or path is invalid.");
+        ACL_LOG_INNER_ERROR("[Check][ProtoPath]The environment variable(ASCEND_OPP_PATH) is not set or path is "\
+            "invalid.");
         return ACL_ERROR_INVALID_OPP_PATH;
     }
     ge::OpsProtoManager *manager = ge::OpsProtoManager::Instance();

@@ -1,7 +1,7 @@
 /**
 * @file attr_utils.cpp
 *
-* Copyright (C) Huawei Technologies Co., Ltd. 2019-2020. All Rights Reserved.
+* Copyright (c) Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
 *
 * This program is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -378,6 +378,7 @@ bool CheckValueRange(const std::vector<std::vector<T>> &valueRange, const std::v
         return false;
     }
     for (size_t i = 0; i < valueRange.size(); ++i) {
+        // 2 is range size
         if (valueRange[i].size() != 2) {
             ACL_LOG_WARN("range size must be 2");
             return false;

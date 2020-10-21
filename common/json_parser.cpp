@@ -131,9 +131,9 @@ namespace acl {
         size_t maxArrayDepth = 0;
         GetMaxNestedLayers(fileName, fileLength, maxObjDepth, maxArrayDepth);
         if ((maxObjDepth > MAX_CONFIG_OBJ_DEPTH) || (maxArrayDepth > MAX_CONFIG_ARRAY_DEPTH)) {
-            ACL_LOG_INNER_ERROR("[Check][MaxArrayDepth]invalid json file, the object's depth[%zu] is larger than %zu, or "
-                          "the array's depth[%zu] is larger than %zu.",
-                          maxObjDepth, MAX_CONFIG_OBJ_DEPTH, maxArrayDepth, MAX_CONFIG_ARRAY_DEPTH);
+            ACL_LOG_INNER_ERROR("[Check][MaxArrayDepth]invalid json file, the object's depth[%zu] is larger than %zu, "
+                "or the array's depth[%zu] is larger than %zu.",
+                maxObjDepth, MAX_CONFIG_OBJ_DEPTH, maxArrayDepth, MAX_CONFIG_ARRAY_DEPTH);
             fin.close();
             return false;
         }

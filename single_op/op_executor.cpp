@@ -177,7 +177,8 @@ ge::SingleOp *OpExecutor::LoadSingleOp(const OpModel &modelInfo, aclrtStream str
     ACL_LOG_INFO("call ge interface LoadSingleOp");
     auto status = ge::GeExecutor::LoadSingleOpV2(modelInfo.name, modelData, stream, &singleOp, modelInfo.opModelId);
     if (status != ge::SUCCESS) {
-        ACL_LOG_CALL_ERROR("[Load][Op]Load operator failed. model = %s, ge result = %u", modelInfo.name.c_str(), status);
+        ACL_LOG_CALL_ERROR("[Load][Op]Load operator failed. model = %s, ge result = %u",
+            modelInfo.name.c_str(), status);
     }
 
     return singleOp;

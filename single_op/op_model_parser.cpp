@@ -64,7 +64,8 @@ aclError OpModelParser::DeserializeModel(const OpModel &opModel, ge::Model &mode
     ModelPartition modelPartition;
     geRet = helper.GetModelPartition(ModelPartitionType::MODEL_DEF, modelPartition);
     if (geRet != ge::SUCCESS) {
-        ACL_LOG_CALL_ERROR("[Get][Model]Get MODEL_DEF Partition failed. modelSize = %u, ge result = %u", modelSize, geRet);
+        ACL_LOG_CALL_ERROR("[Get][Model]Get MODEL_DEF Partition failed. modelSize = %u, ge result = %u", 
+            modelSize, geRet);
         return ACL_ERROR_DESERIALIZE_MODEL;
     }
 
@@ -80,8 +81,8 @@ aclError OpModelParser::DeserializeModel(const OpModel &opModel, ge::Model &mode
 aclError OpModelParser::ParseModelContent(const OpModel &opModel, uint32_t &modelSize, uint8_t *&modelData)
 {
     if (opModel.size <= sizeof(ModelFileHeader)) {
-        ACL_LOG_INNER_ERROR("[Check][Size]invalid model. length[%zu] is smaller than or equal to ModelFileHeader size[%zu]",
-            opModel.size, sizeof(ModelFileHeader));
+        ACL_LOG_INNER_ERROR("[Check][Size]invalid model. length[%zu] is smaller than or equal to "
+            "ModelFileHeader size[%zu]", opModel.size, sizeof(ModelFileHeader));
         return ACL_ERROR_PARSE_MODEL;
     }
 
