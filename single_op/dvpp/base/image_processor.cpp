@@ -28,9 +28,9 @@ namespace acl {
             const char TIFF_HEADER_LE[4] = {0x49, 0x49, 0x2a, 0x00};
             const char TIFF_HEADER_BE[4] = {0x4d, 0x4d, 0x00, 0x2a};
             #define EXIF_MARKER (JPEG_APP0 + 1)
-            #define TIFF_LITTLE_ENDIAN 0X4949
-            #define TIFF_BIG_ENDIAN 0X4d4d
-            #define TIFF_ORIENTATION_TAG 0X0112
+            #define TIFF_LITTLE_ENDIAN 0x4949
+            #define TIFF_BIG_ENDIAN 0x4d4d
+            #define TIFF_ORIENTATION_TAG 0x0112
             #define JPEG_RAW_FORMAT_UNSUPPORT (-1)
 
             enum OrientationValue {
@@ -137,7 +137,7 @@ namespace acl {
                 if (!memcmp(&exifMarker->data[pos], TIFF_HEADER_LE, 4)) {
                     endian = TIFF_LITTLE_ENDIAN;
                 } else if (!memcmp(&exifMarker->data[pos], TIFF_HEADER_BE, 4)) {
-                    endian = TIFF_LITTLE_ENDIAN;
+                    endian = TIFF_BIG_ENDIAN;
                 } else {
                     return false;
                 }
@@ -1425,7 +1425,7 @@ namespace acl {
         const char *argList[] = {"feature", "reason"};
         const char *argVal[] = {"vpc hist api", "please check"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
-            argList, argVal, 2);        
+            argList, argVal, 2);
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
 
@@ -2411,7 +2411,7 @@ namespace acl {
                 static_cast<acldvppPixelFormat>(dstBatchPicDescs->aclDvppPicDescs[index].dvppPicDesc.format));
             if (validFormat != ACL_SUCCESS) {
                 ACL_LOG_INNER_ERROR("[Verify][OutputFormat]output acldvppPicDesc format verify failed, "
-                    "result = %d, format = %u.", validFormat, 
+                    "result = %d, format = %u.", validFormat,
                     dstBatchPicDescs->aclDvppPicDescs[index].dvppPicDesc.format);
                 return validFormat;
             }
