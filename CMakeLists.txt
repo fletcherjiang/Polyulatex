@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 project (ascend)
 
+
 set(BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 option(ENABLE_OPEN_SRC "Enable acl compile in opensource." FALSE)
