@@ -3,7 +3,7 @@ project (ascend)
 
 
 set(BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-
+#ddddddddddddddddddddddddddd
 option(ENABLE_OPEN_SRC "Enable acl compile in opensource." FALSE)
 
 if(ENABLE_OPEN_SRC)
