@@ -64,7 +64,6 @@ bool GetDynamicInputIndex(int32_t size, const aclTensorDesc *const *arr, Dynamic
 
 void GetOptionalInputMap(int32_t size, const aclTensorDesc *const *inputDesc,
     std::map<int32_t, bool> &optionalInputMap);
-
 } // namespace array_utils
 } // acl
 #endif // ACL_UTILS_ARRAY_UTILS_H
