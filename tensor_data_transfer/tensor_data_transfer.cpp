@@ -248,8 +248,6 @@ aclDataType acltdtGetDataTypeFromItem(const acltdtDataItem *dataItem)
     ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if (dataItem == nullptr) {
         ACL_LOG_ERROR("[Check][Dataitem]param [dataItem] must not be null.");
-        const char *argList[] = {"param"};
-        const char *argVal[] = {"dataItem"};
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}),
             std::vector<std::string>({"dataItem"}));
@@ -322,8 +320,8 @@ acltdtDataItem *acltdtCreateDataItem(acltdtTensorType tdtType,
         return nullptr;
     }
     if (dimNum > ACL_MAX_DIM_CNT) {
-        ACL_LOG_INNER_ERROR("[Check][Dimnum]acltdtCreateDataItem failed, dimNum[%zu] can't be larger than ACL_MAX_DIM_CNT[%d]",
-            dimNum, ACL_MAX_DIM_CNT);
+        ACL_LOG_INNER_ERROR("[Check][Dimnum]acltdtCreateDataItem failed, dimNum[%zu] can't be larger than "
+            "ACL_MAX_DIM_CNT[%d]", dimNum, ACL_MAX_DIM_CNT);
         return nullptr;
     }
 

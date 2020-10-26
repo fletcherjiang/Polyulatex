@@ -755,7 +755,7 @@ aclError acldvppSetRoiConfigLeft(acldvppRoiConfig *config, uint32_t left)
         const char *argList[] = {"param", "value", "reason"};
         const char *argVal[] = {"left", leftStr.c_str(), "great than UINT16_MAX"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_PARAM_MSG,
-            argList, argVal, 3);
+            argList, argVal, 3); // 3 is param num
         return ACL_ERROR_INVALID_PARAM;
     }
     config->dvppRoiConfig.leftOffset = static_cast<uint16_t>(left);
@@ -1445,7 +1445,7 @@ aclError aclvencSetChannelDescPicWidth(aclvencChannelDesc *channelDesc, uint32_t
 aclError aclvencSetChannelDescPicHeight(aclvencChannelDesc *channelDesc, uint32_t picHeight)
 {
     if (channelDesc == nullptr) {
-         ACL_LOG_INNER_ERROR("[Check][channelDesc]channelDesc is null.");
+        ACL_LOG_INNER_ERROR("[Check][channelDesc]channelDesc is null.");
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -1524,7 +1524,7 @@ aclError aclvencSetChannelDescParam(aclvencChannelDesc *channelDesc,
         const char *argList[] = {"param", "value", "reason"};
         const char *argVal[] = {"parameter type", paramTypeStr.c_str(), ""};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_PARAM_MSG,
-            argList, argVal, 3);
+            argList, argVal, 3); // 3 is param num
         return ACL_ERROR_INVALID_PARAM;
     }
     return g_vencSetParamFuncMap[paramType](channelDesc, length, param);
@@ -1722,7 +1722,7 @@ acldvppBatchPicDesc *acldvppCreateBatchPicDesc(uint32_t batchSize)
         const char *argList[] = {"param", "value", "reason"};
         const char *argVal[] = {"batchSize", batchSizeStr.c_str(), errMsg.c_str()};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_PARAM_MSG,
-            argList, argVal, 3);
+            argList, argVal, 3); // 3 is param num
         return nullptr;
     }
 
@@ -1777,7 +1777,7 @@ acldvppPicDesc *acldvppGetPicDesc(acldvppBatchPicDesc *batchPicDesc, uint32_t in
         const char *argList[] = {"param", "value", "reason"};
         const char *argVal[] = {"left", indexStr.c_str(), "index Out of bounds"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_PARAM_MSG,
-            argList, argVal, 3);
+            argList, argVal, 3); // 3 is param num
         return nullptr;
     }
 
@@ -1870,7 +1870,7 @@ aclError acldvppSetBorderConfigValue(acldvppBorderConfig *borderConfig, uint32_t
         const char *argList[] = {"param", "value", "reason"};
         const char *argVal[] = {"left", indexStr.c_str(), errMsg.c_str()};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_PARAM_MSG,
-            argList, argVal, 3);
+            argList, argVal, 3); // 3 is param num
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -1895,7 +1895,7 @@ aclError acldvppSetBorderConfigTop(acldvppBorderConfig *borderConfig, uint32_t t
         const char *argList[] = {"param", "value", "reason"};
         const char *argVal[] = {"left", topStr.c_str(), errMsg.c_str()};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_PARAM_MSG,
-            argList, argVal, 3);
+            argList, argVal, 3); // 3 is param num
         return ACL_ERROR_INVALID_PARAM;
     }
     borderConfig->dvppBorderConfig.top = static_cast<uint16_t>(top);
@@ -1912,7 +1912,7 @@ aclError acldvppSetBorderConfigBottom(acldvppBorderConfig *borderConfig, uint32_
         const char *argList[] = {"param", "value", "reason"};
         const char *argVal[] = {"left", bottomStr.c_str(), errMsg.c_str()};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_PARAM_MSG,
-            argList, argVal, 3);
+            argList, argVal, 3); // 3 is param num
         return ACL_ERROR_INVALID_PARAM;
     }
     borderConfig->dvppBorderConfig.bottom = static_cast<uint16_t>(bottom);
@@ -1929,7 +1929,7 @@ aclError acldvppSetBorderConfigLeft(acldvppBorderConfig *borderConfig, uint32_t 
         const char *argList[] = {"param", "value", "reason"};
         const char *argVal[] = {"left", leftStr.c_str(), errMsg.c_str()};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_PARAM_MSG,
-            argList, argVal, 3);
+            argList, argVal, 3); // 3 is param num
         return ACL_ERROR_INVALID_PARAM;
     }
     borderConfig->dvppBorderConfig.left = static_cast<uint16_t>(left);
@@ -1946,7 +1946,7 @@ aclError acldvppSetBorderConfigRight(acldvppBorderConfig *borderConfig, uint32_t
         const char *argList[] = {"param", "value", "reason"};
         const char *argVal[] = {"right", rightStr.c_str(), errMsg.c_str()};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_PARAM_MSG,
-            argList, argVal, 3);
+            argList, argVal, 3); // 3 is param num
         return ACL_ERROR_INVALID_PARAM;
     }
     borderConfig->dvppBorderConfig.right = static_cast<uint16_t>(right);
