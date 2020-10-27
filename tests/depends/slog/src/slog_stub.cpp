@@ -18,12 +18,16 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
-
+#include "acl_stub.h"
 
 void dlog_init(){}
 
+int aclStub::dlog_getlevel(int module_id, int *enable_event){ 
+	return DLOG_DEBUG;
+}
+
 int dlog_getlevel(int module_id, int *enable_event){ 
-	return 0;
+	return MockFunctionTest::aclStubInstance().dlog_getlevel(module_id, enable_event);
 }
 
 void DlogErrorInner(int module_id, const char *fmt, ...){}

@@ -22,9 +22,22 @@ file(GLOB_RECURSE SRC_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
 
 
 include_directories(${BASE_DIR}/third_party/inc)
+include_directories(${BASE_DIR}/tests/depends/)
+include_directories(${BASE_DIR}/third_party/inc/graphengine/inc)
+include_directories(${BASE_DIR}/third_party/inc/graphengine/inc/framework)
+include_directories(${BASE_DIR}/third_party/inc/metadef/inc)
+include_directories(${BASE_DIR}/third_party/inc/metadef/inc/external)
+include_directories(${BASE_DIR}/third_party/inc/graphengine/inc/external)
+include_directories(${BASE_DIR}/third_party/inc/graphengine/inc)
+include_directories(${BASE_DIR}/third_party/inc/toolchain/ide/ide-daemon/external)
 
 add_library(slog_stub SHARED ${SRC_FILES})
 
 target_link_libraries(slog_stub PRIVATE
     $<BUILD_INTERFACE:intf_pub>
+    c_sec
+    gtest
+    gtest_main
+    gmock
+    gmock_main
 )

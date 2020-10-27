@@ -1,7 +1,11 @@
+#include <string>
+#include <iostream>
+
 #include "toolchain/slog.h"
 #include "toolchain/plog.h"
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 #ifndef private
 #define private public
@@ -10,9 +14,21 @@
 #include "log_inner.h"
 #include "json_parser.h"
 #include "toolchain/dump.h"
+#include "toolchain/profiling.h"
+#include "toolchain/profiling_manager.h"
+#include "toolchain/prof_acl_api.h"
+#include "acl/acl_prof.h"
 #include "common/common_inner.h"
+#include "executor/ge_executor.h"
+#include "acl_stub.h"
 #undef private
 #endif
+
+using namespace testing;
+using namespace std;
+using namespace acl;
+using namespace ge;
+using testing::Return;
 
 class UTEST_ACL_toolchain : public testing::Test
 {
@@ -20,25 +36,56 @@ class UTEST_ACL_toolchain : public testing::Test
         UTEST_ACL_toolchain(){}
     protected:
         virtual void SetUp() {}
-        virtual void TearDown() {}
+        virtual void TearDown() {
+            Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
+        }
 };
+
+struct AclprofCommandHandle {
+    uint64_t profSwitch;
+    uint32_t devNums; // length of device id list
+    uint32_t devIdList[64];
+    uint32_t modelId;
+};
+
+INT32 mmGetEnvStub(const CHAR *name, CHAR *value, UINT32 len)
+{
+    char environment[MMPA_MAX_PATH] = "";
+    (void)memcpy_s(value, MMPA_MAX_PATH, environment, MMPA_MAX_PATH);
+    return 0;
+}
+
+static int32_t ctrl_callback(uint32_t type, void *data, uint32_t len)
+{
+    return 0;
+}
+
+static int32_t ctrl_callback1(uint32_t type, void *data, uint32_t len)
+{
+    return 1;
+}
 
 TEST_F(UTEST_ACL_toolchain, dumpApiNotSupportTest)
 {
-    bool aclInitRet = GetAclInitFlag();
-    EXPECT_EQ(aclInitRet, true);
+    acl::AclDump::GetInstance().aclDumpFlag_ = true;
     aclError ret = aclmdlInitDump();
     EXPECT_NE(ret, ACL_SUCCESS);
 
-    aclInitRet = GetAclInitFlag();
-    EXPECT_EQ(aclInitRet, true);
     ret = aclmdlSetDump("llt/acl/ut/json/dumpConfig.json");
     EXPECT_NE(ret, ACL_SUCCESS);
 
-    aclInitRet = GetAclInitFlag();
-    EXPECT_EQ(aclInitRet, true);
     ret = aclmdlFinalizeDump();
     EXPECT_NE(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_ACL_toolchain, dumpInitFailed)
+{
+    acl::AclDump::GetInstance().aclDumpFlag_ = true;
+    acl::AclDump::GetInstance().SetAclDumpFlag(false);
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), AdxDataDumpServerInit())
+        .WillOnce(Return(1));
+    aclError ret = aclmdlInitDump();
+    EXPECT_EQ(ret, ACL_ERROR_INTERNAL_ERROR);
 }
 
 TEST_F(UTEST_ACL_toolchain, dumpParamTest)
@@ -80,6 +127,38 @@ TEST_F(UTEST_ACL_toolchain, dumpParamTest)
     // model name is empty
     ret = aclmdlSetDump("../tests/ut/acl/json/testDump9.json");
     EXPECT_EQ(ret, ACL_SUCCESS);
+
+    // dump_op_switch field is not exist
+    ret = aclmdlSetDump("../tests/ut/acl/json/testDump10.json");
+    EXPECT_EQ(ret, ACL_SUCCESS);
+
+    // dump_op_switch field is off,dump_list is empty
+    ret = aclmdlSetDump("../tests/ut/acl/json/testDump11.json");
+    EXPECT_NE(ret, ACL_SUCCESS);
+
+    // dump_op_switch field is illegal
+    ret = aclmdlSetDump("../tests/ut/acl/json/testDump12.json");
+    EXPECT_NE(ret, ACL_SUCCESS);
+
+    // dump_mode field is illegal
+    ret = aclmdlSetDump("../tests/ut/acl/json/testDump13.json");
+    EXPECT_NE(ret, ACL_SUCCESS);
+
+    // dump_path is empty
+    ret = aclmdlSetDump("../tests/ut/acl/json/testDump14.json");
+    EXPECT_NE(ret, ACL_SUCCESS);
+
+    // no dump item
+    ret = aclmdlSetDump("../tests/ut/acl/json/testDump15.json");
+    EXPECT_NE(ret, ACL_SUCCESS);
+
+    // dump_list field is illegal
+    ret = aclmdlSetDump("../tests/ut/acl/json/testDump16.json");
+    EXPECT_NE(ret, ACL_SUCCESS);
+
+    // aclInit dump
+    ret = aclDump.HandleDumpConfig("../tests/ut/acl/json/dumpConfig.json");
+    EXPECT_EQ(ret, ACL_SUCCESS);
 }
 
 TEST_F(UTEST_ACL_toolchain, dumpNotInitTest)
@@ -88,9 +167,190 @@ TEST_F(UTEST_ACL_toolchain, dumpNotInitTest)
     aclmdlFinalizeDump();
     aclError ret = aclmdlSetDump("llt/acl/ut/json/dumpConfig.json");
     EXPECT_NE(ret, ACL_SUCCESS);
+    EXPECT_NE(aclmdlFinalizeDump(), ACL_SUCCESS);
+}
 
+TEST_F(UTEST_ACL_toolchain, repeatExecuteAclmdlInitDumpTest)
+{
     acl::AclDump::GetInstance().aclDumpFlag_ = false;
-    ret = aclmdlInitDump();
+    aclError ret = aclmdlInitDump();
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    EXPECT_NE(aclmdlInitDump(), ACL_SUCCESS);
+}
+
+TEST_F(UTEST_ACL_toolchain, SetDumpConfigFailedTest)
+{
+    aclInit(nullptr);
+    acl::AclDump::GetInstance().aclDumpFlag_ = false;
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), SetDump(_))
+        .WillOnce(Return((FAILED)));
+
+    aclError ret = aclmdlSetDump("../tests/ut/acl/json/dumpConfig.json");
+    EXPECT_NE(ret, ACL_SUCCESS);
+}
+
+
+TEST_F(UTEST_ACL_toolchain, dumpFinalizeFailedTest)
+{
+    acl::AclDump::GetInstance().SetAclDumpFlag(false);
+    acl::AclDump::GetInstance().aclDumpFlag_ = false;
+    // Clear dump config failed in aclmdlFinalizeDump 
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), SetDump(_))
+        .WillOnce(Return((FAILED)));
+    aclError ret = aclmdlFinalizeDump();
+    EXPECT_NE(ret, ACL_SUCCESS);
+    Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
+
+    // kill dump server failed
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), AdxDataDumpServerUnInit())
+        .WillOnce(Return(1));
+    ret = aclmdlFinalizeDump();
+    EXPECT_EQ(ret, ACL_ERROR_INTERNAL_ERROR);
+}
+
+// ========================== profiling testcase =============================
+extern aclError _aclprofCommandHandle(uint32_t type, void *data, uint32_t len);
+extern aclError _aclprofGetDeviceByModelId(uint32_t modelId, uint32_t &deviceId);
+extern aclError _aclprofRegisterCtrlCallback(MsprofCtrlCallback callback);
+extern aclError _aclprofRegisterSetDeviceCallback(MsprofSetDeviceCallback callback);
+extern aclError _aclprofRegisterReporterCallback(MsprofReporterCallback callback);
+
+TEST_F(UTEST_ACL_toolchain, HandleProfilingConfigFailed)
+{
+    AclProfilingManager::GetInstance().SetProfCtrlCallback(ctrl_callback);
+    acl::AclProfiling aclProf;
+    aclError ret = aclProf.HandleProfilingConfig(nullptr);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+
+    AclProfilingManager::GetInstance().SetProfCtrlCallback(ctrl_callback1);
+    ret = aclProf.HandleProfilingCommand(string(""), true);
+    AclProfilingManager::GetInstance().SetProfCtrlCallback(ctrl_callback);
+    EXPECT_NE(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_ACL_toolchain, setDeviceSuccess)
+{
+    acl::AclProfilingManager aclProfManager;
+    uint32_t deviceIdList[] = {1, 2, 3};
+    aclProfManager.AddDeviceList(nullptr, 0);
+    aclProfManager.AddDeviceList(deviceIdList, 3);
+    aclProfManager.RemoveDeviceList(nullptr, 0);
+    aclProfManager.RemoveDeviceList(deviceIdList, 3);
+}
+
+TEST_F(UTEST_ACL_toolchain, AclProfilingManagerInitFailed)
+{
+    acl::AclProfilingManager aclProfManager;
+    aclError ret = aclProfManager.Init();
+    EXPECT_NE(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_ACL_toolchain, AclProfilingManagerUnInitFailed)
+{
+    acl::AclProfilingManager aclProfManager;
+    aclError ret = aclProfManager.UnInit();
+    EXPECT_NE(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_ACL_toolchain, aclprofCommandHandleSuccessTest)
+{
+    AclprofCommandHandle command;
+    command.profSwitch |= ACL_PROF_ACL_API;
+    command.devIdList[0] = 1;
+    command.devNums = 1;
+    aclError ret = _aclprofCommandHandle(0, nullptr, 0);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+
+    ret = _aclprofCommandHandle(1, (void*)(&command), sizeof(command));
+    EXPECT_EQ(ret, ACL_SUCCESS);
+
+    ret = _aclprofCommandHandle(2, (void*)(&command), sizeof(command));
+    EXPECT_EQ(ret, ACL_SUCCESS);
+
+    ret = _aclprofCommandHandle(3, nullptr, 0);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+
+    ret = _aclprofCommandHandle(4, (void*)(&command), sizeof(command));
+    EXPECT_EQ(ret, ACL_SUCCESS);
+
+    ret = _aclprofCommandHandle(5, (void*)(&command), sizeof(command));
     EXPECT_EQ(ret, ACL_SUCCESS);
 }
 
+TEST_F(UTEST_ACL_toolchain, aclprofCommandHandleFailedTest)
+{
+    AclprofCommandHandle command;
+    // aclprofInnerInit fail
+    aclError ret = _aclprofCommandHandle(1, (void*)(&command), 3);
+    EXPECT_NE(ret, ACL_SUCCESS);
+
+    // aclprofInnerStart fail
+    ret = _aclprofCommandHandle(2, (void*)(&command), 3);
+    EXPECT_NE(ret, ACL_SUCCESS);
+
+    // aclprofInnerModelSubscribe fail
+    ret = _aclprofCommandHandle(4, (void*)(&command), 3);
+    EXPECT_NE(ret, ACL_SUCCESS);
+
+    // aclprofInnerModelUnSubscribe fail
+    ret = _aclprofCommandHandle(5, (void*)(&command), 3);
+    EXPECT_NE(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_ACL_toolchain, invalidCommandTypeTest)
+{
+    AclprofCommandHandle command;
+    aclError ret = _aclprofCommandHandle(6, nullptr, 0);
+    EXPECT_NE(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_ACL_toolchain, aclprofGetDeviceByModelIdSuccessTest)
+{
+    uint32_t modelId = 1;
+    uint32_t deviceId = 2;
+    aclError ret = _aclprofGetDeviceByModelId(modelId, deviceId);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_ACL_toolchain, repeatRegisterCtrlCallbackTest)
+{
+    MsprofCtrlCallback callback1 = (MsprofCtrlCallback)0x0001;
+    uint32_t deviceId;
+    aclError ret = _aclprofGetDeviceByModelId(0, deviceId);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+
+    ret = _aclprofRegisterCtrlCallback(callback1);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_ACL_toolchain, repeatRegisterReporterCallbackTest)
+{
+    MsprofSetDeviceCallback callback2 = (MsprofSetDeviceCallback)0x0001;
+    MsprofReporterCallback callback3 = (MsprofReporterCallback)0x0001;
+    aclError ret = _aclprofRegisterSetDeviceCallback(callback2);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+
+    ret = _aclprofRegisterReporterCallback(callback3);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_ACL_toolchain, RegisterSetDeviceCallbackSuccess)
+{
+    MsprofSetDeviceCallback callback = (MsprofSetDeviceCallback)0x0001;
+    aclError ret = _aclprofRegisterSetDeviceCallback(callback);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_ACL_toolchain, HandleProfilingConfig)
+{
+    acl::AclProfiling aclProf;
+    aclError ret = aclProf.HandleProfilingConfig(nullptr);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+
+    char environment[MMPA_MAX_PATH] = "../tests/ut/acl/json/profConfig.json";
+    ret = aclProf.HandleProfilingConfig("../tests/ut/acl/json/profConfig.json");
+    EXPECT_EQ(ret, ACL_SUCCESS);
+
+    ret = aclProf.HandleProfilingConfig("../tests/ut/acl/json/profilingConfig.json");
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}

@@ -1,0 +1,30 @@
+{
+    "jobID": "job_id",
+    "features":[
+               {
+                   "name":"job_trace"
+               },
+               {
+                   "name":"task_trace",
+                   "conf":{
+                   "aiCoreMetrics":"aicore_arithmatic_throughput"
+                  }
+               },
+               {
+                   "name":"op_trace"
+               },
+               {
+                  "name":"system_trace",
+                  "conf":{
+                                 "cpuSamplingInterval": "20",
+                                  "sysMemorySamplingInterval": "100",
+                                  "hardwareMemorySamplingInterval": "20", 
+                                  "ioSamplingInterval": "20",
+                                  "interconnectionSamplingInterval": "20",
+                                  "dvppSamplingInterval": "20",
+                                  "aicoreSamplingInterval": "10",
+                                  "aicoreMetrics": "aicore_arithmatic_throughput"
+                           }
+               }
+           ]
+   }

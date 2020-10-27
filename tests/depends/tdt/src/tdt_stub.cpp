@@ -15,36 +15,67 @@
  */
 
 #include "tdt/tdt_host_interface.h"
+#include "acl_stub.h"
+
+int32_t aclStub::TdtHostInit(uint32_t deviceId)
+{
+    return 0;
+}
+
+int32_t aclStub::TdtHostPreparePopData()
+{
+    return 0;
+}
+
+int32_t aclStub::TdtHostStop(const std::string &channelName)
+{
+    return 0;
+}
+
+int32_t aclStub::TdtHostDestroy()
+{
+    return 0;
+}
+
+int32_t aclStub::TdtHostPushData(const std::string &channelName, const std::vector<tdt::DataItem> &item, uint32_t deviceId)
+{
+    return 0;
+}
+
+int32_t aclStub::TdtHostPopData(const std::string &channelName, std::vector<tdt::DataItem> &item)
+{
+    return 0;
+}
 
 namespace tdt {
     int32_t TdtHostInit(uint32_t deviceId)
     {
-        return 0;
+        return MockFunctionTest::aclStubInstance().TdtHostInit(deviceId);
     }
 
     int32_t TdtHostPreparePopData()
     {
-        return 0;
+        return MockFunctionTest::aclStubInstance().TdtHostPreparePopData();
     }
 
     int32_t TdtHostStop(const std::string &channelName)
     {
-        return 0;
+        return MockFunctionTest::aclStubInstance().TdtHostStop(channelName);
     }
 
     int32_t TdtHostDestroy()
     {
-        return 0;
+        return MockFunctionTest::aclStubInstance().TdtHostDestroy();
     }
 
     int32_t TdtHostPushData(const std::string &channelName, const std::vector<DataItem> &item, uint32_t deviceId)
     {
-        return 0;
+        return MockFunctionTest::aclStubInstance().TdtHostPushData(channelName, item, deviceId);
     }
 
     int32_t TdtHostPopData(const std::string &channelName, std::vector<DataItem> &item)
     {
-        return 0;
+        return MockFunctionTest::aclStubInstance().TdtHostPopData(channelName, item);
     }
 
 } //namespace tdt
