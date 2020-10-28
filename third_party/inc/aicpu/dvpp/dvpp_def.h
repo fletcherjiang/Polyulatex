@@ -160,6 +160,15 @@ namespace aicpu {
         };
 
         /**
+         * dvpp csc matrix config.
+         */
+        struct DvppCscMatrixConfig {
+            uint16_t paramType = 3;          // TLV type
+            uint16_t paramLen = 4;           // TLV data len
+            uint32_t cscMatrix = 0;          // TLV csc matrix
+        };
+
+        /**
          * venc frame config.
          */
         struct DvppVencFrameConfig {
@@ -325,6 +334,7 @@ namespace aicpu {
         enum DvppTlvType {
             VENC_TLV_RATE_CONTROL = 1,
             VENC_TLV_IP_PROPORTION = 2,
+            DVPP_TLV_CSC_MATRIX = 3
         };
     }
 }

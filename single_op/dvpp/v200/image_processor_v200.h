@@ -198,6 +198,26 @@ namespace acl {
                                                           acldvppBorderConfig *borderCfgs[],
                                                           acldvppResizeConfig *resizeConfig,
                                                           aclrtStream stream) override;
+        /**
+         * set csc matrix in dvpp channelDesc
+         *
+         * @param channelDesc [IN]              the channel destruction
+         * @param matrixFormat [IN]             the csc matrix format
+         *
+         * @retval ACL_SUCCESS The function is successfully executed.
+         * @retval OtherValues Failure
+         */
+        aclError acldvppSetChannelDescMatrix(acldvppChannelDesc *channelDesc,
+            acldvppCscMatrix matrixFormat) override;
+
+        /**
+         * get csc matrix in dvpp channelDesc
+         *
+         * @param channelDesc [IN]              the dvpp channel destruction
+         * @param matrixFormat [OUT]            the csc matrix format
+         */
+        aclError acldvppGetChannelDescMatrix(const acldvppChannelDesc *channelDesc,
+            acldvppCscMatrix &matrixFormat) override;
 
         ~ImageProcessorV200() = default;
 

@@ -23,6 +23,7 @@ namespace {
     constexpr uint16_t LUT_MAP_DEFAULT_VALUE = 256;
     constexpr uint16_t HIST_DEFAULT_LENGTH = 256;
     constexpr uint32_t PiC_DESC_RESERVED_SIZE = 3;
+    constexpr uint32_t DVPP_CSC_MATRIX_CONFIG_LEN = 4;
 }
 
 namespace acl {
@@ -781,7 +782,7 @@ namespace acl {
         uint32_t flags = RT_MEMORY_DEFAULT | RT_MEMORY_POLICY_DEFAULT_PAGE_ONLY;
         rtError_t rtErr = rtMalloc(&devAddr, aclHistSize, flags);
         if (rtErr != RT_ERROR_NONE) {
-            ACL_LOG_CALL_ERROR("[Malloc][Mem]malloc device memory failed, size = %u, runtime result = %d",  
+            ACL_LOG_CALL_ERROR("[Malloc][Mem]malloc device memory failed, size = %u, runtime result = %d",
                 aclHistSize, rtErr);
             return nullptr;
         }
@@ -1284,6 +1285,89 @@ namespace acl {
                 argList, argVal, 3);
             return ACL_ERROR_INVALID_PARAM;
         }
+        return ACL_SUCCESS;
+    }
+
+    aclError ImageProcessorV200::acldvppGetChannelDescMatrix(const acldvppChannelDesc *channelDesc,
+        acldvppCscMatrix &matrixFormat)
+    {
+        ACL_LOG_DEBUG("start to execute acldvppGetChannelDescMatrix");
+        if ((channelDesc == nullptr) || (channelDesc->dvppDesc.extendInfo == nullptr)) {
+            ACL_LOG_ERROR("[Check][ChannelDesc]channelDesc is null.");
+            const char *argList[] = {"param"};
+            const char *argVal[] = {"channelDesc or extendInfo"};
+            acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+                argList, argVal, 1);
+            return ACL_ERROR_INVALID_PARAM;
+        }
+        {
+            std::mutex &mutexMap = const_cast<std::mutex &>(channelDesc->mutexForTLVMap);
+            std::unique_lock<std::mutex> lock{mutexMap};
+            const auto &it = channelDesc->tlvParamMap.find(DVPP_CSC_MATRIX);
+            if (it == channelDesc->tlvParamMap.end()) {
+                matrixFormat = ACL_DVPP_CSC_MATRIX_BT601_WIDE;
+                return ACL_SUCCESS;
+            }
+
+            aicpu::dvpp::DvppCscMatrixConfig *dvppCscMatrixConfig =
+                static_cast<aicpu::dvpp::DvppCscMatrixConfig *>(it->second.value.get());
+            if (dvppCscMatrixConfig == nullptr) {
+                ACL_LOG_INNER_ERROR("[Check][VencRateControl]vencRateControl ptr is null.");
+                return ACL_ERROR_INVALID_PARAM;
+            }
+            matrixFormat = static_cast<acldvppCscMatrix>(dvppCscMatrixConfig->cscMatrix);
+            ACL_LOG_DEBUG("successfully execute aclvdecGetChannelDescMatrix, matrixFormat = %d",
+                static_cast<int32_t>(matrixFormat));
+        }
+        return ACL_SUCCESS;
+    }
+
+    aclError ImageProcessorV200::acldvppSetChannelDescMatrix(acldvppChannelDesc *channelDesc,
+        acldvppCscMatrix matrixFormat)
+    {
+        ACL_LOG_DEBUG("start to execute acldvppSetChannelDescMatrix");
+        if ((channelDesc == nullptr) || (channelDesc->dvppDesc.extendInfo == nullptr)) {
+            ACL_LOG_ERROR("[Check][ChannelDesc]channelDesc is null.");
+            const char *argList[] = {"param"};
+            const char *argVal[] = {"channelDesc or extendInfo"};
+            acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+                argList, argVal, 1);
+            return ACL_ERROR_INVALID_PARAM;
+        }
+        // check if matrix format in range
+        if ((matrixFormat < ACL_DVPP_CSC_MATRIX_BT601_WIDE) ||
+            (matrixFormat > ACL_DVPP_CSC_MATRIX_BT2020_NARROW)) {
+            ACL_LOG_ERROR("[Check][matrixFormat]input format[%u] is not supported in this version",
+                static_cast<uint32_t>(matrixFormat));
+            std::string matrixFormatStr = std::to_string(static_cast<uint32_t>(matrixFormat));
+            const char *argList[] = {"param", "value", "reason"};
+            const char *argVal[] = {"matrixFormat", matrixFormatStr.c_str(), "not supported in this version"};
+            acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_PARAM_MSG,
+                argList, argVal, 3);
+            return ACL_ERROR_INVALID_PARAM;
+        }
+
+        {
+            std::unique_lock<std::mutex> lock{channelDesc->mutexForTLVMap};
+            auto it = channelDesc->tlvParamMap.find(DVPP_CSC_MATRIX);
+            if (it == channelDesc->tlvParamMap.end()) {
+                DvppChannelDescTLVParam vdecTLVParam;
+                std::shared_ptr<aicpu::dvpp::DvppCscMatrixConfig> dvppCscMatrixConfig =
+                    std::make_shared<aicpu::dvpp::DvppCscMatrixConfig>();
+                ACL_REQUIRES_NOT_NULL(dvppCscMatrixConfig);
+                dvppCscMatrixConfig->cscMatrix = static_cast<uint32_t>(matrixFormat);
+                vdecTLVParam.value = static_cast<std::shared_ptr<void>>(dvppCscMatrixConfig);
+                vdecTLVParam.valueLen = sizeof(aicpu::dvpp::DvppCscMatrixConfig);
+                channelDesc->tlvParamMap[DVPP_CSC_MATRIX] = vdecTLVParam;
+            } else {
+                aicpu::dvpp::DvppCscMatrixConfig *dvppCscMatrixConfig =
+                    static_cast<aicpu::dvpp::DvppCscMatrixConfig *>(it->second.value.get());
+                ACL_REQUIRES_NOT_NULL(dvppCscMatrixConfig);
+                dvppCscMatrixConfig->cscMatrix = static_cast<uint32_t>(matrixFormat);
+            }
+        }
+        ACL_LOG_DEBUG("successfully execute acldvppSetChannelDescMatrix, cscMatrixType = %u",
+            static_cast<uint32_t>(matrixFormat));
         return ACL_SUCCESS;
     }
 

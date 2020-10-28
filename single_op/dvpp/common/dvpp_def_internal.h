@@ -77,7 +77,7 @@ namespace acl {
         // define flexible array length
         constexpr uint32_t DVPP_RESIZE_CONFIG_TLV_LEN = 0;
         constexpr uint32_t DVPP_JPEGE_CONFIG_TLV_LEN = 0;
-        constexpr uint32_t DVPP_CHANNEL_DESC_TLV_LEN = 0;
+        constexpr uint32_t DVPP_CHANNEL_DESC_TLV_LEN = 1024;
         constexpr uint32_t DVPP_BORDER_CONFIG_TLV_LEN = 0;
         constexpr uint32_t DVPP_LUT_MAP_TLV_LEN = 0;
         constexpr uint32_t DVPP_HIST_DESC_LEN = 0;
@@ -112,6 +112,15 @@ enum VencTLVType {
     VENC_IP_PROP
 };
 
+enum VdecTLVType {
+    VDEC_BIT_DEPTH = 1,
+    VDEC_CSC_MATRIX
+};
+
+enum DvppTLVType {
+    DVPP_CSC_MATRIX = 1
+};
+
 struct acldvppPicDesc {
     aclDataBuffer dataBuffer = {nullptr, 0};
     aicpu::dvpp::DvppPicDesc dvppPicDesc;
@@ -131,6 +140,11 @@ struct acldvppResizeConfig {
     aicpu::dvpp::DvppResizeConfig dvppResizeConfig;
 };
 
+struct DvppChannelDescTLVParam {
+    size_t valueLen = 0;
+    std::shared_ptr<void> value = nullptr;
+};
+
 struct acldvppChannelDesc {
     WaitTaskType dvppWaitTaskType = NOTIFY_TASK;
     void *notify = nullptr;
@@ -139,6 +153,8 @@ struct acldvppChannelDesc {
     aclDataBuffer dataBuffer = {nullptr, 0};
     aclDataBuffer cmdListBuffer = {nullptr, 0};
     aclDataBuffer shareBuffer = {nullptr, 0};
+    std::mutex mutexForTLVMap;
+    std::map<DvppTLVType, DvppChannelDescTLVParam> tlvParamMap;
     aicpu::dvpp::DvppChannelDesc dvppDesc;
 };
 
@@ -164,6 +180,11 @@ struct VdecCallbackResultInfo {
     aicpu::dvpp::DvppPicDesc dvppPicDesc;
 };
 
+struct VdecChannelDescTLVParam {
+    size_t valueLen = 0;
+    std::shared_ptr<void> value = nullptr;
+};
+
 struct aclvdecChannelDesc {
     aclvdecCallback callback = nullptr;
     uint64_t threadId = 0;
@@ -185,6 +206,8 @@ struct aclvdecChannelDesc {
     std::mutex mutexForCallbackMap;
     uint64_t frameId = 0; // 0 represents eos frame id
     std::unordered_map<uint64_t, aicpu::dvpp::VdecCallbackInfoPtr> callbackMap;
+    std::mutex mutexForTLVMap;
+    std::map<VdecTLVType, VdecChannelDescTLVParam> tlvParamMap;
     aclDataBuffer dataBuffer = {nullptr, 0};
     aclDataBuffer shareBuffer = {nullptr, 0};
     aicpu::dvpp::DvppVdecDesc vdecDesc;

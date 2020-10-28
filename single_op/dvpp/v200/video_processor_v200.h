@@ -147,6 +147,12 @@ namespace acl {
         // constructor
         explicit VideoProcessorV200(aclrtRunMode aclRunMode) : VideoProcessor(aclRunMode) {};
 
+        aclError aclvdecSetChannelDescMatrix(aclvdecChannelDesc *channelDesc,
+            acldvppCscMatrix matrixFormat) override;
+
+        aclError aclvdecGetChannelDescMatrix(const aclvdecChannelDesc *channelDesc,
+            acldvppCscMatrix &matrixFormat) override;
+
     protected:
         aclError aclvencMallocOutMemory(aclvencChannelDesc *channelDesc) override;
 
