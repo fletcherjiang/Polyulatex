@@ -1,0 +1,11 @@
+{
+    "dump":{
+        "dump_list":[
+            {
+                "model_name":"ResNet-50",
+                "layer":["pool1"]
+            }
+        ],
+        "dump_path":"/home/"
+    }
+}

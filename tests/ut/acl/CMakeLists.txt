@@ -37,14 +37,38 @@ include_directories(${BASE_DIR}/utils)
 include_directories(${BASE_DIR}/third_party/inc/toolchain/ide/ide-daemon/external)
 include_directories(${BASE_DIR}/third_party/inc/tdt)
 include_directories(${BASE_DIR}/third_party/patch/securec)
+include_directories(${BASE_DIR}/tests/depends/)
 include_directories(${CMAKE_BINARY_DIR})
 
 set(UT_FILES
-    "testcase/acl_common_unittest.cpp"
-    "testcase/acl_toolchain_unittest.cpp"
     "testcase/compatibility/enum_check.cpp"
     "testcase/compatibility/const_check.cpp"
     "testcase/compatibility/struct_check.cpp"
+    "testcase/acl_common_unittest.cpp"
+    "testcase/acl_toolchain_unittest.cpp"
+    "testcase/acl_model_unittest.cpp"
+    "testcase/acl_opCompile_unittest.cpp"
+    "testcase/acl_opAttr_unittest.cpp"
+    "testcase/acl_opExecutor_unittest.cpp"
+    "testcase/acl_opModelCache_unittest.cpp"
+    "testcase/acl_opModelManager_unittest.cpp"
+    "testcase/acl_opModelParser_unittest.cpp"
+    "testcase/acl_op_unittest.cpp"
+    "testcase/acl_retrInternal_unittest.cpp"
+    "testcase/acl_retrOps_unittest.cpp"
+    "testcase/acl_retr_unittest.cpp"
+    "testcase/acl_builtinOp_unittest.cpp"
+    "testcase/acl_fp16_unittest.cpp"
+    "testcase/acl_blas_unittest.cpp"
+    "testcase/acl_vpc_unittest.cpp"
+    "testcase/acl_dvpp_unittest.cpp"
+    "testcase/acl_channel_unittest.cpp"
+    "testcase/acl_jpeg_unittest.cpp"
+    "testcase/acl_png_unittest.cpp"
+    "testcase/acl_vdec_unittest.cpp"
+    "testcase/acl_venc_unittest.cpp"
+    "testcase/acl_runtime_unittest.cpp"
+    "testcase/acl_tensorDataTransfer_unittest.cpp"
 )
 
 set(SRC_FILES
@@ -166,8 +190,11 @@ target_link_libraries(ascendcl_utest PRIVATE
     $<BUILD_INTERFACE:intf_pub>
     ut_ascendcl_src
     json
+    static_turbojpeg
     gtest
     gtest_main
+    gmock
+    gmock_main
     slog_stub
     c_sec
     mmpa_stub
@@ -178,5 +205,6 @@ target_link_libraries(ascendcl_utest PRIVATE
     profiling_stub
     -lrt
     -ldl
+    -lpthread
     -lgcov
 )

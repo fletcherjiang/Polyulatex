@@ -33,6 +33,7 @@
 #include "graph/ge_attr_value.h"
 #include "graph/ge_error_codes.h"
 #include "graph/types.h"
+#include "graph/ge_attr_value.h"
 #include "graph/operator.h"
 #include "ge/ge_api.h"
 #include "common/ge_types.h"
@@ -41,13 +42,281 @@
 #include "graph/operator_factory.h"
 #include "graph/ge_local_context.h"
 #include "toolchain/prof_callback.h"
+#include "acl_stub.h"
+
+using namespace ge;
 
 namespace {
     std::string STAGES_STR = "[TEST][TEST]";
 }
 
-namespace ge {
+ge::Status aclStub::SetDump(const ge::DumpConfig &dumpConfig)
+{
+    return ge::SUCCESS;
+}
 
+Status aclStub::GEInitialize(const std::map<std::string, std::string>& options)
+{
+    return SUCCESS;
+}
+
+Status aclStub::Finalize()
+{
+    return SUCCESS;
+}
+
+Status aclStub::Ge_Generator_Finalize()
+{
+    return SUCCESS;
+}
+
+Status aclStub::GEFinalize()
+{
+    return SUCCESS;
+}
+
+Status aclStub::BuildSingleOpModel(ge::OpDescPtr &op_desc, const std::vector<GeTensor> &inputs,
+                                   const std::vector<GeTensor> &outputs, OpEngineType engine_type,
+                                   int32_t compile_flag, ModelBufferData &model_buff)
+{
+    return SUCCESS;
+}
+
+graphStatus aclStub::SetShapeRange(const std::vector<std::pair<int64_t,int64_t>> &range)
+{
+    return GRAPH_SUCCESS;
+}
+
+bool aclStub::ReadBytesFromBinaryFile(char const *file_name, char **buffer, int &length)
+{
+    return true;
+}
+
+Status aclStub::Initialize(const std::map<std::string, std::string> &options)
+{
+    return SUCCESS;
+}
+
+Status aclStub::Initialize(const std::map<std::string, std::string> &options, OmgContext &omgContext)
+{
+    return SUCCESS;
+}
+
+Status aclStub::LoadSingleOpV2(const std::string &modelName,
+                                    const ModelData &modelData,
+                                    void *stream,
+                                    SingleOp **single_op,
+                                    const uint64_t model_id)
+{
+    return SUCCESS;
+}
+
+Status aclStub::LoadDynamicSingleOpV2(const std::string &model_name,
+                            const ge::ModelData &modelData,
+                            void *stream,
+                            DynamicSingleOp **single_op,
+                            const uint64_t model_id)
+{
+    return SUCCESS;
+}
+
+Status aclStub::ExecuteAsync(DynamicSingleOp *executor,
+                    const std::vector<GeTensorDesc> &input_desc,
+                    const std::vector<DataBuffer> &inputs,
+                    std::vector<GeTensorDesc> &output_desc,
+                    std::vector<DataBuffer> &outputs)
+{
+    return SUCCESS;
+}
+
+Status aclStub::ExecuteAsync(SingleOp *executor,
+                            const std::vector<DataBuffer> &inputs,
+                            std::vector<DataBuffer> &outputs)
+{
+    return SUCCESS;
+}
+
+bool aclStub::GetBool(AttrUtils::ConstAttrHolderAdapter &&obj, const string &name, bool &value)
+{
+    return true;
+}
+
+bool aclStub::GetInt(ge::AttrUtils::ConstAttrHolderAdapter&& obj, const std::string &name, int32_t &value)
+{
+    return true;
+}
+
+bool aclStub::GetListNamedAttrs(ge::AttrUtils::ConstAttrHolderAdapter &&obj, std::string const &name, vector<GeAttrValue::NAMED_ATTRS> &value)
+{
+    return true;
+}
+
+std::string aclStub::RealPath(const char *path)
+{
+    return "test";
+}
+
+graphStatus aclStub::GetOpsTypeList(std::vector<ge::AscendString> &all_ops)
+{
+    return 0;
+}
+
+Status aclStub::GetModelDescInfo(uint32_t modelId, std::vector<TensorDesc>& inputDesc,
+                                 std::vector<TensorDesc>& outputDesc, bool new_model_desc)
+{
+    return SUCCESS;
+}
+
+Status aclStub::GetDynamicBatchInfo(uint32_t model_id, std::vector<std::vector<int64_t>> &batch_info,
+                                    int32_t &dynamic_type)
+{
+    batch_info.push_back({1});
+    return SUCCESS;
+}
+
+Status aclStub::LoadModelFromData(uint32_t &model_id, const ModelData &modelData,
+                                void *dev_ptr, size_t memsize, void *weight_ptr, size_t weightsize)
+{
+    return SUCCESS;
+}
+
+Status aclStub::LoadDataFromFile(std::string const &path, ModelData &modelData)
+{
+    return SUCCESS;
+}
+
+Status aclStub::LoadModelWithQ(uint32_t &model_id, const ge::ModelData &ge_model_data,
+                const std::vector<uint32_t> &input_queue_ids, const std::vector<uint32_t> &output_queue_ids)
+{
+    return SUCCESS;
+}
+
+Status aclStub::UnloadModel(uint32_t modelId)
+{
+    return SUCCESS;
+}
+
+Status aclStub::GetMemAndWeightSize(const std::string &path, size_t &mem_size, size_t &weight_size)
+{
+    return SUCCESS;
+}
+
+Status aclStub::GetMemAndWeightSize(const void *model_data, size_t model_size, size_t &mem_size, size_t &weight_size)
+{
+    return SUCCESS;
+}
+
+Status aclStub::ExecModel(uint32_t model_id, void *stream, const ge::RunModelData &run_input_data,
+                            const std::vector<ge::GeTensorDesc> &input_desc, ge::RunModelData &run_output_data,
+                            std::vector<ge::GeTensorDesc> &output_desc, bool async_mode)
+{
+    ge::GeTensorDesc geDescTmp;
+    output_desc.push_back(geDescTmp);
+    return SUCCESS;
+}
+
+Status aclStub::SetDynamicBatchSize(uint32_t model_id, void *dynamic_input_addr, uint64_t length, uint64_t batch_size)
+{
+    return SUCCESS;
+}
+
+Status aclStub::SetDynamicImageSize(uint32_t model_id, void *dynamic_input_addr, uint64_t length, uint64_t image_height, uint64_t image_width)
+{
+    return SUCCESS;
+}
+
+Status aclStub::SetDynamicDims(uint32_t model_id, void *dynamic_input_addr, uint64_t length,
+                                    const vector<uint64_t> &dynamic_dims)
+{
+    return SUCCESS;
+}
+
+Status aclStub::GetCurDynamicDims(uint32_t model_id, const vector<uint64_t> &dynamic_dims,
+                                        vector<uint64_t> &cur_dynamic_dims)
+{
+    return SUCCESS;
+}
+
+Status aclStub::GetAippType(uint32_t model_id, uint32_t index, ge::InputAippType &type, size_t &aippindex)
+{
+    type = ge::DATA_WITH_DYNAMIC_AIPP;
+    aippindex = 3;
+    return SUCCESS;
+}
+
+Status aclStub::GetUserDesignateShapeOrder(uint32_t model_id, vector<string> &user_designate_shape_order)
+{
+    return SUCCESS;
+}
+
+ge::Status aclStub::GetCurShape(const uint32_t model_id, std::vector<int64_t> &batch_info, int32_t &dynamic_type)
+{
+    batch_info.push_back(1);
+    return SUCCESS;
+}
+
+Status aclStub::GetModelAttr(uint32_t model_id,std::vector<std::string> &dynamic_output_shape_info)
+{
+    dynamic_output_shape_info.push_back({"0:0:1,3,224,224"});
+    return SUCCESS;
+}
+
+Status aclStub::GetAIPPInfo(uint32_t model_id, uint32_t index, AippConfigInfo &aipp_params)
+{
+    aipp_params.input_format = 1;
+    return SUCCESS;
+}
+
+Status aclStub::GetBatchInfoSize(uint32_t model_id, size_t &shape_count)
+{
+    shape_count = 2;
+    return SUCCESS;
+}
+
+Status aclStub::GetOrigInputInfo(uint32_t model_id, uint32_t index, OriginInputInfo &origOutputInfo)
+{
+    origOutputInfo.format = static_cast<Format>(1);
+    origOutputInfo.data_type = static_cast<DataType>(4);
+    origOutputInfo.dim_num = 4;
+    return SUCCESS;
+}
+
+Status aclStub::GetAllAippInputOutputDims(uint32_t model_id, uint32_t index,
+                                        std::vector<InputOutputDims> &input_dims,
+                                        std::vector<InputOutputDims> &output_dims)
+{
+    InputOutputDims inputDims1;
+    inputDims1.dim_num = 4;
+    inputDims1.dims.push_back(1);
+    inputDims1.dims.push_back(224);
+    inputDims1.dims.push_back(224);
+    inputDims1.dims.push_back(3);
+    InputOutputDims inputDims2;
+    input_dims.push_back(inputDims1);
+    input_dims.push_back(inputDims2);
+    output_dims.push_back(inputDims1);
+    output_dims.push_back(inputDims2);
+    return SUCCESS;
+}
+
+std::string aclStub::GetErrorMessage()
+{
+    std::string message = "";
+    return message;
+}
+
+int aclStub::Init()
+{
+    return 0;
+}
+
+MockFunctionTest& MockFunctionTest::aclStubInstance()
+{
+    static MockFunctionTest stub;
+    return stub;
+};
+
+namespace ge {
 const std::string ATTR_NAME_STORAGE_FORMAT = "storage_format";
 const std::string ATTR_NAME_STORAGE_SHAPE = "storage_shape";
 const std::string ATTR_NAME_UNREGST_OPPATH = "_unregst_oppath";
@@ -64,6 +333,7 @@ const std::string ATTR_NAME_BUILD_MODE = "_build_mode";
 const std::string ATTR_NAME_VALUE = "_value";
 const std::string ATTR_NAME_VALUE_RANGE = "_value_range";
 
+
 namespace {
 bool g_geAttrValueBool;
 std::string g_geAttrValueString;
@@ -78,8 +348,7 @@ std::vector<std::string> g_geAttrValueListString;
 std::vector<float> g_geAttrValueListFloat;
 std::vector<int64_t> g_geAttrValueListInt;
 std::vector<std::vector<int64_t>> g_geAttrValueListListInt;
-std::vector<std::vector<float>> g_geAttrValueListListFloat;
-
+std::vector<std::vector<float, std::allocator<float>> ,std::allocator<std::vector<float, std::allocator<float> > > > g_geAttrValueListListListInt;
 ge::GeAttrValue::ValueType g_geAttrValueType = ge::GeAttrValue::VT_FLOAT;
 
 std::map<string, GeAttrValue> g_geAttrMap;
@@ -104,7 +373,7 @@ std::map<string, GeAttrValue> g_geAttrMap;
 
     Status GeExecutor::Finalize()
     {
-        return SUCCESS;
+        return MockFunctionTest::aclStubInstance().Finalize();
     }
 
     Status GeExecutor::CommandHandle(const ge::Command &command)
@@ -117,9 +386,9 @@ std::map<string, GeAttrValue> g_geAttrMap;
         return SUCCESS;
     }
 
-    Status GeExecutor::SetDump(const DumpConfig &dumpConfig)
+    ge::Status GeExecutor::SetDump(const ge::DumpConfig &dumpConfig)
     {
-        return SUCCESS;
+        return MockFunctionTest::aclStubInstance().SetDump(dumpConfig);
     }
 
     Status GeExecutor::ReleaseSingleOpResource(void *stream)
@@ -130,7 +399,7 @@ std::map<string, GeAttrValue> g_geAttrMap;
     Status GeExecutor::GetModelDescInfo(uint32_t modelId, std::vector<TensorDesc>& inputDesc,
                                             std::vector<TensorDesc>& outputDesc, bool new_model_desc)
     {
-        return SUCCESS;
+        return MockFunctionTest::aclStubInstance().GetModelDescInfo(modelId, inputDesc, outputDesc, new_model_desc);
     }
 
     Status GeExecutor::SetDynamicAippData(uint32_t model_id, void *dynamic_input_addr, uint64_t length,
@@ -143,68 +412,57 @@ std::map<string, GeAttrValue> g_geAttrMap;
     Status GeExecutor::GetAIPPInfo(uint32_t model_id, uint32_t index, AippConfigInfo &aipp_params)
     {
         aipp_params.input_format = 1;
-        return SUCCESS;
+        return MockFunctionTest::aclStubInstance().GetAIPPInfo(model_id, index, aipp_params);
     }
 
     Status GeExecutor::GetAippType(uint32_t model_id, uint32_t index, ge::InputAippType &type, size_t &aippindex)
     {
-        type = ge::DATA_WITH_DYNAMIC_AIPP;
-        aippindex = 3;
-        return SUCCESS;
+        return MockFunctionTest::aclStubInstance().GetAippType(model_id, index, type, aippindex);
     }
 
     Status GeExecutor::GetBatchInfoSize(uint32_t model_id, size_t &shape_count)
     {
-        shape_count = 2;
-        return SUCCESS;
+        return MockFunctionTest::aclStubInstance().GetBatchInfoSize(model_id, shape_count);
     }
 
     Status GeExecutor::GetOrigInputInfo(uint32_t model_id, uint32_t index, OriginInputInfo &origOutputInfo)
     {
-        origOutputInfo.format = static_cast<Format>(1);
-        origOutputInfo.data_type = static_cast<DataType>(4);
-        origOutputInfo.dim_num = 4;
-        return SUCCESS;
+        return MockFunctionTest::aclStubInstance().GetOrigInputInfo(model_id, index, origOutputInfo);
     }
 
     Status GeExecutor::GetAllAippInputOutputDims(uint32_t model_id, uint32_t index,
                                                  std::vector<InputOutputDims> &input_dims,
                                                  std::vector<InputOutputDims> &output_dims)
     {
-        InputOutputDims inputDims1;
-        inputDims1.dim_num = 4;
-        inputDims1.dims.push_back(1);
-        inputDims1.dims.push_back(224);
-        inputDims1.dims.push_back(224);
-        inputDims1.dims.push_back(3);
-        InputOutputDims inputDims2;
-        input_dims.push_back(inputDims1);
-        input_dims.push_back(inputDims2);
-        output_dims.push_back(inputDims1);
-        output_dims.push_back(inputDims2);
-        return SUCCESS;
+        return MockFunctionTest::aclStubInstance().GetAllAippInputOutputDims(model_id, index, input_dims, output_dims);
     }
 
     Status GeExecutor::SetDynamicBatchSize(uint32_t model_id, void *dynamic_input_addr, uint64_t length, uint64_t batch_size)
     {
-        return SUCCESS;
+        return MockFunctionTest::aclStubInstance().SetDynamicBatchSize(model_id, dynamic_input_addr, length, batch_size);
     }
 
     Status GeExecutor::SetDynamicImageSize(uint32_t model_id, void *dynamic_input_addr, uint64_t length, uint64_t image_height, uint64_t image_width)
     {
-        return SUCCESS;
+        return MockFunctionTest::aclStubInstance().SetDynamicImageSize(model_id, dynamic_input_addr, length, image_height, image_width);
     }
 
     Status GeExecutor::SetDynamicDims(uint32_t model_id, void *dynamic_input_addr, uint64_t length,
                                       const vector<uint64_t> &dynamic_dims)
     {
-      return SUCCESS;
+      return MockFunctionTest::aclStubInstance().SetDynamicDims(model_id, dynamic_input_addr, length, dynamic_dims);
     }
 
     Status GeExecutor::GetCurDynamicDims(uint32_t model_id, const vector<uint64_t> &dynamic_dims,
                                          vector<uint64_t> &cur_dynamic_dims)
     {
-      return SUCCESS;
+      return MockFunctionTest::aclStubInstance().GetCurDynamicDims(model_id, dynamic_dims, cur_dynamic_dims);
+    }
+
+    Status GeExecutor::GetOpAttr(uint32_t model_id, const std::string &op_name, const std::string &attr_name,
+                       std::string &attr_value)
+    {
+        return SUCCESS;
     }
 
     int64_t TensorDesc::GetSize() const
@@ -263,76 +521,75 @@ std::map<string, GeAttrValue> g_geAttrMap;
     Status GeExecutor::GetDynamicBatchInfo(uint32_t model_id, std::vector<std::vector<int64_t>> &batch_info,
                                            int32_t &dynamic_type)
     {
-        batch_info.push_back({1});
-        return ge::SUCCESS;
+        return MockFunctionTest::aclStubInstance().GetDynamicBatchInfo(model_id, batch_info, dynamic_type);
     }
 
     Status GeExecutor::GetCombinedDynamicDims(uint32_t model_id, vector<vector<int64_t>> &batch_info)
     {
       return ge::SUCCESS;
     }
+
     Status GeExecutor::GetUserDesignateShapeOrder(uint32_t model_id, vector<string> &user_designate_shape_order)
     {
-        return ge::SUCCESS;
+        return MockFunctionTest::aclStubInstance().GetUserDesignateShapeOrder(model_id, user_designate_shape_order);
     }
+
     Status GeExecutor::GetCurShape(const uint32_t model_id, std::vector<int64_t> &batch_info, int32_t &dynamic_type)
     {
-        batch_info.push_back(1);
-        return ge::SUCCESS;
+        return MockFunctionTest::aclStubInstance().GetCurShape(model_id, batch_info, dynamic_type);
     }
 
     Status GeExecutor::GetModelAttr(uint32_t model_id,std::vector<std::string> &dynamic_output_shape_info)
     {
         dynamic_output_shape_info.push_back({"0:0:1,3,224,224"});
-        return ge::SUCCESS;
+        return MockFunctionTest::aclStubInstance().GetModelAttr(model_id, dynamic_output_shape_info);
     }
 
     Status GeExecutor::LoadDataFromFile(std::string const &path, ModelData &modelData)
     {
-        return SUCCESS;
+        return MockFunctionTest::aclStubInstance().LoadDataFromFile(path, modelData);
     }
 
     Status GeExecutor::LoadModelFromData(uint32_t &model_id, const ModelData &modelData,
                                    void *dev_ptr, size_t memsize, void *weight_ptr, size_t weightsize)
     {
-        return SUCCESS;
+        return MockFunctionTest::aclStubInstance().LoadModelFromData(model_id, modelData, dev_ptr, memsize, weight_ptr, weightsize);
     }
 
     Status GeExecutor::LoadModelWithQ(uint32_t &model_id, const ge::ModelData &ge_model_data,
                    const std::vector<uint32_t> &input_queue_ids, const std::vector<uint32_t> &output_queue_ids)
     {
-        return SUCCESS;
+        return MockFunctionTest::aclStubInstance().LoadModelWithQ(model_id, ge_model_data, input_queue_ids, output_queue_ids);
     }
 
     Status GeExecutor::UnloadModel(uint32_t modelId)
     {
-        return SUCCESS;
+        return MockFunctionTest::aclStubInstance().UnloadModel(modelId);
     }
 
     Status GeExecutor::ExecModel(uint32_t model_id, void *stream, const ge::RunModelData &run_input_data,
                                 const std::vector<ge::GeTensorDesc> &input_desc, ge::RunModelData &run_output_data,
                                 std::vector<ge::GeTensorDesc> &output_desc, bool async_mode)
     {
-        ge::GeTensorDesc geDescTmp;
-        output_desc.push_back(geDescTmp);
-        return SUCCESS;
+        return MockFunctionTest::aclStubInstance().ExecModel(model_id, stream, run_input_data, input_desc,
+            run_output_data, output_desc, async_mode);
     }
 
     Status GeExecutor::GetMemAndWeightSize(const void *model_data, size_t model_size, size_t &mem_size, size_t &weight_size)
     {
-        return SUCCESS;
+        return MockFunctionTest::aclStubInstance().GetMemAndWeightSize(model_data, model_size, mem_size, weight_size);
     }
 
     Status GeExecutor::GetMemAndWeightSize(const std::string &path, size_t &mem_size, size_t &weight_size)
     {
-        return SUCCESS;
+        return MockFunctionTest::aclStubInstance().GetMemAndWeightSize(path, mem_size, weight_size);
     }
 
     Status GeExecutor::ExecuteAsync(SingleOp *executor,
                                     const std::vector<DataBuffer> &inputs,
                                     std::vector<DataBuffer> &outputs)
     {
-        return SUCCESS;
+        return MockFunctionTest::aclStubInstance().ExecuteAsync(executor, inputs, outputs);
     }
 
     Status GeExecutor::ExecuteAsync(DynamicSingleOp *executor,
@@ -341,7 +598,7 @@ std::map<string, GeAttrValue> g_geAttrMap;
                         std::vector<GeTensorDesc> &output_desc,
                         std::vector<DataBuffer> &outputs)
     {
-        return SUCCESS;
+        return MockFunctionTest::aclStubInstance().ExecuteAsync(executor, input_desc, inputs, output_desc, outputs);
     }
 
     Status GeExecutor::LoadSingleOpV2(const std::string &modelName,
@@ -350,7 +607,7 @@ std::map<string, GeAttrValue> g_geAttrMap;
                                       SingleOp **single_op,
                                       const uint64_t model_id)
     {
-        return SUCCESS;
+        return MockFunctionTest::aclStubInstance().LoadSingleOpV2(modelName, modelData, stream, single_op, model_id);
     }
 
     Status GeExecutor::LoadDynamicSingleOpV2(const std::string &model_name,
@@ -359,7 +616,7 @@ std::map<string, GeAttrValue> g_geAttrMap;
                                DynamicSingleOp **single_op,
                                const uint64_t model_id)
     {
-        return SUCCESS;
+        return MockFunctionTest::aclStubInstance().LoadDynamicSingleOpV2(model_name, modelData, stream, single_op, model_id);
     }
 
     Status GeExecutor::GetOpDescInfo(uint32_t device_id, uint32_t stream_id,
@@ -441,7 +698,7 @@ std::map<string, GeAttrValue> g_geAttrMap;
 
     bool AttrUtils::GetBool(ConstAttrHolderAdapter &&obj, const string &name, bool &value)
     {
-        return true;
+        return MockFunctionTest::aclStubInstance().GetBool(obj, name, value);
     }
 
     bool AttrUtils::HasAttr(ConstAttrHolderAdapter &&obj, const string &name)
@@ -459,9 +716,9 @@ std::map<string, GeAttrValue> g_geAttrMap;
         return true;
     }
 
-    bool AttrUtils::GetListNamedAttrs(ge::AttrUtils::ConstAttrHolderAdapter&&, std::string const&, vector<GeAttrValue::NAMED_ATTRS> &)
+    bool AttrUtils::GetListNamedAttrs(ge::AttrUtils::ConstAttrHolderAdapter &&obj, std::string const &name, vector<GeAttrValue::NAMED_ATTRS> &value)
     {
-        return true;
+        return MockFunctionTest::aclStubInstance().GetListNamedAttrs(obj, name, value);
     }
 
     TensorData::TensorData()
@@ -469,7 +726,10 @@ std::map<string, GeAttrValue> g_geAttrMap;
 
     }
 
-    TensorData::~TensorData() = default;
+    TensorData::~TensorData()
+    {
+
+    }
 
     std::uint8_t *TensorData::GetData()
     {
@@ -479,6 +739,12 @@ std::map<string, GeAttrValue> g_geAttrMap;
     const std::uint8_t *TensorData::GetData() const
     {
         return nullptr;
+    }
+
+    const TensorData& GeTensor::GetData() const
+    {
+        TensorData tensorData;
+        return tensorData;
     }
 
     std::size_t TensorData::GetSize() const
@@ -544,6 +810,10 @@ std::map<string, GeAttrValue> g_geAttrMap;
     {
     }
 
+    GeTensorDesc::~GeTensorDesc()
+    {
+    }
+
     GeTensorDesc::GeTensorDesc(GeTensorDesc&&)
     {
     }
@@ -555,8 +825,6 @@ std::map<string, GeAttrValue> g_geAttrMap;
     GeTensorDesc::GeTensorDesc(GeShape, Format, DataType)
     {
     }
-
-    GeTensorDesc::~GeTensorDesc() = default;
 
     ProtoAttrMapHelper GeTensorDesc::MutableAttrMap()
     {
@@ -619,7 +887,7 @@ std::map<string, GeAttrValue> g_geAttrMap;
 
     graphStatus GeTensorDesc::SetShapeRange(const std::vector<std::pair<int64_t,int64_t>> &range)
     {
-        return GRAPH_SUCCESS;
+        return MockFunctionTest::aclStubInstance().SetShapeRange(range);
     }
 
     void GeTensorDesc::SetDataType(ge::DataType dt)
@@ -645,6 +913,10 @@ std::map<string, GeAttrValue> g_geAttrMap;
     {
     }
 
+    GeTensor::~GeTensor()
+    {
+    }
+
     GeTensor::GeTensor(GeTensorDesc const&)
     {
     }
@@ -655,12 +927,6 @@ std::map<string, GeAttrValue> g_geAttrMap;
 
     GeTensor::GeTensor(const GeTensorDesc &tensorDesc, const uint8_t *data, size_t size)
     {
-    }
-
-    GeTensor::~GeTensor() = default;
-
-    const TensorData &GeTensor::GetData() const {
-        return TensorData();
     }
 
     GeTensorDesc GeTensor::GetTensorDesc() const
@@ -674,10 +940,6 @@ std::map<string, GeAttrValue> g_geAttrMap;
     {
     }
 
-    GeAttrValue GeAttrValue::Copy() const {
-        GeAttrValue value;
-        return value;
-    }
 
     graphStatus GeAttrValue::SetValue(bool const& value)
     {
@@ -755,6 +1017,11 @@ std::map<string, GeAttrValue> g_geAttrMap;
         return g_geAttrValueType;
     }
 
+    GeAttrValue GeAttrValue::Copy() const
+    {
+        return g_geAttrValue;
+    }
+
     graphStatus GeAttrValue::GetValue(bool& value) const
     {
         value = g_geAttrValueBool;
@@ -803,7 +1070,7 @@ std::map<string, GeAttrValue> g_geAttrMap;
         return GRAPH_SUCCESS;
     }
 
-    graphStatus GeAttrValue::GetValue(std::vector<long>& value) const
+    graphStatus GeAttrValue::GetValue(std::vector<long >& value) const
     {
         value = g_geAttrValueListInt;
         return GRAPH_SUCCESS;
@@ -815,9 +1082,9 @@ std::map<string, GeAttrValue> g_geAttrMap;
         return GRAPH_SUCCESS;
     }
 
-    graphStatus GeAttrValue::GetValue(std::vector<std::vector<float>>& value) const
+    graphStatus GeAttrValue::GetValue(std::vector<std::vector<float, std::allocator<float>> ,std::allocator<std::vector<float, std::allocator<float> > > > &value) const
     {
-        value = g_geAttrValueListListFloat;
+        value = g_geAttrValueListListListInt;
         return GRAPH_SUCCESS;
     }
 
@@ -889,11 +1156,13 @@ std::map<string, GeAttrValue> g_geAttrMap;
     {
     }
 
-    GeShape::GeShape(GeShape const&)
+    GeShape::~GeShape()
     {
     }
 
-    GeShape::~GeShape() = default;
+    GeShape::GeShape(GeShape const&)
+    {
+    }
 
     graphStatus AttrHolder::SetAttr(const string& name, const GeAttrValue& value)
     {
@@ -906,34 +1175,35 @@ std::map<string, GeAttrValue> g_geAttrMap;
 
     Status GEInitialize(const std::map<std::string, std::string>& options)
     {
-        return SUCCESS;
+        return MockFunctionTest::aclStubInstance().GEInitialize(options);
     }
 
     Status GEFinalize()
     {
-        return SUCCESS;
+        return MockFunctionTest::aclStubInstance().GEFinalize();
     }
 
     Status GeGenerator::Initialize(const std::map<std::string, std::string> &options)
     {
-        return SUCCESS;
+        return MockFunctionTest::aclStubInstance().Initialize(options);
     }
 
     Status GeGenerator::Initialize(const std::map<std::string, std::string> &options, OmgContext &omgContext)
     {
-        return SUCCESS;
+        return MockFunctionTest::aclStubInstance().Initialize(options, omgContext);
     }
 
     Status GeGenerator::BuildSingleOpModel(ge::OpDescPtr &op_desc, const std::vector<GeTensor> &inputs,
                                            const std::vector<GeTensor> &outputs, OpEngineType engine_type,
                                            int32_t compile_flag, ModelBufferData &model_buff)
     {
-        return SUCCESS;
+        return MockFunctionTest::aclStubInstance().BuildSingleOpModel(op_desc, inputs, outputs, engine_type,
+                                                                      compile_flag, model_buff);
     }
 
     Status GeGenerator::Finalize()
     {
-        return SUCCESS;
+        return MockFunctionTest::aclStubInstance().Ge_Generator_Finalize();
     }
 
     Shape::Shape(const std::vector<int64_t>& dims)
@@ -958,7 +1228,7 @@ std::map<string, GeAttrValue> g_geAttrMap;
 
     bool AttrUtils::GetInt(ge::AttrUtils::ConstAttrHolderAdapter&& obj, const std::string &name, int32_t &value)
     {
-        return true;
+        return MockFunctionTest::aclStubInstance().GetInt(obj, name, value);
     }
 
     bool AttrUtils::SetInt(ge::AttrUtils::AttrHolderAdapter &&obj, const string &name, const int64_t &value)
@@ -989,14 +1259,14 @@ namespace ge {
         return ge::SUCCESS;
     }
 
-    bool ReadBytesFromBinaryFile(char const*, char**, int&)
+    bool ReadBytesFromBinaryFile(char const *file_name, char **buffer, int &length)
     {
-        return true;
+        return MockFunctionTest::aclStubInstance().ReadBytesFromBinaryFile(file_name, buffer, length);
     }
 
     std::string RealPath(const char *path)
     {
-        return "test";
+        return MockFunctionTest::aclStubInstance().RealPath(path);
     }
 
     TensorDesc Operator::GetOutputDesc(uint32_t index) const
@@ -1058,7 +1328,7 @@ namespace ge {
 
     graphStatus OperatorFactory::GetOpsTypeList(std::vector<ge::AscendString> &all_ops)
     {
-        return 0;
+        return MockFunctionTest::aclStubInstance().GetOpsTypeList(all_ops);;
     }
 
     OpDescPtr OpDescUtils::GetOpDescFromOperator(const Operator& oprt)
@@ -1130,7 +1400,7 @@ const string& ErrorManager::GetLogHeader()
 
 int ErrorManager::Init()
 {
-    return 0;
+    return MockFunctionTest::aclStubInstance().Init();
 }
 
 void ErrorManager::ATCReportErrMessage(std::string error_code, const std::vector<std::string> &key,
@@ -1142,7 +1412,7 @@ void ErrorManager::ATCReportErrMessage(std::string error_code, const std::vector
 std::string ErrorManager::GetErrorMessage()
 {
     std::string message = "";
-    return message;
+    return MockFunctionTest::aclStubInstance().GetErrorMessage();
 }
 
 int ErrorManager::ReportInterErrMessage(std::string error_code, const std::string &error_msg)

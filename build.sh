@@ -283,8 +283,8 @@ main()
 
   if [[ "X$ENABLE_ACL_COV" = "Xoff" ]]; then
     generate_package
+    echo "---------------- ACL package archive generated ----------------"
   fi
-  echo "---------------- ACL package archive generated ----------------"
 }
 
 main "$@"

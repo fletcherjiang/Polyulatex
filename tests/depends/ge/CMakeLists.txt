@@ -20,6 +20,12 @@ file(GLOB_RECURSE SRC_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
         "src/ge_stub.cpp"
 )
 
+set(PROTO_LIST
+        "${BASE_DIR}/third_party/proto/metadef/proto/om.proto"
+)
+
+protobuf_generate(acl PROTO_SRCS PROTO_HDRS ${PROTO_LIST})
+
 include_directories(${BASE_DIR}/third_party/inc)
 include_directories(${BASE_DIR}/third_party/inc/graphengine/inc)
 include_directories(${BASE_DIR}/third_party/inc/graphengine/inc/framework)
@@ -27,12 +33,19 @@ include_directories(${BASE_DIR}/third_party/inc/metadef/inc)
 include_directories(${BASE_DIR}/third_party/inc/metadef/inc/external)
 include_directories(${BASE_DIR}/third_party/inc/graphengine/inc/external)
 include_directories(${BASE_DIR}/third_party/inc/graphengine/inc)
+include_directories(${CMAKE_BINARY_DIR}/proto/acl/)
+include_directories(${BASE_DIR}/tests/depends/)
+include_directories(${BASE_DIR}/third_party/inc/toolchain/ide/ide-daemon/external)
 
-add_library(ge_stub SHARED ${SRC_FILES})
+add_library(ge_stub SHARED ${SRC_FILES} ${PROTO_LIST})
 
 target_link_libraries(ge_stub PRIVATE
         $<BUILD_INTERFACE:intf_pub>
         c_sec
         ascend_protobuf
+        gtest
+        gtest_main
+        gmock
+        gmock_main
 )
 

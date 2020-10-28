@@ -15,9 +15,29 @@
  */
 
 #include "toolchain/dump.h"
+#include "acl_stub.h"
+#include "adx_datadump_server.h"
 
 extern "C" int AdxDataDumpServerInit();
 extern "C" int AdxDataDumpServerUnInit();
 
-int AdxDataDumpServerInit() { return 0; }
-int AdxDataDumpServerUnInit() { return 0; }
+int aclStub::AdxDataDumpServerInit() 
+{ 
+    return 0; 
+}
+
+int aclStub::AdxDataDumpServerUnInit() 
+{
+    return 0; 
+}
+
+int AdxDataDumpServerInit() 
+{
+    return MockFunctionTest::aclStubInstance().AdxDataDumpServerInit(); 
+}
+
+int AdxDataDumpServerUnInit() 
+{ 
+    return MockFunctionTest::aclStubInstance().AdxDataDumpServerUnInit(); 
+}
+

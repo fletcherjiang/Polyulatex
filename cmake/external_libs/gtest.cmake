@@ -27,7 +27,7 @@ ExternalProject_Add(gtest_build
                     URL ${REQ_URL}
                     TLS_VERIFY OFF
                     CONFIGURE_COMMAND ${CMAKE_COMMAND} -DCMAKE_CXX_FLAGS=${gtest_CXXFLAGS} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/gtest <SOURCE_DIR>
-                -DBUILD_TESTING=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_MACOSX_RPATH=TRUE -Dgtest_disable_pthreads=ON
+                -DBUILD_TESTING=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_MACOSX_RPATH=TRUE -Dgtest_disable_pthreads=OFF
                     BUILD_COMMAND $(MAKE)
                     INSTALL_COMMAND $(MAKE) install
                     EXCLUDE_FROM_ALL TRUE 
@@ -51,6 +51,21 @@ set_target_properties(gtest_main PROPERTIES
 
 target_include_directories(gtest INTERFACE ${GTEST_PKG_DIR}/include)
 target_include_directories(gtest_main INTERFACE ${GTEST_PKG_DIR}/include)
+
+add_library(gmock SHARED IMPORTED)
+
+set_target_properties(gmock PROPERTIES
+    IMPORTED_LOCATION ${GTEST_PKG_DIR}/lib/libgmock.so
+)
+
+add_library(gmock_main SHARED IMPORTED)
+
+set_target_properties(gmock_main PROPERTIES
+    IMPORTED_LOCATION ${GTEST_PKG_DIR}/lib/libgmock_main.so
+)
+
+target_include_directories(gmock INTERFACE ${GTEST_PKG_DIR}/include)
+target_include_directories(gmock_main INTERFACE ${GTEST_PKG_DIR}/include)
 
 set(INSTALL_BASE_DIR "")
 set(INSTALL_LIBRARY_DIR lib)

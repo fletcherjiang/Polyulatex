@@ -15,8 +15,18 @@
  */
 
 #include "mmpa/mmpa_api.h"
-
+#include "acl_stub.h"
 #include <string.h>
+
+INT32 aclStub::mmScandir2(const CHAR *path, mmDirent2 ***entryList, mmFilter2 filterFunc,  mmSort2 sort)
+{
+    return 0;
+}
+
+void* aclStub::mmAlignMalloc(mmSize mallocSize, mmSize alignSize)
+{
+    return malloc(mallocSize);
+}
 
 INT32 mmScandir(const CHAR *path, mmDirent ***entryList, mmFilter filterFunc,  mmSort sort)
 {
@@ -29,7 +39,7 @@ VOID mmScandirFree(mmDirent **entryList, INT32 count)
 
 INT32 mmScandir2(const CHAR *path, mmDirent2 ***entryList, mmFilter2 filterFunc,  mmSort2 sort)
 {
-    return 0;
+    return MockFunctionTest::aclStubInstance().mmScandir2(path, entryList, filterFunc, sort);
 }
 
 VOID mmScandirFree2(mmDirent2 **entryList, INT32 count)
@@ -43,7 +53,7 @@ INT32 mmAccess2(const CHAR *pathName, INT32 mode)
 
 INT32 mmGetEnv(const CHAR *name, CHAR *value, UINT32 len)
 {
-    char environment[MMPA_MAX_PATH] = "llt/acl/ut/json/profilingConfig.json";
+    char environment[MMPA_MAX_PATH] = "";
     (void)memcpy_s(value, MMPA_MAX_PATH, environment, MMPA_MAX_PATH);
     return 0;
 }
@@ -118,9 +128,9 @@ mmSize mmGetPageSize()
     return 2;
 }
 
-VOID *mmAlignMalloc(mmSize mallocSize, mmSize alignSize)
+void *mmAlignMalloc(mmSize mallocSize, mmSize alignSize)
 {
-    return malloc(mallocSize);
+    return MockFunctionTest::aclStubInstance().mmAlignMalloc(mallocSize, alignSize);
 }
 
 VOID mmAlignFree(VOID *addr)
