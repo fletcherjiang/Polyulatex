@@ -59,7 +59,8 @@ TEST_F(VdecTest, aclvdecCreateChannelDesc_1)
 
 void* mmAlignMallocStub6(mmSize mallocSize, mmSize alignSize)
 {
-    mallocSize = 1512;
+    aclvdecChannelDesc *aclChannelDesc = nullptr;
+    mallocSize = CalAclDvppStructSize(aclChannelDesc);
     return malloc(mallocSize);
 }
 
