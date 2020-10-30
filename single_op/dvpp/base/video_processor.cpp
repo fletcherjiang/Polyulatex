@@ -27,7 +27,7 @@ namespace {
     constexpr uint32_t VENC_USER_MODE = 2;
     constexpr uint8_t SEND_FRAME_EOS = 1;
     constexpr int VDEC_CHANNEL_ID_CEILING = 31;
-    constexpr uint32_t VDEC_EXTEND_INFO_OFFSET = sizeof(aicpu::dvpp::DvppVdecBitDepthConfig);
+    constexpr uint32_t VDEC_BIT_DEPTH_STRUCT_SIZE = sizeof(aicpu::dvpp::DvppVdecBitDepthConfig);
 }
 
 namespace acl {
@@ -1402,7 +1402,7 @@ namespace acl {
 
     aclError VideoProcessor::SetVdecParamToVdecChannel(aclvdecChannelDesc *channelDesc)
     {
-        uint32_t offset = VDEC_EXTEND_INFO_OFFSET;
+        uint32_t offset = VDEC_BIT_DEPTH_STRUCT_SIZE;
         for (auto &it : channelDesc->tlvParamMap) {
             if (it.first != VDEC_BIT_DEPTH) { // for compatibility, bit depth should be special treated
                 ACL_REQUIRES_NOT_NULL(it.second.value.get());
@@ -1420,20 +1420,20 @@ namespace acl {
         // for compatibility, bit depth must be in front of extendInfo
         auto itBitDepth = channelDesc->tlvParamMap.find(VDEC_BIT_DEPTH);
         if (itBitDepth != channelDesc->tlvParamMap.end()) {
-            auto ret = memcpy_s(channelDesc->vdecDesc.extendInfo, VDEC_EXTEND_INFO_OFFSET,
+            auto ret = memcpy_s(channelDesc->vdecDesc.extendInfo, VDEC_BIT_DEPTH_STRUCT_SIZE,
                 itBitDepth->second.value.get(), itBitDepth->second.valueLen);
             if (ret != EOK) {
                 ACL_LOG_INNER_ERROR("[Copy][Mem]call memcpy_s failed, result = %d, srcLen = %zu, dstLen = %zu", ret,
-                    itBitDepth->second.valueLen, VDEC_EXTEND_INFO_OFFSET);
+                    itBitDepth->second.valueLen, VDEC_BIT_DEPTH_STRUCT_SIZE);
                 return ACL_ERROR_FAILURE;
             }
-        } else if (offset > VDEC_EXTEND_INFO_OFFSET){
+        } else if (offset > VDEC_BIT_DEPTH_STRUCT_SIZE){
             aicpu::dvpp::DvppVdecBitDepthConfig tmpDvppVdecBitDepthConfig;
-            auto ret = memcpy_s(channelDesc->vdecDesc.extendInfo, VDEC_EXTEND_INFO_OFFSET,
-                &tmpDvppVdecBitDepthConfig, VDEC_EXTEND_INFO_OFFSET);
+            auto ret = memcpy_s(channelDesc->vdecDesc.extendInfo, VDEC_BIT_DEPTH_STRUCT_SIZE,
+                &tmpDvppVdecBitDepthConfig, VDEC_BIT_DEPTH_STRUCT_SIZE);
             if (ret != EOK) {
                 ACL_LOG_INNER_ERROR("[Copy][Mem]call memcpy_s failed, result = %d, srcLen = %zu, dstLen = %zu", ret,
-                    VDEC_EXTEND_INFO_OFFSET, VDEC_EXTEND_INFO_OFFSET);
+                    VDEC_BIT_DEPTH_STRUCT_SIZE, VDEC_BIT_DEPTH_STRUCT_SIZE);
                 return ACL_ERROR_FAILURE;
             }
         } else {
