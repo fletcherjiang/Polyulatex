@@ -128,7 +128,7 @@ namespace acl {
                     return false;
                 }
                 uint16_t orientation = 0;
-                uint32_t pos = 6; // 6 means ignore EXIF heder
+                uint64_t pos = 6; // 6 means ignore EXIF heder
                 uint16_t endian = 0;
 
                 // 8 means TIFF header
@@ -166,7 +166,7 @@ namespace acl {
                     }
                     pos += 12;
                 }
-                ACL_LOG_INFO("orientation is %d", orientation);
+                ACL_LOG_INFO("orientation is %u", orientation);
                 if ((orientation >= ORIENTATION_5) && (orientation <= ORIENTATION_8)) {
                     ACL_LOG_INFO("This image need orientation");
                     return true;
@@ -2728,8 +2728,16 @@ namespace acl {
     aclError ImageProcessor::SetDvppParamToDvppChannel(acldvppChannelDesc *channelDesc)
     {
         uint32_t offset = 0;
+        std::unique_lock<std::mutex> lock{channelDesc->mutexForTLVMap};
         for (auto &it : channelDesc->tlvParamMap) {
             ACL_REQUIRES_NOT_NULL(it.second.value.get());
+            uint32_t tmpOffset = offset;
+            ACL_CHECK_ASSIGN_UINT32T_ADD(tmpOffset, static_cast<uint32_t>(it.second.valueLen), tmpOffset);
+            if (tmpOffset > DVPP_CHANNEL_DESC_TLV_LEN) {
+                ACL_LOG_INNER_ERROR("[Check][Offset] offset %u can not be larger than %u",
+                    tmpOffset, DVPP_CHANNEL_DESC_TLV_LEN);
+                return ACL_ERROR_FAILURE;
+            }
             auto ret = memcpy_s(channelDesc->dvppDesc.extendInfo + offset, it.second.valueLen,
                 it.second.value.get(), it.second.valueLen);
             if (ret != EOK) {
@@ -2737,7 +2745,7 @@ namespace acl {
                     it.second.valueLen, it.second.valueLen);
                 return ACL_ERROR_FAILURE;
             }
-            ACL_CHECK_ASSIGN_UINT32T_ADD(offset, static_cast<uint32_t>(it.second.valueLen), offset);
+            offset += static_cast<uint32_t>(it.second.valueLen);
         }
         channelDesc->dvppDesc.len = offset;
         return ACL_SUCCESS;

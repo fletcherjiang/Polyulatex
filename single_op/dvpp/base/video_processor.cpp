@@ -1403,9 +1403,17 @@ namespace acl {
     aclError VideoProcessor::SetVdecParamToVdecChannel(aclvdecChannelDesc *channelDesc)
     {
         uint32_t offset = VDEC_BIT_DEPTH_STRUCT_SIZE;
+        std::unique_lock<std::mutex> lock{channelDesc->mutexForTLVMap};
         for (auto &it : channelDesc->tlvParamMap) {
             if (it.first != VDEC_BIT_DEPTH) { // for compatibility, bit depth should be special treated
                 ACL_REQUIRES_NOT_NULL(it.second.value.get());
+                uint32_t tmpOffset = offset;
+                ACL_CHECK_ASSIGN_UINT32T_ADD(tmpOffset, static_cast<uint32_t>(it.second.valueLen), tmpOffset);
+                if (tmpOffset > VDEC_CHANNEL_DESC_TLV_LEN) {
+                    ACL_LOG_INNER_ERROR("[Check][Offset] offset %u can not be larger than %u",
+                        tmpOffset, VDEC_CHANNEL_DESC_TLV_LEN);
+                    return ACL_ERROR_FAILURE;
+                }
                 auto ret = memcpy_s(channelDesc->vdecDesc.extendInfo + offset, it.second.valueLen,
                     it.second.value.get(), it.second.valueLen);
                 if (ret != EOK) {
@@ -1413,7 +1421,7 @@ namespace acl {
                         it.second.valueLen, it.second.valueLen);
                     return ACL_ERROR_FAILURE;
                 }
-                ACL_CHECK_ASSIGN_UINT32T_ADD(offset, static_cast<uint32_t>(it.second.valueLen), offset);
+                offset += static_cast<uint32_t>(it.second.valueLen);
             }
         }
         channelDesc->vdecDesc.len = offset;
@@ -1427,7 +1435,7 @@ namespace acl {
                     itBitDepth->second.valueLen, VDEC_BIT_DEPTH_STRUCT_SIZE);
                 return ACL_ERROR_FAILURE;
             }
-        } else if (offset > VDEC_BIT_DEPTH_STRUCT_SIZE){
+        } else if (offset > VDEC_BIT_DEPTH_STRUCT_SIZE) {
             aicpu::dvpp::DvppVdecBitDepthConfig tmpDvppVdecBitDepthConfig;
             auto ret = memcpy_s(channelDesc->vdecDesc.extendInfo, VDEC_BIT_DEPTH_STRUCT_SIZE,
                 &tmpDvppVdecBitDepthConfig, VDEC_BIT_DEPTH_STRUCT_SIZE);
@@ -1445,8 +1453,16 @@ namespace acl {
     aclError VideoProcessor::SetVencParamToVencChannel(aclvencChannelDesc *channelDesc)
     {
         uint32_t offset = 0;
+        std::unique_lock<std::mutex> lock{channelDesc->mutexForTLVMap};
         for (auto &it : channelDesc->tlvParamMap) {
             ACL_REQUIRES_NOT_NULL(it.second.value.get());
+            uint32_t tmpOffset = offset;
+            ACL_CHECK_ASSIGN_UINT32T_ADD(tmpOffset, static_cast<uint32_t>(it.second.valueLen), tmpOffset);
+            if (tmpOffset > VENC_CHANNEL_DESC_TLV_LEN) {
+                ACL_LOG_INNER_ERROR("[Check][Offset] offset %u can not be larger than %u",
+                    tmpOffset, VENC_CHANNEL_DESC_TLV_LEN);
+                return ACL_ERROR_FAILURE;
+            }
             auto ret = memcpy_s(channelDesc->vencDesc.extendInfo + offset, it.second.valueLen,
                 it.second.value.get(), it.second.valueLen);
             if (ret != EOK) {
@@ -1454,7 +1470,7 @@ namespace acl {
                     it.second.valueLen, it.second.valueLen);
                 return ACL_ERROR_FAILURE;
             }
-            ACL_CHECK_ASSIGN_UINT32T_ADD(offset, static_cast<uint32_t>(it.second.valueLen), offset);
+            offset += static_cast<uint32_t>(it.second.valueLen);
         }
         channelDesc->vencDesc.len = offset;
 
