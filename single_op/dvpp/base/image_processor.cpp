@@ -159,10 +159,11 @@ namespace acl {
                     if (tag == TIFF_ORIENTATION_TAG) {
                         uint16_t format = GetU16(&exifMarker->data[pos + 2], endian);
                         uint16_t count = GetU32(&exifMarker->data[pos + 4], endian);
-                        if ((format != 3) || (count != 1)) {
+                        if ((format != 3) || (count != 1)) { // orientation protocal
                             return false;
                         }
                         orientation = GetU16(&exifMarker->data[pos + 8], endian);
+                        break;
                     }
                     pos += 12;
                 }
