@@ -509,7 +509,7 @@ namespace {
         return imageProcessor->acldvppSetChannelDescMatrix(channelDesc, matrixFormat);
     }
 
-    aclError GetVdecChannelDescMatrix(aclvdecChannelDesc *channelDesc, size_t length,
+    aclError GetVdecChannelDescMatrix(const aclvdecChannelDesc *channelDesc, size_t length,
         size_t *paramRetSize, void *param)
     {
         auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
@@ -533,7 +533,7 @@ namespace {
         return ACL_SUCCESS;
     }
 
-    aclError GetDvppChannelDescMatrix(acldvppChannelDesc *channelDesc, size_t length,
+    aclError GetDvppChannelDescMatrix(const acldvppChannelDesc *channelDesc, size_t length,
         size_t *paramRetSize, void *param)
     {
         acldvppCscMatrix matrixFormat;
@@ -596,7 +596,7 @@ namespace {
         {ACL_VDEC_CSC_MATRIX_UINT32, SetVdecChannelDescMatrix}
     };
 
-    typedef aclError (*GetVdecParamFunc)(aclvdecChannelDesc *, size_t, size_t *, void *);
+    typedef aclError (*GetVdecParamFunc)(const aclvdecChannelDesc *, size_t, size_t *, void *);
     std::map<aclvdecChannelDescParamType, GetVdecParamFunc> g_vdecGetParamFuncMap = {
         {ACL_VDEC_CSC_MATRIX_UINT32, GetVdecChannelDescMatrix}
     };
@@ -606,7 +606,7 @@ namespace {
         {ACL_DVPP_CSC_MATRIX_UINT32, SetDvppChannelDescMatrix}
     };
 
-    typedef aclError (*GetDvppParamFunc)(acldvppChannelDesc *, size_t, size_t *, void *);
+    typedef aclError (*GetDvppParamFunc)(const acldvppChannelDesc *, size_t, size_t *, void *);
     std::map<acldvppChannelDescParamType, GetDvppParamFunc> g_dvppGetParamFuncMap = {
         {ACL_DVPP_CSC_MATRIX_UINT32, GetDvppChannelDescMatrix}
     };
@@ -1688,7 +1688,7 @@ aclError acldvppSetChannelDescParam(acldvppChannelDesc *channelDesc,
     return g_dvppSetParamFuncMap[paramType](channelDesc, length, param);
 }
 
-aclError aclvdecGetChannelDescParam(aclvdecChannelDesc *channelDesc,
+aclError aclvdecGetChannelDescParam(const aclvdecChannelDesc *channelDesc,
                                     aclvdecChannelDescParamType paramType,
                                     size_t length,
                                     size_t *paramRetSize,
@@ -1710,7 +1710,7 @@ aclError aclvdecGetChannelDescParam(aclvdecChannelDesc *channelDesc,
     return g_vdecGetParamFuncMap[paramType](channelDesc, length, paramRetSize, param);
 }
 
-aclError acldvppGetChannelDescParam(acldvppChannelDesc *channelDesc,
+aclError acldvppGetChannelDescParam(const acldvppChannelDesc *channelDesc,
                                     acldvppChannelDescParamType paramType,
                                     size_t length,
                                     size_t *paramRetSize,

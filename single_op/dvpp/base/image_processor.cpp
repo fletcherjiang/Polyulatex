@@ -2408,10 +2408,10 @@ namespace acl {
         // valid size
         bool validParam = (size == 0) || (srcBatchPicDescs->dvppBatchPicDescs.batchSize != size);
         if (validParam) {
-            ACL_LOG_ERROR("[Check][BatchSize]srcBatchPicDescs batchSize is not equal to roiNums size or size = 0, "
+            ACL_LOG_ERROR("[Check][BatchSize]srcBatchPicDescs batchSize less than roiNums size or size = 0, "
                 "batch size = %u, size = %u.", srcBatchPicDescs->dvppBatchPicDescs.batchSize, size);
             std::string convertedStr = std::to_string(srcBatchPicDescs->dvppBatchPicDescs.batchSize);
-            std::string errMsg = acl::AclErrorLogManager::FormatStr("not equal to roiNums size[%u] or size = 0", size);
+            std::string errMsg = acl::AclErrorLogManager::FormatStr("less than roiNums size[%u] or size = 0", size);
             const char *argList[] = {"param", "value", "reason"};
             const char *argVal[] = {"srcBatchPicDescs batchSize", convertedStr.c_str(), errMsg.c_str()};
             acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_PARAM_MSG,

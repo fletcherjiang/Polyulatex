@@ -2709,7 +2709,7 @@ ACL_FUNC_VISIBILITY aclError acldvppSetChannelDescParam(acldvppChannelDesc *chan
  *
  * @see acldvppSetChannelDescParam | acldvppCreateChannelDesc | acldvppDestroyChannelDesc
  */
-ACL_FUNC_VISIBILITY aclError acldvppGetChannelDescParam(acldvppChannelDesc *channelDesc,
+ACL_FUNC_VISIBILITY aclError acldvppGetChannelDescParam(const acldvppChannelDesc *channelDesc,
                                                         acldvppChannelDescParamType paramType,
                                                         size_t length,
                                                         size_t *paramRetSize,
@@ -2754,7 +2754,7 @@ ACL_FUNC_VISIBILITY aclError aclvdecSetChannelDescParam(aclvdecChannelDesc *chan
  *
  * @see aclvdecSetChannelDescParam | aclvdecCreateChannelDesc | aclvdecDestroyChannelDesc
  */
-ACL_FUNC_VISIBILITY aclError aclvdecGetChannelDescParam(aclvdecChannelDesc *channelDesc,
+ACL_FUNC_VISIBILITY aclError aclvdecGetChannelDescParam(const aclvdecChannelDesc *channelDesc,
                                                         aclvdecChannelDescParamType paramType,
                                                         size_t length,
                                                         size_t *paramRetSize,
