@@ -147,7 +147,7 @@ namespace acl {
                 if ((pos + 2) > exifMarker->data_length) {
                     return false;
                 }
-                uint16_t entries = GetU16(&exifMarker->data[pos], endian);
+                uint64_t entries = GetU16(&exifMarker->data[pos], endian);
                 pos += 2;
 
                 if ((pos + entries * 12) > exifMarker->data_length) {
