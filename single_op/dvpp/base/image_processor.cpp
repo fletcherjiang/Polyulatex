@@ -2406,7 +2406,7 @@ namespace acl {
                                                               acldvppResizeConfig *resizeConfig)
     {
         // valid size
-        bool validParam = (size == 0) || (srcBatchPicDescs->dvppBatchPicDescs.batchSize != size);
+        bool validParam = (size == 0) || (srcBatchPicDescs->dvppBatchPicDescs.batchSize < size);
         if (validParam) {
             ACL_LOG_ERROR("[Check][BatchSize]srcBatchPicDescs batchSize less than roiNums size or size = 0, "
                 "batch size = %u, size = %u.", srcBatchPicDescs->dvppBatchPicDescs.batchSize, size);
