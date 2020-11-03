@@ -32,12 +32,96 @@ namespace acl {
             constexpr uint32_t VDEC_BIT_DEPTH_CONFIG_LEN = 8;
             constexpr uint16_t VDEC_BIT_DEPTH_CONFIG_DATA_TYPE = 1;
             constexpr uint16_t VDEC_BIT_DEPTH_CONFIG_DATA_LEN = 4;
+            constexpr uint32_t VDEC_EXTEND_INFO_OFFSET = sizeof(aicpu::dvpp::DvppVdecBitDepthConfig);
             std::set<acldvppPixelFormat> validOutPicFormatSet = {
                 acldvppPixelFormat::PIXEL_FORMAT_YVU_SEMIPLANAR_420,
                 acldvppPixelFormat::PIXEL_FORMAT_YUV_SEMIPLANAR_420,
                 acldvppPixelFormat::PIXEL_FORMAT_BGR_888,
                 acldvppPixelFormat::PIXEL_FORMAT_RGB_888
             };
+        }
+
+        aclError VideoProcessorV200::aclvdecSetChannelDescMatrix(aclvdecChannelDesc *channelDesc,
+            acldvppCscMatrix matrixFormat)
+        {
+            ACL_LOG_DEBUG("start to execute aclvdecSetChannelDescMatrix");
+            if ((channelDesc == nullptr) || (channelDesc->vdecDesc.extendInfo == nullptr)) {
+                ACL_LOG_ERROR("[Check][ChannelDesc]channelDesc is null.");
+                const char *argList[] = {"param"};
+                const char *argVal[] = {"channelDesc or extendInfo"};
+                acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+                    argList, argVal, 1);
+                return ACL_ERROR_INVALID_PARAM;
+            }
+            // check if matrix format in range
+            if ((matrixFormat < ACL_DVPP_CSC_MATRIX_BT601_WIDE) ||
+                (matrixFormat > ACL_DVPP_CSC_MATRIX_BT2020_NARROW)) {
+                ACL_LOG_ERROR("[Check][matrixFormat]input format[%u] is not supported in this version",
+                    static_cast<uint32_t>(matrixFormat));
+                std::string matrixFormatStr = std::to_string(static_cast<uint32_t>(matrixFormat));
+                const char *argList[] = {"param", "value", "reason"};
+                const char *argVal[] = {"matrixFormat", matrixFormatStr.c_str(), "not supported in this version"};
+                acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_PARAM_MSG,
+                    argList, argVal, 3);
+                return ACL_ERROR_INVALID_PARAM;
+            }
+            {
+                std::unique_lock<std::mutex> lock{channelDesc->mutexForTLVMap};
+                auto it = channelDesc->tlvParamMap.find(VDEC_CSC_MATRIX);
+                if (it == channelDesc->tlvParamMap.end()) {
+                    VdecChannelDescTLVParam vdecTLVParam;
+                    std::shared_ptr<aicpu::dvpp::DvppCscMatrixConfig> dvppCscMatrixConfig =
+                        std::make_shared<aicpu::dvpp::DvppCscMatrixConfig>();
+                    ACL_REQUIRES_NOT_NULL(dvppCscMatrixConfig);
+                    dvppCscMatrixConfig->cscMatrix = static_cast<uint32_t>(matrixFormat);
+                    vdecTLVParam.value = static_cast<std::shared_ptr<void>>(dvppCscMatrixConfig);
+                    vdecTLVParam.valueLen = sizeof(aicpu::dvpp::DvppCscMatrixConfig);
+                    channelDesc->tlvParamMap[VDEC_CSC_MATRIX] = vdecTLVParam;
+                } else {
+                    aicpu::dvpp::DvppCscMatrixConfig *dvppCscMatrixConfig =
+                        static_cast<aicpu::dvpp::DvppCscMatrixConfig *>(it->second.value.get());
+                    ACL_REQUIRES_NOT_NULL(dvppCscMatrixConfig);
+                    dvppCscMatrixConfig->cscMatrix = static_cast<uint32_t>(matrixFormat);
+                }
+            }
+            ACL_LOG_DEBUG("successfully execute aclvdecSetChannelDescMatrix, cscMatrix = %u",
+                static_cast<uint32_t>(matrixFormat));
+            return ACL_SUCCESS;
+        }
+
+        aclError VideoProcessorV200::aclvdecGetChannelDescMatrix(const aclvdecChannelDesc *channelDesc,
+            acldvppCscMatrix &matrixFormat)
+        {
+            ACL_LOG_DEBUG("start to execute aclvdecGetChannelDescMatrix");
+            if ((channelDesc == nullptr) || (channelDesc->vdecDesc.extendInfo == nullptr)) {
+                ACL_LOG_ERROR("[Check][ChannelDesc]channelDesc is null.");
+                const char *argList[] = {"param"};
+                const char *argVal[] = {"channelDesc or extendInfo"};
+                acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_NULL_POINTER_MSG,
+                    argList, argVal, 1);
+                return ACL_ERROR_INVALID_PARAM;
+            }
+
+            {
+                std::mutex &mutexMap = const_cast<std::mutex &>(channelDesc->mutexForTLVMap);
+                std::unique_lock<std::mutex> lock{mutexMap};
+                const auto &it = channelDesc->tlvParamMap.find(VDEC_CSC_MATRIX);
+                if (it == channelDesc->tlvParamMap.end()) {
+                    matrixFormat = ACL_DVPP_CSC_MATRIX_BT601_WIDE;
+                    return ACL_SUCCESS;
+                }
+
+                aicpu::dvpp::DvppCscMatrixConfig *dvppCscMatrixConfig =
+                    static_cast<aicpu::dvpp::DvppCscMatrixConfig *>(it->second.value.get());
+                if (dvppCscMatrixConfig == nullptr) {
+                    ACL_LOG_INNER_ERROR("[Check][VencRateControl]vencRateControl ptr is null.");
+                    return ACL_ERROR_INVALID_PARAM;
+                }
+                matrixFormat = static_cast<acldvppCscMatrix>(dvppCscMatrixConfig->cscMatrix);
+                ACL_LOG_DEBUG("successfully execute aclvdecGetChannelDescMatrix, matrixFormat = %d",
+                    static_cast<int32_t>(matrixFormat));
+            }
+            return ACL_SUCCESS;
         }
 
         aclError VideoProcessorV200::aclvencSetChannelDescBufSize(aclvencChannelDesc *channelDesc, uint32_t bufSize)
@@ -665,14 +749,25 @@ namespace acl {
             ACL_LOG_DEBUG("start to execute aclvdecSetChannelDescBitDepth, bitDepth %u", bitDepth);
             ACL_REQUIRES_NOT_NULL(channelDesc);
             ACL_REQUIRES_NOT_NULL(channelDesc->vdecDesc.extendInfo);
-
-            channelDesc->vdecDesc.len = VDEC_BIT_DEPTH_CONFIG_LEN;
-            aicpu::dvpp::DvppVdecBitDepthConfig *vdecBitDepthConfig =
-                reinterpret_cast<aicpu::dvpp::DvppVdecBitDepthConfig *>(channelDesc->vdecDesc.extendInfo);
-            vdecBitDepthConfig->paramType = VDEC_BIT_DEPTH_CONFIG_DATA_TYPE;
-            vdecBitDepthConfig->paramLen = VDEC_BIT_DEPTH_CONFIG_DATA_LEN;
-            vdecBitDepthConfig->bitDepth = bitDepth;
-
+            {
+                std::unique_lock<std::mutex> lock{channelDesc->mutexForTLVMap};
+                auto it = channelDesc->tlvParamMap.find(VDEC_BIT_DEPTH);
+                if (it == channelDesc->tlvParamMap.end()) {
+                    VdecChannelDescTLVParam vdecTLVParam;
+                    std::shared_ptr<aicpu::dvpp::DvppVdecBitDepthConfig> dvppVdecBitDepthConfig =
+                        std::make_shared<aicpu::dvpp::DvppVdecBitDepthConfig>();
+                    ACL_REQUIRES_NOT_NULL(dvppVdecBitDepthConfig);
+                    dvppVdecBitDepthConfig->bitDepth = bitDepth;
+                    vdecTLVParam.value = static_cast<std::shared_ptr<void>>(dvppVdecBitDepthConfig);
+                    vdecTLVParam.valueLen = sizeof(aicpu::dvpp::DvppVdecBitDepthConfig);
+                    channelDesc->tlvParamMap[VDEC_BIT_DEPTH] = vdecTLVParam;
+                } else {
+                    aicpu::dvpp::DvppVdecBitDepthConfig *dvppVdecBitDepthConfig =
+                        static_cast<aicpu::dvpp::DvppVdecBitDepthConfig *>(it->second.value.get());
+                    ACL_REQUIRES_NOT_NULL(dvppVdecBitDepthConfig);
+                    dvppVdecBitDepthConfig->bitDepth = bitDepth;
+                }
+            }
             return ACL_SUCCESS;
         }
 
@@ -688,11 +783,23 @@ namespace acl {
                 ACL_LOG_INNER_ERROR("[Check][channelDesc]vdec channelDesc or vdec channelDesc extendInfo is null.");
                 return 0;
             }
+            {
+                std::mutex &mutexMap = const_cast<std::mutex &>(channelDesc->mutexForTLVMap);
+                std::unique_lock<std::mutex> lock{mutexMap};
+                const auto &it = channelDesc->tlvParamMap.find(VDEC_BIT_DEPTH);
+                if (it == channelDesc->tlvParamMap.end()) {
+                    return 0;
+                }
 
-            const aicpu::dvpp::DvppVdecBitDepthConfig *vdecBitDepthConfig =
-                reinterpret_cast<const aicpu::dvpp::DvppVdecBitDepthConfig *>(channelDesc->vdecDesc.extendInfo);
-
-            return vdecBitDepthConfig->bitDepth;
+                aicpu::dvpp::DvppVdecBitDepthConfig *dvppVdecBitDepthConfig =
+                    static_cast<aicpu::dvpp::DvppVdecBitDepthConfig *>(it->second.value.get());
+                if (dvppVdecBitDepthConfig == nullptr) {
+                    ACL_LOG_INNER_ERROR("[Check][VencRateControl]vencRateControl ptr is null.");
+                    return 0;
+                }
+                ACL_LOG_DEBUG("successfully execute aclvdecGetChannelDescBitDepth");
+                return dvppVdecBitDepthConfig->bitDepth;
+            }
         }
 
         aclError VideoProcessorV200::LaunchVdecReleaseFrameTask(const aclvdecChannelDesc *channelDesc)

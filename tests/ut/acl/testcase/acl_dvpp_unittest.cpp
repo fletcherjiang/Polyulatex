@@ -269,7 +269,6 @@ TEST_F(DvppTest, acldvppGetResizeConfigInterpolation)
 
 void* mmAlignMallocStub(mmSize mallocSize, mmSize alignSize)
 {
-    mallocSize = 104;
     return malloc(mallocSize);
 }
 
@@ -442,7 +441,6 @@ TEST_F(DvppTest, aclvdecCreateChannelDesc_onDevice)
 
 void* mmAlignMallocStub5(mmSize mallocSize, mmSize alignSize)
 {
-    mallocSize = 1512;
     return malloc(mallocSize);
 }
 

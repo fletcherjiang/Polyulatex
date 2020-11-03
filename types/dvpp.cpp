@@ -453,6 +453,110 @@ namespace {
         return ACL_SUCCESS;
     }
 
+    aclError CopyChannelDescParam(void *dst, size_t dstLen, const void *src, size_t srcLen)
+    {
+        ACL_REQUIRES_NOT_NULL(src);
+        ACL_REQUIRES_NOT_NULL(dst);
+        if (srcLen > dstLen) {
+            ACL_LOG_INNER_ERROR("[Check][Length]src length = %zu is larger than dst length = %zu when memcpy",
+                srcLen, dstLen);
+            return ACL_ERROR_INVALID_PARAM;
+        }
+        auto ret = memcpy_s(dst, dstLen, src, srcLen);
+        if (ret != EOK) {
+            ACL_LOG_INNER_ERROR("[Check][Memcpy]call memcpy failed, result = %d, srcLen = %zu, dstLen = %zu",
+                ret, srcLen, dstLen);
+            return ACL_ERROR_FAILURE;
+        }
+
+        return ACL_SUCCESS;
+    }
+
+    aclError SetVdecChannelDescMatrix(aclvdecChannelDesc *channelDesc, size_t length,
+        const void *param)
+    {
+        acldvppCscMatrix matrixFormat = ACL_DVPP_CSC_MATRIX_BT601_WIDE;
+        aclError ret = CopyChannelDescParam(static_cast<void *>(&matrixFormat),
+            sizeof(acldvppCscMatrix), param, length);
+        if (ret != ACL_SUCCESS) {
+            ACL_LOG_INNER_ERROR("[Call][Copy]call CopyChannelDescParam failed, ret = %d.", ret);
+            return ret;
+        }
+
+        auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
+        if (videoProcessor == nullptr) {
+            ACL_LOG_INNER_ERROR("[Check][videoProcessor]video processor is null.");
+            return ACL_ERROR_INTERNAL_ERROR;
+        }
+        return videoProcessor->aclvdecSetChannelDescMatrix(channelDesc, matrixFormat);
+    }
+
+    aclError SetDvppChannelDescMatrix(acldvppChannelDesc *channelDesc, size_t length,
+        const void *param)
+    {
+        acldvppCscMatrix matrixFormat = ACL_DVPP_CSC_MATRIX_BT601_WIDE;
+        aclError ret = CopyChannelDescParam(static_cast<void *>(&matrixFormat),
+            sizeof(acldvppCscMatrix), param, length);
+        if (ret != ACL_SUCCESS) {
+            ACL_LOG_INNER_ERROR("[Call][Copy]memcpy value failed, ret=%d.", ret);
+            return ret;
+        }
+        auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
+        if (imageProcessor == nullptr) {
+            ACL_LOG_INNER_ERROR("[Check][Imageprocessor]image processor is null.");
+            return ACL_ERROR_INTERNAL_ERROR;
+        }
+        return imageProcessor->acldvppSetChannelDescMatrix(channelDesc, matrixFormat);
+    }
+
+    aclError GetVdecChannelDescMatrix(const aclvdecChannelDesc *channelDesc, size_t length,
+        size_t *paramRetSize, void *param)
+    {
+        auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
+        if (videoProcessor == nullptr) {
+            ACL_LOG_INNER_ERROR("[Check][Videoprocessor]video processor is null.");
+            return ACL_ERROR_INTERNAL_ERROR;
+        }
+        acldvppCscMatrix matrixFormat;
+        aclError ret = videoProcessor->aclvdecGetChannelDescMatrix(channelDesc, matrixFormat);
+        if (ret != ACL_SUCCESS) {
+            ACL_LOG_INNER_ERROR("[Get][Matrix]get csc matrix failed, ret = %d.", ret);
+            return ret;
+        }
+        ret = CopyChannelDescParam(param, length, static_cast<const void *>(&matrixFormat),
+            sizeof(acldvppCscMatrix));
+        if (ret != ACL_SUCCESS) {
+            ACL_LOG_INNER_ERROR("[Copy][Mem]memcpy value failed, ret = %d.", ret);
+            return ret;
+        }
+        *paramRetSize = sizeof(acldvppCscMatrix);
+        return ACL_SUCCESS;
+    }
+
+    aclError GetDvppChannelDescMatrix(const acldvppChannelDesc *channelDesc, size_t length,
+        size_t *paramRetSize, void *param)
+    {
+        acldvppCscMatrix matrixFormat;
+        auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
+        if (imageProcessor == nullptr) {
+            ACL_LOG_INNER_ERROR("[Check][imageProcessor]image processor is null.");
+            return ACL_ERROR_INTERNAL_ERROR;
+        }
+        aclError ret = imageProcessor->acldvppGetChannelDescMatrix(channelDesc, matrixFormat);
+        if (ret != ACL_SUCCESS) {
+            ACL_LOG_INNER_ERROR("[Get][Matrix]get csc matrix failed, ret = %d.", ret);
+            return ret;
+        }
+        ret = CopyChannelDescParam(param, length, static_cast<const void *>(&matrixFormat),
+            sizeof(acldvppCscMatrix));
+        if (ret != ACL_SUCCESS) {
+            ACL_LOG_INNER_ERROR("[Copy][Mem]memcpy value failed, ret = %d.", ret);
+            return ret;
+        }
+        *paramRetSize = sizeof(acldvppCscMatrix);
+        return ACL_SUCCESS;
+    }
+
     typedef aclError (*SetVencParamFunc)(aclvencChannelDesc *, size_t, const void *);
     std::map<aclvencChannelDescParamType, SetVencParamFunc> g_vencSetParamFuncMap = {
         {ACL_VENC_THREAD_ID_UINT64, SetVencChannelDescThreadId},
@@ -485,6 +589,26 @@ namespace {
         {ACL_VENC_SRC_RATE_UINT32, GetVencChannelDescSrcRate},
         {ACL_VENC_MAX_BITRATE_UINT32, GetVencChannelDescMaxBitRate},
         {ACL_VENC_MAX_IP_PROP_UINT32, GetVencChannelDescIpProp}
+    };
+
+    typedef aclError (*SetVdecParamFunc)(aclvdecChannelDesc *, size_t, const void *);
+    std::map<aclvdecChannelDescParamType, SetVdecParamFunc> g_vdecSetParamFuncMap = {
+        {ACL_VDEC_CSC_MATRIX_UINT32, SetVdecChannelDescMatrix}
+    };
+
+    typedef aclError (*GetVdecParamFunc)(const aclvdecChannelDesc *, size_t, size_t *, void *);
+    std::map<aclvdecChannelDescParamType, GetVdecParamFunc> g_vdecGetParamFuncMap = {
+        {ACL_VDEC_CSC_MATRIX_UINT32, GetVdecChannelDescMatrix}
+    };
+
+    typedef aclError (*SetDvppParamFunc)(acldvppChannelDesc *, size_t, const void *);
+    std::map<acldvppChannelDescParamType, SetDvppParamFunc> g_dvppSetParamFuncMap = {
+        {ACL_DVPP_CSC_MATRIX_UINT32, SetDvppChannelDescMatrix}
+    };
+
+    typedef aclError (*GetDvppParamFunc)(const acldvppChannelDesc *, size_t, size_t *, void *);
+    std::map<acldvppChannelDescParamType, GetDvppParamFunc> g_dvppGetParamFuncMap = {
+        {ACL_DVPP_CSC_MATRIX_UINT32, GetDvppChannelDescMatrix}
     };
 }
 
@@ -933,7 +1057,7 @@ acldvppChannelDesc *acldvppCreateChannelDesc()
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_DVPP_CHANNEL_DESC);
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
-        ACL_LOG_ERROR("image processor is null.");
+        ACL_LOG_INNER_ERROR("[Check][imageProcessor]image processor is null.");
         return nullptr;
     }
     auto aclChannelDesc = imageProcessor->acldvppCreateChannelDesc();
@@ -949,7 +1073,7 @@ aclError acldvppDestroyChannelDesc(acldvppChannelDesc *channelDesc)
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_DVPP_CHANNEL_DESC);
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
     if (imageProcessor == nullptr) {
-        ACL_LOG_ERROR("image processor is null.");
+        ACL_LOG_INNER_ERROR("[Check][imageProcessor]image processor is null.");
         return ACL_ERROR_INTERNAL_ERROR;
     }
     aclError aclRet = imageProcessor->acldvppDestroyChannelDesc(channelDesc);
@@ -974,7 +1098,7 @@ aclvdecChannelDesc *aclvdecCreateChannelDesc()
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_VDEC_CHANNEL_DESC);
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
-        ACL_LOG_ERROR("video processor is null.");
+        ACL_LOG_INNER_ERROR("[Check][videoProcessor]video processor is null.");
         return nullptr;
     }
     auto aclChannelDesc = videoProcessor->aclvdecCreateChannelDesc();
@@ -990,7 +1114,7 @@ aclError aclvdecDestroyChannelDesc(aclvdecChannelDesc *channelDesc)
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_VDEC_CHANNEL_DESC);
     auto videoProcessor = acl::dvpp::DvppManager::GetInstance().GetVideoProcessor();
     if (videoProcessor == nullptr) {
-        ACL_LOG_ERROR("video processor is null.");
+        ACL_LOG_INNER_ERROR("[Check][videoProcessor]video processor is null.");
         return ACL_ERROR_INTERNAL_ERROR;
     }
     aclError aclRet = videoProcessor->aclvdecDestroyChannelDesc(channelDesc);
@@ -1529,6 +1653,83 @@ aclError aclvencSetChannelDescParam(aclvencChannelDesc *channelDesc,
     }
     return g_vencSetParamFuncMap[paramType](channelDesc, length, param);
 }
+
+aclError aclvdecSetChannelDescParam(aclvdecChannelDesc *channelDesc,
+    aclvdecChannelDescParamType paramType, size_t length, const void *param)
+{
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(param);
+    if (g_vdecSetParamFuncMap.find(paramType) == g_vdecSetParamFuncMap.end()) {
+        ACL_LOG_ERROR("[Check][Paramtype]invalid vdec channelDesc parameter type %d.", static_cast<int32_t>(paramType));
+        std::string paramTypeStr = std::to_string(static_cast<int32_t>(paramType));
+        const char *argList[] = {"param", "value", "reason"};
+        const char *argVal[] = {"parameter type", paramTypeStr.c_str(), ""};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_PARAM_MSG,
+            argList, argVal, 3);
+        return ACL_ERROR_INVALID_PARAM;
+    }
+    return g_vdecSetParamFuncMap[paramType](channelDesc, length, param);
+}
+
+aclError acldvppSetChannelDescParam(acldvppChannelDesc *channelDesc,
+    acldvppChannelDescParamType paramType, size_t length, const void *param)
+{
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(param);
+    if (g_dvppSetParamFuncMap.find(paramType) == g_dvppSetParamFuncMap.end()) {
+        ACL_LOG_ERROR("[Check][Paramtype]invalid dvpp channelDesc parameter type %d.", static_cast<int32_t>(paramType));
+        std::string paramTypeStr = std::to_string(static_cast<int32_t>(paramType));
+        const char *argList[] = {"param", "value", "reason"};
+        const char *argVal[] = {"parameter type", paramTypeStr.c_str(), ""};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_PARAM_MSG,
+            argList, argVal, 3);
+        return ACL_ERROR_INVALID_PARAM;
+    }
+    return g_dvppSetParamFuncMap[paramType](channelDesc, length, param);
+}
+
+aclError aclvdecGetChannelDescParam(const aclvdecChannelDesc *channelDesc,
+                                    aclvdecChannelDescParamType paramType,
+                                    size_t length,
+                                    size_t *paramRetSize,
+                                    void *param)
+{
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(channelDesc);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(paramRetSize);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(param);
+    if (g_vdecGetParamFuncMap.find(paramType) == g_vdecGetParamFuncMap.end()) {
+        ACL_LOG_ERROR("[Check][Paramtype]invalid vdec channelDesc parameter type %d.", static_cast<int32_t>(paramType));
+        std::string paramTypeStr = std::to_string(static_cast<int32_t>(paramType));
+        const char *argList[] = {"param", "value", "reason"};
+        const char *argVal[] = {"parameter type", paramTypeStr.c_str(), ""};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_PARAM_MSG,
+            argList, argVal, 3);
+        return ACL_ERROR_INVALID_PARAM;
+    }
+    return g_vdecGetParamFuncMap[paramType](channelDesc, length, paramRetSize, param);
+}
+
+aclError acldvppGetChannelDescParam(const acldvppChannelDesc *channelDesc,
+                                    acldvppChannelDescParamType paramType,
+                                    size_t length,
+                                    size_t *paramRetSize,
+                                    void *param)
+{
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(param);
+    if (g_dvppGetParamFuncMap.find(paramType) == g_dvppGetParamFuncMap.end()) {
+        ACL_LOG_ERROR("[Check][Paramtype]invalid dvpp channelDesc parameter type %d.", static_cast<int32_t>(paramType));
+        std::string paramTypeStr = std::to_string(static_cast<int32_t>(paramType));
+        const char *argList[] = {"param", "value", "reason"};
+        const char *argVal[] = {"parameter type", paramTypeStr.c_str(), ""};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::INVALID_PARAM_MSG,
+            argList, argVal, 3);
+        return ACL_ERROR_INVALID_PARAM;
+    }
+    return g_dvppGetParamFuncMap[paramType](channelDesc, length, paramRetSize, param);;
+}
+
 
 uint32_t aclvencGetChannelDescBufSize(const aclvencChannelDesc *channelDesc)
 {

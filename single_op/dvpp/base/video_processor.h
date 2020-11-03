@@ -20,7 +20,6 @@ namespace acl {
     namespace dvpp {
     class VideoProcessor {
     public:
-        
         /**
          * Vdec create channel
          * @param channelDesc[in] vdec channel desc
@@ -245,6 +244,27 @@ namespace acl {
          * @retval bit depth， default 0.
          */
         virtual uint32_t aclvdecGetChannelDescBitDepth(const aclvdecChannelDesc *channelDesc);
+
+        /**
+         * set csc matrix in vdec channelDesc
+         *
+         * @param channelDesc [OUT]             the channel destruction
+         * @param matrixFormat [IN]             the csc matrix format
+         *
+         * @retval ACL_SUCCESS The function is successfully executed.
+         * @retval OtherValues Failure
+         */
+        virtual aclError aclvdecSetChannelDescMatrix(aclvdecChannelDesc *channelDesc,
+            acldvppCscMatrix matrixFormat);
+
+        /**
+         * get csc matrix in vdec channelDesc
+         *
+         * @param channelDesc [IN]              the vdec channel destruction
+         * @param matrixFormat [OUT]            the csc matrix format
+         */
+        virtual aclError aclvdecGetChannelDescMatrix(const aclvdecChannelDesc *channelDesc,
+            acldvppCscMatrix &matrixFormat);
 
         /**
          * Vdec destroy frame config
@@ -644,6 +664,8 @@ namespace acl {
          * @return ACL_SUCCESS for ok, others for fail
          */
         aclError SetVencParamToVencChannel(aclvencChannelDesc *channelDesc);
+
+        aclError SetVdecParamToVdecChannel(aclvdecChannelDesc *channelDesc);
     };
     }
 }

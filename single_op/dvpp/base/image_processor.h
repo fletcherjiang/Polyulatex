@@ -662,6 +662,27 @@ namespace acl {
          */
         virtual uint32_t acldvppGetHistRetCode(acldvppHist* hist);
 
+        /**
+         * set csc matrix in dvpp channelDesc
+         *
+         * @param channelDesc [IN]              the channel destruction
+         * @param matrixFormat [IN]             the csc matrix format
+         *
+         * @retval ACL_SUCCESS The function is successfully executed.
+         * @retval OtherValues Failure
+         */
+        virtual aclError acldvppSetChannelDescMatrix(acldvppChannelDesc *channelDesc,
+            acldvppCscMatrix matrixFormat);
+
+        /**
+         * get csc matrix in dvpp channelDesc
+         *
+         * @param channelDesc [IN]              the dvpp channel destruction
+         * @param matrixFormat [OUT]            the csc matrix format
+         */
+        virtual aclError acldvppGetChannelDescMatrix(const acldvppChannelDesc *channelDesc,
+            acldvppCscMatrix &matrixFormat);
+
         ~ImageProcessor() = default;
 
         // not allow copy constructor and assignment operators
@@ -1029,6 +1050,7 @@ namespace acl {
                                                   acldvppResizeConfig *resizeConfig,
                                                   const bool &resizeConfigSwitch,
                                                   aclrtStream stream);
+        aclError SetDvppParamToDvppChannel(acldvppChannelDesc *channelDesc);
     };
     }
 }

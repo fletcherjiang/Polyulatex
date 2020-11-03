@@ -15,6 +15,7 @@
 #include <cstddef>
 #include "securec.h"
 #include "runtime/rt.h"
+#include "utils/math_utils.h"
 #include "common/log_inner.h"
 #include "error_codes_inner.h"
 #include "aicpu/dvpp/dvpp_def.h"
@@ -127,7 +128,7 @@ namespace acl {
                     return false;
                 }
                 uint16_t orientation = 0;
-                uint32_t pos = 6; // 6 means ignore EXIF heder
+                uint64_t pos = 6; // 6 means ignore EXIF heder
                 uint16_t endian = 0;
 
                 // 8 means TIFF header
@@ -146,7 +147,7 @@ namespace acl {
                 if ((pos + 2) > exifMarker->data_length) {
                     return false;
                 }
-                uint16_t entries = GetU16(&exifMarker->data[pos], endian);
+                uint64_t entries = GetU16(&exifMarker->data[pos], endian);
                 pos += 2;
 
                 if ((pos + entries * 12) > exifMarker->data_length) {
@@ -158,14 +159,15 @@ namespace acl {
                     if (tag == TIFF_ORIENTATION_TAG) {
                         uint16_t format = GetU16(&exifMarker->data[pos + 2], endian);
                         uint16_t count = GetU32(&exifMarker->data[pos + 4], endian);
-                        if ((format != 3) || (count != 1)) {
+                        if ((format != 3) || (count != 1)) { // orientation protocal
                             return false;
                         }
                         orientation = GetU16(&exifMarker->data[pos + 8], endian);
+                        break;
                     }
                     pos += 12;
                 }
-                ACL_LOG_INFO("orientation is %d", orientation);
+                ACL_LOG_INFO("orientation is %u", orientation);
                 if ((orientation >= ORIENTATION_5) && (orientation <= ORIENTATION_8)) {
                     ACL_LOG_INFO("This image need orientation");
                     return true;
@@ -383,6 +385,11 @@ namespace acl {
     {
         ACL_LOG_INFO("start to execute acldvppCreateChannel");
         ACL_REQUIRES_NOT_NULL(channelDesc->dataBuffer.data);
+        aclError aclRet = SetDvppParamToDvppChannel(channelDesc);
+        if (aclRet != ACL_SUCCESS) {
+            ACL_LOG_INNER_ERROR("[Set][DvppParam]set dvpp parameter failed, result = %d", aclRet);
+            return ACL_ERROR_INVALID_PARAM;
+        }
         if (channelDesc->isNeedNotify) {
             return DvppCreateChannelWithNotify(channelDesc);
         } else {
@@ -1885,6 +1892,11 @@ namespace acl {
             return ACL_SUCCESS;
         }
 
+        {
+            std::unique_lock<std::mutex> lock{channelDesc->mutexForTLVMap};
+            channelDesc->tlvParamMap.clear();
+        }
+
         ACL_LOG_INFO("destroy DvppChannelDesc info: channelIndex = %lu, dataLen = %u, cmdListLen = %u.",
             channelDesc->channelIndex, channelDesc->dataBuffer.length, channelDesc->cmdListBuffer.length);
         switch (aclRunMode_) {
@@ -2137,8 +2149,22 @@ namespace acl {
         }
         // create acldvppChannelDesc in host addr
         aclDvppChannelDesc = new (hostAddr)acldvppChannelDesc;
-        RETURN_NULL_WITH_ALIGN_FREE(aclDvppChannelDesc, hostAddr);
+        if ((aclDvppChannelDesc == nullptr) || (aclDvppChannelDesc->dvppDesc.extendInfo == nullptr)) {
+            ACL_LOG_INNER_ERROR("[Create][VdecChannelDesc]create aclvdecChannelDesc with function new failed");
+            aclDvppChannelDesc->~acldvppChannelDesc();
+            ACL_ALIGN_FREE(hostAddr);
+            return nullptr;
+        }
 
+        auto err = memset_s(aclDvppChannelDesc->dvppDesc.extendInfo, acl::dvpp::DVPP_CHANNEL_DESC_TLV_LEN,
+            0, acl::dvpp::DVPP_CHANNEL_DESC_TLV_LEN);
+        if (err != EOK) {
+            ACL_LOG_INNER_ERROR("[Set][Mem]set dvppDesc extendInfo to 0 failed, dstLen = %u, srclen = %u, "
+                "result = %d.", aclDvppChannelDesc->dvppDesc.len, aclDvppChannelDesc->dvppDesc.len, err);
+            aclDvppChannelDesc->~acldvppChannelDesc();
+            ACL_ALIGN_FREE(hostAddr);
+            return nullptr;
+        }
         // alloc device mem for dataBuffer and share buffer
         size_t dataBufferSize = CalAclDvppStructSize(&aclDvppChannelDesc->dvppDesc);
         size_t totalSize =  dataBufferSize + acl::dvpp::DVPP_CHANNEL_SHARE_BUFFER_SIZE;
@@ -2191,8 +2217,18 @@ namespace acl {
 
         // create acldvppChannelDesc in device addr
         aclDvppChannelDesc = new (devAddr)acldvppChannelDesc;
-        if (aclDvppChannelDesc == nullptr) {
+        if ((aclDvppChannelDesc == nullptr) || (aclDvppChannelDesc->dvppDesc.extendInfo == nullptr)) {
             ACL_LOG_INNER_ERROR("[Create][ChannelDesc]create acldvppChannelDesc with function new failed");
+            (void) rtFree(devAddr);
+            devAddr = nullptr;
+            return nullptr;
+        }
+
+        auto err = memset_s(aclDvppChannelDesc->dvppDesc.extendInfo, acl::dvpp::DVPP_CHANNEL_DESC_TLV_LEN,
+            0, acl::dvpp::DVPP_CHANNEL_DESC_TLV_LEN);
+        if (err != EOK) {
+            ACL_LOG_INNER_ERROR("[Set][Mem]set dvppDesc extendInfo to 0 failed, dstLen = %u, srclen = %u, "
+                "result = %d.", aclDvppChannelDesc->dvppDesc.len, aclDvppChannelDesc->dvppDesc.len, err);
             (void) rtFree(devAddr);
             devAddr = nullptr;
             return nullptr;
@@ -2663,6 +2699,56 @@ namespace acl {
         struct jpeg_compress_struct *cinfoPtr = static_cast<jpeg_compress_struct *>(compressInfoPtr);
         jpeg_start_compress(cinfoPtr, TRUE);
 
+        return ACL_SUCCESS;
+    }
+
+    aclError ImageProcessor::acldvppSetChannelDescMatrix(acldvppChannelDesc *channelDesc,
+        acldvppCscMatrix matrixFormat)
+    {
+        ACL_LOG_ERROR("[Unsupport][Feature]Setting descMatrix for channel desc is not "
+            "supported in this version. Please check.");
+        const char *argList[] = {"feature", "reason"};
+        const char *argVal[] = {"Setting descMatrix for channel desc", "please check"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
+            argList, argVal, 2);
+        return ACL_ERROR_FEATURE_UNSUPPORTED;
+    }
+
+    aclError ImageProcessor::acldvppGetChannelDescMatrix(const acldvppChannelDesc *channelDesc,
+        acldvppCscMatrix &matrixFormat)
+    {
+        ACL_LOG_ERROR("[Unsupport][Feature]Getting descMatrix for channel desc is not "
+            "supported in this version. Please check.");
+        const char *argList[] = {"feature", "reason"};
+        const char *argVal[] = {"Getting descMatrix for channel desc", "please check"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
+            argList, argVal, 2);
+        return ACL_ERROR_FEATURE_UNSUPPORTED;
+    }
+
+    aclError ImageProcessor::SetDvppParamToDvppChannel(acldvppChannelDesc *channelDesc)
+    {
+        uint32_t offset = 0;
+        std::unique_lock<std::mutex> lock{channelDesc->mutexForTLVMap};
+        for (auto &it : channelDesc->tlvParamMap) {
+            ACL_REQUIRES_NOT_NULL(it.second.value.get());
+            uint32_t tmpOffset = offset;
+            ACL_CHECK_ASSIGN_UINT32T_ADD(tmpOffset, static_cast<uint32_t>(it.second.valueLen), tmpOffset);
+            if (tmpOffset > DVPP_CHANNEL_DESC_TLV_LEN) {
+                ACL_LOG_INNER_ERROR("[Check][Offset] offset %u can not be larger than %u",
+                    tmpOffset, DVPP_CHANNEL_DESC_TLV_LEN);
+                return ACL_ERROR_FAILURE;
+            }
+            auto ret = memcpy_s(channelDesc->dvppDesc.extendInfo + offset, it.second.valueLen,
+                it.second.value.get(), it.second.valueLen);
+            if (ret != EOK) {
+                ACL_LOG_INNER_ERROR("[Copy][Mem]call memcpy_s failed, result = %d, srcLen = %zu, dstLen = %zu", ret,
+                    it.second.valueLen, it.second.valueLen);
+                return ACL_ERROR_FAILURE;
+            }
+            offset += static_cast<uint32_t>(it.second.valueLen);
+        }
+        channelDesc->dvppDesc.len = offset;
         return ACL_SUCCESS;
     }
     }

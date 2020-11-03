@@ -27,6 +27,7 @@ namespace {
     constexpr uint32_t VENC_USER_MODE = 2;
     constexpr uint8_t SEND_FRAME_EOS = 1;
     constexpr int VDEC_CHANNEL_ID_CEILING = 31;
+    constexpr uint32_t VDEC_BIT_DEPTH_STRUCT_SIZE = sizeof(aicpu::dvpp::DvppVdecBitDepthConfig);
 }
 
 namespace acl {
@@ -124,7 +125,11 @@ namespace acl {
         ACL_LOG_INFO("start to execute aclvdecCreateChannel");
         ACL_REQUIRES_NOT_NULL(channelDesc->callback);
         ACL_REQUIRES_NOT_NULL(channelDesc->dataBuffer.data);
-
+        aclError aclRet = SetVdecParamToVdecChannel(channelDesc);
+        if (aclRet != ACL_SUCCESS) {
+            ACL_LOG_INNER_ERROR("[Set][VdecParam]set vdec parameter failed, result = %d", aclRet);
+            return aclRet;
+        }
         // record context of current thread
         rtError_t getCtxRet = rtCtxGetCurrent(&channelDesc->vdecMainContext);
         if (getCtxRet != RT_ERROR_NONE) {
@@ -402,6 +407,11 @@ namespace acl {
     {
         if (channelDesc == nullptr) {
             return ACL_SUCCESS;
+        }
+
+        {
+            std::unique_lock<std::mutex> lock{channelDesc->mutexForTLVMap};
+            channelDesc->tlvParamMap.clear();
         }
 
         switch (aclRunMode_) {
@@ -1390,11 +1400,69 @@ namespace acl {
         ACL_LOG_INFO("venc wait task type is notify");
     }
 
+    aclError VideoProcessor::SetVdecParamToVdecChannel(aclvdecChannelDesc *channelDesc)
+    {
+        uint32_t offset = VDEC_BIT_DEPTH_STRUCT_SIZE;
+        std::unique_lock<std::mutex> lock{channelDesc->mutexForTLVMap};
+        for (auto &it : channelDesc->tlvParamMap) {
+            if (it.first != VDEC_BIT_DEPTH) { // for compatibility, bit depth should be special treated
+                ACL_REQUIRES_NOT_NULL(it.second.value.get());
+                uint32_t tmpOffset = offset;
+                ACL_CHECK_ASSIGN_UINT32T_ADD(tmpOffset, static_cast<uint32_t>(it.second.valueLen), tmpOffset);
+                if (tmpOffset > VDEC_CHANNEL_DESC_TLV_LEN) {
+                    ACL_LOG_INNER_ERROR("[Check][Offset] offset %u can not be larger than %u",
+                        tmpOffset, VDEC_CHANNEL_DESC_TLV_LEN);
+                    return ACL_ERROR_FAILURE;
+                }
+                auto ret = memcpy_s(channelDesc->vdecDesc.extendInfo + offset, it.second.valueLen,
+                    it.second.value.get(), it.second.valueLen);
+                if (ret != EOK) {
+                    ACL_LOG_INNER_ERROR("[Copy][Mem]call memcpy_s failed, result = %d, srcLen = %zu, dstLen = %zu", ret,
+                        it.second.valueLen, it.second.valueLen);
+                    return ACL_ERROR_FAILURE;
+                }
+                offset += static_cast<uint32_t>(it.second.valueLen);
+            }
+        }
+        channelDesc->vdecDesc.len = offset;
+        // for compatibility, bit depth must be in front of extendInfo
+        auto itBitDepth = channelDesc->tlvParamMap.find(VDEC_BIT_DEPTH);
+        if (itBitDepth != channelDesc->tlvParamMap.end()) {
+            auto ret = memcpy_s(channelDesc->vdecDesc.extendInfo, VDEC_BIT_DEPTH_STRUCT_SIZE,
+                itBitDepth->second.value.get(), itBitDepth->second.valueLen);
+            if (ret != EOK) {
+                ACL_LOG_INNER_ERROR("[Copy][Mem]call memcpy_s failed, result = %d, srcLen = %zu, dstLen = %zu", ret,
+                    itBitDepth->second.valueLen, VDEC_BIT_DEPTH_STRUCT_SIZE);
+                return ACL_ERROR_FAILURE;
+            }
+        } else if (offset > VDEC_BIT_DEPTH_STRUCT_SIZE) {
+            aicpu::dvpp::DvppVdecBitDepthConfig tmpDvppVdecBitDepthConfig;
+            auto ret = memcpy_s(channelDesc->vdecDesc.extendInfo, VDEC_BIT_DEPTH_STRUCT_SIZE,
+                &tmpDvppVdecBitDepthConfig, VDEC_BIT_DEPTH_STRUCT_SIZE);
+            if (ret != EOK) {
+                ACL_LOG_INNER_ERROR("[Copy][Mem]call memcpy_s failed, result = %d, srcLen = %zu, dstLen = %zu", ret,
+                    VDEC_BIT_DEPTH_STRUCT_SIZE, VDEC_BIT_DEPTH_STRUCT_SIZE);
+                return ACL_ERROR_FAILURE;
+            }
+        } else {
+            channelDesc->vdecDesc.len = 0;
+        }
+        return ACL_SUCCESS;
+    }
+
     aclError VideoProcessor::SetVencParamToVencChannel(aclvencChannelDesc *channelDesc)
     {
         uint32_t offset = 0;
+        std::unique_lock<std::mutex> lock{channelDesc->mutexForTLVMap};
         for (auto &it : channelDesc->tlvParamMap) {
             ACL_REQUIRES_NOT_NULL(it.second.value.get());
+            uint32_t tmpOffset = offset;
+            ACL_CHECK_ASSIGN_UINT32T_ADD(tmpOffset, static_cast<uint32_t>(it.second.valueLen), tmpOffset);
+            if (tmpOffset > VENC_CHANNEL_DESC_TLV_LEN) {
+                ACL_LOG_INNER_ERROR("[Check][Offset] offset %u can not be larger than %u",
+                    tmpOffset, VENC_CHANNEL_DESC_TLV_LEN);
+                return ACL_ERROR_FAILURE;
+            }
             auto ret = memcpy_s(channelDesc->vencDesc.extendInfo + offset, it.second.valueLen,
                 it.second.value.get(), it.second.valueLen);
             if (ret != EOK) {
@@ -1402,7 +1470,7 @@ namespace acl {
                     it.second.valueLen, it.second.valueLen);
                 return ACL_ERROR_FAILURE;
             }
-            ACL_CHECK_ASSIGN_UINT32T_ADD(offset, static_cast<uint32_t>(it.second.valueLen), offset);
+            offset += static_cast<uint32_t>(it.second.valueLen);
         }
         channelDesc->vencDesc.len = offset;
 
@@ -1616,6 +1684,30 @@ namespace acl {
         return ACL_SUCCESS;
     }
 
+    aclError VideoProcessor::aclvdecSetChannelDescMatrix(aclvdecChannelDesc *channelDesc,
+        acldvppCscMatrix matrixFormat)
+    {
+        ACL_LOG_ERROR("[Unsupport][Feature]Setting descMatrix for channel desc is not "
+            "supported in this version. Please check.");
+        const char *argList[] = {"feature", "reason"};
+        const char *argVal[] = {"Setting descMatrix for channel desc", "please check"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
+            argList, argVal, 2);
+        return ACL_ERROR_FEATURE_UNSUPPORTED;
+    }
+
+    aclError VideoProcessor::aclvdecGetChannelDescMatrix(const aclvdecChannelDesc *channelDesc,
+            acldvppCscMatrix &matrixFormat)
+    {
+        ACL_LOG_ERROR("[Unsupport][Feature]Getting descMatrix for channel desc is not "
+            "supported in this version. Please check.");
+        const char *argList[] = {"feature", "reason"};
+        const char *argVal[] = {"Getting descMatrix for channel desc", "please check"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
+            argList, argVal, 2);
+        return ACL_ERROR_FEATURE_UNSUPPORTED;
+    }
+
     aclError VideoProcessor::aclvencSendFrame(aclvencChannelDesc *channelDesc, acldvppPicDesc *input, void *reserve,
         aclvencFrameConfig *config, void *userdata)
     {
@@ -1733,7 +1825,6 @@ namespace acl {
             ACL_ALIGN_FREE(hostAddr);
             return nullptr;
         }
-
         // malloc device memory for vdecChannelDesc
         void *devPtr = nullptr;
         size_t dataSize = CalAclDvppStructSize(&aclChannelDesc->vdecDesc);
@@ -1776,6 +1867,7 @@ namespace acl {
         aclChannelDesc = new (devAddr)aclvdecChannelDesc;
         if ((aclChannelDesc == nullptr) || (aclChannelDesc->vdecDesc.extendInfo == nullptr)) {
             ACL_LOG_INNER_ERROR("[Create][ChannelDesc]create aclvdecChannelDesc with function new failed");
+            aclChannelDesc->~aclvdecChannelDesc();
             (void) rtFree(devAddr);
             devAddr = nullptr;
             return nullptr;
@@ -1785,6 +1877,7 @@ namespace acl {
         if (err != EOK) {
             ACL_LOG_INNER_ERROR("[Set][Mem]set vdecDesc extendInfo to 0 failed, dstLen = %u, srclen = %u, "
                 "result = %d.", aclChannelDesc->vdecDesc.len, aclChannelDesc->vdecDesc.len, err);
+            aclChannelDesc->~aclvdecChannelDesc();
             (void) rtFree(devAddr);
             devAddr = nullptr;
             return nullptr;
