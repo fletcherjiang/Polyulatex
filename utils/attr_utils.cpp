@@ -99,6 +99,8 @@ string GeAttrValueToString(const ge::GeAttrValue &val)
             return ScalarAttrToString<int64_t>(val);
         case ge::GeAttrValue::VT_FLOAT:
             return ScalarAttrToString<float>(val);
+        case ge::GeAttrValue::VT_DATA_TYPE:
+            return ScalarAttrToString<ge::GeAttrValue::DATA_TYPE>(val);
         case ge::GeAttrValue::VT_LIST_STRING:
             return ListAttrToString<string>(val);
         case ge::GeAttrValue::VT_LIST_BOOL:
@@ -107,6 +109,8 @@ string GeAttrValueToString(const ge::GeAttrValue &val)
             return ListAttrToString<int64_t>(val);
         case ge::GeAttrValue::VT_LIST_FLOAT:
             return ListAttrToString<float>(val);
+        case ge::GeAttrValue::VT_LIST_DATA_TYPE:
+            return ListAttrToString<ge::GeAttrValue::DATA_TYPE>(val);
         case ge::GeAttrValue::VT_LIST_LIST_INT:
             return ListListAttrToString<int64_t>(val);
         default:
@@ -213,6 +217,9 @@ void GeAttrValueToStringForDigest(std::string &buffer, const ge::GeAttrValue &va
         case ge::GeAttrValue::VT_INT:
             ScalarAttrToString<int64_t>(buffer, val);
             break;
+        case ge::GeAttrValue::VT_DATA_TYPE:
+            ScalarAttrToString<ge::GeAttrValue::DATA_TYPE>(buffer, val);
+            break;
         case ge::GeAttrValue::VT_FLOAT:
             ScalarAttrToString<float>(buffer, val);
             break;
@@ -224,6 +231,9 @@ void GeAttrValueToStringForDigest(std::string &buffer, const ge::GeAttrValue &va
             break;
         case ge::GeAttrValue::VT_LIST_INT:
             ListAttrToStringForDigest<int64_t>(buffer, val);
+            break;
+        case ge::GeAttrValue::VT_LIST_DATA_TYPE:
+            ListAttrToStringForDigest<ge::GeAttrValue::DATA_TYPE>(buffer, val);
             break;
         case ge::GeAttrValue::VT_LIST_FLOAT:
             ListAttrToStringForDigest<float>(buffer, val);
@@ -354,6 +364,8 @@ bool AttrValueEquals(const ge::GeAttrValue &lhs, const ge::GeAttrValue &rhs)
             return AttrScalarValueEquals<int64_t>(lhs, rhs);
         case ge::GeAttrValue::VT_FLOAT:
             return AttrScalarValueEquals<float>(lhs, rhs);
+        case ge::GeAttrValue::VT_DATA_TYPE:
+            return AttrScalarValueEquals<ge::GeAttrValue::DATA_TYPE>(lhs, rhs);
         case ge::GeAttrValue::VT_LIST_STRING:
             return AttrListValueEquals<string>(lhs, rhs);
         case ge::GeAttrValue::VT_LIST_BOOL:
@@ -362,6 +374,8 @@ bool AttrValueEquals(const ge::GeAttrValue &lhs, const ge::GeAttrValue &rhs)
             return AttrListValueEquals<int64_t>(lhs, rhs);
         case ge::GeAttrValue::VT_LIST_FLOAT:
             return AttrListValueEquals<float>(lhs, rhs);
+        case ge::GeAttrValue::VT_LIST_DATA_TYPE:
+            return AttrListValueEquals<ge::GeAttrValue::DATA_TYPE>(lhs, rhs);
         case ge::GeAttrValue::VT_LIST_LIST_INT:
             return AttrListListValueEquals<int64_t>(lhs, rhs);
         default:

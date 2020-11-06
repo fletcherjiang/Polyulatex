@@ -28,10 +28,12 @@ namespace {
         {GeAttrValue::VT_FLOAT, "float"},
         {GeAttrValue::VT_BOOL, "bool"},
         {GeAttrValue::VT_INT, "int"},
+        {GeAttrValue::VT_DATA_TYPE, "datatype"},
         {GeAttrValue::VT_LIST_STRING, "liststring"},
         {GeAttrValue::VT_LIST_FLOAT, "listfloat"},
         {GeAttrValue::VT_LIST_BOOL, "listbool"},
-        {GeAttrValue::VT_LIST_INT, "listint"}
+        {GeAttrValue::VT_LIST_INT, "listint"},
+        {GeAttrValue::VT_LIST_DATA_TYPE, "listdatatype"},
     };
     int32_t compileFlag = 0;
 }
