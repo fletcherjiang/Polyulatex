@@ -56,7 +56,7 @@ struct ACL_FUNC_VISIBILITY aclopAttr {
     template<typename T>
     aclError SetAttr(const char *attrName, T value)
     {
-        ACL_REQUIRES_NOT_NULL(attrName);
+        ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attrName);
         auto attrVal = ge::GeAttrValue::CreateFrom<T>(value);
         attrs_[std::string(attrName)] = attrVal;
         return ACL_SUCCESS;
@@ -65,9 +65,9 @@ struct ACL_FUNC_VISIBILITY aclopAttr {
     template<typename T>
     aclError SetAttr(const char *attrName, int numValues, const T *values)
     {
-        ACL_REQUIRES_NOT_NULL(attrName);
+        ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attrName);
         if (numValues > 0) {
-            ACL_REQUIRES_NOT_NULL(values);
+            ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(values);
         }
         std::vector<T> valueVec;
         for (int32_t i = 0; i < numValues; ++i) {

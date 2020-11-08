@@ -66,6 +66,35 @@ aclError aclopSetAttrString(aclopAttr *attr, const char *attrName, const char *a
     return attr->SetAttr(attrName, std::string(attrValue));
 }
 
+aclError aclopSetAttrDataType(aclopAttr *attr, const char *attrName, aclDataType attrValue)
+{
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attr);
+    ge::DataType dt = ge::DT_UNDEFINED;
+    if (attrValue != ACL_DT_UNDEFINED) {
+        dt = static_cast<ge::DataType>(attrValue);
+    }
+    return attr->SetAttr(attrName, dt);
+}
+
+aclError aclopSetAttrListDataType(aclopAttr *attr, const char *attrName, int numValues, const aclDataType values[])
+{
+    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attr);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attrName);
+    if (numValues > 0) {
+        ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(values);
+    }
+    std::vector<ge::DataType> dtVec;
+    for (int i = 0; i < numValues; ++i) {
+        ge::DataType dt = ge::DT_UNDEFINED;
+        if (values[i] != ACL_DT_UNDEFINED) {
+            dt = static_cast<ge::DataType>(values[i]);
+        }
+        dtVec.push_back(dt);
+    }
+    return attr->SetAttr(attrName, numValues, dtVec.data());
+}
 aclError aclopSetAttrListBool(aclopAttr *attr, const char *attrName, int numValues, const uint8_t *values)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
