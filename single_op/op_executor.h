@@ -73,7 +73,6 @@ private:
                                    const AclOp &aclOp,
                                    const aclDataBuffer *const inputs[],
                                    aclDataBuffer *const outputs[],
-                                   std::map<int32_t, bool> optionalInputMap,
                                    bool executeWithExactModel = true);
 };
 } // namespace acl

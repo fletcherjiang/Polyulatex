@@ -71,6 +71,7 @@ struct ACL_FUNC_VISIBILITY aclTensorDesc {
     {
         return memtype == ACL_MEMTYPE_HOST;
     }
+    bool IsOptinalTensor() const;
     void Init(const aclTensorDesc &tensorDesc);
     void UpdateTensorShape(const std::vector<int64_t> &shape);
     void UpdateTensorShapeRange(const std::vector<std::pair<int64_t, int64_t>> &ranges);
