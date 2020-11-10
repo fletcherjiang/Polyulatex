@@ -28,7 +28,6 @@ aclError OpExecutor::DoExecuteAsync(ge::SingleOp *singleOp,
                                     const AclOp &aclOp,
                                     const aclDataBuffer *const *inputs,
                                     aclDataBuffer *const *outputs,
-                                    std::map<int32_t, bool> optionalInputMap,
                                     bool executeWithExactModel)
 {
     std::vector<ge::DataBuffer> inputVec;
@@ -36,7 +35,7 @@ aclError OpExecutor::DoExecuteAsync(ge::SingleOp *singleOp,
 
     for (int i = 0; i < aclOp.numInputs; ++i) {
         // skip optional input
-        if (optionalInputMap[i] == true) {
+        if (aclOp.inputDesc[i]->IsOptinalTensor()) {
             ACL_LOG_INFO("unused optional input, index %d", i);
             continue;
         }
@@ -84,6 +83,11 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
     std::vector<ge::GeTensorDesc> inputDesc;
     std::vector<ge::GeTensorDesc> outputDesc;
     for (int i = 0; i < aclOp.numInputs; ++i) {
+        // skip optional input
+        if (aclOp.inputDesc[i]->IsOptinalTensor()) {
+            ACL_LOG_INFO("unused optional input, index %d", i);
+            continue;
+        }
         if (aclOp.inputDesc[i]->CheckConstTensor(executeWithExactModel)) {
             ACL_LOG_INFO("the inputTensor is const tensor, index %d", i);
             continue;
@@ -245,9 +249,7 @@ aclError OpExecutor::ExecuteAsync(const AclOp &aclOp,
         if (executor == nullptr) {
             return ACL_ERROR_OP_LOAD_FAILED;
         }
-        std::map <int32_t, bool> optionalInputMap;
-        array_utils::GetOptionalInputMap(aclOp.numInputs, aclOp.inputDesc, optionalInputMap);
-        ret = DoExecuteAsync(executor, aclOp, inputs, outputs, optionalInputMap, isExactModel);
+        ret = DoExecuteAsync(executor, aclOp, inputs, outputs, isExactModel);
     }
 
     return ret;
@@ -321,7 +323,7 @@ aclError OpExecutor::ExecuteAsync(OpHandle &opHandle,
             ACL_LOG_INFO("cache operator executor. model = %s, stream = %p", opHandle.opModel.name.c_str(), stream);
             opHandle.cachedOperators.emplace(stream, singleOp);
         }
-        ret = DoExecuteAsync(singleOp, opHandle.aclOp, inputs, outputs, opHandle.optionalInputMap);
+        ret = DoExecuteAsync(singleOp, opHandle.aclOp, inputs, outputs);
     }
 
     return ret;
@@ -344,9 +346,6 @@ aclError OpExecutor::CreateOpHandle(const AclOp &aclOp, OpHandle **handle)
         }
     }
     bool isDynamic = false;
-
-    // get optional input from map
-    array_utils::GetOptionalInputMap(aclOp.numInputs, aclOp.inputDesc, handlePtr->optionalInputMap);
 
     if (handlePtr->kernelDesc == nullptr) {
         ACL_REQUIRES_OK(OpModelManager::GetInstance().MatchOpModel(aclOp, handlePtr->opModel, isDynamic));

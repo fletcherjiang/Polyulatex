@@ -104,21 +104,6 @@ bool GetDynamicInputIndex(int32_t size, const aclTensorDesc *const *arr, Dynamic
     return true;
 }
 
-void GetOptionalInputMap(int32_t size, const aclTensorDesc *const *inputDesc,
-    std::map<int32_t, bool> &optionalInputMap)
-{
-    optionalInputMap.clear();
-    for (int32_t i = 0; i < size; ++i) {
-        // optional input condition
-        if (inputDesc[i]->dataType == ACL_DT_UNDEFINED && inputDesc[i]->format == ACL_FORMAT_UNDEFINED
-            && inputDesc[i]->dims.size() == 0) {
-            optionalInputMap[i] = true;
-        } else {
-            optionalInputMap[i] = false;
-        }
-    }
-}
-
 aclError IsHostMemTensorDesc(int size, const aclTensorDesc *const *arr)
 {
     if (size == 0) {

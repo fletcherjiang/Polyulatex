@@ -34,7 +34,6 @@ struct OpHandle {
     std::shared_ptr<aclopKernelDesc> kernelDesc;
     AclOp aclOp;
     bool isDynamic = false;
-    std::map<int32_t, bool> optionalInputMap;
 };
 
 class ACL_FUNC_VISIBILITY OpExecutor {
@@ -73,7 +72,6 @@ private:
                                    const AclOp &aclOp,
                                    const aclDataBuffer *const inputs[],
                                    aclDataBuffer *const outputs[],
-                                   std::map<int32_t, bool> optionalInputMap,
                                    bool executeWithExactModel = true);
 };
 } // namespace acl

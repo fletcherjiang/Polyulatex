@@ -163,6 +163,14 @@ bool aclTensorDesc::CheckConstTensor(bool needCheckHostMem) const
     }
 }
 
+bool aclTensorDesc::IsOptinalTensor() const
+{
+    if ((dataType == ACL_DT_UNDEFINED) && (format == ACL_FORMAT_UNDEFINED) && (dims.empty())) {
+        return true;
+    }
+    return false;
+}
+
 void aclTensorDesc::UpdateTensorShape(const std::vector<int64_t> &shape)
 {
     dims.clear();
