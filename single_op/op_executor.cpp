@@ -347,9 +347,6 @@ aclError OpExecutor::CreateOpHandle(const AclOp &aclOp, OpHandle **handle)
     }
     bool isDynamic = false;
 
-    // get optional input from map
-    array_utils::GetOptionalInputMap(aclOp.numInputs, aclOp.inputDesc, handlePtr->optionalInputMap);
-
     if (handlePtr->kernelDesc == nullptr) {
         ACL_REQUIRES_OK(OpModelManager::GetInstance().MatchOpModel(aclOp, handlePtr->opModel, isDynamic));
         ACL_LOG_INFO("Match opModel success, opType = %s, isDynamic = %d", aclOp.opType.c_str(), isDynamic);

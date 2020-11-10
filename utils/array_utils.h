@@ -61,9 +61,6 @@ bool IsAllTensorEmpty(int size, const aclDataBuffer *const *arr);
 ACL_FUNC_VISIBILITY aclError IsHostMemTensorDesc(int size, const aclTensorDesc *const *arr);
 
 bool GetDynamicInputIndex(int32_t size, const aclTensorDesc *const *arr, DynamicInputIndexPair &indexPair);
-
-void GetOptionalInputMap(int32_t size, const aclTensorDesc *const *inputDesc,
-    std::map<int32_t, bool> &optionalInputMap);
 } // namespace array_utils
 } // acl
 #endif // ACL_UTILS_ARRAY_UTILS_H

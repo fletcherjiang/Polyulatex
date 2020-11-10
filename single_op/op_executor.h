@@ -34,7 +34,6 @@ struct OpHandle {
     std::shared_ptr<aclopKernelDesc> kernelDesc;
     AclOp aclOp;
     bool isDynamic = false;
-    std::map<int32_t, bool> optionalInputMap;
 };
 
 class ACL_FUNC_VISIBILITY OpExecutor {
