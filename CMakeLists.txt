@@ -253,15 +253,15 @@ if (NOT ENABLE_OPEN_SRC)
             if (${TARGET_SYSTEM_NAME} STREQUAL  "Android")
                 target_link_directories(ascendcl PRIVATE
                     ${TOP_DIR}/vendor/sdk/hi3796/drv_android
-                )
+                    )
             elseif(${TARGET_LINUX_DISTRIBUTOR_RELEASE} STREQUAL 100)
                 target_link_directories(ascendcl PRIVATE
                     ${TOP_DIR}/vendor/sdk/hi3796/drv
-                )
+                    )
             elseif(${TARGET_LINUX_DISTRIBUTOR_RELEASE} STREQUAL 200)
-            target_link_directories(ascendcl PRIVATE
-                ${TOP_DIR}/vendor/sdk/hi3559dv100/drv
-            )
+                target_link_directories(ascendcl PRIVATE
+                    ${TOP_DIR}/vendor/sdk/hi3559dv100/drv
+                    )
             endif()
             list(APPEND linklibs drvdevdrv drv_dfx)
         else ()
@@ -284,7 +284,7 @@ else ()
 endif()
 
 if(${TARGET_SYSTEM_NAME} STREQUAL "Windows")
-set(linklibs ascend_hal)
+    set(linklibs ascend_hal)
 endif()
 
 if(${TARGET_SYSTEM_NAME} STREQUAL "Windows")
@@ -394,6 +394,7 @@ target_link_libraries(ascendcl_static PRIVATE
     $<BUILD_INTERFACE:mmpa_headers>
     $<BUILD_INTERFACE:msprof_headers>
     $<BUILD_INTERFACE:slog_headers>
+    $<BUILD_INTERFACE:runtime_headers>
     c_sec
     json
     ascend_protobuf
