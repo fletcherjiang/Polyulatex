@@ -134,7 +134,7 @@ TEST_F(UTEST_ACL_compatibility_const_check, rt_error_codes)
 TEST_F(UTEST_ACL_compatibility_const_check, acl)
 {
     EXPECT_EQ(ACL_MAJOR_VERSION, 1);
-    EXPECT_EQ(ACL_MINOR_VERSION, 0);
+    EXPECT_EQ(ACL_MINOR_VERSION, 1);
     EXPECT_EQ(ACL_PATCH_VERSION, 0);
 }
 
