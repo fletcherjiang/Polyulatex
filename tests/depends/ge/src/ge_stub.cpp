@@ -354,6 +354,7 @@ std::vector<bool> g_geAttrValueListBool;
 std::vector<std::string> g_geAttrValueListString;
 std::vector<float> g_geAttrValueListFloat;
 std::vector<int64_t> g_geAttrValueListInt;
+std::vector<ge::GeAttrValue::DATA_TYPE> g_geAttrValueListDataType;
 std::vector<std::vector<int64_t>> g_geAttrValueListListInt;
 std::vector<std::vector<float, std::allocator<float>> ,std::allocator<std::vector<float, std::allocator<float> > > > g_geAttrValueListListListInt;
 ge::GeAttrValue::ValueType g_geAttrValueType = ge::GeAttrValue::VT_FLOAT;
@@ -997,6 +998,13 @@ std::map<string, GeAttrValue> g_geAttrMap;
         return GRAPH_SUCCESS;
     }
 
+    graphStatus GeAttrValue::SetValue(std::vector<DATA_TYPE> const& value)
+    {
+        g_geAttrValueType = GeAttrValue::VT_LIST_DATA_TYPE;
+        g_geAttrValueListDataType = value;
+        return GRAPH_SUCCESS;
+    }
+
     graphStatus GeAttrValue::SetValue(std::vector<float> const& value)
     {
         g_geAttrValueType = GeAttrValue::VT_LIST_FLOAT;
@@ -1080,6 +1088,12 @@ std::map<string, GeAttrValue> g_geAttrMap;
     graphStatus GeAttrValue::GetValue(std::vector<long >& value) const
     {
         value = g_geAttrValueListInt;
+        return GRAPH_SUCCESS;
+    }
+
+    graphStatus GeAttrValue::GetValue(std::vector<DATA_TYPE >& value) const
+    {
+        value = g_geAttrValueListDataType;
         return GRAPH_SUCCESS;
     }
 
