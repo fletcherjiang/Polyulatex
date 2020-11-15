@@ -351,6 +351,19 @@ TEST_F(UTEST_ACL_compatibility_enum_check, aclrtEventStatus)
     EXPECT_EQ(eventStatus, ACL_EVENT_STATUS_RESERVED);
 }
 
+TEST_F(UTEST_ACL_compatibility_enum_check, aclrtEventWaitStatus)
+{
+    aclrtEventStatus eventStatus;
+    eventStatus = (aclrtEventStatus)0;
+    EXPECT_EQ(eventStatus, ACL_EVENT_WAIT_STATUS_COMPLETE);
+
+    eventStatus = (aclrtEventStatus)1;
+    EXPECT_EQ(eventStatus, ACL_EVENT_WAIT_STATUS_NOT_READY);
+
+    eventStatus = (aclrtEventStatus)0xffff;
+    EXPECT_EQ(eventStatus, ACL_EVENT_WAIT_STATUS_RESERVED);
+}
+
 TEST_F(UTEST_ACL_compatibility_enum_check, aclrtCallbackBlockType)
 {
     aclrtCallbackBlockType blockType;

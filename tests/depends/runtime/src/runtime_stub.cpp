@@ -156,6 +156,11 @@ rtError_t aclStub::rtEventQuery(rtEvent_t event)
     return RT_ERROR_NONE;
 }
 
+rtError_t aclStub::rtEventQueryWaitStatus(rtEvent_t event, rtEventWaitStatus *status)
+{
+    return RT_ERROR_NONE;
+}
+
 rtError_t aclStub::rtNotifyCreate(int32_t device_id, rtNotify_t *notify_)
 {
     return RT_ERROR_NONE;
@@ -563,6 +568,11 @@ rtError_t rtEventSynchronize(rtEvent_t event)
 rtError_t rtEventQuery(rtEvent_t event)
 {
     return MockFunctionTest::aclStubInstance().rtEventQuery(event);
+}
+
+rtError_t rtEventQueryWaitStatus(rtEvent_t event, rtEventWaitStatus *status)
+{
+    return MockFunctionTest::aclStubInstance().rtEventQueryWaitStatus(event, status);
 }
 
 rtError_t rtNotifyCreate(int32_t device_id, rtNotify_t *notify_)
