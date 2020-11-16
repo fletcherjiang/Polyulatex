@@ -132,6 +132,29 @@ aclError aclrtQueryEvent(aclrtEvent event, aclrtEventStatus *status)
     return ACL_SUCCESS;
 }
 
+aclError aclrtQueryEventWaitStatus(aclrtEvent event, aclrtEventWaitStatus *status)
+{
+    ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
+    ACL_LOG_INFO("start to execute aclrtQueryEventWaitStatus");
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(event);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(status);
+
+    rtEventWaitStatus_t rtWaitStatus = EVENT_STATUS_NOT_READY;
+    rtError_t rtErr = rtEventQueryWaitStatus(static_cast<rtEvent_t>(event), &rtWaitStatus);
+    if (rtErr != RT_ERROR_NONE) {
+        ACL_LOG_CALL_ERROR("[Query][Status]query event wait-status failed, runtime result = %d",
+            static_cast<int32_t>(rtErr));
+        return ACL_GET_ERRCODE_RTS(rtErr);
+    }
+    if (rtWaitStatus == EVENT_STATUS_COMPLETE) {
+        *status = ACL_EVENT_WAIT_STATUS_COMPLETE;
+    } else {
+        *status = ACL_EVENT_WAIT_STATUS_NOT_READY;
+    }
+    ACL_LOG_INFO("successfully execute aclrtQueryEventWaitStatus");
+    return ACL_SUCCESS;
+}
+
 aclError aclrtSynchronizeEvent(aclrtEvent event)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);

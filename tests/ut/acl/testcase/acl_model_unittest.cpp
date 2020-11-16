@@ -108,6 +108,69 @@ ge::Status GetAippTypeStaticAippInvoke(uint32_t model_id, uint32_t index, ge::In
     return ge::SUCCESS;
 }
 
+ge::Status GetOpAttr_Invoke(uint32_t model_id, const std::string &op_name, const std::string &attr_name, std::string &attr_value)
+{
+    return FAILED;
+}
+
+ge::Status GetOpAttr_Invoke_1(uint32_t model_id, const std::string &op_name, const std::string &attr_name, std::string &attr_value)
+{
+    attr_value = "";
+    return SUCCESS;
+}
+
+ge::Status GetOpAttr_Invoke_2(uint32_t model_id, const std::string &op_name, const std::string &attr_name, std::string &attr_value)
+{
+    attr_value = "attr_finded";
+    return SUCCESS;
+}
+
+TEST_F(UTEST_ACL_Model, aclmdlGetOpAttr)
+{
+    aclmdlDesc *mdlDesc = aclmdlCreateDesc();
+    aclmdlDesc *mdlDescNullptr = nullptr;
+    const char *opName = "anyOp";
+    const char *opNameNullptr = nullptr;
+    const char *attr = "_datadump_original_op_names";
+    const char *attrNullptr = nullptr;
+
+    const char *attrNotSupported = "anyAttr";
+    const char *result = aclmdlGetOpAttr(mdlDesc, opName, attrNotSupported);
+    EXPECT_EQ(result, nullptr);
+
+    const char *resultNullptr_1 = aclmdlGetOpAttr(mdlDescNullptr, opName, attr);
+    EXPECT_EQ(resultNullptr_1, nullptr);
+
+    const char *resultNullptr_2 = aclmdlGetOpAttr(mdlDesc, opNameNullptr, attr);
+    EXPECT_EQ(resultNullptr_2, nullptr);
+
+    const char *resultNullptr_3 = aclmdlGetOpAttr(mdlDesc, opName, attrNullptr);
+    EXPECT_EQ(resultNullptr_3, nullptr);
+
+    const char *opName2 = "anyOp2";
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetOpAttr(_,_,_,_))
+        .WillOnce(Invoke(GetOpAttr_Invoke));
+    const char *resultGeFailed  = aclmdlGetOpAttr(mdlDesc, opName, attr);
+    EXPECT_EQ(resultGeFailed, nullptr);
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetOpAttr(_,_,_,_))
+        .WillOnce(Invoke(GetOpAttr_Invoke_1));
+    const char *resultEmptyStr = aclmdlGetOpAttr(mdlDesc, opName, attr);
+    EXPECT_EQ(string(resultEmptyStr), "");
+
+    const char *opName3 = "anyOp3";
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetOpAttr(_,_,_,_))
+        .WillOnce(Invoke(GetOpAttr_Invoke_2));
+    const char *resultValue = aclmdlGetOpAttr(mdlDesc, opName3, attr);
+    std::cout << string(resultValue) << "****************"<<std::endl;;
+    EXPECT_EQ(string(resultValue), "attr_finded");
+
+    const char *resultGeSuccess = aclmdlGetOpAttr(mdlDesc, opName3, attr);
+    EXPECT_EQ(string(resultGeSuccess), "attr_finded");
+
+    aclmdlDestroyDesc(mdlDesc);
+}
+
 TEST_F(UTEST_ACL_Model, desc)
 {
     aclmdlDesc* desc = aclmdlCreateDesc();

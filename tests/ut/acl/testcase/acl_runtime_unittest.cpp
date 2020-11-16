@@ -37,6 +37,18 @@ protected:
 
 extern aclError MemcpyKindTranslate(aclrtMemcpyKind kind, rtMemcpyKind_t &rtKind);
 
+rtError_t rtEventQueryWaitStatus_Invoke(rtEvent_t event, rtEventWaitStatus *status)
+{
+    *status = EVENT_STATUS_COMPLETE;
+    return RT_ERROR_NONE;
+}
+
+rtError_t rtEventQueryWaitStatus_Invoke2(rtEvent_t event, rtEventWaitStatus *status)
+{
+    *status = EVENT_STATUS_NOT_READY;
+    return RT_ERROR_NONE;
+}
+
 TEST_F(UTEST_ACL_Runtime, aclrtSetDeviceSuccessTest)
 {
     int32_t deviceId = 1;
@@ -353,6 +365,35 @@ TEST_F(UTEST_ACL_Runtime, aclrtResetEventTest)
         .WillRepeatedly(Return((ACL_ERROR_RT_PARAM_INVALID)));
     ret = aclrtResetEvent(event, stream);
     EXPECT_EQ(ret, ACL_ERROR_RT_PARAM_INVALID);
+}
+
+TEST_F(UTEST_ACL_Runtime, aclrtQueryEventWaitStatusTest)
+{
+    //aclrtQueryEventWaitStatus
+    aclrtEvent event = (aclrtEvent)0x01;
+    aclrtEventWaitStatus status;
+    aclError ret = aclrtQueryEventWaitStatus(nullptr, &status);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    ret = aclrtQueryEventWaitStatus(event, nullptr);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtEventQueryWaitStatus(_,_))
+        .WillOnce(Return((ACL_ERROR_RT_PARAM_INVALID)));
+    ret =  aclrtQueryEventWaitStatus(event, &status);
+    EXPECT_EQ(ret, ACL_ERROR_RT_PARAM_INVALID);
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtEventQueryWaitStatus(_,_))
+        .WillOnce(Invoke(rtEventQueryWaitStatus_Invoke));
+    ret =  aclrtQueryEventWaitStatus(event, &status);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    EXPECT_EQ(status, ACL_EVENT_WAIT_STATUS_COMPLETE);
+
+   EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtEventQueryWaitStatus(_,_))
+        .WillOnce(Invoke(rtEventQueryWaitStatus_Invoke2));
+    ret =  aclrtQueryEventWaitStatus(event, &status);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    EXPECT_EQ(status, ACL_EVENT_WAIT_STATUS_NOT_READY);
 }
 
 TEST_F(UTEST_ACL_Runtime, aclrtQueryEventTest)

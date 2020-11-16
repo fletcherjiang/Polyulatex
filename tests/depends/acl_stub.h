@@ -101,6 +101,7 @@ public:
     virtual Status GetUserDesignateShapeOrder(uint32_t model_id, vector<string> &user_designate_shape_order);
     virtual Status GetCurShape(const uint32_t model_id, std::vector<int64_t> &batch_info, int32_t &dynamic_type);
     virtual Status GetModelAttr(uint32_t model_id,std::vector<std::string> &dynamic_output_shape_info);
+    virtual Status GetOpAttr(uint32_t model_id, const std::string &op_name, const std::string &attr_name, std::string &attr_value);
     virtual Status GetAIPPInfo(uint32_t model_id, uint32_t index, AippConfigInfo &aipp_params);
     virtual Status GetBatchInfoSize(uint32_t model_id, size_t &shape_count);
     virtual Status GetOrigInputInfo(uint32_t model_id, uint32_t index, OriginInputInfo &origOutputInfo);
@@ -141,6 +142,7 @@ public:
     virtual rtError_t rtEventReset(rtEvent_t event, rtStream_t stream);
     virtual rtError_t rtEventSynchronize(rtEvent_t event);
     virtual rtError_t rtEventQuery(rtEvent_t event);
+    virtual rtError_t rtEventQueryWaitStatus(rtEvent_t event, rtEventWaitStatus *status);
     virtual rtError_t rtNotifyCreate(int32_t device_id, rtNotify_t *notify_);
     virtual rtError_t rtNotifyDestroy(rtNotify_t notify_);
     virtual rtError_t rtNotifyRecord(rtNotify_t notify_, rtStream_t stream_);
@@ -261,6 +263,7 @@ public:
     MOCK_METHOD2(GetUserDesignateShapeOrder, Status(uint32_t model_id, vector<string> &user_designate_shape_order));
     MOCK_METHOD3(GetCurShape, Status(const uint32_t model_id, std::vector<int64_t> &batch_info, int32_t &dynamic_type));
     MOCK_METHOD2(GetModelAttr, Status(uint32_t model_id,std::vector<std::string> &dynamic_output_shape_info));
+    MOCK_METHOD4(GetOpAttr, Status(uint32_t model_id, const std::string &op_name, const std::string &attr_name, std::string &attr_value));
     MOCK_METHOD3(GetAIPPInfo, Status(uint32_t model_id, uint32_t index, AippConfigInfo &aipp_params));
     MOCK_METHOD2(GetBatchInfoSize, Status(uint32_t model_id, size_t &shape_count));
     MOCK_METHOD3(GetOrigInputInfo, Status(uint32_t model_id, uint32_t index, OriginInputInfo &origOutputInfo));
@@ -307,6 +310,7 @@ public:
     MOCK_METHOD2(rtEventReset, rtError_t(rtEvent_t event, rtStream_t stream));
     MOCK_METHOD1(rtEventSynchronize, rtError_t(rtEvent_t event));
     MOCK_METHOD1(rtEventQuery, rtError_t(rtEvent_t event));
+    MOCK_METHOD2(rtEventQueryWaitStatus, rtError_t(rtEvent_t event, rtEventWaitStatus *status));
     MOCK_METHOD2(rtNotifyCreate, rtError_t(int32_t device_id, rtNotify_t *notify_));
     MOCK_METHOD1(rtNotifyDestroy, rtError_t(rtNotify_t notify_));
     MOCK_METHOD2(rtNotifyRecord, rtError_t(rtNotify_t notify_, rtStream_t stream_));

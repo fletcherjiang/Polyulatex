@@ -261,6 +261,13 @@ Status aclStub::GetModelAttr(uint32_t model_id,std::vector<std::string> &dynamic
     return SUCCESS;
 }
 
+Status aclStub::GetOpAttr(uint32_t model_id, const std::string &op_name, const std::string &attr_name,
+                   std::string &attr_value)
+{
+    return SUCCESS;
+}
+
+
 Status aclStub::GetAIPPInfo(uint32_t model_id, uint32_t index, AippConfigInfo &aipp_params)
 {
     aipp_params.input_format = 1;
@@ -460,12 +467,6 @@ std::map<string, GeAttrValue> g_geAttrMap;
       return MockFunctionTest::aclStubInstance().GetCurDynamicDims(model_id, dynamic_dims, cur_dynamic_dims);
     }
 
-    Status GeExecutor::GetOpAttr(uint32_t model_id, const std::string &op_name, const std::string &attr_name,
-                       std::string &attr_value)
-    {
-        return SUCCESS;
-    }
-
     int64_t TensorDesc::GetSize() const
     {
         return 1;
@@ -544,6 +545,12 @@ std::map<string, GeAttrValue> g_geAttrMap;
     {
         dynamic_output_shape_info.push_back({"0:0:1,3,224,224"});
         return MockFunctionTest::aclStubInstance().GetModelAttr(model_id, dynamic_output_shape_info);
+    }
+
+    Status GeExecutor::GetOpAttr(uint32_t model_id, const std::string &op_name, const std::string &attr_name,
+                       std::string &attr_value)
+    {
+        return MockFunctionTest::aclStubInstance().GetOpAttr(model_id, op_name, attr_name, attr_value);
     }
 
     Status GeExecutor::LoadDataFromFile(std::string const &path, ModelData &modelData)
