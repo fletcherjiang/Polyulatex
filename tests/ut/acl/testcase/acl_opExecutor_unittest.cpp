@@ -116,6 +116,7 @@ TEST_F(OpExecutorTest, DoExecuteAsyncTest)
         .WillOnce(Return(PARAM_INVALID))
         .WillOnce(Return(SUCCESS));
 
+    std::map<int32_t, bool> optionalInputMap;
     AclOp aclOp;
     aclOp.opType = "Add";
     aclOp.numInputs = 2;
@@ -128,8 +129,8 @@ TEST_F(OpExecutorTest, DoExecuteAsyncTest)
     outputDesc[0] = aclCreateTensorDesc(ACL_FLOAT16, 2, shape, ACL_FORMAT_ND);
     aclOp.inputDesc = inputDesc;
     aclOp.outputDesc = outputDesc;
-    ASSERT_NE(OpExecutor::DoExecuteAsync(singleOp, aclOp, inputs_, outputs_), ACL_SUCCESS);
-    ASSERT_EQ(OpExecutor::DoExecuteAsync(singleOp, aclOp, inputs_, outputs_), ACL_SUCCESS);
+    ASSERT_NE(OpExecutor::DoExecuteAsync(singleOp, aclOp, inputs_, outputs_, optionalInputMap), ACL_SUCCESS);
+    ASSERT_EQ(OpExecutor::DoExecuteAsync(singleOp, aclOp, inputs_, outputs_, optionalInputMap), ACL_SUCCESS);
     aclDestroyTensorDesc(inputDesc[0]);
     aclDestroyTensorDesc(inputDesc[1]);
     aclDestroyTensorDesc(outputDesc[0]);

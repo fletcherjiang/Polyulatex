@@ -255,6 +255,66 @@ ge::Status aclStub::GetCurShape(const uint32_t model_id, std::vector<int64_t> &b
     return SUCCESS;
 }
 
+
+Status aclStub::GetMemAndWeightSize(const std::string &path, size_t &mem_size, size_t &weight_size)
+{
+    return SUCCESS;
+}
+
+Status aclStub::GetMemAndWeightSize(const void *model_data, size_t model_size, size_t &mem_size, size_t &weight_size)
+{
+    return SUCCESS;
+}
+
+Status aclStub::ExecModel(uint32_t model_id, void *stream, const ge::RunModelData &run_input_data,
+                            const std::vector<ge::GeTensorDesc> &input_desc, ge::RunModelData &run_output_data,
+                            std::vector<ge::GeTensorDesc> &output_desc, bool async_mode)
+{
+    ge::GeTensorDesc geDescTmp;
+    output_desc.push_back(geDescTmp);
+    return SUCCESS;
+}
+
+Status aclStub::SetDynamicBatchSize(uint32_t model_id, void *dynamic_input_addr, uint64_t length, uint64_t batch_size)
+{
+    return SUCCESS;
+}
+
+Status aclStub::SetDynamicImageSize(uint32_t model_id, void *dynamic_input_addr, uint64_t length, uint64_t image_height, uint64_t image_width)
+{
+    return SUCCESS;
+}
+
+Status aclStub::SetDynamicDims(uint32_t model_id, void *dynamic_input_addr, uint64_t length,
+                                    const vector<uint64_t> &dynamic_dims)
+{
+    return SUCCESS;
+}
+
+Status aclStub::GetCurDynamicDims(uint32_t model_id, const vector<uint64_t> &dynamic_dims,
+                                        vector<uint64_t> &cur_dynamic_dims)
+{
+    return SUCCESS;
+}
+
+Status aclStub::GetAippType(uint32_t model_id, uint32_t index, ge::InputAippType &type, size_t &aippindex)
+{
+    type = ge::DATA_WITH_DYNAMIC_AIPP;
+    aippindex = 3;
+    return SUCCESS;
+}
+
+Status aclStub::GetUserDesignateShapeOrder(uint32_t model_id, vector<string> &user_designate_shape_order)
+{
+    return SUCCESS;
+}
+
+ge::Status aclStub::GetCurShape(const uint32_t model_id, std::vector<int64_t> &batch_info, int32_t &dynamic_type)
+{
+    batch_info.push_back(1);
+    return SUCCESS;
+}
+
 Status aclStub::GetModelAttr(uint32_t model_id,std::vector<std::string> &dynamic_output_shape_info)
 {
     dynamic_output_shape_info.push_back({"0:0:1,3,224,224"});
