@@ -44,9 +44,9 @@ set(UT_FILES
     "testcase/compatibility/enum_check.cpp"
     "testcase/compatibility/const_check.cpp"
     "testcase/compatibility/struct_check.cpp"
+    "testcase/acl_model_unittest.cpp"
     "testcase/acl_common_unittest.cpp"
     "testcase/acl_toolchain_unittest.cpp"
-    "testcase/acl_model_unittest.cpp"
     "testcase/acl_opCompile_unittest.cpp"
     "testcase/acl_opAttr_unittest.cpp"
     "testcase/acl_opExecutor_unittest.cpp"
@@ -85,7 +85,6 @@ set(SRC_FILES
     "${BASE_DIR}/runtime/callback.cpp"
     "${BASE_DIR}/runtime/group.cpp"
     "${BASE_DIR}/model/model.cpp"
-    "${BASE_DIR}/stub/libjpeg_lhisi_stub.cpp"
     "${BASE_DIR}/model/model_config.cpp"
     "${BASE_DIR}/model/acl_aipp.cpp"
     "${BASE_DIR}/model/aipp_param_check.cpp"
@@ -203,6 +202,7 @@ target_link_libraries(ascendcl_utest PRIVATE
     toolchain_stub
     runtime_stub
     profiling_stub
+    jpeg_stub
     -lrt
     -ldl
     -lpthread

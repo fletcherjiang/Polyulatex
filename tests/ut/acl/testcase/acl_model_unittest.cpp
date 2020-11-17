@@ -32,6 +32,7 @@ ge::Status GetModelDescInfo_Invoke(uint32_t modelId, std::vector<ge::TensorDesc>
     outputDesc.push_back(desc1);
     return ge::SUCCESS;
 }
+
 ge::Status GetModelDescInfo_Invoke2(uint32_t modelId, std::vector<ge::TensorDesc>& inputDesc,
                                    std::vector<ge::TensorDesc>& outputDesc, bool new_model_desc)
 {
@@ -689,7 +690,7 @@ TEST_F(UTEST_ACL_Model, aclmdlGetOutputFormat)
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetDynamicBatchInfo(_, _,_))
         .WillRepeatedly(Invoke((GetDynamicBatchInfo_Invoke)));
     aclError ret = aclmdlGetDesc(desc, 1);
-    EXPECT_EQ(ret, ACL_SUCCESS); // 有问题
+    EXPECT_EQ(ret, ACL_SUCCESS);
 
     aclFormat formatVal = aclmdlGetOutputFormat(nullptr, 0);
     EXPECT_EQ(formatVal, ACL_FORMAT_UNDEFINED);
@@ -994,6 +995,18 @@ TEST_F(UTEST_ACL_Model, aclmdlGetOutputDims01)
     EXPECT_EQ(ret, ACL_SUCCESS);
 }
 
+TEST_F(UTEST_ACL_Model, aclmdlGetOutputDims02)
+{
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetModelDescInfo(_, _,_,_))
+        .WillRepeatedly(Invoke((GetModelDescInfo_Invoke)));
+    aclmdlDesc* desc = aclmdlCreateDesc();
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetDynamicBatchInfo(_, _,_))
+        .WillRepeatedly(Invoke((GetDynamicBatchInfo_Invoke)));
+    aclmdlGetDesc(desc, 1);
+    aclmdlDestroyDesc(desc);
+}
+
 ge::Status GetDynamicBatchInfo_Invoke1(uint32_t model_id,
                                       std::vector<std::vector<int64_t>> &batch_info, int32_t &dynamic_type)
 {
@@ -1137,7 +1150,7 @@ TEST_F(UTEST_ACL_Model, aclmdlGetCurOutputDims)
     EXPECT_EQ(ret, ACL_SUCCESS);
 
     ret = aclmdlGetCurOutputDims(desc, 0, &dims);
-    EXPECT_EQ(ret, ACL_SUCCESS);
+    EXPECT_EQ(ret, ACL_SUCCESS); //modify
     Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
 
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetModelAttr(_, _))
@@ -1150,6 +1163,89 @@ TEST_F(UTEST_ACL_Model, aclmdlGetCurOutputDims)
 
     ret = aclmdlDestroyDesc(desc);
     EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_ACL_Model, aclmdlSetInputAIPP)
+{
+    aclmdlAIPP *aippmdlAipp = aclmdlCreateAIPP(0);
+    aclError ret = aclmdlSetAIPPInputFormat(aippmdlAipp, ACL_YUV420SP_U8);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+    uint32_t batchNumber = 1;
+    aclmdlAIPP *aippDynamicSet = aclmdlCreateAIPP(batchNumber);
+    ret = aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_YUV420SP_U8);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    ret = aclmdlSetAIPPCscParams(aippDynamicSet, 1, 256, 443, 0, 256, -86, -178, 256, 0, 350, 0, 0, 0, 0, 128, 128);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    ret = aclmdlSetAIPPCscParams(aippDynamicSet, 0, 256, 443, 0, 256, -86, -178, 256, 0, 350, 0, 0, 0, 0, 128, 128);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    ret = aclmdlSetAIPPRbuvSwapSwitch(aippDynamicSet, 0);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    ret = aclmdlSetAIPPDtcPixelMean(aippDynamicSet, 0, 0, 0, 0, 0);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    ret = aclmdlSetAIPPDtcPixelMin(aippDynamicSet, 0, 0, 0, 0, 0);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    ret = aclmdlSetAIPPPixelVarReci(aippDynamicSet, 1, 1, 1, 0, 0);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    ret = aclmdlSetAIPPScfParams(aippDynamicSet, 0, 1, 1, 1, 1, 0);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    ret = aclmdlSetAIPPScfParams(aippDynamicSet, 1, 224, 224, 16, 224, 0);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    ret = aclmdlSetAIPPAxSwapSwitch(aippDynamicSet, 0);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    ret = aclmdlSetAIPPSrcImageSize(aippDynamicSet, 224, 224);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    ret = aclmdlSetAIPPCropParams(aippDynamicSet, 0, 0, 0, 1, 1, 0);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    ret = aclmdlSetAIPPCropParams(aippDynamicSet, 1, 0, 0, 1, 1, 0);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    ret = aclmdlSetAIPPPaddingParams(aippDynamicSet, 0, 0, 0, 0, 0, 0);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    ret = aclmdlSetAIPPPaddingParams(aippDynamicSet, 1, 0, 0, 0, 0, 0);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    aclmdlDataset *dataset = aclmdlCreateDataset();
+    aclDataBuffer *buffer = aclCreateDataBuffer((void*)0x1, 1);
+    ret = aclmdlAddDatasetBuffer(dataset, buffer);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+
+    ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
+    EXPECT_NE(ret, ACL_SUCCESS);
+    ret = aclmdlDestroyAIPP(aippDynamicSet);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    aclDestroyDataBuffer(buffer);
+    aclmdlDestroyDataset(dataset);
+}
+
+TEST_F(UTEST_ACL_Model, aclmdlSetInputAIPP_SetDynamicAippData_fail)
+{
+    aclmdlAIPP *aippmdlAipp = aclmdlCreateAIPP(0);
+    aclError ret = aclmdlSetAIPPInputFormat(aippmdlAipp, ACL_YUV420SP_U8);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+    uint32_t batchNumber = 1;
+    aclmdlAIPP *aippDynamicSet = aclmdlCreateAIPP(batchNumber);
+    ret = aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_YUV420SP_U8);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    ret = aclmdlSetAIPPCscParams(aippDynamicSet, 1, 256, 443, 0, 256, -86, -178, 256, 0, 350, 0, 0, 0, 0, 128, 128);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    ret = aclmdlSetAIPPSrcImageSize(aippDynamicSet, 224, 224);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+
+    aclmdlDataset *dataset = aclmdlCreateDataset();
+    aclDataBuffer *buffer = aclCreateDataBuffer((void*)0x1, 1);
+    ret = aclmdlAddDatasetBuffer(dataset, buffer);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetAippType(_, _,_,_))
+        .WillRepeatedly(Invoke(GetAippTypeSuccessInvoke));
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), SetDynamicAippData(_, _,_,_, _))
+        .WillRepeatedly(Return(FAILED));
+
+    ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
+    EXPECT_NE(ret, ACL_SUCCESS);
+    ret = aclmdlDestroyAIPP(aippDynamicSet);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    aclDestroyDataBuffer(buffer);
+    aclmdlDestroyDataset(dataset);
 }
 
 TEST_F(UTEST_ACL_Model, aclmdlSetAIPPByInputIndex_fail1)
@@ -1167,6 +1263,29 @@ TEST_F(UTEST_ACL_Model, aclmdlSetAIPPByInputIndex_fail1)
 
     ret = aclmdlSetAIPPByInputIndex(1, dataset, 6, aippDynamicSet);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+    ret = aclmdlDestroyAIPP(aippDynamicSet);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    aclDestroyDataBuffer(buffer);
+    aclmdlDestroyDataset(dataset);
+}
+
+TEST_F(UTEST_ACL_Model, aclmdlSetAIPPByInputIndex_fail2)
+{
+    aclmdlAIPP *aippmdlAipp = aclmdlCreateAIPP(0);
+    aclError ret = aclmdlSetAIPPInputFormat(aippmdlAipp, ACL_YUV420SP_U8);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+    uint32_t batchNumber = 1;
+    aclmdlAIPP *aippDynamicSet = aclmdlCreateAIPP(batchNumber);
+
+    aclmdlDataset *dataset = aclmdlCreateDataset();
+    aclDataBuffer *buffer = aclCreateDataBuffer((void*)0x1, 1);
+    ret = aclmdlAddDatasetBuffer(dataset, buffer);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetAippType(_, _,_,_))
+        .WillRepeatedly(Return(ACL_ERROR_FAILURE));
+    ret = aclmdlSetAIPPByInputIndex(1, dataset, 0, aippDynamicSet);
+    EXPECT_EQ(ret, ACL_ERROR_FAILURE);
     ret = aclmdlDestroyAIPP(aippDynamicSet);
     EXPECT_EQ(ret, ACL_SUCCESS);
     aclDestroyDataBuffer(buffer);
@@ -1197,10 +1316,52 @@ TEST_F(UTEST_ACL_Model, aclmdlSetAIPPByInputIndex_fail3)
     aclmdlDestroyDataset(dataset);
 }
 
+TEST_F(UTEST_ACL_Model, aclmdlSetAIPPByInputIndex_SUCCESS)
+{
+    aclmdlAIPP *aippmdlAipp = aclmdlCreateAIPP(0);
+    uint32_t batchNumber = 1;
+    aclmdlAIPP *aippDynamicSet = aclmdlCreateAIPP(batchNumber);
+
+    aclmdlDataset *dataset = aclmdlCreateDataset();
+    aclDataBuffer *buffer = aclCreateDataBuffer((void*)0x1, 1);
+    auto ret = aclmdlAddDatasetBuffer(dataset, buffer);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetModelDescInfo(_, _,_,_))
+        .WillRepeatedly(Invoke(GetModelDescInfo_Invoke2));
+    ret = aclmdlSetAIPPByInputIndex(1, dataset, 0, aippDynamicSet);
+    EXPECT_EQ(ret, ACL_ERROR_FAILURE);
+    ret = aclmdlDestroyAIPP(aippDynamicSet);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    aclDestroyDataBuffer(buffer);
+    aclmdlDestroyDataset(dataset);
+}
+
 aclError aclmdlGetInputIndexByName_Invoke(const aclmdlDesc *modelDesc, const char *name, size_t *index)
 {
     *index = 0;
     return ACL_SUCCESS;
+}
+
+TEST_F(UTEST_ACL_Model, aclmdlSetInputAIPP_Fail)
+{
+    uint32_t batchNumber = 1;
+    aclmdlAIPP *aippDynamicSet = aclmdlCreateAIPP(batchNumber);
+    aclmdlDataset *dataset = aclmdlCreateDataset();
+    aclDataBuffer *buffer = aclCreateDataBuffer((void*)0x1, 1);
+    aclError ret = aclmdlAddDatasetBuffer(dataset, buffer);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetModelDescInfo(_,_,_,_))
+        .WillOnce(Return(ACL_ERROR_INVALID_PARAM))
+        .WillRepeatedly(Return(ACL_SUCCESS));
+    ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
+    EXPECT_EQ(ret, ACL_ERROR_GE_FAILURE);
+    ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
+    ret = aclmdlDestroyAIPP(aippDynamicSet);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    aclDestroyDataBuffer(buffer);
+    aclmdlDestroyDataset(dataset);
 }
 
 TEST_F(UTEST_ACL_Model, aclmdlSetInputAIPP_Fail1)
@@ -1219,6 +1380,323 @@ TEST_F(UTEST_ACL_Model, aclmdlSetInputAIPP_Fail1)
 
     ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
     EXPECT_NE(ret, ACL_SUCCESS);
+    ret = aclmdlDestroyAIPP(aippDynamicSet);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    aclDestroyDataBuffer(buffer);
+    aclmdlDestroyDataset(dataset);
+}
+
+TEST_F(UTEST_ACL_Model, aclmdlSetInputAIPP_Fail2)
+{
+    aclmdlAIPP *aippmdlAipp = aclmdlCreateAIPP(0);
+    uint32_t batchNumber = 1;
+    aclmdlAIPP *aippDynamicSet = aclmdlCreateAIPP(batchNumber);
+
+    aclmdlDataset *dataset = aclmdlCreateDataset();
+    aclDataBuffer *buffer = aclCreateDataBuffer((void*)0x1, 1);
+    auto ret = aclmdlAddDatasetBuffer(dataset, buffer);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetAippType(_, _,_,_))
+        .WillOnce(Invoke(GetAippTypeFailInvoke))
+        .WillRepeatedly(Invoke(GetAippTypeStaticAippInvoke));
+
+    ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
+    EXPECT_NE(ret, ACL_SUCCESS);
+    ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
+    EXPECT_NE(ret, ACL_SUCCESS);
+    ret = aclmdlDestroyAIPP(aippDynamicSet);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    aclDestroyDataBuffer(buffer);
+    aclmdlDestroyDataset(dataset);
+}
+
+TEST_F(UTEST_ACL_Model, aclmdlSetInputAIPP_Fail3)
+{
+    aclmdlAIPP *aippmdlAipp = aclmdlCreateAIPP(0);
+    uint32_t batchNumber = 1;
+    aclmdlAIPP *aippDynamicSet = aclmdlCreateAIPP(batchNumber);
+
+    aclmdlDataset *dataset = aclmdlCreateDataset();
+    aclDataBuffer *buffer = aclCreateDataBuffer((void*)0x1, 1);
+    auto ret = aclmdlAddDatasetBuffer(dataset, buffer);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetAippType(_, _,_,_))
+        .WillRepeatedly(Invoke(GetAippTypeNoAippInvoke));
+    ret = aclmdlSetInputAIPP(1, dataset, 6, aippDynamicSet);
+    EXPECT_NE(ret, ACL_SUCCESS);
+
+    ret = aclmdlDestroyAIPP(aippDynamicSet);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    aclDestroyDataBuffer(buffer);
+    aclmdlDestroyDataset(dataset);
+}
+
+TEST_F(UTEST_ACL_Model, aclmdlGetFirstAippInfo)
+{
+    aclAippInfo aippInfo;
+    aclError ret = aclmdlGetFirstAippInfo(1, 0, &aippInfo);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_ACL_Model, AippParamsCheck)
+{
+    aclmdlAIPP *aippmdlAipp = aclmdlCreateAIPP(0);
+    aclError ret;
+    uint32_t batchNumber = 2;
+    aclmdlAIPP *aippDynamicSet = aclmdlCreateAIPP(batchNumber);
+
+    aclmdlDataset *dataset = aclmdlCreateDataset();
+    aclDataBuffer *buffer = aclCreateDataBuffer((void*)0x1, 1);
+    ret = aclmdlAddDatasetBuffer(dataset, buffer);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+
+    //InputFormat not setted
+    (void)GetSrcImageSize(aippDynamicSet);
+    ret = AippParamsCheck(aippDynamicSet, "Ascend310", 120, 120, true);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    //aipp not support Ascend910
+    std::string socVersion = "Ascend910";
+    (void)aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_ARGB8888_U8);
+    (void)GetSrcImageSize(aippDynamicSet);
+    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    //Ascend310 not support YUYV_U8
+    socVersion = "Ascend310";
+    (void)aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_YUYV_U8);
+    (void)GetSrcImageSize(aippDynamicSet);
+    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    //Ascend310 not support RAW10,for cover GetSrcImageSize
+    (void)aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_RAW10);
+    (void)GetSrcImageSize(aippDynamicSet);
+
+    //Ascend310 not support RAW12,for cover GetSrcImageSize
+    (void)aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_RAW12);
+    (void)GetSrcImageSize(aippDynamicSet);
+
+    //Ascend310 not support RAW16,for cover GetSrcImageSize
+    (void)aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_RAW16);
+    (void)GetSrcImageSize(aippDynamicSet);
+
+    //Ascend310 not support RAW24,for cover GetSrcImageSize
+    (void)aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_RAW24);
+    (void)GetSrcImageSize(aippDynamicSet);
+
+    //Ascend310 not support UV422SP_U8,for cover GetSrcImageSize
+    (void)aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_YUV422SP_U8);
+    (void)GetSrcImageSize(aippDynamicSet);
+
+    //for cover GetSrcImageSize
+    (void)aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_XRGB8888_U8);
+    (void)GetSrcImageSize(aippDynamicSet);
+
+    //Ascend310 not support scf
+    (void)aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_YUV420SP_U8);
+    ret = aclmdlSetAIPPScfParams(aippDynamicSet, 0, 1, 1, 1, 1, 0);
+    (void)GetSrcImageSize(aippDynamicSet);
+    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    //Ascend610 not support RAW24
+    socVersion = "Ascend610";
+    (void)aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_RAW24);
+    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    //ES not support RAW24
+    socVersion = "Hi3796CV300ES";
+    (void)aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_RAW24);
+    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    //YUV400_U8 not support csc
+    ret = aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_YUV400_U8);
+    ret = aclmdlSetAIPPCscParams(aippDynamicSet, 1, 256, 443, 0, 256, -86, -178, 256, 0, 350, 0, 0, 0, 0, 128, 128);
+    (void)GetSrcImageSize(aippDynamicSet);
+    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    //YUV420SP_U8,src_image_h and src_image_w must be even
+    (void)aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_YUV420SP_U8);
+    (void)GetSrcImageSize(aippDynamicSet);
+    (void)aclmdlSetAIPPSrcImageSize(aippDynamicSet, 223, 223);
+    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    //ES,YUV420SP_U8, src_image_w must be multiples of 16
+    (void)aclmdlSetAIPPSrcImageSize(aippDynamicSet, 18, 224);
+    ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    //ES,ARGB8888_U8,src_image_w*4 must be multiples of 16
+    (void)aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_ARGB8888_U8);
+    (void)aclmdlSetAIPPSrcImageSize(aippDynamicSet, 5, 224);
+    (void)GetSrcImageSize(aippDynamicSet);
+    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    //ES,RGB888_U8, src_image_w*3 must be multiples of 16
+    (void)aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_RGB888_U8);
+    (void)aclmdlSetAIPPSrcImageSize(aippDynamicSet, 6, 224);
+    (void)GetSrcImageSize(aippDynamicSet);
+    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    //enable scf, disable crop,scfInputSizeW==srcImageSizeW,scfInputSizeH==srcImageSizeH
+    (void)aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_YUV420SP_U8);
+    (void)aclmdlSetAIPPSrcImageSize(aippDynamicSet, 224, 224);
+    ret = aclmdlSetAIPPScfParams(aippDynamicSet, 1, 210, 210, 1, 1, 0);
+    ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    //enable scf，crop,scfInputSizeW==cropSizeW,scfInputSizeH==cropSizeH
+    (void)aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_YUV420SP_U8);
+    (void)aclmdlSetAIPPSrcImageSize(aippDynamicSet, 224, 224);
+    ret = aclmdlSetAIPPCropParams(aippDynamicSet, 1, 0, 0, 220, 220, 0);
+    ret = aclmdlSetAIPPScfParams(aippDynamicSet, 1, 210, 210, 1, 1, 0);
+    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    //the first batch, enable crop,scf,padding, aippOutputW and aippOutputH is 120,120
+    ret = aclmdlSetAIPPScfParams(aippDynamicSet, 1, 220, 220, 100, 100, 0);
+    ret = aclmdlSetAIPPPaddingParams(aippDynamicSet, 1, 10, 10, 10, 10, 0);
+
+    //the second batch, enable crop, cropStartPosW + cropSizeW > srcImageSizeW
+    ret = aclmdlSetAIPPCropParams(aippDynamicSet, 1, 5, 1, 221, 221, 1);
+    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    //the second batch, enable crop, cropStartPosH + cropSizeH > srcImageSizeH
+    ret = aclmdlSetAIPPCropParams(aippDynamicSet, 1, 1, 5, 221, 221, 1);
+    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    //ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    //the second batch, enable crop, cropStartPosW，cropStartPosH，cropSizeW，cropSizeH must be even
+    ret = aclmdlSetAIPPCropParams(aippDynamicSet, 1, 1, 1, 221, 221, 1);
+    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    //ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    //the second batch, enable scf, scfInputSizeW is within [16,4096]
+    ret = aclmdlSetAIPPScfParams(aippDynamicSet, 1, 10, 220, 100, 100, 1);
+    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    //ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    //the second batch, enable scf, scfInputSizeH is within [16,4096]
+    ret = aclmdlSetAIPPScfParams(aippDynamicSet, 1, 20, 10, 100, 100, 1);
+    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    //the second batch, enable scf, scfOutputSizeW is within [16,1920]
+    ret = aclmdlSetAIPPScfParams(aippDynamicSet, 1, 20, 20, 10, 100, 1);
+    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    //the second batch, enable scf, scfOutputSizeH is within [16,4096]
+    ret = aclmdlSetAIPPScfParams(aippDynamicSet, 1, 20, 20, 100, 10, 1);
+    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    //the second batch, enable scf, scfOutputSizeW/scfInputSizeW is within [1/16,16]
+    ret = aclmdlSetAIPPScfParams(aippDynamicSet, 1, 20, 20, 1000, 100, 1);
+    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    //the second batch, enable scf, scfOutputSizeH/scfInputSizeH在[1/16,16]
+    ret = aclmdlSetAIPPScfParams(aippDynamicSet, 1, 20, 20, 100, 1000, 1);
+    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    //the second batch, disable crop, enable scf，scfInputSizeW==srcImageSizeW，scfInputSizeH==srcImageSizeH
+    ret = aclmdlSetAIPPCropParams(aippDynamicSet, 0, 0, 0, 20, 20, 1);
+    ret = aclmdlSetAIPPScfParams(aippDynamicSet, 1, 10, 20, 100, 100, 1);
+    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    //the first batch aippOutputH and aippOutputW is 120,120，祎he second batch aippOutputH and aippOutputW is100,100
+    ret = aclmdlSetAIPPCropParams(aippDynamicSet, 0, 0, 0, 20, 20, 1);
+    ret = aclmdlSetAIPPScfParams(aippDynamicSet, 1, 224, 224, 100, 100, 1);
+    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    //aipp output size by ACL is 120,120, aipp output size in the model is 100,100
+    ret = aclmdlSetAIPPScfParams(aippDynamicSet, 1, 224, 224, 120, 120, 1);
+    ret = AippParamsCheck(aippDynamicSet, socVersion, 100, 100, true);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    //model is old
+    ret = aclmdlSetAIPPScfParams(aippDynamicSet, 1, 224, 224, 120, 120, 1);
+    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, false);
+
+    ret = aclmdlSetAIPPScfParams(aippDynamicSet, 1, 224, 224, 120, 120, 1);
+    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+
+    //after padding,mini/1951:aippOutputW <= 1080;ES/CS:aippOutputW <= 4096
+    (void)aclmdlSetAIPPSrcImageSize(aippDynamicSet, 4096, 4096);
+    ret = aclmdlSetAIPPCropParams(aippDynamicSet, 0, 5, 1, 221, 221, 0);
+    ret = aclmdlSetAIPPCropParams(aippDynamicSet, 0, 5, 1, 221, 221, 1);
+    ret = aclmdlSetAIPPScfParams(aippDynamicSet, 0, 224, 224, 120, 120, 0);
+    ret = aclmdlSetAIPPScfParams(aippDynamicSet, 0, 224, 224, 120, 120, 1);
+    ret = aclmdlSetAIPPPaddingParams(aippDynamicSet, 1, 10, 10, 10, 10, 0);
+    ret = aclmdlSetAIPPPaddingParams(aippDynamicSet, 1, 10, 10, 10, 10, 1);
+    ret = AippParamsCheck(aippDynamicSet, "Ascend310", 100, 100, true);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+    ret = AippParamsCheck(aippDynamicSet, "Hi3796CV300ES", 100, 100, true);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    ret = aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_YUV420SP_U8);
+    ret = aclmdlSetAIPPCropParams(aippDynamicSet, 1, 4, 2, 221, 221, 0);
+    ret = AippParamsCheck(aippDynamicSet, "Hi3796CV300ES", 100, 100, true);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    ret = aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_YUV422SP_U8);
+    ret = aclmdlSetAIPPCropParams(aippDynamicSet, 1, 4, 2, 221, 221, 0);
+    ret = AippParamsCheck(aippDynamicSet, "Hi3796CV300ES", 100, 100, true);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    ret = aclmdlSetAIPPCropParams(aippDynamicSet, 1, 3, 2, 221, 221, 0);
+    ret = AippParamsCheck(aippDynamicSet, "Hi3796CV300ES", 100, 100, true);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    ret = aclmdlDestroyAIPP(aippDynamicSet);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    aclDestroyDataBuffer(buffer);
+    aclmdlDestroyDataset(dataset);
+}
+
+TEST_F(UTEST_ACL_Model, aclmdlSetInputAIPP_Check)
+{
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetModelAttr(_, _))
+        .WillRepeatedly(Invoke(GetModelAttr_Invoke));
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetModelDescInfo(_,_,_,_))
+        .WillRepeatedly(Invoke(GetModelDescInfo_Invoke));
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetDynamicBatchInfo(_,_,_))
+         .WillRepeatedly(Invoke(GetDynamicBatchInfo_Invoke5));
+    uint32_t batchNumber = 1;
+    aclmdlAIPP *aippDynamicSet = aclmdlCreateAIPP(batchNumber);
+    aclmdlDataset *dataset = aclmdlCreateDataset();
+    aclDataBuffer *buffer = aclCreateDataBuffer((void*)0x1, 1);
+    aclError ret = aclmdlAddDatasetBuffer(dataset, buffer);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetAippType(_, _,_,_))
+        .WillRepeatedly(Invoke(GetAippTypeNoAippInvoke));
+
+    ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+    ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+    ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+    ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
     ret = aclmdlDestroyAIPP(aippDynamicSet);
     EXPECT_EQ(ret, ACL_SUCCESS);
     aclDestroyDataBuffer(buffer);
@@ -1388,6 +1866,7 @@ TEST_F(UTEST_ACL_Model, aclmdlGetRealTensorName)
     ret = aclmdlGetInputDimsV2(mdlDesc, 1, &dims1);
     EXPECT_EQ(ret, ACL_SUCCESS);
 
+    // printf("dims.name = %s", dims.name);
     EXPECT_STREQ(dims.name, "acl_modelId_0_input_0");
     EXPECT_STREQ(dims1.name, "a6872_1bu_idc");
 
@@ -1424,7 +1903,7 @@ TEST_F(UTEST_ACL_Model, aclmdlGetRealTensorName)
     EXPECT_STREQ(dims.name, "acl_modelId_0_input_0");
 
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetCurShape(_,_,_))
-        .WillOnce(Return(SUCCESS)); // 有问题
+        .WillOnce(Return(SUCCESS));
     ret = aclmdlGetCurOutputDims(mdlDesc, 0, &dims);
     EXPECT_EQ(ret, ACL_SUCCESS);
     EXPECT_STREQ(dims.name, "acl_modelId_0_output_0");
@@ -1546,6 +2025,52 @@ TEST_F(UTEST_ACL_Model, aclmdlSetAIPPPixelVarReciTest)
     aclError ret = aclmdlSetAIPPPixelVarReci(aippDynamicSet, 1, 1, 1, 0, 3);
     EXPECT_NE(ret, ACL_SUCCESS);
     aclmdlDestroyAIPP(aippDynamicSet);
+}
+
+TEST_F(UTEST_ACL_Model, aclmdlSetInputAIPPTest01)
+{
+    uint32_t batchNumber = 1;
+    aclmdlAIPP *aippDynamicSet = aclmdlCreateAIPP(batchNumber);
+    aclmdlDataset *dataset = aclmdlCreateDataset();
+    aippDynamicSet->aippParms.inputFormat = CCE_YUV400_U8;
+    aippDynamicSet->aippParms.srcImageSizeW = 1;
+    aippDynamicSet->aippParms.srcImageSizeH = 511373560;
+    aippDynamicSet->batchSize = 1;
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetAippType(_, _,_,_))
+        .WillRepeatedly(Invoke(GetAippTypeSuccessInvoke));
+    aclError ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
+    EXPECT_NE(ret, ACL_SUCCESS);
+
+    aippDynamicSet->aippParms.srcImageSizeH = 1;
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetOrigInputInfo(_, _, _))
+        .WillOnce(Return(FAILED));
+    ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
+    EXPECT_NE(ret, ACL_SUCCESS);
+    aclmdlDestroyAIPP(aippDynamicSet);
+    aclmdlDestroyDataset(dataset);
+}
+
+TEST_F(UTEST_ACL_Model, aclmdlSetInputAIPPTest02)
+{
+    uint32_t batchNumber = 1;
+    aclmdlAIPP *aippDynamicSet = aclmdlCreateAIPP(batchNumber);
+    aippDynamicSet->aippParms.inputFormat = CCE_YUV420SP_U8;
+    aippDynamicSet->aippParms.srcImageSizeW = 1;
+    aippDynamicSet->aippParms.srcImageSizeH = 2;
+    aclmdlDataset *dataset = aclmdlCreateDataset();
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetAippType(_, _,_,_))
+        .WillRepeatedly(Invoke(GetAippTypeSuccessInvoke));
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetAllAippInputOutputDims(_, _, _, _))
+        .WillOnce(Return(FAILED));
+    aclError ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
+    EXPECT_NE(ret, ACL_SUCCESS);
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetAllAippInputOutputDims(_, _, _, _))
+        .WillOnce(Return(SUCCESS));
+    ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
+    EXPECT_NE(ret, ACL_SUCCESS);
+    aclmdlDestroyAIPP(aippDynamicSet);
+    aclmdlDestroyDataset(dataset);
 }
 
 TEST_F(UTEST_ACL_Model, aclmdlGetFirstAippInfoTest)

@@ -1,6 +1,7 @@
 #include <vector>
 #include <iostream>
 #include "securec.h"
+#include <memory>
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
@@ -53,6 +54,50 @@ rtError_t rtGetRunMode_dvpp(rtRunMode *mode)
 {
     *mode = RT_RUN_MODE_OFFLINE;
     return RT_ERROR_NONE;
+}
+
+void* mmAlignMalloc_dvpp(mmSize mallocSize, mmSize alignSize)
+{
+    aclvdecChannelDesc *aclChannelDesc = nullptr;
+    mallocSize = CalAclDvppStructSize(aclChannelDesc);
+    return malloc(mallocSize);
+}
+
+TEST_F(DvppTest, acldvppCreatePicDesc)
+{
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
+    // acldvppCreatePicDesc
+    acl::dvpp::DvppManager &dvppManager = acl::dvpp::DvppManager::GetInstance();
+    dvppManager.dvppVersion_ = DVPP_KERNELS_V100;
+    dvppManager.aclRunMode_ = ACL_HOST;
+    dvppManager.InitDvppProcessor();
+
+    acldvppPicDesc* desc = acldvppCreatePicDesc();
+    EXPECT_NE(desc, nullptr);
+    acldvppDestroyPicDesc(desc);
+    desc = nullptr;
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtMalloc(_, _, _))
+        .WillOnce(Return((ACL_ERROR_RT_PARAM_INVALID)));
+    desc = acldvppCreatePicDesc();
+    EXPECT_EQ(desc, nullptr);
+    Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
+    desc = acldvppCreatePicDesc();
+    EXPECT_NE(desc, nullptr);
+
+    aclError aclRt = acldvppDestroyPicDesc(desc);
+    EXPECT_EQ(aclRt, ACL_SUCCESS);
+    Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
+
+    void *alignRet = nullptr;
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
+        .WillRepeatedly(Return(alignRet));
+    desc = acldvppCreatePicDesc();
+    EXPECT_EQ(desc, nullptr);
 }
 
 TEST_F(DvppTest, acldvppSetPicDescData)
@@ -205,6 +250,67 @@ TEST_F(DvppTest, acldvppSetRoiConfigTest)
     acldvppDestroyRoiConfig(config);
 }
 
+TEST_F(DvppTest, acldvppCreateRoiConfig)
+{
+    // acldvppCreateRoiConfig
+    acldvppRoiConfig *config = nullptr;
+    acldvppDestroyRoiConfig(config);
+    config = acldvppCreateRoiConfig(0, 0, 0, 0);
+    EXPECT_NE(config, nullptr);
+    acldvppSetRoiConfigLeft(config, 2);
+    acldvppSetRoiConfigRight(config, 3);
+    acldvppSetRoiConfigTop(config, 4);
+    acldvppSetRoiConfigBottom(config, 5);
+    EXPECT_EQ(config->dvppRoiConfig.leftOffset, 2);
+    EXPECT_EQ(config->dvppRoiConfig.rightOffset, 3);
+    EXPECT_EQ(config->dvppRoiConfig.upOffset, 4);
+    EXPECT_EQ(config->dvppRoiConfig.downOffset, 5);
+    acldvppSetRoiConfig(config, 1, 2, 3, 4);
+    EXPECT_EQ(config->dvppRoiConfig.leftOffset, 1);
+    EXPECT_EQ(config->dvppRoiConfig.rightOffset, 2);
+    EXPECT_EQ(config->dvppRoiConfig.upOffset, 3);
+    EXPECT_EQ(config->dvppRoiConfig.downOffset, 4);
+    acldvppCreateRoiConfig(0, 0, 0, 4294967291);
+    acldvppSetRoiConfigLeft(config, 4294967291);
+    acldvppSetRoiConfigRight(config, 4294967291);
+    acldvppSetRoiConfigTop(config, 4294967291);
+    acldvppSetRoiConfigBottom(config, 4294967291);
+    acldvppDestroyRoiConfig(config);
+
+    uint32_t left = 10;
+    uint32_t right = 10;
+    uint32_t top = 10;
+    uint32_t bottom = 10;
+
+    acldvppRoiConfig *desc = acldvppCreateRoiConfig(left, right, top, bottom);
+    EXPECT_NE(desc, nullptr);
+}
+
+TEST_F(DvppTest, acldvppDestroyRoiConfig)
+{
+    acldvppRoiConfig *roiConfig = nullptr;
+    aclError desc = acldvppDestroyRoiConfig(roiConfig);
+    EXPECT_EQ(desc, ACL_SUCCESS);
+}
+
+TEST_F(DvppTest, acldvppCreateJpegeConfig)
+{
+    acldvppJpegeConfig* config = nullptr;
+    acldvppDestroyJpegeConfig(config);
+    config = acldvppCreateJpegeConfig();
+    EXPECT_NE(config, nullptr);
+    acldvppDestroyJpegeConfig(config);
+    config = nullptr;
+    Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
+}
+
+TEST_F(DvppTest, acldvppDestroyJpegeConfigTest)
+{
+    acldvppJpegeConfig *jpegeConfig = nullptr;
+    aclError desc = acldvppDestroyJpegeConfig(jpegeConfig);
+    EXPECT_EQ(desc, ACL_SUCCESS);
+}
+
 TEST_F(DvppTest, acldvppSetJpegeConfigLevel)
 {
     uint32_t level = 10;
@@ -220,6 +326,23 @@ TEST_F(DvppTest, acldvppSetJpegeConfigLevel02)
 {
     acldvppJpegeConfig *jpegeConfig = nullptr;
     EXPECT_EQ(acldvppGetJpegeConfigLevel(jpegeConfig), 0);
+}
+
+TEST_F(DvppTest, acldvppCreateResizeConfig)
+{
+    // acldvppCreateResizeConfig
+    acldvppResizeConfig *resizeConfig = nullptr;
+    acldvppDestroyResizeConfig(resizeConfig);
+    resizeConfig = acldvppCreateResizeConfig();
+    EXPECT_NE(resizeConfig, nullptr);
+    acldvppDestroyResizeConfig(resizeConfig);
+}
+
+TEST_F(DvppTest, acldvppDestroyResizeConfig)
+{
+    acldvppResizeConfig *resizeConfig = nullptr;
+    aclError desc = acldvppDestroyResizeConfig(resizeConfig);
+    EXPECT_EQ(desc, ACL_SUCCESS);
 }
 
 TEST_F(DvppTest, acldvppSetResizeConfigInterpolation1)
@@ -267,28 +390,10 @@ TEST_F(DvppTest, acldvppGetResizeConfigInterpolation)
     acldvppDestroyResizeConfig(resizeConfig);
 }
 
-void* mmAlignMallocStub(mmSize mallocSize, mmSize alignSize)
-{
-    mallocSize = 104;
-    return malloc(mallocSize);
-}
-
-rtError_t rtMallocStub(void **devPtr, uint64_t size, rtMemType_t type)
-{
-    *devPtr = malloc(size);
-    return RT_ERROR_NONE;
-}
-
-rtError_t rtDvppMallocStub(void **devPtr, uint64_t size)
-{
-    *devPtr = malloc(size);
-    return RT_ERROR_NONE;
-}
-
 TEST_F(DvppTest, acldvppCreateChannelDesc)
 {
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
-        .WillRepeatedly(Invoke(mmAlignMallocStub));
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
 
     acl::dvpp::DvppManager &dvppManager = acl::dvpp::DvppManager::GetInstance();
     dvppManager.dvppVersion_ = DVPP_KERNELS_V200;
@@ -310,7 +415,7 @@ TEST_F(DvppTest, acldvppCreateChannelDesc)
     Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
 
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
-        .WillRepeatedly(Invoke(mmAlignMallocStub));
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtDvppMalloc(_, _))
         .WillOnce(Return(ACL_ERROR_RT_PARAM_INVALID));
     dvppChannelDesc = acldvppCreateChannelDesc();
@@ -346,6 +451,53 @@ TEST_F(DvppTest, acldvppCreateChannelDesc_2)
     dvppManager.imageProcessor_ = nullptr;
     dvppChannelDesc = acldvppCreateChannelDesc();
     EXPECT_EQ(dvppChannelDesc, nullptr);
+}
+
+TEST_F(DvppTest, dataBuffer)
+{
+    aclDataBuffer dataBuffer((void *)0x11, 1);
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtFree(_))
+        .WillRepeatedly(Return(ACL_ERROR_RT_PARAM_INVALID));
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtDvppFree(_))
+        .WillRepeatedly(Return(ACL_ERROR_RT_PARAM_INVALID));
+    acl::dvpp::FreeDeviceBuffer(dataBuffer);
+
+    dataBuffer.data = (void *)0x11;
+    acl::dvpp::FreeDeviceBuffer(dataBuffer);
+
+    dataBuffer.data = (void *)0x11;
+    acl::dvpp::FreeDeviceAddr(dataBuffer.data);
+}
+
+TEST_F(DvppTest, acldvppSetChannelDescMode)
+{
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
+    acl::dvpp::DvppManager &dvppManager = acl::dvpp::DvppManager::GetInstance();
+    dvppManager.dvppVersion_ = DVPP_KERNELS_V200;
+    dvppManager.aclRunMode_ = ACL_HOST;
+    dvppManager.InitDvppProcessor();
+
+    acldvppChannelDesc *dvppChannelDesc = acldvppCreateChannelDesc();
+    EXPECT_NE(dvppChannelDesc, nullptr);
+    aclError ret = acldvppSetChannelDescMode(dvppChannelDesc, aicpu::dvpp::DVPP_CHNMODE_VPC);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    EXPECT_EQ(dvppChannelDesc->dvppDesc.channelMode, aicpu::dvpp::DVPP_CHNMODE_VPC);
+    acldvppDestroyChannelDesc(dvppChannelDesc);
+
+    dvppManager.dvppVersion_ = DVPP_KERNELS_V100;
+    dvppManager.aclRunMode_ = ACL_HOST;
+    dvppManager.InitDvppProcessor();
+    dvppChannelDesc = acldvppCreateChannelDesc();
+    EXPECT_NE(dvppChannelDesc, nullptr);
+    ret = acldvppSetChannelDescMode(dvppChannelDesc, aicpu::dvpp::DVPP_CHNMODE_VPC);
+    EXPECT_NE(ret, ACL_SUCCESS);
+    acldvppDestroyChannelDesc(dvppChannelDesc);
+    Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
+
+    ret = acldvppSetChannelDescMode(dvppChannelDesc, aicpu::dvpp::DVPP_CHNMODE_VPC);
+    EXPECT_NE(ret, ACL_SUCCESS);
 }
 
 TEST_F(DvppTest, acldvppGetPicDescData)
@@ -408,8 +560,26 @@ TEST_F(DvppTest, memory_malloc_device)
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 }
 
+TEST_F(DvppTest, memory_free_device)
+{
+    aclError ret = acldvppFree(nullptr);
+    EXPECT_NE(ret, ACL_SUCCESS);
+
+    void *devPtr = (void *)0x01;
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtDvppFree(_))
+        .WillOnce(Return(ACL_ERROR_RT_PARAM_INVALID))
+        .WillRepeatedly(Return(RT_ERROR_NONE));
+    ret = acldvppFree(devPtr);
+    EXPECT_NE(ret, ACL_SUCCESS);
+
+    ret = acldvppFree(devPtr);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
 TEST_F(DvppTest, aclvdecCreateChannelDesc_onHost_1)
 {
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
     // aclvdecCreateChannelDesc
     aclvdecChannelDesc *vdecChannelDesc = aclvdecCreateChannelDesc();
     EXPECT_NE(vdecChannelDesc, nullptr);
@@ -419,6 +589,8 @@ TEST_F(DvppTest, aclvdecCreateChannelDesc_onHost_1)
 
 TEST_F(DvppTest, aclvdecCreateChannelDesc_onHost_2)
 {
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
     // aclvdecCreateChannelDesc
     aclvdecChannelDesc *vdecChannelDesc = aclvdecCreateChannelDesc();
     EXPECT_NE(vdecChannelDesc, nullptr);
@@ -429,8 +601,8 @@ TEST_F(DvppTest, aclvdecCreateChannelDesc_onHost_2)
 TEST_F(DvppTest, aclvdecCreateChannelDesc_onDevice)
 {
     // aclvdecCreateChannelDesc
-    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtGetRunMode(_))
-        .WillRepeatedly(Invoke((rtGetRunMode_dvpp)));
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
 
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtMalloc(_,_,_))
         .WillOnce(Return((ACL_ERROR_RT_PARAM_INVALID)));
@@ -440,16 +612,10 @@ TEST_F(DvppTest, aclvdecCreateChannelDesc_onDevice)
     vdecChannelDesc = nullptr;
 }
 
-void* mmAlignMallocStub5(mmSize mallocSize, mmSize alignSize)
-{
-    mallocSize = 1512;
-    return malloc(mallocSize);
-}
-
 TEST_F(DvppTest, aclvdecChannelDesc_v200_host_1)
 {
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
-        .WillRepeatedly(Invoke(mmAlignMallocStub5));
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
     auto instance = &(acl::dvpp::DvppManager::GetInstance());
     instance->videoProcessor_ = std::unique_ptr<VideoProcessorV200>(new (std::nothrow)VideoProcessorV200(ACL_HOST));
     aclvdecChannelDesc *vdecChannelDesc = aclvdecCreateChannelDesc();
@@ -534,7 +700,7 @@ TEST_F(DvppTest, aclvdecChannelDesc_v200_host_1)
 TEST_F(DvppTest, aclvdecChannelDesc_v200_host_2)
 {
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
-        .WillRepeatedly(Invoke(mmAlignMallocStub5));
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
     auto instance = &(acl::dvpp::DvppManager::GetInstance());
     instance->videoProcessor_ = std::unique_ptr<VideoProcessorV200>(new (std::nothrow)VideoProcessorV200(ACL_HOST));
 
@@ -570,7 +736,7 @@ TEST_F(DvppTest, aclvdecChannelDesc_v200_host_2)
 TEST_F(DvppTest, aclvdecChannelDesc_v100_host)
 {
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
-        .WillRepeatedly(Invoke(mmAlignMallocStub5));
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
     auto instance = &(acl::dvpp::DvppManager::GetInstance());
     instance->videoProcessor_ = std::unique_ptr<VideoProcessorV100>(new (std::nothrow)VideoProcessorV100(ACL_HOST));
 
@@ -607,7 +773,7 @@ TEST_F(DvppTest, aclvdecChannelDesc_v100_host)
 TEST_F(DvppTest, aclvdecChannelDesc_v200_device)
 {
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
-        .WillRepeatedly(Invoke(mmAlignMallocStub5));
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
     auto instance = &(acl::dvpp::DvppManager::GetInstance());
     instance->videoProcessor_ = std::unique_ptr<VideoProcessorV200>(new (std::nothrow)VideoProcessorV200(ACL_HOST));
 
@@ -644,7 +810,7 @@ TEST_F(DvppTest, aclvdecChannelDesc_v200_device)
     EXPECT_EQ(ret, ACL_SUCCESS);
 
     uint32_t refFrameNum = aclvdecGetChannelDescRefFrameNum(vdecChannelDesc);
-    EXPECT_EQ(refFrameNum, 1); // error
+    EXPECT_EQ(refFrameNum, 1);
 
     refFrameNum = aclvdecGetChannelDescRefFrameNum(nullptr);
     EXPECT_EQ(refFrameNum, 0);
@@ -743,7 +909,7 @@ TEST_F(DvppTest, acldvppGetBorderConfigValue)
 TEST_F(DvppTest, aclvdecChannelDesc)
 {
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
-        .WillRepeatedly(Invoke(mmAlignMallocStub5));
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
     // aclvdecSetChannelDesc
     aclvdecChannelDesc *vdecChannelDesc = aclvdecCreateChannelDesc();
     aclvdecCallback callback;
@@ -797,23 +963,17 @@ TEST_F(DvppTest, aclvdecChannelDesc)
     EXPECT_EQ(getvdecCallback, nullptr);
 }
 
-void* mmAlignMallocStub4(mmSize mallocSize, mmSize alignSize)
-{
-    mallocSize = 64;
-    return malloc(mallocSize);
-}
-
 TEST_F(DvppTest, acldvppCreateStreamDesc_1)
 {
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
-        .WillRepeatedly(Invoke(mmAlignMallocStub4));
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
     acldvppStreamDesc *streamDesc = acldvppCreateStreamDesc();
-    EXPECT_NE(streamDesc, nullptr); // error 
+    EXPECT_NE(streamDesc, nullptr);
     acldvppDestroyStreamDesc(streamDesc);
     Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
 
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
-        .WillRepeatedly(Invoke(mmAlignMallocStub4));
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtMalloc(_, _, _)) //error
         .WillOnce(Return((ACL_ERROR_RT_PARAM_INVALID)));
     streamDesc = acldvppCreateStreamDesc();
@@ -829,7 +989,7 @@ rtError_t CreateStreamOnDevice(rtRunMode *mode)
 TEST_F(DvppTest, acldvppCreateStreamDesc_2)
 {
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
-        .WillRepeatedly(Invoke(mmAlignMallocStub4));
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtGetRunMode(_))
         .WillRepeatedly(Invoke((CreateStreamOnDevice)));
     acldvppStreamDesc *streamDesc = acldvppCreateStreamDesc();
@@ -837,10 +997,30 @@ TEST_F(DvppTest, acldvppCreateStreamDesc_2)
     acldvppDestroyStreamDesc(streamDesc);
 }
 
+TEST_F(DvppTest, acldvppStreamDescData)
+{
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
+    int data = 10;
+    acldvppStreamDesc *streamDesc = acldvppCreateStreamDesc();
+    aclError ret = acldvppSetStreamDescData(streamDesc, &data);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    void* devData = nullptr;
+    devData = acldvppGetStreamDescData(streamDesc);
+    EXPECT_EQ(*(static_cast<int *>(devData)), data);
+    acldvppDestroyStreamDesc(streamDesc);
+
+    streamDesc = nullptr;
+    ret = acldvppSetStreamDescData(streamDesc, &data);
+    EXPECT_NE(ret, ACL_SUCCESS);
+    devData = acldvppGetStreamDescData(streamDesc);
+    EXPECT_EQ(devData, nullptr);
+}
+
 TEST_F(DvppTest, acldvppStreamDescSize)
 {
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
-        .WillRepeatedly(Invoke(mmAlignMallocStub4));
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
     acldvppStreamDesc *streamDesc = acldvppCreateStreamDesc();
     aclError ret = acldvppSetStreamDescSize(streamDesc, 16);
     EXPECT_EQ(ret, ACL_SUCCESS);
@@ -859,7 +1039,7 @@ TEST_F(DvppTest, acldvppStreamDescSize)
 TEST_F(DvppTest, acldvppStreamDescFormat)
 {
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
-        .WillRepeatedly(Invoke(mmAlignMallocStub4));
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
     acldvppStreamDesc *streamDesc = acldvppCreateStreamDesc();
     aclError ret = acldvppSetStreamDescFormat(streamDesc, H265_MAIN_LEVEL);
     EXPECT_EQ(ret, ACL_SUCCESS);
@@ -878,9 +1058,9 @@ TEST_F(DvppTest, acldvppStreamDescFormat)
 TEST_F(DvppTest, acldvppStreamDescTimestamp)
 {
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
-        .WillRepeatedly(Invoke(mmAlignMallocStub4));
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
     acldvppStreamDesc *streamDesc = acldvppCreateStreamDesc();
-    aclError ret = acldvppSetStreamDescTimestamp(streamDesc, 16); //error
+    aclError ret = acldvppSetStreamDescTimestamp(streamDesc, 16);
     EXPECT_EQ(ret, ACL_SUCCESS);
     uint64_t timestamp = 0;
     timestamp = acldvppGetStreamDescTimestamp(streamDesc);
@@ -897,9 +1077,9 @@ TEST_F(DvppTest, acldvppStreamDescTimestamp)
 TEST_F(DvppTest, acldvppStreamDescRetCode)
 {
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
-        .WillRepeatedly(Invoke(mmAlignMallocStub4));
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
-        .WillRepeatedly(Invoke(mmAlignMallocStub4));
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
     acldvppStreamDesc *streamDesc = acldvppCreateStreamDesc();
     aclError ret = acldvppSetStreamDescRetCode(streamDesc, 16);
     EXPECT_EQ(ret, ACL_SUCCESS);
@@ -918,7 +1098,7 @@ TEST_F(DvppTest, acldvppStreamDescRetCode)
 TEST_F(DvppTest, acldvppStreamDescEos)
 {
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
-        .WillRepeatedly(Invoke(mmAlignMallocStub4));
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
     acldvppStreamDesc *streamDesc = acldvppCreateStreamDesc();
     aclError ret = acldvppSetStreamDescEos(streamDesc, 0);
     EXPECT_EQ(ret, ACL_SUCCESS);
@@ -933,16 +1113,10 @@ TEST_F(DvppTest, acldvppStreamDescEos)
     EXPECT_EQ(eos, 0);
 }
 
-void* mmAlignMallocStub3(mmSize mallocSize, mmSize alignSize)
-{
-    mallocSize = 80;
-    return malloc(mallocSize);
-}
-
 TEST_F(DvppTest, acldvppCreateBatchPicDesc)
 {
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
-        .WillRepeatedly(Invoke(mmAlignMallocStub3));
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
     acldvppBatchPicDesc *batchDesc = acldvppCreateBatchPicDesc(0);
     EXPECT_EQ(batchDesc, nullptr);
 
@@ -1205,6 +1379,18 @@ TEST_F(DvppTest, acldvppHistDesc)
     EXPECT_NE(aclRet, ACL_SUCCESS);
 }
 
+TEST_F(DvppTest, DvppManager_001)
+{
+    acl::dvpp::DvppManager manager;
+    manager.CheckRunModeAndDvppVersion();
+    manager.CheckRunModeAndDvppVersion();
+    Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtStreamCreate(_, _))
+        .WillOnce(Return(ACL_ERROR_RT_PARAM_INVALID));
+    EXPECT_EQ(manager.GetDvppKernelVersion(), ACL_ERROR_RT_PARAM_INVALID);
+}
+
 TEST_F(DvppTest, IsSupportSuperTask)
 {
     DvppVersion dvppVersion;
@@ -1221,6 +1407,8 @@ TEST_F(DvppTest, IsSupportSuperTask)
 
 TEST_F(DvppTest, CopyDvppPicDescAsync)
 {
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
     acldvppPicDesc *aclPicDesc = acldvppCreatePicDesc();
     aclrtMemcpyKind memcpyKind = ACL_MEMCPY_DEVICE_TO_DEVICE;
     aclrtStream stream;
@@ -1232,6 +1420,8 @@ TEST_F(DvppTest, CopyDvppPicDescAsync)
 
 TEST_F(DvppTest, CopyDvppBatchPicDescAsyncTest)
 {
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
     acldvppBatchPicDesc *aclBatchPicDesc = acldvppCreateBatchPicDesc(1);
     aclrtMemcpyKind memcpyKind;
     uint32_t batchSize = 10;
@@ -1256,13 +1446,23 @@ TEST_F(DvppTest, CopyDvppHistDescAsync)
     acldvppDestroyHist(aclDvppHist);
 }
 
+TEST_F(DvppTest, FreeDvppDeviceBuffer)
+{
+    aclDataBuffer *dataBuffer = aclCreateDataBuffer((void*)0x1, 1);
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtDvppFree(_))
+        .WillOnce(Return((1)));
+    FreeDvppDeviceBuffer(*dataBuffer);
+    aclDestroyDataBuffer(dataBuffer);
+}
+
 TEST_F(DvppTest, CalcImageSizeKernel)
 {
     uint32_t width;
     uint32_t height;
     acldvppPixelFormat format = acldvppPixelFormat::PIXEL_FORMAT_UNKNOWN;
     uint32_t *size;
-    EXPECT_NE(CalcImageSizeKernel(width, height, format, size), true);
+    EXPECT_EQ(CalcImageSizeKernel(width, height, format, size), false);
 }
 
 TEST_F(DvppTest, DvppCreateChannelWithoutNotifyTest01)
@@ -1417,6 +1617,40 @@ TEST_F(DvppTest, LaunchDvppTask)
     EXPECT_NE(ret, ACL_SUCCESS);
 }
 
+TEST_F(DvppTest, acldvppVpcCropResizeAsync)
+{
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
+    acldvppChannelDesc channelDesc;
+    acldvppBatchPicDesc *inputBatch = acldvppCreateBatchPicDesc(1);
+    acldvppBatchPicDesc *outputBatch = acldvppCreateBatchPicDesc(1);
+
+    acldvppPicDesc *inputDesc = acldvppGetPicDesc(inputBatch, 0);
+    acldvppPicDesc *outputDesc = acldvppGetPicDesc(outputBatch, 0);
+    acldvppRoiConfig *cropArea =  acldvppCreateRoiConfig(1, 1, 1, 1);
+
+    acldvppResizeConfig *resizeConfig;
+    aclrtStream stream;
+    channelDesc.dataBuffer.data = (void*)0x1;
+    channelDesc.dataBuffer.length = sizeof(uint64_t);
+    channelDesc.notify = (void*)0x1;
+    channelDesc.isNeedNotify = false;
+    inputDesc->dataBuffer.data = (void*)0x1;
+    inputDesc->dataBuffer.length = sizeof(aicpu::dvpp::DvppPicDesc);
+    outputDesc->dataBuffer.data = (void*)0x1;
+    outputDesc->dataBuffer.length = sizeof(aicpu::dvpp::DvppPicDesc);
+    inputDesc->dvppPicDesc.format = PIXEL_FORMAT_YVU_SEMIPLANAR_420;
+    outputDesc->dvppPicDesc.format = PIXEL_FORMAT_YVU_SEMIPLANAR_420;
+
+    auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
+    aclError ret = imageProcessor->acldvppVpcCropResizeAsync(&channelDesc, inputDesc, outputDesc, cropArea, resizeConfig, stream);
+    EXPECT_NE(ret, ACL_SUCCESS);
+
+    acldvppDestroyBatchPicDesc(inputBatch);
+    acldvppDestroyBatchPicDesc(outputBatch);
+    acldvppDestroyRoiConfig(cropArea);
+}
+
 TEST_F(DvppTest, CreateVencChannelDescOnDeviceTest)
 {
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtMalloc(_, _, _))
@@ -1431,8 +1665,61 @@ TEST_F(DvppTest, ValidateDvppResizeConfigTest)
     acldvppResizeConfig *config = acldvppCreateResizeConfig();
     config->dvppResizeConfig.interpolation = 5;
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
-    imageProcessor->ValidateDvppResizeConfig(config);
+    aclError ret = imageProcessor->ValidateDvppResizeConfig(config);
+    EXPECT_EQ(ret, ACL_ERROR_FEATURE_UNSUPPORTED);
+    Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
+
+    config->dvppResizeConfig.interpolation = 4;
+    ret = imageProcessor->ValidateDvppResizeConfig(config);
+    EXPECT_EQ(ret, ACL_SUCCESS);
     acldvppDestroyResizeConfig(config);
+}
+
+TEST_F(DvppTest, acldvppPngDecodeAsyncSuccessTest)
+{
+    acldvppChannelDesc channelDesc;
+    channelDesc.dataBuffer.data = (void*)0x1;
+    channelDesc.notify = (void*)0x1;
+    channelDesc.isNeedNotify = false;
+    void *data = (void *)0x11;
+    uint32_t size = 1;
+    acldvppPicDesc outputDesc;
+    outputDesc.dataBuffer.data = (void*)0x1;
+    outputDesc.dataBuffer.length = sizeof(aicpu::dvpp::DvppPicDesc);
+    outputDesc.dvppPicDesc.format = PIXEL_FORMAT_RGB_888;
+    aclrtStream stream;
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtMemcpyAsync(_, _, _, _, _, _))
+        .WillOnce(Return(ACL_ERROR_RT_PARAM_INVALID));
+    auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
+    imageProcessor->acldvppPngDecodeAsync(&channelDesc, data, size, &outputDesc, stream);
+    Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtCpuKernelLaunch(_, _, _, _, _, _, _))
+        .WillOnce(Return(ACL_ERROR_RT_PARAM_INVALID));
+    imageProcessor->acldvppPngDecodeAsync(&channelDesc, data, size, &outputDesc, stream);
+    Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtMemcpyAsync(_, _, _, _, _, _))
+        .WillOnce(Return(RT_ERROR_NONE))
+        .WillRepeatedly(Return(ACL_ERROR_RT_PARAM_INVALID));
+    imageProcessor->acldvppPngDecodeAsync(&channelDesc, data, size, &outputDesc, stream);
+}
+
+TEST_F(DvppTest, acldvppPngPredictDecSizeTest)
+{
+    void *data = (void *)0x11;
+    uint32_t dataSize = 2;
+    acldvppPixelFormat outputPixelFormat = PIXEL_FORMAT_RGB_888;
+    uint32_t decSize = 2;
+    auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
+    aclError ret = imageProcessor->acldvppPngPredictDecSize(data, dataSize, outputPixelFormat, &decSize);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+    Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
+
+    outputPixelFormat = PIXEL_FORMAT_BGR_888;
+    ret = imageProcessor->acldvppPngPredictDecSize(data, dataSize, outputPixelFormat, &decSize);
+    EXPECT_EQ(ret, ACL_ERROR_FORMAT_NOT_MATCH);
+    Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
 }
 
 TEST_F(DvppTest, DestroyStreamTest)
@@ -1442,6 +1729,60 @@ TEST_F(DvppTest, DestroyStreamTest)
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtStreamDestroy(_))
         .WillOnce(Return((1)));
     imageProcessor->DestroyStream(stream);
+}
+
+TEST_F(DvppTest, DestroyNotifyAndStreamTest)
+{
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
+    acldvppChannelDesc *channelDesc = nullptr;
+    rtStream_t stream = (rtStream_t)0x11;
+    auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
+    imageProcessor->DestroyNotifyAndStream(channelDesc, stream);
+    Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
+    channelDesc = acldvppCreateChannelDesc();
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtStreamDestroy(_))
+        .WillOnce(Return(1));
+    imageProcessor->DestroyNotifyAndStream(channelDesc, stream);
+    Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
+
+    channelDesc->notify = (void *)0x1;
+    channelDesc->dvppWaitTaskType = NOTIFY_TASK;
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtNotifyDestroy(_))
+        .WillOnce(Return((1)));
+    imageProcessor->DestroyNotifyAndStream(channelDesc, stream);
+    Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
+
+    channelDesc->notify = (void *)0x1;
+    channelDesc->dvppWaitTaskType = EVENT_TASK;
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtEventDestroy(_))
+        .WillOnce(Return(1));
+    imageProcessor->DestroyNotifyAndStream(channelDesc, stream);
+    acldvppDestroyChannelDesc(channelDesc);
+}
+
+TEST_F(DvppTest, CreateNotifyForDvppChannelTest)
+{
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
+    acldvppChannelDesc *channelDesc = acldvppCreateChannelDesc();
+    auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
+    channelDesc->dvppWaitTaskType = EVENT_TASK;
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtEventCreateWithFlag(_, _))
+        .WillOnce(Return(1));
+    imageProcessor->CreateNotifyForDvppChannel(channelDesc);
+    Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtEventCreateWithFlag(_, _))
+        .WillOnce(Return((0)));
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtGetEventID(_, _))
+        .WillOnce(Return((1)));
+    imageProcessor->CreateNotifyForDvppChannel(channelDesc);
+    acldvppDestroyChannelDesc(channelDesc);
 }
 
 TEST_F(DvppTest, CreateChannelDescOnHostTest)
@@ -1473,6 +1814,114 @@ TEST_F(DvppTest, CreatePicDescOnHostTest)
     imageProcessor->CreatePicDescOnHost();
 }
 
+TEST_F(DvppTest, acldvppVpcBatchCropResizePasteAsyncTest)
+{
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
+    acldvppChannelDesc channelDesc;
+    acldvppResizeConfig resizeConfig;
+
+    acldvppBatchPicDesc *inputBatch = acldvppCreateBatchPicDesc(1);
+    acldvppBatchPicDesc *outputBatch = acldvppCreateBatchPicDesc(1);
+
+    acldvppPicDesc *inputDesc = acldvppGetPicDesc(inputBatch, 0);
+    acldvppPicDesc *outputDesc = acldvppGetPicDesc(outputBatch, 0);
+    acldvppRoiConfig  *roiConfig =  acldvppCreateRoiConfig(1, 1, 1, 1);
+    acldvppRoiConfig  *pasteRoiConfig =  acldvppCreateRoiConfig(1, 1, 1, 1);
+
+    aclrtStream stream;
+    channelDesc.dataBuffer.data = (void*)0x1;
+    channelDesc.dataBuffer.length = sizeof(uint64_t);
+    inputDesc->dataBuffer.data = (void*)0x1;
+    inputDesc->dataBuffer.length = sizeof(aicpu::dvpp::DvppPicDesc);
+    outputDesc->dataBuffer.data = (void*)0x1;
+    outputDesc->dataBuffer.length = sizeof(aicpu::dvpp::DvppPicDesc);
+    inputDesc->dvppPicDesc.format = PIXEL_FORMAT_YVU_SEMIPLANAR_420;
+    outputDesc->dvppPicDesc.format = PIXEL_FORMAT_YUV_SEMIPLANAR_422;
+
+    uint32_t *roiNums = new uint32_t[1];
+    roiNums[0] = 1;
+    auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
+
+    imageProcessor->acldvppVpcBatchCropResizePasteAsync(&channelDesc, inputBatch, roiNums, 1, outputBatch,
+        &roiConfig, &pasteRoiConfig, &resizeConfig, stream);
+
+    acldvppDestroyRoiConfig(roiConfig);
+    acldvppDestroyRoiConfig(pasteRoiConfig);
+    acldvppDestroyBatchPicDesc(inputBatch);
+    acldvppDestroyBatchPicDesc(outputBatch);
+    delete [] roiNums;
+}
+
+TEST_F(DvppTest, acldvppVpcCropResizePasteAsyncTest)
+{
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
+    acldvppChannelDesc channelDesc;
+    acldvppResizeConfig resizeConfig;
+
+    acldvppBatchPicDesc *inputBatch = acldvppCreateBatchPicDesc(1);
+    acldvppBatchPicDesc *outputBatch = acldvppCreateBatchPicDesc(1);
+
+    acldvppPicDesc *inputDesc = acldvppGetPicDesc(inputBatch, 0);
+    acldvppPicDesc *outputDesc = acldvppGetPicDesc(outputBatch, 0);
+    acldvppRoiConfig *roiConfig =  acldvppCreateRoiConfig(1, 1, 1, 1);
+    acldvppRoiConfig *pasteRoiConfig =  acldvppCreateRoiConfig(1, 1, 1, 1);
+    channelDesc.dataBuffer.data = (void*)0x1;
+    channelDesc.dataBuffer.length = sizeof(uint64_t);
+    inputDesc->dataBuffer.data = (void*)0x1;
+    inputDesc->dataBuffer.length = sizeof(aicpu::dvpp::DvppPicDesc);
+    outputDesc->dataBuffer.data = (void*)0x1;
+    outputDesc->dataBuffer.length = sizeof(aicpu::dvpp::DvppPicDesc);
+    inputDesc->dvppPicDesc.format = PIXEL_FORMAT_YVU_SEMIPLANAR_420;
+    outputDesc->dvppPicDesc.format = PIXEL_FORMAT_YUV_SEMIPLANAR_422;
+    aclrtStream stream;
+
+    auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
+    imageProcessor->acldvppVpcCropResizePasteAsync(&channelDesc, inputDesc, outputDesc,
+        roiConfig, pasteRoiConfig, &resizeConfig, stream);
+
+    acldvppDestroyRoiConfig(roiConfig);
+    acldvppDestroyRoiConfig(pasteRoiConfig);
+    acldvppDestroyBatchPicDesc(inputBatch);
+    acldvppDestroyBatchPicDesc(outputBatch);
+}
+
+TEST_F(DvppTest, acldvppVpcBatchCropResizeAsyncTest)
+{
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
+    acldvppChannelDesc channelDesc;
+    acldvppResizeConfig resizeConfig;
+
+    acldvppBatchPicDesc *inputBatch = acldvppCreateBatchPicDesc(1);
+    acldvppBatchPicDesc *outputBatch = acldvppCreateBatchPicDesc(1);
+
+    acldvppPicDesc *inputDesc = acldvppGetPicDesc(inputBatch, 0);
+    acldvppPicDesc *outputDesc = acldvppGetPicDesc(outputBatch, 0);
+    acldvppRoiConfig *roiConfig =  acldvppCreateRoiConfig(1, 1, 1, 1);
+    channelDesc.dataBuffer.data = (void*)0x1;
+    channelDesc.dataBuffer.length = sizeof(uint64_t);
+    inputDesc->dataBuffer.data = (void*)0x1;
+    inputDesc->dataBuffer.length = sizeof(aicpu::dvpp::DvppPicDesc);
+    outputDesc->dataBuffer.data = (void*)0x1;
+    outputDesc->dataBuffer.length = sizeof(aicpu::dvpp::DvppPicDesc);
+    inputDesc->dvppPicDesc.format = PIXEL_FORMAT_YVU_SEMIPLANAR_420;
+    outputDesc->dvppPicDesc.format = PIXEL_FORMAT_YUV_SEMIPLANAR_422;
+    aclrtStream stream;
+
+    uint32_t *roiNums = new uint32_t[1];
+    roiNums[0] = 1;
+    auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();
+    imageProcessor->acldvppVpcBatchCropResizeAsync(&channelDesc, inputBatch, roiNums, 1, outputBatch,
+        &roiConfig, &resizeConfig, stream);
+
+    acldvppDestroyRoiConfig(roiConfig);
+    acldvppDestroyBatchPicDesc(inputBatch);
+    acldvppDestroyBatchPicDesc(outputBatch);
+    delete [] roiNums;
+}
+
 TEST_F(DvppTest, aclvencV200_CreateHistOnDeviceTest)
 {
     acl::dvpp::ImageProcessorV200 v200(ACL_HOST);
@@ -1488,6 +1937,8 @@ TEST_F(DvppTest, aclvencV200_CreateHistOnDeviceTest)
 
 TEST_F(DvppTest, aclvencV200_acldvppSetChannelDescModeTest)
 {
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
+        .WillRepeatedly(Invoke(mmAlignMalloc_dvpp));
     acl::dvpp::ImageProcessorV200 v200(ACL_HOST);
     acldvppChannelDesc *channelDesc = acldvppCreateChannelDesc();
     uint32_t mode = -1;

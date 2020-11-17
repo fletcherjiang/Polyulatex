@@ -945,7 +945,7 @@ TEST_F(UTEST_ACL_Runtime, aclDeviceCanAccessPeerTest)
     EXPECT_EQ(aclrtDeviceCanAccessPeer(&canAccessPeer, 0, 1), ACL_ERROR_RT_PARAM_INVALID);
 
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtDeviceCanAccessPeer(_, _, _))
-        .WillOnce(Return(ACL_ERROR_RT_PARAM_INVALID))
+        .WillOnce(Return((ACL_ERROR_RT_PARAM_INVALID)))
         .WillRepeatedly(Return(RT_ERROR_NONE));
     EXPECT_EQ(aclrtDeviceCanAccessPeer(&canAccessPeer, 0, 1), ACL_ERROR_RT_PARAM_INVALID);
 }
@@ -967,8 +967,7 @@ TEST_F(UTEST_ACL_Runtime, aclEnablePeerAccessTest)
     EXPECT_EQ(aclrtDeviceEnablePeerAccess(peerDeviceId, 0), ACL_ERROR_RT_PARAM_INVALID);
 
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtEnableP2P(_, _, _))
-        .WillOnce(Return((ACL_ERROR_RT_PARAM_INVALID)))
-        .WillRepeatedly(Return(RT_ERROR_NONE));
+        .WillOnce(Return(ACL_ERROR_RT_PARAM_INVALID));
     EXPECT_EQ(aclrtDeviceEnablePeerAccess(peerDeviceId, 0), ACL_ERROR_RT_PARAM_INVALID);
 }
 
@@ -987,8 +986,7 @@ TEST_F(UTEST_ACL_Runtime, aclDisablePeerAccessTest)
     EXPECT_EQ(aclrtDeviceDisablePeerAccess(peerDeviceId), ACL_ERROR_RT_PARAM_INVALID);
 
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtDisableP2P(_, _))
-        .WillOnce(Return((ACL_ERROR_RT_PARAM_INVALID)))
-        .WillRepeatedly(Return(RT_ERROR_NONE));
+        .WillOnce(Return((ACL_ERROR_RT_PARAM_INVALID)));
     EXPECT_EQ(aclrtDeviceDisablePeerAccess(peerDeviceId), ACL_ERROR_RT_PARAM_INVALID);
 }
 

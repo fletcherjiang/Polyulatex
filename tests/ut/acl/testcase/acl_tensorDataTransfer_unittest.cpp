@@ -334,7 +334,6 @@ TEST_F(UTEST_tensor_data_transfer, TestTensorDatasetDeserializes02)
     tdt::DataItem dataItem = {tdt::TDT_TENSOR, "hidden", "3", "int64", 8, std::shared_ptr<void>(new int(0))};
     std::vector<tdt::DataItem> itemVec;
     itemVec.push_back(dataItem);
-
     EXPECT_NE(TensorDatasetDeserializes(itemVec, dataSet), ACL_SUCCESS);
     EXPECT_EQ(acltdtDestroyDataset(dataSet), ACL_SUCCESS);
 }
@@ -359,6 +358,7 @@ TEST_F(UTEST_tensor_data_transfer, TestTensorDatasetDeserializes03)
     EXPECT_EQ(acltdtDestroyDataset(dataSet), ACL_SUCCESS);
     EXPECT_EQ(acltdtDestroyDataItem(item), ACL_SUCCESS);
 }
+
 
 TEST_F(UTEST_tensor_data_transfer, TestAcltdtReceiveTensor01)
 {

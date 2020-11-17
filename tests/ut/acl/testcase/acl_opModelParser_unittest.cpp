@@ -24,11 +24,40 @@ using namespace acl;
 class OpModelParserTest : public testing::Test {
 protected:
     void SetUp() {}
-    void TearDown() {}
+    void TearDown() {
+        Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
+    }
 };
 
 ge::GeAttrValue::NAMED_ATTRS value1;
 vector<ge::GeAttrValue::NAMED_ATTRS> g_value{value1};
+
+TEST_F(OpModelParserTest, TestDeserializeModel)
+{
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), Init(_, _))
+        .WillOnce(Return(1))
+        .WillRepeatedly(Return(0));
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetModelPartition(_, _))
+        .WillOnce(Return(1))
+        .WillRepeatedly(Return(0));
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), Load(_, _, _))
+        .WillOnce(Return(1))
+        .WillRepeatedly(Return(0));
+
+    OpModel opModel;
+    ge::Model geModel;
+    opModel.size = sizeof(struct ge::ModelFileHeader) + 128;
+    ge::ModelFileHeader header;
+    header.length = 128;
+    opModel.data = std::shared_ptr<void>(&header, [](void *) {});
+
+    ASSERT_NE(OpModelParser::DeserializeModel(opModel, geModel), ACL_SUCCESS);
+    ASSERT_NE(OpModelParser::DeserializeModel(opModel, geModel), ACL_SUCCESS);
+    ASSERT_NE(OpModelParser::DeserializeModel(opModel, geModel), ACL_SUCCESS);
+    ASSERT_EQ(OpModelParser::DeserializeModel(opModel, geModel), ACL_SUCCESS);
+}
 
 TEST_F(OpModelParserTest, TestParseModelContent)
 {
@@ -61,13 +90,7 @@ TEST_F(OpModelParserTest, TestToModelConfig)
 {
     OpModelDef opModelDef;
     ge::Model geModel;
-
-    ASSERT_EQ(OpModelParser::ToModelConfig(geModel, opModelDef), ACL_SUCCESS);
-    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetBool(_, _, _))
-        .WillOnce(Invoke(GetBool_invoke))
-        .WillRepeatedly(Return(false));
-
-    ASSERT_EQ(OpModelParser::ToModelConfig(geModel, opModelDef), ACL_ERROR_OP_UNSUPPORTED_DYNAMIC);
+    ASSERT_EQ(OpModelParser::ToModelConfig(geModel, opModelDef), ACL_ERROR_MODEL_MISSING_ATTR);
 }
 
 TEST_F(OpModelParserTest, ParseGeTensorDescTest)
@@ -93,6 +116,27 @@ TEST_F(OpModelParserTest, TestParseOpAttrs)
     OpModelParser::ParseOpAttrs(model, attr);
 }
 
+TEST_F(OpModelParserTest, TestParseOpModel)
+{
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), Init(_, _))
+        .WillOnce(Return(ACL_ERROR_DESERIALIZE_MODEL))
+        .WillRepeatedly(Return(ACL_SUCCESS));
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetListTensor(_, _, _))
+        .WillOnce(Return(false))
+        .WillRepeatedly(Return(true));
+
+    OpModelDef opModelDef;
+    OpModel opModel;
+    opModel.size = sizeof(struct ge::ModelFileHeader) + 128;
+    ge::ModelFileHeader header;
+    header.length = 128;
+    opModel.data = std::shared_ptr<void>(&header, [](void *) {});
+    ASSERT_NE(OpModelParser::ParseOpModel(opModel, opModelDef), ACL_SUCCESS);
+    ASSERT_NE(OpModelParser::ParseOpModel(opModel, opModelDef), ACL_SUCCESS);
+    ASSERT_EQ(OpModelParser::ParseOpModel(opModel, opModelDef), ACL_SUCCESS);
+}
+
 bool GetInt_invoke(ge::AttrUtils::ConstAttrHolderAdapter obj, const string &name, int32_t& value)
 {
     value = 1;
@@ -103,9 +147,9 @@ TEST_F(OpModelParserTest, TestToModelConfig1)
 {
     OpModelDef opModelDef;
     ge::Model geModel;
+
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetInt(_, _, _))
-        .WillOnce(Invoke(GetInt_invoke));
-    // 返回值未做判断
+        .WillRepeatedly(Invoke(GetInt_invoke));
     OpModelParser::ToModelConfig(geModel, opModelDef);
 }
 
@@ -117,30 +161,12 @@ bool GetListNamedAttrs_invoke(ge::AttrUtils::ConstAttrHolderAdapter obj, const s
 TEST_F(OpModelParserTest, TestToModelConfig2)
 {
     OpModelDef opModelDef;
-    aclTensorDesc desc;
-    opModelDef.inputDescArr.push_back(desc);
     ge::Model geModel;
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetListTensor(_, _, _))
+        .WillRepeatedly(Return(true));
+
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetInt(_, _, _))
-        .WillOnce(Invoke(GetInt_invoke));
-
-    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetListNamedAttrs(_, _, _))
-        .WillOnce(Invoke(GetListNamedAttrs_invoke))
-        .WillOnce(Return(false))
-        .WillOnce(Return(false));
-    // 返回值未做判断
-    OpModelParser::ToModelConfig(geModel, opModelDef);
-}
-
-TEST_F(OpModelParserTest, TestToModelConfig3)
-{
-    OpModelDef opModelDef;
-    ge::Model geModel;
-    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetInt(_, _, _))
-        .WillOnce(Invoke(GetInt_invoke));
-
-    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetListNamedAttrs(_, _, _))
-        .WillOnce(Invoke(GetListNamedAttrs_invoke))
-        .WillOnce(Return(false))
-        .WillOnce(Return(false));
+        .WillRepeatedly(Invoke(GetInt_invoke));
     OpModelParser::ToModelConfig(geModel, opModelDef);
 }

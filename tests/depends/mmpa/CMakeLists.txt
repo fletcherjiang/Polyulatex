@@ -36,6 +36,7 @@ target_link_libraries(mmpa_stub PRIVATE
         $<BUILD_INTERFACE:intf_pub>
         -Wl,--no-as-needed
         c_sec
+        static_turbojpeg
         gtest
         gtest_main
         gmock

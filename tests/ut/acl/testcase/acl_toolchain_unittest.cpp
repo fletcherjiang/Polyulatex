@@ -78,12 +78,18 @@ TEST_F(UTEST_ACL_toolchain, dumpApiNotSupportTest)
     EXPECT_NE(ret, ACL_SUCCESS);
 }
 
+static int AdxDataDumpServerInitInvoke()
+{
+    int initRet = 1;
+    return initRet;
+}
+
 TEST_F(UTEST_ACL_toolchain, dumpInitFailed)
 {
     acl::AclDump::GetInstance().aclDumpFlag_ = true;
     acl::AclDump::GetInstance().SetAclDumpFlag(false);
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), AdxDataDumpServerInit())
-        .WillOnce(Return(1));
+        .WillRepeatedly(Invoke(AdxDataDumpServerInitInvoke));
     aclError ret = aclmdlInitDump();
     EXPECT_EQ(ret, ACL_ERROR_INTERNAL_ERROR);
 }

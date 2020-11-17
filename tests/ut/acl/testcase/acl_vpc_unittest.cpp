@@ -640,16 +640,17 @@ TEST_F(VpcTest, TestDvppVpcPyrDown_param_check)
         &outputDesc, (void*)0x1, stream), ACL_SUCCESS);
 }
 
-void* mmAlignMallocStub2(mmSize mallocSize, mmSize alignSize)
+void* mmAlignMallocInvoke(mmSize mallocSize, mmSize alignSize)
 {
-    mallocSize = 80;
+    aclvdecChannelDesc *aclChannelDesc = nullptr;
+    mallocSize = CalAclDvppStructSize(aclChannelDesc);
     return malloc(mallocSize);
 }
 
 TEST_F(VpcTest, TestDvppVpcBatchCrop_param_check)
 {
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
-        .WillRepeatedly(Invoke(mmAlignMallocStub2));
+        .WillRepeatedly(Invoke(mmAlignMallocInvoke));
     acldvppChannelDesc channelDesc;
     acldvppBatchPicDesc *inputBatch = acldvppCreateBatchPicDesc(1);
     acldvppBatchPicDesc *outputBatch = acldvppCreateBatchPicDesc(1);
@@ -731,7 +732,10 @@ TEST_F(VpcTest, TestDvppVpcBatchCrop_param_check)
 TEST_F(VpcTest, TestDvppVpcBatchCrop)
 {
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
-        .WillRepeatedly(Invoke(mmAlignMallocStub2));
+        .WillRepeatedly(Invoke(mmAlignMallocInvoke));
+
+    // EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtMalloc(_, _, _))
+    //     .WillRepeatedly(Invoke(rtMallocStub));
 
     acldvppChannelDesc channelDesc;
 
@@ -820,7 +824,7 @@ TEST_F(VpcTest, TestDvppVpcBatchCrop)
 TEST_F(VpcTest, TestDvppVpcBatchCropAndPaste_param_check)
 {
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
-        .WillRepeatedly(Invoke(mmAlignMallocStub2));
+        .WillRepeatedly(Invoke(mmAlignMallocInvoke));
     acldvppChannelDesc channelDesc;
 
     acldvppBatchPicDesc *inputBatch = acldvppCreateBatchPicDesc(1);
@@ -902,7 +906,7 @@ TEST_F(VpcTest, TestDvppVpcBatchCropAndPaste_param_check)
 TEST_F(VpcTest, TestDvppVpcBatchCropAndPaste)
 {
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
-        .WillRepeatedly(Invoke(mmAlignMallocStub2));
+        .WillRepeatedly(Invoke(mmAlignMallocInvoke));
     acldvppChannelDesc channelDesc;
 
     acldvppBatchPicDesc *inputBatch = acldvppCreateBatchPicDesc(1);
@@ -1404,10 +1408,94 @@ TEST_F(VpcTest, TestDvppCalcHist_param_check)
         &histDesc, nullptr, stream), ACL_SUCCESS);
 }
 
+
+TEST_F(VpcTest, TestacldvppVpcCropResizeAsync)
+{
+    acldvppChannelDesc channelDesc;
+    acldvppPicDesc inputDesc;
+    acldvppPicDesc outputDesc;
+    acldvppRoiConfig cropArea;
+    acldvppResizeConfig resizeConfig;
+    aclrtStream stream;
+
+    channelDesc.dataBuffer.data = (void*)0x1;
+    channelDesc.notify = (void*)0x1;
+    inputDesc.dataBuffer.data = (void*)0x1;
+    outputDesc.dataBuffer.data = (void*)0x1;
+    aclError ret = acldvppVpcCropResizeAsync(&channelDesc, &inputDesc, &outputDesc, &cropArea,
+        &resizeConfig, stream);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(VpcTest, TestDvppVpcBatchCropResizeAsync)
+{
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
+        .WillRepeatedly(Invoke(mmAlignMallocInvoke));
+    acldvppChannelDesc channelDesc;
+    acldvppResizeConfig resizeConfig;
+
+    acldvppBatchPicDesc *inputBatch = acldvppCreateBatchPicDesc(1);
+    acldvppBatchPicDesc *outputBatch = acldvppCreateBatchPicDesc(1);
+
+    acldvppPicDesc *inputDesc = acldvppGetPicDesc(inputBatch, 0);
+    acldvppPicDesc *outputDesc = acldvppGetPicDesc(outputBatch, 0);
+    acldvppRoiConfig  *roiConfig =  acldvppCreateRoiConfig(1, 1, 1, 1);
+    aclrtStream stream;
+    channelDesc.dataBuffer.data = (void*)0x1;
+    channelDesc.dataBuffer.length = sizeof(uint64_t);
+    inputDesc->dataBuffer.data = (void*)0x1;
+    inputDesc->dataBuffer.length = sizeof(aicpu::dvpp::DvppPicDesc);
+    outputDesc->dataBuffer.data = (void*)0x1;
+    outputDesc->dataBuffer.length = sizeof(aicpu::dvpp::DvppPicDesc);
+    inputDesc->dvppPicDesc.format = PIXEL_FORMAT_YVU_SEMIPLANAR_420;
+    outputDesc->dvppPicDesc.format = PIXEL_FORMAT_YVU_SEMIPLANAR_420;
+
+    uint32_t *roiNums = new uint32_t[1];
+    roiNums[0] = 1;
+    channelDesc.notify = (void*)0x1;
+
+    acl::dvpp::DvppManager &dvppManager = acl::dvpp::DvppManager::GetInstance();
+    dvppManager.dvppVersion_ = DVPP_KERNELS_V100;
+    dvppManager.aclRunMode_ = ACL_HOST;
+    dvppManager.InitDvppProcessor();
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtNotifyWait(_, _))
+        .WillOnce(Return((ACL_ERROR_RT_PARAM_INVALID)));
+    EXPECT_NE(acldvppVpcBatchCropResizeAsync(&channelDesc, inputBatch, roiNums, 1, outputBatch,
+                                        &roiConfig, &resizeConfig, stream), ACL_SUCCESS);
+    acldvppDestroyRoiConfig(roiConfig);
+    acldvppDestroyBatchPicDesc(inputBatch);
+    acldvppDestroyBatchPicDesc(outputBatch);
+    delete[] roiNums;
+}
+
+
+TEST_F(VpcTest, TestDvppVpcCropResizePaste)
+{
+    acldvppChannelDesc channelDesc;
+    acldvppPicDesc inputDesc;
+    acldvppPicDesc outputDesc;
+    acldvppRoiConfig cropArea;
+    acldvppRoiConfig pasteArea;
+    acldvppResizeConfig resizeConfig;
+    aclrtStream stream;
+    inputDesc.dvppPicDesc.format = PIXEL_FORMAT_YVU_SEMIPLANAR_420;
+    outputDesc.dvppPicDesc.format = PIXEL_FORMAT_YVU_SEMIPLANAR_420;
+    channelDesc.dataBuffer.data = (void*)0x1;
+    channelDesc.dataBuffer.length = sizeof(uint64_t);
+    inputDesc.dataBuffer.data = (void*)0x1;
+    inputDesc.dataBuffer.length = sizeof(aicpu::dvpp::DvppPicDesc);
+    outputDesc.dataBuffer.data = (void*)0x1;
+    outputDesc.dataBuffer.length = sizeof(aicpu::dvpp::DvppPicDesc);
+    channelDesc.notify = (void*)0x1;
+    EXPECT_EQ(acldvppVpcCropResizePasteAsync(&channelDesc, &inputDesc, &outputDesc,
+                                          &cropArea, &pasteArea, &resizeConfig, stream), ACL_SUCCESS);
+}
+
 TEST_F(VpcTest, TestDvppVpcBatchCropResizePaste)
 {
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
-        .WillRepeatedly(Invoke(mmAlignMallocStub2));
+        .WillRepeatedly(Invoke(mmAlignMallocInvoke));
     acldvppChannelDesc channelDesc;
     acldvppResizeConfig resizeConfig;
 
@@ -1441,6 +1529,57 @@ TEST_F(VpcTest, TestDvppVpcBatchCropResizePaste)
 
     EXPECT_EQ(acldvppVpcBatchCropResizePasteAsync(&channelDesc, inputBatch, roiNums, 1, outputBatch,
                                        &roiConfig, &pasteRoiConfig, &resizeConfig, stream), ACL_SUCCESS);
+    acldvppDestroyRoiConfig(roiConfig);
+    acldvppDestroyRoiConfig(pasteRoiConfig);
+    acldvppDestroyBatchPicDesc(inputBatch);
+    acldvppDestroyBatchPicDesc(outputBatch);
+    delete[] roiNums;
+}
+
+TEST_F(VpcTest, TestDvppVpcBatchCropResizeMakeBorderAsync)
+{
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), mmAlignMalloc(_, _))
+        .WillRepeatedly(Invoke(mmAlignMallocInvoke));
+    acldvppChannelDesc channelDesc;
+    acldvppResizeConfig resizeConfig;
+
+    acldvppBatchPicDesc *inputBatch = acldvppCreateBatchPicDesc(1);
+    acldvppBatchPicDesc *outputBatch = acldvppCreateBatchPicDesc(1);
+
+    acldvppPicDesc *inputDesc = acldvppGetPicDesc(inputBatch, 0);
+    acldvppPicDesc *outputDesc = acldvppGetPicDesc(outputBatch, 0);
+    acldvppRoiConfig  *roiConfig =  acldvppCreateRoiConfig(1, 1, 1, 1);
+    acldvppRoiConfig  *pasteRoiConfig =  acldvppCreateRoiConfig(1, 1, 1, 1);
+
+    aclrtStream stream;
+    channelDesc.dataBuffer.data = (void*)0x1;
+    channelDesc.dataBuffer.length = sizeof(uint64_t);
+    inputDesc->dataBuffer.data = (void*)0x1;
+    inputDesc->dataBuffer.length = sizeof(aicpu::dvpp::DvppPicDesc);
+    outputDesc->dataBuffer.data = (void*)0x1;
+    outputDesc->dataBuffer.length = sizeof(aicpu::dvpp::DvppPicDesc);
+    inputDesc->dvppPicDesc.format = PIXEL_FORMAT_YVU_SEMIPLANAR_420;
+    outputDesc->dvppPicDesc.format = PIXEL_FORMAT_YVU_SEMIPLANAR_420;
+
+    uint32_t *roiNums = new uint32_t[1];
+    roiNums[0] = 1;
+    channelDesc.notify = (void*)0x1;
+
+    acl::dvpp::DvppManager &dvppManager = acl::dvpp::DvppManager::GetInstance();
+    dvppManager.dvppVersion_ = DVPP_KERNELS_V200;
+    dvppManager.aclRunMode_ = ACL_HOST;
+    dvppManager.InitDvppProcessor();
+    acldvppBorderConfig *borderConfig = dvppManager.GetImageProcessor()->acldvppCreateBorderConfig();
+    EXPECT_EQ(acldvppVpcBatchCropResizeMakeBorderAsync(&channelDesc, inputBatch, roiNums, 1, outputBatch,
+                                    &roiConfig, &borderConfig, &resizeConfig, stream), ACL_SUCCESS);
+
+    EXPECT_NE(acldvppVpcBatchCropResizeMakeBorderAsync(&channelDesc, inputBatch, nullptr, 1, outputBatch,
+                                &roiConfig, &borderConfig, &resizeConfig, stream), ACL_SUCCESS);
+    dvppManager.aclRunMode_ = ACL_DEVICE;
+    dvppManager.InitDvppProcessor();
+    EXPECT_EQ(dvppManager.GetImageProcessor()->acldvppVpcBatchCropResizeMakeBorderAsync(&channelDesc, inputBatch, roiNums,
+                        1, outputBatch, &roiConfig, &borderConfig, &resizeConfig, stream), ACL_SUCCESS);
+    acldvppDestroyBorderConfig(borderConfig);
     acldvppDestroyRoiConfig(roiConfig);
     acldvppDestroyRoiConfig(pasteRoiConfig);
     acldvppDestroyBatchPicDesc(inputBatch);

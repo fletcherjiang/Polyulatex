@@ -331,6 +331,29 @@ TEST_F(UTEST_ACL_OpModelManager, MatchModelTest)
     aclopDestroyAttr(opAttr);
 }
 
+TEST_F(UTEST_ACL_OpModelManager, TestStaticMapAging)
+{
+    OpModelDef modelDef;
+    modelDef.opType = "testOpStatic";
+    int64_t shape[]{16, 16};
+    modelDef.inputDescArr.emplace_back(ACL_FLOAT16, 2, shape, ACL_FORMAT_ND);
+    modelDef.inputDescArr.emplace_back(ACL_FLOAT16, 2, shape, ACL_FORMAT_ND);
+    modelDef.outputDescArr.emplace_back(ACL_FLOAT16, 2, shape, ACL_FORMAT_ND);
+    modelDef.opAttr.SetAttr<string>("testAttr", "attrValue");
+
+    auto &instance = OpModelManager::GetInstance();
+    EXPECT_EQ(instance.HandleMaxOpQueueConfig("../tests/ut/acl/json/aging.json"), ACL_SUCCESS);
+    EXPECT_EQ(instance.RegisterModel(std::move(modelDef), instance.opModels_, instance.dynamicOpModels_, false, false), ACL_SUCCESS);
+
+    OpModelDef modelDef1;
+    modelDef1.opType = "testOpStatic1";
+    modelDef1.inputDescArr.emplace_back(ACL_FLOAT16, 2, shape, ACL_FORMAT_ND);
+    modelDef1.inputDescArr.emplace_back(ACL_FLOAT16, 2, shape, ACL_FORMAT_ND);
+    modelDef1.outputDescArr.emplace_back(ACL_FLOAT16, 2, shape, ACL_FORMAT_ND);
+    modelDef1.opAttr.SetAttr<string>("testAttr", "attrValue");
+    EXPECT_EQ(instance.RegisterModel(std::move(modelDef1), instance.opModels_, instance.dynamicOpModels_, false, false), ACL_SUCCESS);
+}
+
 TEST_F(UTEST_ACL_OpModelManager, TestDynamicMapAging)
 {
     OpModelDef modelDef;
@@ -358,6 +381,14 @@ TEST_F(UTEST_ACL_OpModelManager, TestDynamicMapAging)
     ASSERT_EQ(instance.RegisterModel(std::move(modelDef), instance.opModels_, instance.dynamicOpModels_, true, false), ACL_SUCCESS);
 }
 
+TEST_F(UTEST_ACL_OpModelManager, TestGetOpModel)
+{
+    AclOp aclOp;
+    aclOp.opType = "newOp";
+    auto &instance = OpModelManager::GetInstance();
+    EXPECT_NE(instance.GetOpModel(aclOp), ACL_SUCCESS);
+
+}
 
 TEST_F(UTEST_ACL_OpModelManager, TestOmFileFilterFn)
 {
@@ -407,6 +438,13 @@ TEST_F(UTEST_ACL_OpModelManager, LoadModelFromMemTest)
     auto &instance = OpModelManager::GetInstance();
     EXPECT_NE(instance.LoadModelFromMem(aclModelData, modelSize, isStatic), ACL_SUCCESS);
     delete []aclModelData;
+}
+
+TEST_F(UTEST_ACL_OpModelManager, BuildOpModelTest)
+{
+    AclOp aclop;
+    auto &instance = OpModelManager::GetInstance();
+    EXPECT_NE(instance.BuildOpModel(aclop), ACL_SUCCESS);
 }
 
 TEST_F(UTEST_ACL_OpModelManager, LoadAllModelsTest)

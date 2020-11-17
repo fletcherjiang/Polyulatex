@@ -35,6 +35,7 @@ protected:
 
     void TearDown()
     {
+        Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
     }
 };
 
@@ -246,10 +247,67 @@ TEST_F(PngTest, TestPredictPngDecSizeAicpu0)
     EXPECT_EQ(acldvppPngPredictDecSize(nullptr, 0, PIXEL_FORMAT_RGBA_8888, nullptr), ACL_ERROR_RESOURCE_NOT_MATCH);
 }
 
+TEST_F(PngTest, TestInvalidVersion)
+{
+    acl::dvpp::DvppManager &dvppManager = acl::dvpp::DvppManager::GetInstance();
+    dvppManager.aclRunMode_ = ACL_DEVICE;
+    dvppManager.GetDvppKernelVersion();
+    Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtCpuKernelLaunch(_, _, _, _, _, _, _))
+        .WillRepeatedly(Return(RT_ERROR_NONE));
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtFree(_))
+        .WillOnce(Return(ACL_ERROR_RT_PARAM_INVALID));
+    EXPECT_EQ(dvppManager.GetDvppKernelVersion(), ACL_ERROR_FEATURE_UNSUPPORTED);
+    Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
+}
+
 TEST_F(PngTest, GetDvppKernelVersion)
 {
     acl::dvpp::DvppManager &dvppManager = acl::dvpp::DvppManager::GetInstance();
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtStreamCreate(_, _))
         .WillOnce(Return((ACL_ERROR_RT_PARAM_INVALID)));
     dvppManager.GetDvppKernelVersion();
+}
+
+TEST_F(PngTest, acldvppPngDecodeAsync)
+{
+    acldvppChannelDesc *channelDesc;
+    void *data;
+    uint32_t size;
+    acldvppPicDesc *outputDesc;
+    aclrtStream stream;
+    aclError ret = acldvppPngDecodeAsync(channelDesc, data, size, outputDesc, stream);
+    EXPECT_EQ(ret, ACL_ERROR_RESOURCE_NOT_MATCH);
+
+    acl::dvpp::DvppManager &dvppManager = acl::dvpp::DvppManager::GetInstance();
+    dvppManager.aicpuVersion_ = 1;
+    ret = acldvppPngDecodeAsync(channelDesc, data, size, outputDesc, stream);
+    EXPECT_EQ(ret, ACL_ERROR_FEATURE_UNSUPPORTED);
+}
+
+TEST_F(PngTest, acldvppPngGetImageInfo)
+{
+    void *data;
+    uint32_t size;
+    uint32_t *width;
+    uint32_t *height;
+    int32_t *components;
+    aclError ret = acldvppPngGetImageInfo(data, size, width, height, components);
+    EXPECT_EQ(ret, ACL_ERROR_FEATURE_UNSUPPORTED);
+
+    acl::dvpp::DvppManager &dvppManager = acl::dvpp::DvppManager::GetInstance();
+    dvppManager.aicpuVersion_ = 1;
+    ret = acldvppPngGetImageInfo(data, size, width, height, components);
+    EXPECT_EQ(ret, ACL_ERROR_FEATURE_UNSUPPORTED);
+}
+
+TEST_F(PngTest, acldvppPngPredictDecSize)
+{
+    void *data;
+    uint32_t size;
+    acldvppPixelFormat outputPixelFormat;
+    uint32_t *decSize;
+    aclError ret = acldvppPngPredictDecSize(data, size,outputPixelFormat, decSize);
+    EXPECT_NE(ret, ACL_SUCCESS);
 }

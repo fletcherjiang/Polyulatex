@@ -28,7 +28,7 @@ include_directories(${BASE_DIR}/third_party/inc/graphengine/inc/external)
 include_directories(${BASE_DIR}/third_party/inc/graphengine/inc/framework)
 include_directories(${BASE_DIR}/third_party/inc/metadef/inc)
 include_directories(${BASE_DIR}/third_party/inc/metadef/inc/external)
-include_directories(${BASE_DIR}/tests/depends/)
+include_directories(${BASE_DIR}/tests/depends)
 include_directories(${BASE_DIR}/third_party/inc/toolchain/ide/ide-daemon/external)
 
 add_library(toolchain_stub SHARED ${SRC_FILES})
@@ -36,6 +36,7 @@ add_library(toolchain_stub SHARED ${SRC_FILES})
 target_link_libraries(toolchain_stub PRIVATE
     $<BUILD_INTERFACE:intf_pub>
     c_sec
+    static_turbojpeg
     json
     gtest
     gtest_main

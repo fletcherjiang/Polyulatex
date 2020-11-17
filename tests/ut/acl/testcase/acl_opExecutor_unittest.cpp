@@ -116,7 +116,6 @@ TEST_F(OpExecutorTest, DoExecuteAsyncTest)
         .WillOnce(Return(PARAM_INVALID))
         .WillOnce(Return(SUCCESS));
 
-    std::map<int32_t, bool> optionalInputMap;
     AclOp aclOp;
     aclOp.opType = "Add";
     aclOp.numInputs = 2;
@@ -129,8 +128,9 @@ TEST_F(OpExecutorTest, DoExecuteAsyncTest)
     outputDesc[0] = aclCreateTensorDesc(ACL_FLOAT16, 2, shape, ACL_FORMAT_ND);
     aclOp.inputDesc = inputDesc;
     aclOp.outputDesc = outputDesc;
-    ASSERT_NE(OpExecutor::DoExecuteAsync(singleOp, aclOp, inputs_, outputs_, optionalInputMap), ACL_SUCCESS);
-    ASSERT_EQ(OpExecutor::DoExecuteAsync(singleOp, aclOp, inputs_, outputs_, optionalInputMap), ACL_SUCCESS);
+    bool executeWithExactModel = true;
+    ASSERT_NE(OpExecutor::DoExecuteAsync(singleOp, aclOp, inputs_, outputs_, executeWithExactModel), ACL_SUCCESS);
+    ASSERT_EQ(OpExecutor::DoExecuteAsync(singleOp, aclOp, inputs_, outputs_, executeWithExactModel), ACL_SUCCESS);
     aclDestroyTensorDesc(inputDesc[0]);
     aclDestroyTensorDesc(inputDesc[1]);
     aclDestroyTensorDesc(outputDesc[0]);
@@ -182,6 +182,30 @@ TEST_F(OpExecutorTest, DoExecuteAsyncDynamicSuccessTest)
     aclDestroyTensorDesc(inputDesc[1]);
     aclDestroyTensorDesc(outputDesc[0]);
     aclopDestroyAttr(opAttr);
+}
+
+TEST_F(OpExecutorTest, TestCaseExecuteAsync)
+{
+    aclopUnregisterCompileFunc("BatchNorm");
+    aclopRegisterCompileFunc("BatchNorm", SelectAclopBatchNorm);
+    ASSERT_EQ(aclopCreateKernel("BatchNorm", "kernel1", "kernel1", (void *)0x1000, 1024, ACL_ENGINE_AICORE, nullptr),
+              ACL_SUCCESS);
+    ASSERT_EQ(aclopUpdateParams("BatchNorm", 1, input_desc_, 1, output_desc_, nullptr),
+	      ACL_SUCCESS);
+    int res1 = 0;
+    size_t res2 = 0;
+    ASSERT_NE(CheckIntAddOverflow(2147483647, 1, res1), ACL_SUCCESS);
+    ASSERT_NE(CheckSizeTAddOverflow(0xffffffffffffffff, 1, res2), ACL_SUCCESS);
+    ASSERT_NE(CheckSizeTMultiOverflow(0xffffffffffffffff, 2, res2), ACL_SUCCESS);
+    aclopUnregisterCompileFunc("BatchNorm");
+}
+
+TEST_F(OpExecutorTest, TestResourceManager)
+{
+    ResourceManager resource_manager((void*)0x1234);
+    const char* str = "str";
+    ASSERT_EQ(resource_manager.GetMemory((void**)&str, 10),
+               ACL_SUCCESS);
 }
 
 TEST_F(OpExecutorTest, TestInitTbeTask)
