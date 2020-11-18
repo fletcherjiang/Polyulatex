@@ -42,6 +42,8 @@
 #include "graph/operator_factory.h"
 #include "graph/ge_local_context.h"
 #include "toolchain/prof_callback.h"
+#include "graph/detail/attributes_holder.h"
+
 #include "acl_stub.h"
 
 using namespace ge;
@@ -306,15 +308,60 @@ Status aclStub::GetAllAippInputOutputDims(uint32_t model_id, uint32_t index,
     return SUCCESS;
 }
 
+Status aclStub::Init(uint8_t *model_data, const uint32_t model_data_size)
+{
+    return MockFunctionTest::aclStubInstance().Init(model_data, model_data_size);
+}
+
+
 std::string aclStub::GetErrorMessage()
 {
     std::string message = "";
     return message;
 }
 
+Status aclStub::SetDynamicAippData(uint32_t model_id, void *dynamic_input_addr, uint64_t length,
+                                        const std::vector<kAippDynamicBatchPara> &aippBatchPara,
+                                        const kAippDynamicPara &aippParms)
+{
+    return SUCCESS;
+}
+
 int aclStub::Init()
 {
     return 0;
+}
+
+bool aclStub::OpsProtoManager_Initialize(const std::map<std::string, std::string> &options)
+{
+    return true;
+}
+
+Status aclStub::TransShape(const TensorDesc &src_desc,
+                                Format dst_format,
+                                std::vector<int64_t> &dst_shape)
+{
+    return SUCCESS;
+}
+
+Status aclStub::GetModelPartition(ModelPartitionType type, ModelPartition &partition)
+{
+    return SUCCESS;
+}
+
+graphStatus aclStub::Load(const uint8_t *data, size_t len, Model &model)
+{
+    return 0;
+}
+
+bool aclStub::HasAttr(AttrUtils::ConstAttrHolderAdapter&& obj, const string &name)
+{
+    return true;
+}
+
+bool aclStub::GetListTensor(AttrUtils::ConstAttrHolderAdapter&& obj, const string& name, vector<ConstGeTensorPtr>& value)
+{
+    return true;
 }
 
 MockFunctionTest& MockFunctionTest::aclStubInstance()
@@ -414,7 +461,7 @@ std::map<string, GeAttrValue> g_geAttrMap;
                                             const std::vector<kAippDynamicBatchPara> &aippBatchPara,
                                             const kAippDynamicPara &aippParms)
     {
-        return SUCCESS;
+        return MockFunctionTest::aclStubInstance().SetDynamicAippData(model_id, dynamic_input_addr, length, aippBatchPara, aippParms);
     }
 
     Status GeExecutor::GetAIPPInfo(uint32_t model_id, uint32_t index, AippConfigInfo &aipp_params)
@@ -658,9 +705,9 @@ std::map<string, GeAttrValue> g_geAttrMap;
     {
     }
 
-    graphStatus Model::Load(unsigned char const*, unsigned long, Model&)
+    graphStatus Model::Load(const uint8_t *data, size_t len, Model &model)
     {
-        return 0;
+        return MockFunctionTest::aclStubInstance().Load(data, len, model);
     }
 
     GeAttrValue NamedAttrs::GetItem(const string &key) const
@@ -679,12 +726,12 @@ std::map<string, GeAttrValue> g_geAttrMap;
     {
     }
 
-    bool AttrUtils::GetListTensor(AttrUtils::ConstAttrHolderAdapter&&  obj, const string& name, vector<ConstGeTensorPtr>& value)
+    bool AttrUtils::GetListTensor(ge::AttrUtils::ConstAttrHolderAdapter&& obj, const string& name, vector<ConstGeTensorPtr>& value)
     {
-        return true;
+        return MockFunctionTest::aclStubInstance().GetListTensor(obj, name, value);
     }
 
-    bool AttrUtils::GetStr(AttrUtils::ConstAttrHolderAdapter&&  obj, const string& name, string& value)
+    bool AttrUtils::GetStr(AttrUtils::ConstAttrHolderAdapter&& obj, const string& name, string& value)
     {
         return true;
     }
@@ -711,7 +758,7 @@ std::map<string, GeAttrValue> g_geAttrMap;
 
     bool AttrUtils::HasAttr(ConstAttrHolderAdapter &&obj, const string &name)
     {
-        return true;
+        return MockFunctionTest::aclStubInstance().HasAttr(obj, name);
     }
 
     bool AttrUtils::SetTensor(AttrHolderAdapter &&obj, const string &name, const ConstGeTensorPtr &value)
@@ -1239,7 +1286,7 @@ std::map<string, GeAttrValue> g_geAttrMap;
                                     Format dst_format,
                                     std::vector<int64_t> &dst_shape)
     {
-        return SUCCESS;
+        return MockFunctionTest::aclStubInstance().TransShape(src_desc, dst_format, dst_shape);
     }
 
     bool AttrUtils::GetInt(ge::AttrUtils::ConstAttrHolderAdapter&& obj, const std::string &name, int64_t &value)
@@ -1270,14 +1317,14 @@ std::map<string, GeAttrValue> g_geAttrMap;
 } // namespace ge
 
 namespace ge {
-    Status OmFileLoadHelper::Init(unsigned char*, unsigned int)
+    Status OmFileLoadHelper::Init(uint8_t *model_data, const uint32_t model_data_size)
     {
-        return ge::SUCCESS;
+        return MockFunctionTest::aclStubInstance().Init(model_data, model_data_size);
     }
 
-    Status OmFileLoadHelper::GetModelPartition(ModelPartitionType, ModelPartition&)
+    Status OmFileLoadHelper::GetModelPartition(ModelPartitionType type, ModelPartition &partition)
     {
-        return ge::SUCCESS;
+        return MockFunctionTest::aclStubInstance().GetModelPartition(type, partition);
     }
 
     bool ReadBytesFromBinaryFile(char const *file_name, char **buffer, int &length)
@@ -1327,7 +1374,7 @@ namespace ge {
 
     bool OpsProtoManager::Initialize(const std::map<std::string, std::string> &options)
     {
-        return true;
+        return MockFunctionTest::aclStubInstance().OpsProtoManager_Initialize(options);
     }
 
     Operator OperatorFactory::CreateOperator(const std::string &operator_name, const std::string &operator_type)

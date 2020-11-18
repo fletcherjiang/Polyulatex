@@ -109,68 +109,26 @@ TEST_F(UTEST_ACL_Common, ErrorManagerTest)
     EXPECT_EQ(ret, ACL_SUCCESS);
 }
 
-// TEST_F(UTEST_ACL_Common, init)
-// {
-//     MsprofCtrlCallback callback = ctrl_callback;
-//     AclProfilingManager::GetInstance().SetProfCtrlCallback(callback);
-//     MsprofReporterCallback callback2 = reporter_callback;
-//     AclProfilingManager::GetInstance().SetProfReporterCallback(callback2);
-//     MOCKER(AclDump::HandleDumpConfig)
-//         .stubs()
-//         .will(returnValue(ACL_ERROR_INVALID_FILE));
-//     aclError ret = aclInit("llt/acl/ut/json/dumpConfig.json");
-//     EXPECT_NE(ret, ACL_SUCCESS);
-//     GlobalMockObject::reset();
-
-//     MOCKER(AclProfiling::HandleProfilingConfig)
-//         .stubs()
-//         .will(returnValue(ACL_ERROR_INVALID_FILE));
-//     ret = aclInit("llt/acl/ut/json/dumpConfig.json");
-//     EXPECT_NE(ret, ACL_SUCCESS);
-//     GlobalMockObject::reset();
-
-//     MOCKER_CPP(&ge::GeExecutor::Initialize)
-//         .stubs()
-//         .will(returnValue(ge::PARAM_INVALID));
-//     ret = aclInit("llt/acl/ut/json/dumpConfig.json");
-//     EXPECT_NE(ret, ACL_SUCCESS);
-//     GlobalMockObject::reset();
-
-//     MOCKER(DlogReportInitialize)
-//           .stubs()
-//           .will(returnValue(-1));
-//       ret = aclInit("llt/acl/ut/json/dumpConfig.json");
-//       GlobalMockObject::reset();
-
-//     ret = aclInit("llt/acl/ut/json/dumpConfig.json");
-//     EXPECT_NE(ret, ACL_SUCCESS);
-//     ret = aclInit("llt/acl/ut/json/dumpConfig.json");
-//     EXPECT_NE(ret, ACL_SUCCESS);
-// }
-
-// TEST_F(UTEST_ACL_Common, finalize1)
-// {
-//     SetGeFinalizeCallback(nullptr);
-//     // ge executor finalize failed
-//     MOCKER_CPP(&ge::GeExecutor::Finalize)
-//         .stubs()
-//         .will(returnValue(ge::PARAM_INVALID));
-//     MOCKER(DlogReportFinalize)
-//             .stubs()
-//             .will(returnValue(-1));
-//     aclError ret = aclFinalize();
-//     EXPECT_NE(ret, ACL_SUCCESS);
-//     GlobalMockObject::reset();
-// }
+TEST_F(UTEST_ACL_Common, finalize1)
+{
+    SetGeFinalizeCallback(nullptr);
+    // ge executor finalize failed
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), Finalize())
+        .WillRepeatedly(Return(PARAM_INVALID));
+    aclError ret = aclFinalize();
+    EXPECT_NE(ret, ACL_SUCCESS);
+}
 
 TEST_F(UTEST_ACL_Common, finalize2)
 {
-    SetGeFinalizeCallback(nullptr);
     acl::AclDump::GetInstance().aclDumpFlag_ = true;
-    printf("----------finalize1--------------\n");
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), Finalize())
+        .WillRepeatedly(Return(SUCCESS));
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), AdxDataDumpServerInit())
+        .WillRepeatedly(Return(0));
+
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), AdxDataDumpServerUnInit())
         .WillOnce(Return(ACL_ERROR_INTERNAL_ERROR));
-    printf("----------finalize2--------------\n");
     aclError ret = aclFinalize();
     EXPECT_NE(ret, ACL_SUCCESS);
 }
@@ -715,26 +673,6 @@ TEST_F(UTEST_ACL_Common, memory_malloc_cache_device)
     EXPECT_NE(ret, ACL_SUCCESS);
 }
 
-#if 0
-TEST_F(UTEST_ACL_Common, memory_free_device)
-{
-    void *devPtr = (void *)0x01;
-
-    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtFree(_))
-        .WillOnce(Return(ACL_ERROR_RT_PARAM_INVALID))
-        .WillRepeatedly(Return(RT_ERROR_NONE));
-
-    aclError ret = aclrtFree(nullptr);
-    EXPECT_NE(ret, ACL_SUCCESS);
-
-    ret = aclrtFree(devPtr);
-    EXPECT_NE(ret, ACL_SUCCESS);
-
-    ret = aclrtFree(devPtr);
-    EXPECT_EQ(ret, ACL_SUCCESS);
-}
-#endif
-
 TEST_F(UTEST_ACL_Common, memory_malloc_host)
 {
     void *hostPtr = nullptr;
@@ -758,79 +696,6 @@ TEST_F(UTEST_ACL_Common, memory_malloc_host)
     ret = aclrtMallocHost(&hostPtr, size);
     EXPECT_NE(ret, ACL_SUCCESS);
 }
-
-#if 0
-TEST_F(UTEST_ACL_Common, memory_free_host)
-{
-    // void *hostPtr = (void *)0x01;
-    void *hostPtr = nullptr;
-
-    aclError ret = aclrtFreeHost(hostPtr);
-    EXPECT_NE(ret, ACL_SUCCESS);
-    size_t size = 1;
-    ret = aclrtMallocHost(&hostPtr, size);
-    EXPECT_EQ(ret, ACL_SUCCESS);
-    EXPECT_NE(hostPtr, nullptr);
-    ret = aclrtFreeHost(hostPtr);
-    EXPECT_EQ(ret, ACL_SUCCESS);
-
-    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtFreeHost(_))
-        .WillOnce(Return(ACL_ERROR_RT_PARAM_INVALID))
-        .WillRepeatedly(Return(RT_ERROR_NONE));
-    ret = aclrtFreeHost(nullptr);
-    EXPECT_NE(ret, ACL_SUCCESS);
-
-    ret = aclrtFreeHost(hostPtr);
-    EXPECT_NE(ret, ACL_SUCCESS);
-}
-
-TEST_F(UTEST_ACL_Common, memory_memset)
-{
-    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtMemset(_, _, _, _))
-        .WillOnce(Return((ACL_ERROR_RT_PARAM_INVALID)))
-        .WillRepeatedly(Return((RT_ERROR_NONE)));
-
-    void *ptr = (void *)0x01;
-    aclError ret = aclrtMemset(ptr, 1, 1, 1);
-    EXPECT_NE(ret, ACL_SUCCESS);
-
-    ret = aclrtMemset(nullptr, 1, 1, 1);
-    EXPECT_NE(ret, ACL_SUCCESS);
-
-    ret = aclrtMemset(ptr, 1, 1, 1);
-    EXPECT_EQ(ret, ACL_SUCCESS);
-}
-
-TEST_F(UTEST_ACL_Common, memory_memcpy)
-{
-    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtMemcpy(_, _, _, _, _))
-        .WillOnce(Return((ACL_ERROR_RT_PARAM_INVALID)))
-        .WillRepeatedly(Return((RT_ERROR_NONE)));
-
-    void *dst = (void *)0x01;
-    void *src = (void *)0x02;
-    aclError ret = aclrtMemcpy(dst, 1, src, 1, ACL_MEMCPY_HOST_TO_HOST);
-    EXPECT_NE(ret, ACL_SUCCESS);
-
-    ret = aclrtMemcpy(nullptr, 1, src, 1, ACL_MEMCPY_HOST_TO_HOST);
-    EXPECT_NE(ret, ACL_SUCCESS);
-
-    ret = aclrtMemcpy(dst, 1, nullptr, 1, ACL_MEMCPY_HOST_TO_HOST);
-    EXPECT_NE(ret, ACL_SUCCESS);
-
-    ret = aclrtMemcpy(dst, 1, src, 1, ACL_MEMCPY_HOST_TO_DEVICE);
-    EXPECT_EQ(ret, ACL_SUCCESS);
-
-    ret = aclrtMemcpy(dst, 1, src, 1, ACL_MEMCPY_DEVICE_TO_HOST);
-    EXPECT_EQ(ret, ACL_SUCCESS);
-
-    ret = aclrtMemcpy(dst, 1, src, 1, ACL_MEMCPY_DEVICE_TO_DEVICE);
-    EXPECT_EQ(ret, ACL_SUCCESS);
-
-    ret = aclrtMemcpy(dst, 1, src, 1, (aclrtMemcpyKind)0x7FFFFFFF);
-    EXPECT_NE(ret, ACL_SUCCESS);
-}
-#endif
 
 TEST_F(UTEST_ACL_Common, memory_memcpyAsync)
 {
@@ -1123,4 +988,11 @@ TEST_F(UTEST_ACL_Common, AclGetRecentErrMsgTest)
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetErrorMessage())
         .WillOnce(Return((errMsg)));
     EXPECT_NE(aclGetRecentErrMsg(), nullptr);
+}
+
+TEST_F(UTEST_ACL_Common, AclrtGetSocNameTest)
+{
+    std::string aclSocVersion = "lhisi";
+    const char *ret = aclrtGetSocName();
+    EXPECT_NE(ret, nullptr);
 }

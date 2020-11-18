@@ -24,6 +24,7 @@ add_subdirectory(depends/runtime)
 add_subdirectory(depends/tdt)
 add_subdirectory(depends/profiling)
 add_subdirectory(depends/toolchain)
+add_subdirectory(depends/jpeg)
 
 if (ENABLE_ACL_COV OR ENABLE_ACL_UT)
     add_subdirectory(ut)

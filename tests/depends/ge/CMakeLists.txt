@@ -42,6 +42,7 @@ add_library(ge_stub SHARED ${SRC_FILES} ${PROTO_LIST})
 target_link_libraries(ge_stub PRIVATE
         $<BUILD_INTERFACE:intf_pub>
         c_sec
+        static_turbojpeg
         ascend_protobuf
         gtest
         gtest_main

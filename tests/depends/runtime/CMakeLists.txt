@@ -35,6 +35,7 @@ add_library(runtime_stub SHARED ${SRC_FILES})
 target_link_libraries(runtime_stub PRIVATE
     $<BUILD_INTERFACE:intf_pub>
     c_sec
+    static_turbojpeg
     gtest
     gtest_main
     gmock

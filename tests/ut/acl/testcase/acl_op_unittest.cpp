@@ -243,6 +243,24 @@ TEST_F(OpApiTest, TestGetDimRange)
     aclDestroyTensorDesc(desc);
 }
 
+TEST_F(OpApiTest, TestAclOpDebugString)
+{
+    AclOp aclOp;
+    aclOp.opType = "opType";
+    ASSERT_FALSE(aclOp.DebugString().empty());
+
+    aclOp.numInputs = 2;
+    aclOp.inputDesc = input_desc_;
+    ASSERT_FALSE(aclOp.DebugString().empty());
+
+    aclOp.numOutputs = 1;
+    aclOp.outputDesc = output_desc_;
+    ASSERT_FALSE(aclOp.DebugString().empty());
+
+    aclOp.opAttr = opAttr;
+    ASSERT_FALSE(aclOp.DebugString().empty());
+}
+
 TEST_F(OpApiTest, NullsTest)
 {
     ASSERT_EQ(aclCreateTensorDesc(ACL_FLOAT16, 1, nullptr, ACL_FORMAT_ND), nullptr);
@@ -256,6 +274,53 @@ TEST_F(OpApiTest, NullsTest)
     aclTensorDesc desc1(ACL_INT64, 2, dims1, ACL_FORMAT_NCHW);
     ASSERT_EQ(aclGetTensorDescElementCount(&desc1), 0);
     ASSERT_EQ(aclGetTensorDescNumDims(nullptr), 0);
+}
+
+TEST_F(OpApiTest, TestSetModelDir)
+{
+    ASSERT_EQ(aclopSetModelDir("op_models"), ACL_SUCCESS);
+    ASSERT_EQ(aclopSetModelDir("op_models"), ACL_ERROR_REPEAT_INITIALIZE);
+}
+
+TEST_F(OpApiTest, TestAclopLoad)
+{
+    int modelSize = 10;
+    char* model = new(std::nothrow) char[modelSize]();
+    ASSERT_NE(aclopLoad((void *)model, modelSize), ACL_SUCCESS);
+    ASSERT_NE(aclopLoad((void *)model, 0), ACL_SUCCESS);
+    delete []model;
+}
+
+TEST_F(OpApiTest, TestTransTensorDescFormat)
+{
+    int64_t shape[] = {1, 3, 224, 224};
+    aclTensorDesc *srcDesc = aclCreateTensorDesc(ACL_FLOAT16, 4, shape, ACL_FORMAT_NCHW);
+    aclTensorDesc *dstDesc = nullptr;
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), TransShape(_, _, _))
+        .WillRepeatedly(Return(PARAM_INVALID));
+    ASSERT_NE(aclTransTensorDescFormat(srcDesc, ACL_FORMAT_NC1HWC0, &dstDesc), ACL_SUCCESS);
+    Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), TransShape(_, _, _))
+        .WillRepeatedly(Return(SUCCESS));
+    srcDesc = aclCreateTensorDesc(ACL_FLOAT16, -1, shape, ACL_FORMAT_NCHW);
+    ASSERT_NE(aclTransTensorDescFormat(srcDesc, ACL_FORMAT_NC1HWC0, &dstDesc), ACL_SUCCESS);
+    aclDestroyTensorDesc(srcDesc);
+    aclDestroyTensorDesc(dstDesc);
+}
+
+TEST_F(OpApiTest, AclOpCompileTest)
+{
+    aclopUnregisterCompileFunc("BatchNorm");
+    aclopRegisterCompileFunc("BatchNorm", SelectAclopBatchNorm);
+    ASSERT_NE(aclopUpdateParams(nullptr, 1, input_desc_, 1, output_desc_, opAttr),
+	      ACL_SUCCESS);
+    ASSERT_NE(aclopUpdateParams("BatchNorm", 1, nullptr, 1, output_desc_, opAttr),
+              ACL_SUCCESS);
+    ASSERT_NE(aclopUpdateParams("BatchNorm", 1, input_desc_, 1, nullptr, opAttr),
+            ACL_SUCCESS);
+    aclopUnregisterCompileFunc("BatchNorm");
+    ASSERT_NE(aclopUpdateParams("opType", 1, input_desc_, 1, output_desc_, opAttr), ACL_SUCCESS);
 }
 
 TEST_F(OpApiTest, TestRepeatRegisterSelectKernelFunc)
@@ -361,8 +426,7 @@ TEST_F(OpApiTest, TestAclOpInferShapeFail)
     inputs[1] = aclCreateDataBuffer((void *)buf2, 16);
     std::string filePath = "";
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), RealPath(_))
-        .Times(4)
-        .WillOnce(Return((filePath)));
+        .WillRepeatedly(Return((filePath)));
 
     aclError ret = aclopInferShape("opType", 2, (aclTensorDesc **)input_desc_, inputs, 2, v2_empty_output_desc_, opAttr);
     aclDestroyDataBuffer(inputs[0]);
@@ -380,6 +444,12 @@ TEST_F(OpApiTest, TestLoadOpsProtoFail)
     aclDataBuffer *inputs[2];
     inputs[0] = aclCreateDataBuffer((void *)buf1, 16);
     inputs[1] = aclCreateDataBuffer((void *)buf2, 16);
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), OpsProtoManager_Initialize(_))
+        .WillRepeatedly(Return(false));
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetOpsTypeList(_))
+        .WillRepeatedly(Return((GRAPH_SUCCESS)));
 
     EXPECT_NE(aclopInferShape("opType", 2, (aclTensorDesc **)input_desc_, inputs, 2, v2_empty_output_desc_, opAttr),
               ACL_SUCCESS);

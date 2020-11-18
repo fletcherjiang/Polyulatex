@@ -18,6 +18,7 @@
 #include "graph/operator_factory.h"
 #include "graph/ge_local_context.h"
 #include "graph/tensor.h"
+#include "common/helper/om_file_helper.h"
 
 #include "tdt/tdt_host_interface.h"
 #include "runtime/dev.h"
@@ -31,8 +32,8 @@
 
 #include "adx_datadump_server.h"
 #include "mmpa/mmpa_api.h"
+#include "./jpeg/src/jpeg_stub.h"
 
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
 using namespace tdt;
@@ -108,8 +109,20 @@ public:
     virtual Status GetAllAippInputOutputDims(uint32_t model_id, uint32_t index,
                                         std::vector<InputOutputDims> &input_dims,
                                         std::vector<InputOutputDims> &output_dims);
+    virtual Status SetDynamicAippData(uint32_t model_id, void *dynamic_input_addr, uint64_t length,
+                                        const std::vector<kAippDynamicBatchPara> &aippBatchPara,
+                                        const kAippDynamicPara &aippParms);
     virtual std::string GetErrorMessage();
     virtual int Init();
+    virtual bool OpsProtoManager_Initialize(const std::map<std::string, std::string> &options);
+    virtual Status TransShape(const TensorDesc &src_desc,
+                                Format dst_format,
+                                std::vector<int64_t> &dst_shape);
+    virtual Status Init(uint8_t *model_data, const uint32_t model_data_size);
+    virtual Status GetModelPartition(ModelPartitionType type, ModelPartition &partition);
+    virtual graphStatus Load(const uint8_t *data, size_t len, Model &model);
+    virtual bool HasAttr(AttrUtils::ConstAttrHolderAdapter&& obj, const string &name);
+    virtual bool GetListTensor(AttrUtils::ConstAttrHolderAdapter&& obj, const string& name, vector<ConstGeTensorPtr>& value);
 
     // runtime function
     virtual rtError_t rtSubscribeReport(uint64_t threadId, rtStream_t stream);
@@ -201,12 +214,18 @@ public:
     virtual int AdxDataDumpServerInit();
     virtual int AdxDataDumpServerUnInit();
 
-    // slog funciton
+    // slog function
     virtual int dlog_getlevel(int module_id, int *enable_event);
 
     // mmpa function
     virtual INT32 mmScandir2(const CHAR *path, mmDirent2 ***entryList, mmFilter2 filterFunc,  mmSort2 sort);
     virtual void* mmAlignMalloc(mmSize mallocSize, mmSize alignSize);
+
+    // jpeg function
+    virtual void jpeg_CreateDecompress(j_decompress_ptr cinfo, int version, size_t structsize);
+    virtual int jpeg_read_header(j_decompress_ptr cinfo, boolean require_image);
+    virtual void jpeg_save_markers(j_decompress_ptr cinfo, int marker_code, unsigned int length_limit);
+    virtual void jpeg_mem_src(j_decompress_ptr cinfo, const unsigned char *inbuffer, unsigned long insize);
 };
 
 class MockFunctionTest : public aclStub {
@@ -269,7 +288,18 @@ public:
     MOCK_METHOD3(GetOrigInputInfo, Status(uint32_t model_id, uint32_t index, OriginInputInfo &origOutputInfo));
     MOCK_METHOD4(GetAllAippInputOutputDims, Status(uint32_t model_id, uint32_t index, std::vector<InputOutputDims> &input_dims, std::vector<InputOutputDims> &output_dims));
     MOCK_METHOD0(GetErrorMessage, std::string());
+    MOCK_METHOD5(SetDynamicAippData, Status(uint32_t model_id, void *dynamic_input_addr, uint64_t length,
+                                        const std::vector<kAippDynamicBatchPara> &aippBatchPara,
+                                        const kAippDynamicPara &aippParms));
     MOCK_METHOD0(Init, int());
+    MOCK_METHOD1(OpsProtoManager_Initialize, bool(const std::map<std::string, std::string> &options));
+    MOCK_METHOD3(TransShape, Status(const TensorDesc &src_desc, Format dst_format,
+                                    std::vector<int64_t> &dst_shape));
+    MOCK_METHOD3(Load, graphStatus(const uint8_t *data, size_t len, Model &model));
+    MOCK_METHOD2(Init, Status(uint8_t *model_data, const uint32_t model_data_size));
+    MOCK_METHOD2(GetModelPartition, Status(ModelPartitionType type, ModelPartition &partition));
+    MOCK_METHOD2(HasAttr, bool(AttrUtils::ConstAttrHolderAdapter obj, const string &name));
+    MOCK_METHOD3(GetListTensor, bool(AttrUtils::ConstAttrHolderAdapter obj, const string& name, vector<ConstGeTensorPtr>& value));
 
     // tdt function stub
     MOCK_METHOD1(TdtHostInit, int32_t(uint32_t deviceId));
@@ -367,4 +397,10 @@ public:
     // mmpa function stub
     MOCK_METHOD4(mmScandir2, INT32(const CHAR *path, mmDirent2 ***entryList, mmFilter2 filterFunc,  mmSort2 sort));
     MOCK_METHOD2(mmAlignMalloc, void*(mmSize mallocSize, mmSize alignSize));
+
+    // jpeg function
+    MOCK_METHOD3(jpeg_CreateDecompress, void(j_decompress_ptr cinfo, int version, size_t structsize));
+    MOCK_METHOD2(jpeg_read_header, int(j_decompress_ptr cinfo, boolean require_image));
+    MOCK_METHOD3(jpeg_save_markers, void(j_decompress_ptr cinfo, int marker_code, unsigned int length_limit));
+    MOCK_METHOD3(jpeg_mem_src, void(j_decompress_ptr cinfo, const unsigned char *inbuffer, unsigned long insize));
 };

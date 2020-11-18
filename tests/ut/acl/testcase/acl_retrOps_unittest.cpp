@@ -1,9 +1,11 @@
 #include "retr/retr_internal.h"
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 #include "acl/acl.h"
 #include "securec.h"
+#include "acl_stub.h"
 
 using namespace std;
 using namespace testing;
@@ -13,7 +15,9 @@ protected:
 
     void SetUp() {}
 
-    void TearDown() {}
+    void TearDown() {
+        Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
+    }
 };
 
 TEST_F(UTEST_ACL_RetrOps, aclCheckResultSuccessTest)

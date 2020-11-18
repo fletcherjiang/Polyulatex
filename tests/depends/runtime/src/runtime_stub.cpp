@@ -624,7 +624,6 @@ rtError_t rtInvalidCache(void *devPtr, size_t size)
 
 rtError_t rtFree(void *devPtr)
 {
-    free(devPtr);
     return MockFunctionTest::aclStubInstance().rtFree(devPtr);
 }
 
@@ -636,7 +635,6 @@ rtError_t rtDvppMalloc(void **devPtr, uint64_t size)
 
 rtError_t rtDvppFree(void *devPtr)
 {
-    free(devPtr);
     return MockFunctionTest::aclStubInstance().rtDvppFree(devPtr);
 }
 
@@ -654,7 +652,6 @@ rtError_t rtFreeHost(void *hostPtr)
 
 rtError_t rtMemset(void *devPtr, uint64_t destMax, uint32_t value, uint64_t count)
 {
-    memset(devPtr, value, count);
     return MockFunctionTest::aclStubInstance().rtMemset(devPtr, destMax, value, count);
 }
 
