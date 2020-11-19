@@ -1788,7 +1788,7 @@ namespace acl {
         }
 
         // set data buffer
-        auto offset = offsetof(acldvppStreamDesc, dvppStreamDesc);
+        size_t offset = OFFSET_OF_MEMBER(acldvppStreamDesc, dvppStreamDesc);
         aclStreamDesc->dataBuffer.data = reinterpret_cast<aicpu::dvpp::DvppVdecDesc *>(
             reinterpret_cast<uintptr_t>(devAddr) + offset);
         aclStreamDesc->dataBuffer.length = CalAclDvppStructSize(&aclStreamDesc->dvppStreamDesc);
@@ -1884,13 +1884,13 @@ namespace acl {
         }
 
         // set data buffer
-        auto offset = offsetof(aclvdecChannelDesc, vdecDesc);
+        size_t offset = OFFSET_OF_MEMBER(aclvdecChannelDesc, vdecDesc);
         aclChannelDesc->dataBuffer.data = reinterpret_cast<aicpu::dvpp::DvppVdecDesc *>(
             reinterpret_cast<uintptr_t>(devAddr) + offset);
         aclChannelDesc->dataBuffer.length = CalAclDvppStructSize(&aclChannelDesc->vdecDesc);
 
         // malloc device addr for share buffer
-        offset = offsetof(aclvdecChannelDesc, callbackResult);
+        offset = OFFSET_OF_MEMBER(aclvdecChannelDesc, callbackResult);
         aclChannelDesc->shareBuffer.data = reinterpret_cast<VdecCallbackResultInfo *>(
             reinterpret_cast<uintptr_t>(devAddr) + offset);
         aclChannelDesc->shareBuffer.length = acl::dvpp::VDEC_CHANNEL_SHARE_BUFFER_SIZE;

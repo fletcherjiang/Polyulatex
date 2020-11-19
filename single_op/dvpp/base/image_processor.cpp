@@ -2122,7 +2122,7 @@ namespace acl {
         }
 
         // set data buffer
-        auto offset = offsetof(acldvppPicDesc, dvppPicDesc);
+        size_t offset = OFFSET_OF_MEMBER(acldvppPicDesc, dvppPicDesc);
         aclPicDesc->dataBuffer.data = reinterpret_cast<aicpu::dvpp::DvppPicDesc *>(
             reinterpret_cast<uintptr_t>(devAddr) + offset);
         aclPicDesc->dataBuffer.length = CalAclDvppStructSize(&aclPicDesc->dvppPicDesc);
@@ -2235,7 +2235,7 @@ namespace acl {
         }
 
         // set data buffer
-        auto offset = offsetof(acldvppChannelDesc, dvppDesc);
+        size_t offset = OFFSET_OF_MEMBER(acldvppChannelDesc, dvppDesc);
         aclDvppChannelDesc->dataBuffer.data = reinterpret_cast<aicpu::dvpp::DvppChannelDesc *>(
             reinterpret_cast<uintptr_t>(devAddr) + offset);
         aclDvppChannelDesc->dataBuffer.length = CalAclDvppStructSize(&aclDvppChannelDesc->dvppDesc);

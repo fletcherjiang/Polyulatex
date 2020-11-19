@@ -820,7 +820,7 @@ namespace acl {
 
         // set data buffer
         aclHist->dvppHistDesc.hist = reinterpret_cast<uint32_t *>(histData);
-        auto offset = offsetof(acldvppHist, dvppHistDesc);
+        size_t offset = OFFSET_OF_MEMBER(acldvppHist, dvppHistDesc);
         aclHist->dataBuffer.data = reinterpret_cast<aicpu::dvpp::DvppHistDesc *>(
             reinterpret_cast<uintptr_t>(devAddr) + offset);
         aclHist->dataBuffer.length = CalDevDvppStructRealUsedSize(&aclHist->dvppHistDesc);
