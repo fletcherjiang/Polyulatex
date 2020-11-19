@@ -192,6 +192,8 @@ inline bool IsInfoLogEnabled()
 #define ACL_STAGES_REG(firstStage, secondStage) \
     const acl::AclErrorLogManager error_manager(firstStage, secondStage)
 
+#define OFFSET_OF_MEMBER(type, member) (size_t)(&(((type *)0)->member))
+
 #define ACL_REQUIRES_OK(expr) \
     do { \
         auto __ret = (expr); \

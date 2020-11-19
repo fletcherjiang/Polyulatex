@@ -7,8 +7,6 @@
 #undef private
 #endif
 
-#define OFFSET_OF_MEMBER(type, member) (size_t)(&(((type *)0)->member))
-
 class UTEST_ACL_compatibility_struct_check : public testing::Test
 {
     public:
