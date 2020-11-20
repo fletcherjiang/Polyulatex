@@ -46,7 +46,7 @@ aclError aclInit(const char *configPath)
     ACL_LOG_INFO("start to execute aclInit");
     std::unique_lock<std::mutex> lk(aclInitMutex);
     if (aclInitFlag) {
-        ACL_LOG_ERROR("repeatedly initialized");
+        ACL_LOG_WARN("repeatedly initialized");
         return ACL_ERROR_REPEAT_INITIALIZE;
     }
     ACL_LOG_INFO("call ErrorManager.Initialize");
