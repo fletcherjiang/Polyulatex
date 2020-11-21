@@ -158,11 +158,13 @@ TEST_F(OpApiTest, TestOpHandleCreate)
 TEST_F(OpApiTest, OpCompileTest)
 {
     aclMemType memType = ACL_MEMTYPE_HOST;
+    aclopCompileType compileFlag = (aclCompileType)(3);
     aclSetTensorPlaceMent(const_cast<aclTensorDesc *>(input_desc_[0]), ACL_MEMTYPE_HOST);
     EXPECT_NE(aclopCompile("opType", 2, input_desc_, 1, output_desc_, opAttr, ACL_ENGINE_SYS, ACL_COMPILE_SYS, nullptr), ACL_SUCCESS);
     aclSetTensorPlaceMent(const_cast<aclTensorDesc *>(input_desc_[0]), ACL_MEMTYPE_DEVICE);
     aclSetTensorPlaceMent(const_cast<aclTensorDesc *>(output_desc_[0]), ACL_MEMTYPE_HOST);
     EXPECT_NE(aclopCompile("opType", 2, input_desc_, 1, output_desc_, opAttr, ACL_ENGINE_SYS, ACL_COMPILE_SYS, nullptr), ACL_SUCCESS);
+    EXPECT_EQ(aclopCompile("opType", 2, input_desc_, 1, output_desc_, opAttr, ACL_ENGINE_SYS, compileFlag, nullptr), ACL_ERROR_API_NOT_SUPPORT);
 }
 
 TEST_F(OpApiTest, TestGetTensorSize)
