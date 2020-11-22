@@ -323,3 +323,106 @@ TEST_F(UTEST_ACL_OpCompiler, AclIsDigitTest)
     std::string str = "";
     EXPECT_EQ(string_utils::IsDigit(str), false);
 }
+
+TEST_F(UTEST_ACL_OpCompiler, aclopCompileAndExecuteTest)
+{
+    char *opType;
+    int numInputs = 2;
+
+    int64_t shape[]{16, -1};
+    const aclTensorDesc *inputDesc[2];
+    const aclTensorDesc *outputDesc[1];
+    inputDesc[0] = aclCreateTensorDesc(ACL_FLOAT16, 2, shape, ACL_FORMAT_ND);
+    inputDesc[1] = aclCreateTensorDesc(ACL_FLOAT16, 2, shape, ACL_FORMAT_ND);
+
+    outputDesc[0] = aclCreateTensorDesc(ACL_FLOAT16, 2, shape, ACL_FORMAT_ND);
+
+    aclDataBuffer *inputs[2];
+    inputs[0] = aclCreateDataBuffer((void *) 0x1000, 1024);
+    inputs[1] = aclCreateDataBuffer((void *) 0x1000, 1024);
+
+    aclDataBuffer *outputs[1];
+    outputs[0] = aclCreateDataBuffer((void *) 0x1000, 1024);
+
+    int numOutputs = 1;
+
+    aclopAttr attr;
+    string str = "";
+    attr.SetAttr("unregst _attrlist", str);
+    aclopEngineType engineType;
+    aclopCompileType compileFlag = (aclCompileType)(3);
+    const char *opPath;
+    aclrtStream stream;
+
+    aclError ret = aclopCompileAndExecute(opType, numInputs, inputDesc, inputs,
+                numOutputs, outputDesc, outputs, &attr, engineType, compileFlag,
+                opPath, stream);
+    EXPECT_EQ(ret, ACL_ERROR_API_NOT_SUPPORT);
+
+    compileFlag = ACL_COMPILE_UNREGISTERED;
+    opType = "Add";
+    ret = aclopCompileAndExecute(opType, numInputs, inputDesc, inputs,
+                numOutputs, outputDesc, outputs, &attr, engineType, compileFlag,
+                opPath, stream);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    compileFlag = ACL_COMPILE_SYS;
+    ret = aclopCompileAndExecute(opType, numInputs, inputDesc, inputs,
+                numOutputs, outputDesc, outputs, &attr, engineType, compileFlag,
+                opPath, stream);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    opPath = "tests/ut/";
+    ret = aclopCompileAndExecute(opType, numInputs, inputDesc, inputs,
+                numOutputs, outputDesc, outputs, &attr, engineType, compileFlag,
+                opPath, stream);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+    aclDestroyTensorDesc(inputDesc[0]);
+    aclDestroyTensorDesc(inputDesc[1]);
+    aclDestroyTensorDesc(outputDesc[0]);
+    aclDestroyDataBuffer(inputs[0]);
+    aclDestroyDataBuffer(inputs[1]);
+    aclDestroyDataBuffer(outputs[0]);
+}
+
+TEST_F(UTEST_ACL_OpCompiler, aclopCompile)
+{
+    char *opType = "Add";
+    int numInputs = 2;
+
+    int64_t shape[]{16, -1};
+    const aclTensorDesc *inputDesc[2];
+    const aclTensorDesc *outputDesc[1];
+    inputDesc[0] = aclCreateTensorDesc(ACL_FLOAT16, 2, shape, ACL_FORMAT_ND);
+    inputDesc[1] = aclCreateTensorDesc(ACL_FLOAT16, 2, shape, ACL_FORMAT_ND);
+    outputDesc[0] = aclCreateTensorDesc(ACL_FLOAT16, 2, shape, ACL_FORMAT_ND);
+
+    aclDataBuffer *inputs[2];
+    inputs[0] = aclCreateDataBuffer((void *) 0x1000, 1024);
+    inputs[1] = aclCreateDataBuffer((void *) 0x1000, 1024);
+
+    aclDataBuffer *outputs[1];
+    outputs[0] = aclCreateDataBuffer((void *) 0x1000, 1024);
+
+    int numOutputs = 1;
+
+    aclopAttr attr;
+    string str = "";
+    attr.SetAttr("unregst _attrlist", str);
+
+    const char *opPath = "tests/";
+    aclopEngineType engineType = ACL_ENGINE_AICORE;
+    aclopCompileType compileFlag = ACL_COMPILE_UNREGISTERED;
+
+    aclError ret = aclopCompile(opType, numInputs, inputDesc,
+                numOutputs, outputDesc, &attr, engineType, compileFlag,
+                opPath);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    compileFlag = ACL_COMPILE_UNREGISTERED;
+    opPath = nullptr;
+    ret = aclopCompile(opType, numInputs, inputDesc,
+                numOutputs, outputDesc, &attr, engineType, compileFlag,
+                opPath);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+}

@@ -1432,6 +1432,12 @@ TEST_F(DvppTest, CopyDvppBatchPicDescAsyncTest)
     batchSize = 0;
     ret = CopyDvppBatchPicDescAsync(aclBatchPicDesc, memcpyKind, batchSize, stream);
     EXPECT_NE(ret, ACL_SUCCESS);
+
+    aclBatchPicDesc->dataBuffer.length = 4;
+    memcpyKind = aclrtMemcpyKind(4);
+    ret = CopyDvppBatchPicDescAsync(aclBatchPicDesc, memcpyKind, batchSize, stream);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+    Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
     acldvppDestroyBatchPicDesc(aclBatchPicDesc);
 }
 
@@ -1440,9 +1446,12 @@ TEST_F(DvppTest, CopyDvppHistDescAsync)
     acldvppHist *aclDvppHist = acldvppCreateHist();
     aclrtMemcpyKind memcpyKind = ACL_MEMCPY_HOST_TO_HOST;
     aclrtStream stream;
-
     aclError ret = CopyDvppHistDescAsync(aclDvppHist, memcpyKind, stream);
     EXPECT_NE(ret, ACL_SUCCESS);
+
+    memcpyKind = aclrtMemcpyKind(4);
+    ret = CopyDvppHistDescAsync(aclDvppHist, memcpyKind, stream);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
     acldvppDestroyHist(aclDvppHist);
 }
 
@@ -1456,13 +1465,171 @@ TEST_F(DvppTest, FreeDvppDeviceBuffer)
     aclDestroyDataBuffer(dataBuffer);
 }
 
-TEST_F(DvppTest, CalcImageSizeKernel)
+TEST_F(DvppTest, CalcImageSizeKernelTest)
 {
     uint32_t width;
     uint32_t height;
     acldvppPixelFormat format = acldvppPixelFormat::PIXEL_FORMAT_UNKNOWN;
     uint32_t *size;
     EXPECT_EQ(CalcImageSizeKernel(width, height, format, size), false);
+}
+
+TEST_F(DvppTest, CalcImageSizeTest)
+{
+    const uint32_t jpegdHeight = 32;
+    const uint32_t jpegdWidth = 32;
+    struct jpeg_decompress_struct libjpegHandlerGray;
+    libjpegHandlerGray.image_width = jpegdWidth;
+    libjpegHandlerGray.image_height = jpegdHeight;
+    libjpegHandlerGray.jpeg_color_space = JCS_GRAYSCALE;
+    bool needOrientation = true;
+    acldvppPixelFormat outputPixelFormat = acldvppPixelFormat::PIXEL_FORMAT_YUV_SEMIPLANAR_422;
+    uint32_t size = 10;
+    EXPECT_EQ(CalcImageSize(libjpegHandlerGray, needOrientation, outputPixelFormat, &size), ACL_SUCCESS);
+    Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
+
+    outputPixelFormat = acldvppPixelFormat::PIXEL_FORMAT_YVU_SEMIPLANAR_444;
+    EXPECT_EQ(CalcImageSize(libjpegHandlerGray, needOrientation, outputPixelFormat, &size), ACL_SUCCESS);
+    Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
+
+    outputPixelFormat = acldvppPixelFormat::PIXEL_FORMAT_YVU_SEMIPLANAR_440;
+    EXPECT_EQ(CalcImageSize(libjpegHandlerGray, needOrientation, outputPixelFormat, &size), ACL_SUCCESS);
+    Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
+
+    libjpegHandlerGray.jpeg_color_space = JCS_YCbCr;
+    libjpegHandlerGray.num_components = 3;
+    libjpegHandlerGray.comp_info[0].h_samp_factor = 0;
+    libjpegHandlerGray.comp_info[1].h_samp_factor = 0;
+    libjpegHandlerGray.comp_info[2].h_samp_factor = 0;
+    libjpegHandlerGray.comp_info[0].v_samp_factor = 0;
+    libjpegHandlerGray.comp_info[1].v_samp_factor = 0;
+    libjpegHandlerGray.comp_info[2].v_samp_factor = 0;
+    EXPECT_EQ(CalcImageSize(libjpegHandlerGray, needOrientation, outputPixelFormat, &size), ACL_SUCCESS);
+    Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
+
+    outputPixelFormat = acldvppPixelFormat::PIXEL_FORMAT_YVU_SEMIPLANAR_444;
+    libjpegHandlerGray.comp_info[0].h_samp_factor = 0;
+    libjpegHandlerGray.comp_info[1].h_samp_factor = 0;
+    libjpegHandlerGray.comp_info[2].h_samp_factor = 0;
+    libjpegHandlerGray.comp_info[0].v_samp_factor = 0;
+    libjpegHandlerGray.comp_info[1].v_samp_factor = 0;
+    libjpegHandlerGray.comp_info[2].v_samp_factor = 0;
+    EXPECT_EQ(CalcImageSize(libjpegHandlerGray, needOrientation, outputPixelFormat, &size), ACL_SUCCESS);
+    Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
+
+    outputPixelFormat = acldvppPixelFormat::PIXEL_FORMAT_YUV_SEMIPLANAR_422;
+    libjpegHandlerGray.comp_info[0].h_samp_factor = 0;
+    libjpegHandlerGray.comp_info[1].h_samp_factor = 0;
+    libjpegHandlerGray.comp_info[2].h_samp_factor = 0;
+    libjpegHandlerGray.comp_info[0].v_samp_factor = 0;
+    libjpegHandlerGray.comp_info[1].v_samp_factor = 0;
+    libjpegHandlerGray.comp_info[2].v_samp_factor = 0;
+    EXPECT_EQ(CalcImageSize(libjpegHandlerGray, needOrientation, outputPixelFormat, &size), ACL_SUCCESS);
+    Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
+
+    outputPixelFormat = acldvppPixelFormat::PIXEL_FORMAT_UNKNOWN;
+    libjpegHandlerGray.comp_info[0].h_samp_factor = 0;
+    libjpegHandlerGray.comp_info[1].h_samp_factor = 0;
+    libjpegHandlerGray.comp_info[2].h_samp_factor = 0;
+    libjpegHandlerGray.comp_info[0].v_samp_factor = 0;
+    libjpegHandlerGray.comp_info[1].v_samp_factor = 0;
+    libjpegHandlerGray.comp_info[2].v_samp_factor = 0;
+    EXPECT_EQ(CalcImageSize(libjpegHandlerGray, needOrientation, outputPixelFormat, &size), ACL_SUCCESS);
+    Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
+
+    outputPixelFormat = acldvppPixelFormat::PIXEL_FORMAT_YVU_SEMIPLANAR_420;
+    libjpegHandlerGray.comp_info[0].h_samp_factor = 0;
+    libjpegHandlerGray.comp_info[1].h_samp_factor = 0;
+    libjpegHandlerGray.comp_info[2].h_samp_factor = 0;
+    libjpegHandlerGray.comp_info[0].v_samp_factor = 0;
+    libjpegHandlerGray.comp_info[1].v_samp_factor = 0;
+    libjpegHandlerGray.comp_info[2].v_samp_factor = 0;
+    EXPECT_EQ(CalcImageSize(libjpegHandlerGray, needOrientation, outputPixelFormat, &size), ACL_ERROR_FORMAT_NOT_MATCH);
+    Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
+
+    libjpegHandlerGray.jpeg_color_space = JCS_RGB;
+    EXPECT_EQ(CalcImageSize(libjpegHandlerGray, needOrientation, outputPixelFormat, &size), ACL_ERROR_FORMAT_NOT_MATCH);
+}
+
+TEST_F(DvppTest, IsYUV440Test)
+{
+    const uint32_t jpegdHeight = 32;
+    const uint32_t jpegdWidth = 32;
+    struct jpeg_decompress_struct libjpegHandler;
+    libjpegHandler.image_width = jpegdWidth;
+    libjpegHandler.image_height = jpegdHeight;
+    libjpegHandler.comp_info[0].h_samp_factor = 0;
+    libjpegHandler.comp_info[1].h_samp_factor = 0;
+    libjpegHandler.comp_info[0].v_samp_factor = 0;
+    libjpegHandler.comp_info[1].v_samp_factor = 0;
+    acldvppPixelFormat pixelFormat = acldvppPixelFormat::PIXEL_FORMAT_YVU_SEMIPLANAR_440;
+    bool ret = IsYUV440(libjpegHandler, pixelFormat);
+    EXPECT_EQ(ret, true);
+
+    pixelFormat = acldvppPixelFormat::PIXEL_FORMAT_YVU_SEMIPLANAR_444;
+    ret = IsYUV440(libjpegHandler, pixelFormat);
+    EXPECT_EQ(ret, false);
+}
+
+TEST_F(DvppTest, IsYUV444Test)
+{
+    const uint32_t jpegdHeight = 32;
+    const uint32_t jpegdWidth = 32;
+    struct jpeg_decompress_struct libjpegHandler;
+    libjpegHandler.image_width = jpegdWidth;
+    libjpegHandler.image_height = jpegdHeight;
+    libjpegHandler.comp_info[0].h_samp_factor = 0;
+    libjpegHandler.comp_info[1].h_samp_factor = 0;
+    libjpegHandler.comp_info[0].v_samp_factor = 0;
+    libjpegHandler.comp_info[1].v_samp_factor = 0;
+    acldvppPixelFormat pixelFormat = acldvppPixelFormat::PIXEL_FORMAT_YVU_SEMIPLANAR_444;
+    bool ret = IsYUV444(libjpegHandler, pixelFormat);
+    EXPECT_EQ(ret, true);
+
+    pixelFormat = acldvppPixelFormat::PIXEL_FORMAT_YVU_SEMIPLANAR_440;
+    ret = IsYUV444(libjpegHandler, pixelFormat);
+    EXPECT_EQ(ret, false);
+}
+
+TEST_F(DvppTest, IsYUV422Test)
+{
+    const uint32_t jpegdHeight = 32;
+    const uint32_t jpegdWidth = 32;
+    struct jpeg_decompress_struct libjpegHandler;
+    libjpegHandler.image_width = jpegdWidth;
+    libjpegHandler.image_height = jpegdHeight;
+    libjpegHandler.comp_info[0].h_samp_factor = 0;
+    libjpegHandler.comp_info[1].h_samp_factor = 0;
+    libjpegHandler.comp_info[0].v_samp_factor = 0;
+    libjpegHandler.comp_info[1].v_samp_factor = 0;
+    acldvppPixelFormat pixelFormat = acldvppPixelFormat::PIXEL_FORMAT_YVU_SEMIPLANAR_440;
+    bool ret = IsYUV422(libjpegHandler, pixelFormat);
+    EXPECT_EQ(ret, false);
+
+    pixelFormat = acldvppPixelFormat::PIXEL_FORMAT_YVU_SEMIPLANAR_422;
+    ret = IsYUV422(libjpegHandler, pixelFormat);
+    EXPECT_EQ(ret, true);
+}
+
+TEST_F(DvppTest, IsYUV420Test)
+{
+    const uint32_t jpegdHeight = 32;
+    const uint32_t jpegdWidth = 32;
+    struct jpeg_decompress_struct libjpegHandler;
+    libjpegHandler.image_width = jpegdWidth;
+    libjpegHandler.image_height = jpegdHeight;
+    libjpegHandler.data_precision = 8;
+    libjpegHandler.comp_info[0].h_samp_factor = 0;
+    libjpegHandler.comp_info[1].h_samp_factor = 0;
+    libjpegHandler.comp_info[0].v_samp_factor = 0;
+    libjpegHandler.comp_info[1].v_samp_factor = 0;
+    acldvppPixelFormat pixelFormat = acldvppPixelFormat::PIXEL_FORMAT_UNKNOWN;
+    bool ret = IsYUV420(libjpegHandler, pixelFormat);
+    EXPECT_EQ(ret, true);
+
+    pixelFormat = acldvppPixelFormat::PIXEL_FORMAT_YVU_SEMIPLANAR_440;
+    ret = IsYUV420(libjpegHandler, pixelFormat);
+    EXPECT_EQ(ret, false);
 }
 
 TEST_F(DvppTest, DvppCreateChannelWithoutNotifyTest01)
