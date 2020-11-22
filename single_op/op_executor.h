@@ -29,7 +29,9 @@ struct OpHandle {
     int numInputs = 0;
     int numOutputs = 0;
     OpModel opModel;
+    std::mutex mutexForStatic;
     std::unordered_map<aclrtStream, ge::SingleOp *> cachedOperators;
+    std::mutex mutexForDynamic;
     std::map<aclrtStream, ge::DynamicSingleOp *> cachedDynamicOperators;
     std::shared_ptr<aclopKernelDesc> kernelDesc;
     AclOp aclOp;
