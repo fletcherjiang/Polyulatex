@@ -44,8 +44,6 @@ public:
         return instance;
     }
 
-    aclError LoadBasicModels(const std::string &modelDir);
-
     aclError LoadAllModels(const std::string &modelDir);
 
     aclError LoadModelFromMem(const void *model, size_t modelSize, bool isStatic = false);
@@ -53,8 +51,6 @@ public:
     aclError LoadModelFromSharedMem(std::shared_ptr<void> &model, size_t modelSize, bool isStatic = false);
 
     aclError GetOpModel(AclOp &aclOp);
-
-    OpModel* GetBasicOpModel(const std::string &opType);
 
     aclError MatchOpModel(const AclOp &aclOp, OpModel &opModel, bool &isDynamic);
 
@@ -120,8 +116,6 @@ private:
     ModelMap onlineCompiledModels_;
     OpModelCache modelCache_;
     OpModelCache dynamicModelCache_;
-    std::map<std::string, OpModel> basicModelMap_;
-    std::mutex mutex_;
     std::uint32_t counter_ = 0;
 
     std::mutex shapeStatusMutex_;

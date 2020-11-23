@@ -195,31 +195,6 @@ aclError OpModelManager::LoadModelFromSharedMem(std::shared_ptr<void> &model, si
     return ACL_SUCCESS;
 }
 
-aclError OpModelManager::LoadBasicModels(const std::string &modelDir)
-{
-    ACL_LOG_DEBUG("LoadBasicModels begin.");
-    vector<string> modelFilePaths;
-    ACL_REQUIRES_OK(file_utils::ListFiles(modelDir, OmFileFilterFn, modelFilePaths, OM_DIR_MAX_DEPTH));
-    ACL_LOG_INFO("Found %zu model config", modelFilePaths.size());
-    for (auto &path : modelFilePaths) {
-        OpModel opModel;
-        ACL_REQUIRES_OK(ReadOpModelFromFile(path, opModel));
-
-        OpModelDef modelDef;
-        modelDef.modelPath = path;
-        auto ret = OpModelParser::ParseOpModel(opModel, modelDef);
-        if (ret != ACL_SUCCESS) {
-            ACL_LOG_WARN("Parse model failed. result = %d, model = %s. skip it", ret, modelDef.modelPath.c_str());
-            continue;
-        }
-
-        ACL_LOG_DEBUG("Add op model: %s, model path = %s", modelDef.opType.c_str(), modelDef.modelPath.c_str());
-        basicModelMap_.emplace(modelDef.opType, opModel);
-    }
-
-    return ACL_SUCCESS;
-}
-
 static void SetShapeStatus(int tensorNum,
                            const aclTensorDesc *const tensorDesc[],
                            std::vector<aclTensorShapeStatus> &shapeStatus)
@@ -425,17 +400,6 @@ aclError OpModelManager::RegisterModel(OpModelDef &&modelConfig,
     }
     ACL_LOG_INFO("Register model. OpModelDef = %s", modelDefPtr->DebugString().c_str());
     return ACL_SUCCESS;
-}
-
-OpModel *OpModelManager::GetBasicOpModel(const std::string &opType)
-{
-    auto iter = basicModelMap_.find(opType);
-    if (iter == basicModelMap_.end()) {
-        return nullptr;
-    }
-
-    OpModel &opModel = iter->second;
-    return &opModel;
 }
 
 aclError OpModelManager::SetTensorConst(aclTensorDesc *desc, const aclDataBuffer *dataBuffer)
