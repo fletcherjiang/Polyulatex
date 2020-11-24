@@ -59,14 +59,14 @@ static void MakeHostMemTensor(const aclTensorDesc *desc, const aclDataBuffer *da
             AttrUtils::SetBool(geTensorDesc, ge::CONST_ATTR_NAME_INPUT, true);
             ge::ConstGeTensorPtr constTensor = nullptr;
             ACL_MAKE_SHARED(constTensor = std::make_shared<GeTensor>(geTensorDesc,
-                static_cast<uint8_t *>(dataBuffer->data), dataBuffer->length), return);
+                static_cast<uint8_t *>(dataBuffer->data), dataBuffer->length), ;);
             ge::AttrUtils::SetTensor(geTensorDesc, ge::ATTR_NAME_WEIGHTS, constTensor);
         } else {
             // During fuzzy compilation, change hostMem to data input.
             ACL_LOG_INFO("compleFlag is ACL_OP_COMPILE_FUZZ, change hostMem to data.");
             ge::ConstGeTensorPtr dataTensor = nullptr;
             ACL_MAKE_SHARED(dataTensor = std::make_shared<GeTensor>(geTensorDesc,
-                static_cast<uint8_t *>(dataBuffer->data), dataBuffer->length), return);
+                static_cast<uint8_t *>(dataBuffer->data), dataBuffer->length), ;);
             ge::AttrUtils::SetTensor(geTensorDesc, ge::ATTR_NAME_VALUE, dataTensor);
         }
     }
