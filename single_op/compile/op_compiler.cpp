@@ -57,14 +57,16 @@ static void MakeHostMemTensor(const aclTensorDesc *desc, const aclDataBuffer *da
             // During static compilation, change hostMem to const input.
             ACL_LOG_INFO("compleFlag is ACL_OP_COMPILE_DEFAULT, change hostMem to const.");
             AttrUtils::SetBool(geTensorDesc, ge::CONST_ATTR_NAME_INPUT, true);
-            ge::ConstGeTensorPtr constTensor = std::make_shared<GeTensor>(geTensorDesc,
-                static_cast<uint8_t *>(dataBuffer->data), dataBuffer->length);
+            ge::ConstGeTensorPtr constTensor = nullptr;
+            ACL_MAKE_SHARED(constTensor = std::make_shared<GeTensor>(geTensorDesc,
+                static_cast<uint8_t *>(dataBuffer->data), dataBuffer->length), return);
             ge::AttrUtils::SetTensor(geTensorDesc, ge::ATTR_NAME_WEIGHTS, constTensor);
         } else {
             // During fuzzy compilation, change hostMem to data input.
             ACL_LOG_INFO("compleFlag is ACL_OP_COMPILE_FUZZ, change hostMem to data.");
-            ge::ConstGeTensorPtr dataTensor = std::make_shared<GeTensor>(geTensorDesc,
-                static_cast<uint8_t *>(dataBuffer->data), dataBuffer->length);
+            ge::ConstGeTensorPtr dataTensor = nullptr;
+            ACL_MAKE_SHARED(dataTensor = std::make_shared<GeTensor>(geTensorDesc,
+                static_cast<uint8_t *>(dataBuffer->data), dataBuffer->length), return);
             ge::AttrUtils::SetTensor(geTensorDesc, ge::ATTR_NAME_VALUE, dataTensor);
         }
     }
@@ -161,8 +163,9 @@ static aclError MakeInputCompileParam(const AclOp &aclOp, CompileParam &param,
 
         if (desc->isConst) {
             AttrUtils::SetBool(geTensorDesc, ge::CONST_ATTR_NAME_INPUT, true);
-            ge::ConstGeTensorPtr constTensor = std::make_shared<GeTensor>(geTensorDesc,
-                static_cast<uint8_t *>(desc->constDataBuf.get()), desc->constDataLen);
+            ge::ConstGeTensorPtr constTensor = nullptr;
+            ACL_MAKE_SHARED(constTensor = std::make_shared<GeTensor>(geTensorDesc,
+                static_cast<uint8_t *>(desc->constDataBuf.get()), desc->constDataLen), ;);
             ge::AttrUtils::SetTensor(geTensorDesc, ge::ATTR_NAME_WEIGHTS, constTensor);
         }
 
@@ -219,8 +222,9 @@ static aclError MakeOutputCompileParam(const AclOp &aclOp, CompileParam &param,
         }
         if (desc->isConst) {
             AttrUtils::SetBool(geTensorDesc, ge::CONST_ATTR_NAME_INPUT, true);
-            ge::ConstGeTensorPtr constTensor = std::make_shared<GeTensor>(geTensorDesc,
-                static_cast<uint8_t *>(desc->constDataBuf.get()), desc->constDataLen);
+            ge::ConstGeTensorPtr constTensor = nullptr;
+            ACL_MAKE_SHARED(constTensor = std::make_shared<GeTensor>(geTensorDesc,
+                static_cast<uint8_t *>(desc->constDataBuf.get()), desc->constDataLen), ;);
             ge::AttrUtils::SetTensor(geTensorDesc, ge::ATTR_NAME_WEIGHTS, constTensor);
         }
 
@@ -238,7 +242,8 @@ static aclError MakeOutputCompileParam(const AclOp &aclOp, CompileParam &param,
 
 aclError OpCompiler::MakeCompileParam(const AclOp &aclOp, CompileParam &param, int32_t compileFlag)
 {
-    OpDescPtr opDesc = std::make_shared<ge::OpDesc>(aclOp.opType, aclOp.opType);
+    OpDescPtr opDesc = nullptr;
+    ACL_MAKE_SHARED(opDesc = std::make_shared<ge::OpDesc>(aclOp.opType, aclOp.opType), return ACL_ERROR_BAD_ALLOC);
     ACL_CHECK_MALLOC_RESULT(opDesc);
 
     aclError inputRet = MakeInputCompileParam(aclOp, param, opDesc.get(), compileFlag);
