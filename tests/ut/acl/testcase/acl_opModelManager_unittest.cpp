@@ -452,21 +452,6 @@ TEST_F(UTEST_ACL_OpModelManager, LoadAllModelsTest)
     EXPECT_EQ(OpModelManager::GetInstance().LoadAllModels("op_models"), ACL_SUCCESS);
 }
 
-TEST_F(UTEST_ACL_OpModelManager, MatchBasicModelTest)
-{
-    OpModelDef modelDef;
-    modelDef.opType = "testOp";
-    OpModel *nullModel = nullptr;
-    EXPECT_EQ(OpModelManager::GetInstance().GetBasicOpModel("testOp"), nullModel);
-
-    string modelDir = "fakedir";
-    EXPECT_EQ(OpModelManager::GetInstance().LoadBasicModels(modelDir), ACL_SUCCESS);
-
-    ASSERT_TRUE(OpModelManager::GetInstance().basicModelMap_.empty());
-    EXPECT_EQ(OpModelManager::GetInstance().LoadBasicModels(modelDir), ACL_SUCCESS);
-    EXPECT_EQ(OpModelManager::GetInstance().GetBasicOpModel("testOp"), nullModel);
-}
-
 TEST_F(UTEST_ACL_OpModelManager, LoadModelFromMemFailedTest)
 {
     int modelSize = 10;

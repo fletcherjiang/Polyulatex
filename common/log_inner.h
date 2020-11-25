@@ -437,14 +437,14 @@ inline bool IsInfoLogEnabled()
     try { \
         expr0; \
     } catch (const std::bad_alloc &) { \
-        ACL_LOG_ERROR("[Make][Shared]Make shared failed"); \
+        ACL_LOG_INNER_ERROR("[Make][Shared]Make shared failed"); \
         expr1; \
     }
 
 #define RETURN_NULL_WITH_ALIGN_FREE(newAddr, mallocAddr) \
     do { \
         if (newAddr == nullptr) { \
-            ACL_LOG_ERROR("[Malloc][Mem]new memory failed"); \
+            ACL_LOG_INNER_ERROR("[Malloc][Mem]new memory failed"); \
             mmAlignFree(mallocAddr); \
             return nullptr; \
         } \

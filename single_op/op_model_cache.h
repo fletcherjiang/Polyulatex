@@ -30,7 +30,6 @@ public:
 
 private:
     std::map<std::string, OpModel> cachedModels_;
-    std::map<std::string, OpModel> cachedCompiledModels_;
     std::mutex mutex_;
 };
 } // namespace acl

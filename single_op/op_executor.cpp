@@ -276,52 +276,58 @@ aclError OpExecutor::ExecuteAsync(OpHandle &opHandle,
         ACL_LOG_INFO("begin to load dynamic model. model = %s, stream = %p", opHandle.opModel.name.c_str(), stream);
         auto &cachedExecutors = opHandle.cachedDynamicOperators;
         ge::DynamicSingleOp *singleOp = nullptr;
-        auto it = cachedExecutors.find(stream);
-        if (it != cachedExecutors.end()) {
-            singleOp = it->second;
-        } else {
-            singleOp = LoadDynamicSingleOp(opHandle.opModel, stream);
-            if (singleOp == nullptr) {
-                ACL_LOG_INNER_ERROR("[Load][Op]LoadSingleOp failed");
-                return ACL_ERROR_OP_LOAD_FAILED;
-            }
+        {
+            std::lock_guard<std::mutex> lk(opHandle.mutexForDynamic);
+            auto it = cachedExecutors.find(stream);
+            if (it != cachedExecutors.end()) {
+                singleOp = it->second;
+            } else {
+                singleOp = LoadDynamicSingleOp(opHandle.opModel, stream);
+                if (singleOp == nullptr) {
+                    ACL_LOG_INNER_ERROR("[Load][Op]LoadSingleOp failed");
+                    return ACL_ERROR_OP_LOAD_FAILED;
+                }
 
-            // Just for protection. Preventing from cache grows to large.
-            if (cachedExecutors.size() > MAX_CACHED_NUM) {
-                auto toErase = cachedExecutors.begin();
-                ACL_LOG_WARN("cache[%zu] reaches max size[%zu], evict one object. stream = %p",
-                    cachedExecutors.size(), MAX_CACHED_NUM, toErase->first);
-                cachedExecutors.erase(toErase);
-            }
+                // Just for protection. Preventing from cache grows to large.
+                if (cachedExecutors.size() > MAX_CACHED_NUM) {
+                    auto toErase = cachedExecutors.begin();
+                    ACL_LOG_WARN("cache[%zu] reaches max size[%zu], evict one object. stream = %p",
+                        cachedExecutors.size(), MAX_CACHED_NUM, toErase->first);
+                    cachedExecutors.erase(toErase);
+                }
 
-            ACL_LOG_INFO("cache operator executor. model = %s, stream = %p", opHandle.opModel.name.c_str(), stream);
-            opHandle.cachedDynamicOperators.emplace(stream, singleOp);
+                ACL_LOG_INFO("cache operator executor. model = %s, stream = %p", opHandle.opModel.name.c_str(), stream);
+                opHandle.cachedDynamicOperators.emplace(stream, singleOp);
+            }
         }
         ret = DoExecuteAsync(singleOp, opHandle.aclOp, inputs, outputs);
     } else {
         ACL_LOG_INFO("begin to load static model. model = %s, stream = %p", opHandle.opModel.name.c_str(), stream);
         auto &cachedExecutors = opHandle.cachedOperators;
         ge::SingleOp *singleOp = nullptr;
-        auto it = opHandle.cachedOperators.find(stream);
-        if (it != cachedExecutors.end()) {
-            singleOp = it->second;
-        } else {
-            singleOp = LoadSingleOp(opHandle.opModel, stream);
-            if (singleOp == nullptr) {
-                ACL_LOG_INNER_ERROR("[Load][Op]LoadSingleOp failed");
-                return ACL_ERROR_OP_LOAD_FAILED;
-            }
+        {
+            std::lock_guard<std::mutex> lk(opHandle.mutexForStatic);
+            auto it = opHandle.cachedOperators.find(stream);
+            if (it != cachedExecutors.end()) {
+                singleOp = it->second;
+            } else {
+                singleOp = LoadSingleOp(opHandle.opModel, stream);
+                if (singleOp == nullptr) {
+                    ACL_LOG_INNER_ERROR("[Load][Op]LoadSingleOp failed");
+                    return ACL_ERROR_OP_LOAD_FAILED;
+                }
 
-            // Just for protection. Preventing from cache grows to large.
-            if (cachedExecutors.size() > MAX_CACHED_NUM) {
-                auto toErase = cachedExecutors.begin();
-                ACL_LOG_INFO("cache[%zu] reaches max size[%zu], evict one object. stream = %p",
-                    cachedExecutors.size(), MAX_CACHED_NUM, toErase->first);
-                cachedExecutors.erase(toErase);
-            }
+                // Just for protection. Preventing from cache grows to large.
+                if (cachedExecutors.size() > MAX_CACHED_NUM) {
+                    auto toErase = cachedExecutors.begin();
+                    ACL_LOG_INFO("cache[%zu] reaches max size[%zu], evict one object. stream = %p",
+                        cachedExecutors.size(), MAX_CACHED_NUM, toErase->first);
+                    cachedExecutors.erase(toErase);
+                }
 
-            ACL_LOG_INFO("cache operator executor. model = %s, stream = %p", opHandle.opModel.name.c_str(), stream);
-            opHandle.cachedOperators.emplace(stream, singleOp);
+                ACL_LOG_INFO("cache operator executor. model = %s, stream = %p", opHandle.opModel.name.c_str(), stream);
+                opHandle.cachedOperators.emplace(stream, singleOp);
+            }
         }
         ret = DoExecuteAsync(singleOp, opHandle.aclOp, inputs, outputs);
     }
