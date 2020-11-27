@@ -292,6 +292,18 @@ ACL_FUNC_VISIBILITY aclError aclmdlSetDatasetTensorDesc(aclmdlDataset *dataset,
 
 /**
  * @ingroup AscendCL
+ * @brief Get aclTensorDesc from aclmdlDataset
+ *
+ * @param dataset [OUT]    aclmdlDataset which obtain tensorDesc wanted;
+ * @param index [IN]       index of tensorDesc wanted
+ *
+ * @retval ACL_SUCCESS The function is successfully executed.
+ * @retval OtherValues Failure
+ */
+ACL_FUNC_VISIBILITY aclTensorDesc *aclmdlGetDatasetTensorDesc(aclmdlDataset *dataset, size_t index);
+
+/**
+ * @ingroup AscendCL
  * @brief Get the number of aclDataBuffer in aclmdlDataset
  *
  * @param dataset [IN]   aclmdlDataset poiter
