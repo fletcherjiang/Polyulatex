@@ -829,7 +829,6 @@ aclError ModelExecute(uint32_t modelId, const aclmdlDataset *input,
         }
     }
 
-
     ge::GeExecutor executor;
     ACL_LOG_INFO("call ge interface executor.ExecModel, modelId[%u], asyncMode[%d]",
         modelId, static_cast<int32_t>(async));
