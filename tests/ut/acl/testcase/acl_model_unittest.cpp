@@ -61,6 +61,16 @@ ge::Status GetDynamicBatchInfo_Invoke3(uint32_t model_id, std::vector<std::vecto
     return ge::SUCCESS;
 }
 
+ge::Status ExecModelInvoke(uint32_t model_id, void *stream, const ge::RunModelData &run_input_data,
+                            const std::vector<ge::GeTensorDesc> &input_desc, ge::RunModelData &run_output_data,
+                            std::vector<ge::GeTensorDesc> &output_desc, bool async_mode)
+{
+    ge::GeTensorDesc geDescTmp;
+    output_desc.push_back(geDescTmp);
+    output_desc.push_back(geDescTmp);
+    return SUCCESS;
+}
+
 ge::Status GetDynamicBatchInfo_Invoke4(uint32_t model_id, std::vector<std::vector<int64_t>> &batch_info,
                                        int32_t &dynamic_type)
 {
@@ -1451,23 +1461,71 @@ TEST_F(UTEST_ACL_Model, aclmdlSetTensorDesc)
     aclError ret = aclmdlAddDatasetBuffer(dataset, buffer);
     aclDataBuffer *buffer1 = aclCreateDataBuffer((void*)0x2, 1);
     ret = aclmdlAddDatasetBuffer(dataset, buffer1);
+    aclmdlDataset *datasetOut = aclmdlCreateDataset();
+    aclDataBuffer *buffer2 = aclCreateDataBuffer((void*)0x3, 1);
+    ret = aclmdlAddDatasetBuffer(datasetOut, buffer);
+
     int64_t shape[2] = {16, 32};
     aclTensorDesc *inputDesc = aclCreateTensorDesc(ACL_FLOAT16, 2, shape, ACL_FORMAT_ND);
     size_t index = 1;
     ret = aclmdlSetDatasetTensorDesc (dataset, inputDesc, index);
     EXPECT_EQ(ret, ACL_SUCCESS);
-
     ret = aclmdlSetDatasetTensorDesc (dataset, nullptr, 0);
-    ret = aclmdlExecute(1, dataset, dataset);
+
+    ret = aclmdlExecute(1, dataset, datasetOut);
     EXPECT_EQ(ret, ACL_SUCCESS);
 
     size_t index1 = 2;
     ret = aclmdlSetDatasetTensorDesc (dataset, inputDesc, index1);
     EXPECT_NE(ret, ACL_SUCCESS);
 
-    aclmdlDestroyDataset(dataset);
+    aclmdlDestroyDataset(dataset);    
+    aclmdlDestroyDataset(datasetOut);
     aclDestroyDataBuffer(buffer);
     aclDestroyDataBuffer(buffer1);
+    aclDestroyDataBuffer(buffer2);
+    aclDestroyTensorDesc(inputDesc);
+}
+
+	TEST_F(UTEST_ACL_Model, aclmdlGetDatasetTensorDesc)
+{
+    aclmdlDataset *dataset = aclmdlCreateDataset();
+    aclDataBuffer *buffer = aclCreateDataBuffer((void*)0x1, 1);
+    aclError ret = aclmdlAddDatasetBuffer(dataset, buffer);
+    aclDataBuffer *buffer1 = aclCreateDataBuffer((void*)0x2, 1);
+    ret = aclmdlAddDatasetBuffer(dataset, buffer1);
+    aclmdlDataset *datasetOut = aclmdlCreateDataset();
+    aclDataBuffer *buffer2 = aclCreateDataBuffer((void*)0x3, 1);
+    ret = aclmdlAddDatasetBuffer(datasetOut, buffer);
+    aclDataBuffer *buffer3 = aclCreateDataBuffer((void*)0x4, 1);
+    ret = aclmdlAddDatasetBuffer(datasetOut, buffer);
+
+    int64_t shape[2] = {16, 32};
+    aclTensorDesc *inputDesc = aclCreateTensorDesc(ACL_FLOAT16, 2, shape, ACL_FORMAT_ND);
+    size_t index = 1;
+    ret = aclmdlSetDatasetTensorDesc (dataset, inputDesc, index);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    ret = aclmdlSetDatasetTensorDesc (dataset, nullptr, 0);
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), ExecModel(_,_,_,_,_,_,_))
+        .WillOnce(Invoke(ExecModelInvoke));
+    ret = aclmdlExecute(1, dataset, datasetOut);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+
+    aclTensorDesc *outputDesc = aclmdlGetDatasetTensorDesc(nullptr, 0);
+    EXPECT_EQ(outputDesc, nullptr);
+
+    outputDesc = aclmdlGetDatasetTensorDesc(datasetOut, 2);
+    EXPECT_EQ(outputDesc, nullptr);
+
+    outputDesc = aclmdlGetDatasetTensorDesc(datasetOut, 1);
+    EXPECT_NE(outputDesc, nullptr);
+
+    aclmdlDestroyDataset(dataset);    
+    aclmdlDestroyDataset(datasetOut);
+    aclDestroyDataBuffer(buffer);
+    aclDestroyDataBuffer(buffer1);
+    aclDestroyDataBuffer(buffer2);
+    aclDestroyDataBuffer(buffer3);
     aclDestroyTensorDesc(inputDesc);
 }
 
