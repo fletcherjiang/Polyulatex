@@ -538,9 +538,9 @@ aclError aclmdlDestroyDataset(const aclmdlDataset *dataset)
     ACL_STAGES_REG(acl::ACL_STAGE_DESTROY, acl::ACL_STAGE_DEFAULT);
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_DATASET);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataset);
-//    for (size_t i = 0; i < dataset->blobs.size(); ++i) {
-//        ACL_DELETE_AND_SET_NULL((const_cast<aclmdlDataset *>(dataset))->blobs[i].tensorDesc);
-//    }
+    for (size_t i = 0; i < dataset->blobs.size(); ++i) {
+        ACL_DELETE_AND_SET_NULL((const_cast<aclmdlDataset *>(dataset))->blobs[i].tensorDesc);
+    }
     ACL_DELETE_AND_SET_NULL(dataset);
     ACL_ADD_RELEASE_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_DATASET);
     return ACL_SUCCESS;
