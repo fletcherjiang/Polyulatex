@@ -836,7 +836,7 @@ aclError ModelExecute(uint32_t modelId, const aclmdlDataset *input,
             output->blobs[i].tensorDesc = aclCreateTensorDesc(ACL_FLOAT, 1, &shape, ACL_FORMAT_NCHW);
         }
     }
-std::cout << outputGeDesc.size() << "cout size of outputGeDesc" << std::endl;
+
     for (size_t i = 0; i < outputGeDesc.size(); ++i) {
         if (output->blobs[i].tensorDesc != nullptr) {
             output->blobs[i].tensorDesc->dims.clear();
