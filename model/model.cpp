@@ -539,7 +539,7 @@ aclError aclmdlDestroyDataset(const aclmdlDataset *dataset)
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_DATASET);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataset);
     for (size_t i = 0; i < dataset->blobs.size(); ++i) {
-        ACL_DELETE_AND_SET_NULL((const_cast<aclmdlDataset *>(dataset))->blobs[i].tensorDesc);
+        ACL_DELETE_ARRAY_AND_SET_NULL((const_cast<aclmdlDataset *>(dataset))->blobs[i].tensorDesc);
     }
     ACL_DELETE_AND_SET_NULL(dataset);
     ACL_ADD_RELEASE_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_DATASET);
@@ -622,7 +622,7 @@ aclError aclmdlSetDatasetTensorDesc(aclmdlDataset *dataset, aclTensorDesc *tenso
     }
 
     if (dataset->blobs[index].tensorDesc == nullptr) {
-        dataset->blobs[index].tensorDesc = new(std::nothrow) aclTensorDesc(*tensorDesc);
+        dataset->blobs[index].tensorDesc = new(std::nothrow) aclTensorDesc[1]{*tensorDesc};
         ACL_CHECK_MALLOC_RESULT(dataset->blobs[index].tensorDesc);
     } else {
         *(dataset->blobs[index].tensorDesc) = *tensorDesc;

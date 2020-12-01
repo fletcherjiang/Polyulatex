@@ -1484,10 +1484,10 @@ TEST_F(UTEST_ACL_Model, aclmdlSetTensorDesc)
     aclDestroyDataBuffer(buffer);
     aclDestroyDataBuffer(buffer1);
     aclDestroyDataBuffer(buffer2);
-    aclDestroyTensorDesc(inputDesc);
+    aclDestroyTensorDesc(inputDesc); 
 }
 
-	TEST_F(UTEST_ACL_Model, aclmdlGetDatasetTensorDesc)
+TEST_F(UTEST_ACL_Model, aclmdlGetDatasetTensorDesc)
 {
     aclmdlDataset *dataset = aclmdlCreateDataset();
     aclDataBuffer *buffer = aclCreateDataBuffer((void*)0x1, 1);
