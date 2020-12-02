@@ -294,13 +294,13 @@ ACL_FUNC_VISIBILITY aclError aclmdlSetDatasetTensorDesc(aclmdlDataset *dataset,
  * @ingroup AscendCL
  * @brief Get aclTensorDesc from aclmdlDataset
  *
- * @param dataset [OUT]    aclmdlDataset which obtain tensorDesc wanted;
- * @param index [IN]       index of tensorDesc wanted
+ * @param dataset [IN]    aclmdlDataset poiter;
+ * @param index [IN]      index of tensorDesc
  *
- * @retval ACL_SUCCESS The function is successfully executed.
- * @retval OtherValues Failure
+ * @retval Get Address of aclTensorDesc when executed successfully.
+ * @retval OtherValues Failure return NULL
  */
-ACL_FUNC_VISIBILITY aclTensorDesc *aclmdlGetDatasetTensorDesc(aclmdlDataset *dataset, size_t index);
+ACL_FUNC_VISIBILITY aclTensorDesc *aclmdlGetDatasetTensorDesc(const aclmdlDataset *dataset, size_t index);
 
 /**
  * @ingroup AscendCL

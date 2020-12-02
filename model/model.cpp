@@ -585,9 +585,9 @@ aclDataBuffer *aclmdlGetDatasetBuffer(const aclmdlDataset *dataset, size_t index
     return dataset->blobs[index].dataBuf;
 }
 
-aclTensorDesc *aclmdlGetDatasetTensorDesc(aclmdlDataset *dataset, size_t index)
+aclTensorDesc *aclmdlGetDatasetTensorDesc(const aclmdlDataset *dataset, size_t index)
 {
-    ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_RET_NULL_INPUT_REPORT(dataset);
     if (index >= dataset->blobs.size()) {
         ACL_LOG_ERROR("[Check][Index]input param index[%zu] must be smaller than output databuf size[%zu]",
@@ -595,7 +595,7 @@ aclTensorDesc *aclmdlGetDatasetTensorDesc(aclmdlDataset *dataset, size_t index)
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
                                                   std::vector<std::string>({"param", "value", "reason"}),
                                                   std::vector<std::string>({"index", std::to_string(index),
-                                                                            "must be smaller than output databuf size"}));
+                                                      "must be smaller than output databuf size"}));
         return nullptr;
     }
     return dataset->blobs[index].tensorDesc;
