@@ -733,18 +733,19 @@ aclError aclmdlLoadFromMemWithQ(const void *model, size_t modelSize, uint32_t *m
     return ACL_SUCCESS;
 }
 
-static void SetInputData(const vector<AclModelTensor> &blobs, vector<ge::GeTensorDesc> &inputGeDesc, bool &isDynamic)
+static void SetInputAndOutputData(const vector<AclModelTensor> &inputBlobs, const vector<AclModelTensor> &outputBlobs,
+    vector<ge::GeTensorDesc> &inputGeDesc)
 {
-    for (size_t i = 0; i < blobs.size(); ++i) {
-        if (blobs[i].tensorDesc != nullptr) {
+    for (size_t i = 0; i < inputBlobs.size(); ++i) {
+        if (inputBlobs[i].tensorDesc != nullptr) {
             isDynamic = true;
             break;
         }
     }
     if (isDynamic) {
-        for (size_t i = 0; i < blobs.size(); ++i) {
+        for (size_t i = 0; i < inputBlobs.size(); ++i) {
             if (blobs[i].tensorDesc != nullptr) {
-                ge::GeShape shape(blobs[i].tensorDesc->dims);
+                ge::GeShape shape(inputBlobs[i].tensorDesc->dims);
                 ge::GeTensorDesc geTensorDescTmp(shape);
                 geTensorDescTmp.SetOriginShape(shape);
                 inputGeDesc.push_back(geTensorDescTmp);
@@ -752,6 +753,13 @@ static void SetInputData(const vector<AclModelTensor> &blobs, vector<ge::GeTenso
                 ge::GeTensorDesc geTensorDescTmp;
                 inputGeDesc.push_back(geTensorDescTmp);
             }
+        }
+        int64_t shapeDefault = 1;
+        for (size_t i = 0; i < outputBlobs.size(); ++i) {
+            if (outputBlobs[i].tensorDesc != nullptr) {
+                aclDestroyTensorDesc(outputBlobs[i].tensorDesc);
+            }
+            outputBlobs[i].tensorDesc = aclCreateTensorDesc(ACL_FLOAT, 1, &shapeDefault, ACL_FORMAT_NCHW);
         }
     }
     return;
@@ -794,10 +802,6 @@ aclError ModelExecute(uint32_t modelId, const aclmdlDataset *input,
         inputData.blobs.push_back(inputBuffer);
     }
 
-    vector<ge::GeTensorDesc> inputGeDesc;
-    bool dynamicFlag = false;
-    SetInputData(input->blobs, inputGeDesc, dynamicFlag);
-
     ge::RunModelData outputData;
     outputData.modelId = modelId;
     for (size_t i = 0; i < output->blobs.size(); ++i) {
@@ -817,24 +821,17 @@ aclError ModelExecute(uint32_t modelId, const aclmdlDataset *input,
         outputData.blobs.push_back(outputBuffer);
     }
 
+    vector<ge::GeTensorDesc> inputGeDesc;
+    vector<ge::GeTensorDesc> outputGeDesc;
+    SetInputAndOutputData(input->blobs, output->blobs, inputGeDesc);
+
     ge::GeExecutor executor;
     ACL_LOG_INFO("call ge interface executor.ExecModel, modelId[%u], asyncMode[%d]",
         modelId, static_cast<int32_t>(async));
-    vector<ge::GeTensorDesc> outputGeDesc;
     ge::Status ret = executor.ExecModel(modelId, stream, inputData, inputGeDesc, outputData, outputGeDesc, async);
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Exec][Model]Execute model failed, ge result[%u], modelId[%u]", ret, modelId);
         return ACL_GET_ERRCODE_GE(ret);
-    }
-
-    if (dynamicFlag) {
-        int64_t shape = 1;
-        for (size_t i = 0; i < output->blobs.size(); ++i) {
-            if (output->blobs[i].tensorDesc != nullptr) {
-                aclDestroyTensorDesc(output->blobs[i].tensorDesc);   
-            }
-            output->blobs[i].tensorDesc = aclCreateTensorDesc(ACL_FLOAT, 1, &shape, ACL_FORMAT_NCHW);
-        }
     }
 
     for (size_t i = 0; i < outputGeDesc.size(); ++i) {
