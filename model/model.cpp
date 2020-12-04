@@ -736,6 +736,7 @@ aclError aclmdlLoadFromMemWithQ(const void *model, size_t modelSize, uint32_t *m
 static void SetInputAndOutputData(const vector<AclModelTensor> &inputBlobs, const vector<AclModelTensor> &outputBlobs,
     vector<ge::GeTensorDesc> &inputGeDesc)
 {
+    bool isDynamic = false;
     for (size_t i = 0; i < inputBlobs.size(); ++i) {
         if (inputBlobs[i].tensorDesc != nullptr) {
             isDynamic = true;
@@ -822,12 +823,12 @@ aclError ModelExecute(uint32_t modelId, const aclmdlDataset *input,
     }
 
     vector<ge::GeTensorDesc> inputGeDesc;
-    vector<ge::GeTensorDesc> outputGeDesc;
     SetInputAndOutputData(input->blobs, output->blobs, inputGeDesc);
 
     ge::GeExecutor executor;
     ACL_LOG_INFO("call ge interface executor.ExecModel, modelId[%u], asyncMode[%d]",
         modelId, static_cast<int32_t>(async));
+    vector<ge::GeTensorDesc> outputGeDesc;
     ge::Status ret = executor.ExecModel(modelId, stream, inputData, inputGeDesc, outputData, outputGeDesc, async);
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Exec][Model]Execute model failed, ge result[%u], modelId[%u]", ret, modelId);
