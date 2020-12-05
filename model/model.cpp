@@ -745,7 +745,7 @@ static void SetInputAndOutputData(const vector<AclModelTensor> &inputBlobs, cons
     }
     if (isDynamic) {
         for (size_t i = 0; i < inputBlobs.size(); ++i) {
-            if (blobs[i].tensorDesc != nullptr) {
+            if (inputBlobs[i].tensorDesc != nullptr) {
                 ge::GeShape shape(inputBlobs[i].tensorDesc->dims);
                 ge::GeTensorDesc geTensorDescTmp(shape);
                 geTensorDescTmp.SetOriginShape(shape);
