@@ -733,7 +733,7 @@ aclError aclmdlLoadFromMemWithQ(const void *model, size_t modelSize, uint32_t *m
     return ACL_SUCCESS;
 }
 
-static void SetInputAndOutputData(const vector<AclModelTensor> &inputBlobs, const vector<AclModelTensor> &outputBlobs,
+static void SetInputAndOutputData(const vector<AclModelTensor> &inputBlobs, vector<AclModelTensor> &outputBlobs,
     vector<ge::GeTensorDesc> &inputGeDesc)
 {
     bool isDynamic = false;
