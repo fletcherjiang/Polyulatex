@@ -832,7 +832,7 @@ aclError ModelExecute(uint32_t modelId, const aclmdlDataset *input,
             if (output->blobs[i].tensorDesc != nullptr) {
                 aclDestroyTensorDesc(output->blobs[i].tensorDesc);   
             }
-            output->blobs[i].tensorDesc = aclCreateTensorDesc(ACL_DT_UNDEFINED, 0, nullptr, ACL_FORMAT_NCHW);
+            output->blobs[i].tensorDesc = aclCreateTensorDesc(ACL_DT_UNDEFINED, 0, nullptr, ACL_FORMAT_UNDEFINED);
         }
     }
 
