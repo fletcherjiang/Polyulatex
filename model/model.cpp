@@ -539,7 +539,7 @@ aclError aclmdlDestroyDataset(const aclmdlDataset *dataset)
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_DATASET);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataset);
     for (size_t i = 0; i < dataset->blobs.size(); ++i) {
-        ACL_DELETE_AND_SET_NULL((const_cast<aclmdlDataset *>(dataset))->blobs[i].tensorDesc);
+        ACL_DELETE_ARRAY_AND_SET_NULL((const_cast<aclmdlDataset *>(dataset))->blobs[i].tensorDesc);
     }
     ACL_DELETE_AND_SET_NULL(dataset);
     ACL_ADD_RELEASE_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_DATASET);
@@ -585,6 +585,22 @@ aclDataBuffer *aclmdlGetDatasetBuffer(const aclmdlDataset *dataset, size_t index
     return dataset->blobs[index].dataBuf;
 }
 
+aclTensorDesc *aclmdlGetDatasetTensorDesc(const aclmdlDataset *dataset, size_t index)
+{
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
+    ACL_REQUIRES_NOT_NULL_RET_NULL_INPUT_REPORT(dataset);
+    if (index >= dataset->blobs.size()) {
+        ACL_LOG_ERROR("[Check][Index]input param index[%zu] must be smaller than output databuf size[%zu]",
+                      index, dataset->blobs.size());
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
+                                                  std::vector<std::string>({"param", "value", "reason"}),
+                                                  std::vector<std::string>({"index", std::to_string(index),
+                                                      "must be smaller than output databuf size"}));
+        return nullptr;
+    }
+    return dataset->blobs[index].tensorDesc;
+}
+
 aclError aclmdlSetDatasetTensorDesc(aclmdlDataset *dataset, aclTensorDesc *tensorDesc, size_t index)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
@@ -606,7 +622,7 @@ aclError aclmdlSetDatasetTensorDesc(aclmdlDataset *dataset, aclTensorDesc *tenso
     }
 
     if (dataset->blobs[index].tensorDesc == nullptr) {
-        dataset->blobs[index].tensorDesc = new(std::nothrow) aclTensorDesc(*tensorDesc);
+        dataset->blobs[index].tensorDesc = new(std::nothrow) aclTensorDesc[1]{*tensorDesc};
         ACL_CHECK_MALLOC_RESULT(dataset->blobs[index].tensorDesc);
     } else {
         *(dataset->blobs[index].tensorDesc) = *tensorDesc;
@@ -717,9 +733,8 @@ aclError aclmdlLoadFromMemWithQ(const void *model, size_t modelSize, uint32_t *m
     return ACL_SUCCESS;
 }
 
-static void SetInputData(const vector<AclModelTensor> &blobs, vector<ge::GeTensorDesc> &inputGeDesc)
+static void SetInputData(const vector<AclModelTensor> &blobs, vector<ge::GeTensorDesc> &inputGeDesc, bool &isDynamic)
 {
-    bool isDynamic = false;
     for (size_t i = 0; i < blobs.size(); ++i) {
         if (blobs[i].tensorDesc != nullptr) {
             isDynamic = true;
@@ -780,7 +795,8 @@ aclError ModelExecute(uint32_t modelId, const aclmdlDataset *input,
     }
 
     vector<ge::GeTensorDesc> inputGeDesc;
-    SetInputData(input->blobs, inputGeDesc);
+    bool dynamicFlag = false;
+    SetInputData(input->blobs, inputGeDesc, dynamicFlag);
 
     ge::RunModelData outputData;
     outputData.modelId = modelId;
@@ -810,12 +826,30 @@ aclError ModelExecute(uint32_t modelId, const aclmdlDataset *input,
         ACL_LOG_CALL_ERROR("[Exec][Model]Execute model failed, ge result[%u], modelId[%u]", ret, modelId);
         return ACL_GET_ERRCODE_GE(ret);
     }
+
+    if (dynamicFlag) {
+        for (size_t i = 0; i < output->blobs.size(); ++i) {
+            if (output->blobs[i].tensorDesc != nullptr) {
+                aclDestroyTensorDesc(output->blobs[i].tensorDesc);   
+            }
+            output->blobs[i].tensorDesc = aclCreateTensorDesc(ACL_DT_UNDEFINED, 0, nullptr, ACL_FORMAT_UNDEFINED);
+        }
+    }
+
     for (size_t i = 0; i < outputGeDesc.size(); ++i) {
         if (output->blobs[i].tensorDesc != nullptr) {
             output->blobs[i].tensorDesc->dims.clear();
             std::vector<int64_t> dims = outputGeDesc[i].GetShape().GetDims();
+            ge::Format format = outputGeDesc[i].GetFormat();
+            ge::DataType dataType = outputGeDesc[i].GetDataType();
             for (auto dim : dims) {
                 output->blobs[i].tensorDesc->dims.push_back(dim);
+            }
+            if (format != ge::FORMAT_RESERVED) {
+                output->blobs[i].tensorDesc->format = static_cast<aclFormat>(format);
+            }
+            if (dataType != ge::DT_UNDEFINED) {
+                output->blobs[i].tensorDesc->dataType = static_cast<aclDataType>(dataType);
             }
         }
     }
