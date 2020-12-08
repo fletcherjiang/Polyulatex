@@ -846,10 +846,10 @@ aclError ModelExecute(uint32_t modelId, const aclmdlDataset *input,
                 output->blobs[i].tensorDesc->dims.push_back(dim);
             }
             if (format != ge::FORMAT_RESERVED) {
-                output->blobs[i].tensorDesc->format = ACL_FORMAT_UNDEFINED;
+                output->blobs[i].tensorDesc->format = static_cast<aclFormat>(format);
             }
             if (dataType != ge::DT_UNDEFINED) {
-                output->blobs[i].tensorDesc->dataType = ACL_DT_UNDEFINED;
+                output->blobs[i].tensorDesc->dataType = static_cast<aclDataType>(dataType);
             }
         }
     }
