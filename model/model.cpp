@@ -593,9 +593,8 @@ aclTensorDesc *aclmdlGetDatasetTensorDesc(const aclmdlDataset *dataset, size_t i
         ACL_LOG_ERROR("[Check][Index]input param index[%zu] must be smaller than output databuf size[%zu]",
                       index, dataset->blobs.size());
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
-                                                  std::vector<std::string>({"param", "value", "reason"}),
-                                                  std::vector<std::string>({"index", std::to_string(index),
-                                                      "must be smaller than output databuf size"}));
+            std::vector<std::string>({"param", "value", "reason"}),
+            std::vector<std::string>({"index", std::to_string(index), "must be smaller than output databuf size"}));
         return nullptr;
     }
     return dataset->blobs[index].tensorDesc;
@@ -610,8 +609,7 @@ aclError aclmdlSetDatasetTensorDesc(aclmdlDataset *dataset, aclTensorDesc *tenso
                       index, dataset->blobs.size());
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
-            std::vector<std::string>({"index", std::to_string(index),
-            "must be smaller than input databuf size"}));
+            std::vector<std::string>({"index", std::to_string(index), "must be smaller than input databuf size"}));
         return ACL_ERROR_INVALID_PARAM;
     }
 
