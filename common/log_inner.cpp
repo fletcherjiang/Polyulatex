@@ -132,7 +132,7 @@ void AclErrorLogManager::ReportInnerError(const char *fmt, ...)
         return;
     }
     va_end(ap);
-    REPORT_INNER_ERROR("EH9999", errorMsgStr);
+    REPORT_INNER_ERROR("EH9999", "%s", errorMsgStr);
 }
 
 void AclErrorLogManager::ReportCallError(const char *fmt, ...)
@@ -147,7 +147,7 @@ void AclErrorLogManager::ReportCallError(const char *fmt, ...)
         return;
     }
     va_end(ap);
-    REPORT_CALL_ERROR("EH9999", errorMsgStr);
+    REPORT_CALL_ERROR("EH9999", "%s", errorMsgStr);
 }
 
 void AclErrorLogManager::ReportInputErrorWithChar(const char *const errorCode, const char *argNames[],

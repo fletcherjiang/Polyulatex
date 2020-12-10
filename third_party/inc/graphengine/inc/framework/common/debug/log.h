@@ -89,7 +89,7 @@
 #define GE_CHK_GRAPH_STATUS_RET(expr, ...)                  \
   do {                                                      \
     if ((expr) != ge::GRAPH_SUCCESS) {                      \
-      REPORT_CALL_ERROR("E19999", "Operator graph failed"); \
+      REPORT_CALL_ERROR("E19999", "%s", "Operator graph failed"); \
       DOMI_LOGE(__VA_ARGS__);                               \
       return FAILED;                                        \
     }                                                       \
@@ -107,7 +107,7 @@
   do {                                             \
     bool b = (expr);                               \
     if (!b) {                                      \
-      REPORT_INNER_ERROR("E19999", __VA_ARGS__);   \
+      REPORT_INNER_ERROR("E19999", "%s", __VA_ARGS__);   \
       GELOGE(_status, __VA_ARGS__);                \
       return _status;                              \
     }                                              \
@@ -196,7 +196,7 @@
   {                                                                     \
     bool b = (expr);                                                    \
     if (b) {                                                            \
-      REPORT_INNER_ERROR("E19999", __VA_ARGS__);                        \
+      REPORT_INNER_ERROR("E19999", "%s", __VA_ARGS__);                        \
       DOMI_LOGE(__VA_ARGS__);                                           \
       exec_expr;                                                        \
       return _status;                                                   \
