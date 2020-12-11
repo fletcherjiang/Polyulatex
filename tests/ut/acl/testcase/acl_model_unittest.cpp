@@ -164,6 +164,11 @@ TEST_F(UTEST_ACL_Model, aclmdlGetOpAttr)
     const char *resultGeFailed  = aclmdlGetOpAttr(mdlDesc, opName, attr);
     EXPECT_EQ(resultGeFailed, nullptr);
 
+    //ensure ut cover twp funcs below
+    string testStr = "test";
+    acl::AclErrorLogManager::ReportInnerError("%s", testStr.c_str());
+    acl::AclErrorLogManager::ReportCallError("%s", testStr.c_str());
+
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetOpAttr(_,_,_,_))
         .WillOnce(Invoke(GetOpAttr_Invoke_1));
     const char *resultEmptyStr = aclmdlGetOpAttr(mdlDesc, opName, attr);
@@ -173,7 +178,6 @@ TEST_F(UTEST_ACL_Model, aclmdlGetOpAttr)
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetOpAttr(_,_,_,_))
         .WillOnce(Invoke(GetOpAttr_Invoke_2));
     const char *resultValue = aclmdlGetOpAttr(mdlDesc, opName3, attr);
-    std::cout << string(resultValue) << "****************"<<std::endl;;
     EXPECT_EQ(string(resultValue), "attr_finded");
 
     const char *resultGeSuccess = aclmdlGetOpAttr(mdlDesc, opName3, attr);
