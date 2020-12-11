@@ -164,7 +164,7 @@ TEST_F(UTEST_ACL_Model, aclmdlGetOpAttr)
     const char *resultGeFailed  = aclmdlGetOpAttr(mdlDesc, opName, attr);
     EXPECT_EQ(resultGeFailed, nullptr);
 
-    //ensure ut cover twp funcs below
+    //ensure ut cover two functions below
     string testStr = "test";
     acl::AclErrorLogManager::ReportInnerError("%s", testStr.c_str());
     acl::AclErrorLogManager::ReportCallError("%s", testStr.c_str());
