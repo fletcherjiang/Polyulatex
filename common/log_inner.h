@@ -20,7 +20,7 @@
 #include "mmpa/mmpa_api.h"
 #include "acl/acl_base.h"
 
-#define ACL_MODE_ID ASCENDCL
+#define ACL_MODE_ID static_cast<int>(ASCENDCL)
 #define APP_MODE_ID APP
 
 constexpr int MAX_LOG_STRING = 1024;
