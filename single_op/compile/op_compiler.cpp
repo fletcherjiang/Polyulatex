@@ -132,6 +132,7 @@ static aclError MakeInputCompileParam(const AclOp &aclOp, CompileParam &param,
                                   geFormat,
                                   geDataType);
         geTensorDesc.SetOriginFormat(geFormat);
+        geTensorDesc.SetOriginShape(GeShape(desc->dims));
         if (aclOp.opType == "TransData") {
             ACL_LOG_INFO("This op is TransData of input");
             if (desc->storageFormat != ACL_FORMAT_UNDEFINED) {
@@ -191,6 +192,7 @@ static aclError MakeOutputCompileParam(const AclOp &aclOp, CompileParam &param,
                                   static_cast<::ge::Format>(desc->format),
                                   static_cast<::ge::DataType >(desc->dataType));
         geTensorDesc.SetOriginFormat(static_cast<::ge::Format>(desc->format));
+        geTensorDesc.SetOriginShape(GeShape(desc->dims));
         if (aclOp.opType == "TransData") {
             ACL_LOG_INFO("This op is TransData of output");
             if (desc->storageFormat != ACL_FORMAT_UNDEFINED) {
