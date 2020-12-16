@@ -140,7 +140,6 @@ static aclError MakeInputCompileParam(const AclOp &aclOp, CompileParam &param,
                 geTensorDesc.SetShape(GeShape(desc->storageDims));
                 geTensorDesc.SetFormat(static_cast<::ge::Format>(desc->storageFormat));
                 geTensorDesc.SetDataType(geDataType);
-                geTensorDesc.SetOriginShape(GeShape(desc->dims));
                 geTensorDesc.SetOriginDataType(geDataType);
             }
         }
