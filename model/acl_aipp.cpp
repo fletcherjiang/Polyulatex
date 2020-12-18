@@ -760,7 +760,7 @@ static bool IsInRange(int64_t start, int64_t end, int64_t val)
     return true;
 }
 
-static aclError CheckAippOutShapeRange(aclFormat format, const std::vector<std::pair<int64_t, int64_t>> &shapeRanges,
+static aclError CheckAippOutputShapeRange(aclFormat format, const std::vector<std::pair<int64_t, int64_t>> &shapeRanges,
     int32_t aippOutputW, int32_t aippOutputH, int64_t batchSize)
 {
     switch (format) {
@@ -837,7 +837,7 @@ static aclError CheckAippOutShapeRange(aclFormat format, const std::vector<std::
     return ACL_SUCCESS;
 }
 
-static aclError GetAndCheckShape(uint32_t modelId, const aclmdlDesc &modelDesc,
+static aclError GetAndCheckAippOutputShape(uint32_t modelId, const aclmdlDesc &modelDesc,
     size_t index, const aclmdlAIPP *aippParmsSet)
 {
     int32_t aippOutputW = 0;
@@ -879,10 +879,12 @@ static aclError GetAndCheckShape(uint32_t modelId, const aclmdlDesc &modelDesc,
                     "ModelAippOutputH = %d.", aippOutputW, aippOutputH, mdlOriW, mdlOriH);
                 return ACL_ERROR_INVALID_PARAM;
             }
+        } else {
+            ACL_LOG_INFO("cant not get model H W N, current used model is old");
         }
     } else {
         aclFormat format = modelDesc.inputDesc[index].format;
-        aclError ret = CheckAippOutShapeRange(format, shapeRanges, aippOutputW, aippOutputH, batchSize);
+        aclError ret = CheckAippOutputShapeRange(format, shapeRanges, aippOutputW, aippOutputH, batchSize);
         return ret;
     }
 }
@@ -909,10 +911,12 @@ static aclError GetAndCheckAippParams(uint32_t modelId, const aclmdlDesc &modelD
                 std::vector<std::string>({"dynamic aipp size", errMsg}));
             return ACL_ERROR_INVALID_PARAM;
         }
-        aclError ret = GetAndCheckShape(modelId, modelDesc, relatedInputRank, aippParmsSet);
+        aclError ret = GetAndCheckAippOutputShape(modelId, modelDesc, relatedInputRank, aippParmsSet);
         if (ret != ACL_SUCCESS) {
             return ret;
         }
+    } else {
+        ACL_LOG_INFO("current used model is old");
     }
 
     return AippParamsCheck(aippParmsSet, GetSocVersion());
