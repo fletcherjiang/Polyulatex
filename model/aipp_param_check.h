@@ -25,7 +25,6 @@
 #include "model_desc_internal.h"
 
 uint64_t GetSrcImageSize(const aclmdlAIPP *aippParmsSet);
-aclError AippParamsCheck(const aclmdlAIPP *aippParmsSet, std::string socVersion,
-                         int32_t aippOutputW, int32_t aippOutputH, bool isNewModel);
+aclError AippParamsCheck(const aclmdlAIPP *aippParmsSet, std::string socVersion);
 
 #endif // AIPP_PARAM_CHECK_H_
