@@ -767,7 +767,7 @@ static aclError CheckAippOutputShapeRange(aclFormat format, const std::vector<st
         case ACL_FORMAT_NCHW:
             if (!IsInRange(shapeRanges[0].first, shapeRanges[0].second, batchSize)) {
                 ACL_LOG_ERROR("[Check][batchSize]the dynamic aipp batchSize[%ld] is not in "
-                    "model origin batchSize range [%ld, %ld]", batchSize, hapeRanges[0].first, shapeRanges[0].second);
+                    "model origin batchSize range [%ld, %ld]", batchSize, shapeRanges[0].first, shapeRanges[0].second);
                 std::string errMsg = acl::AclErrorLogManager::FormatStr("the dynamic aipp batchSize[%ld] is not in "
                     "model origin batchSize range[%ld, %ld]", batchSize, shapeRanges[0].first, shapeRanges[0].second);
                 acl::AclErrorLogManager::ReportInputError(acl::INVALID_AIPP_MSG,
@@ -799,7 +799,7 @@ static aclError CheckAippOutputShapeRange(aclFormat format, const std::vector<st
         case ACL_FORMAT_NHWC:
             if (!IsInRange(shapeRanges[0].first, shapeRanges[0].second, batchSize)) {
                 ACL_LOG_ERROR("[Check][batchSize]the dynamic aipp batchSize[%ld] is not in "
-                    "model origin batchSize range [%ld, %ld]", batchSize, hapeRanges[0].first, shapeRanges[0].second);
+                    "model origin batchSize range [%ld, %ld]", batchSize, shapeRanges[0].first, shapeRanges[0].second);
                 std::string errMsg = acl::AclErrorLogManager::FormatStr("the dynamic aipp batchSize[%ld] is not in "
                     "model origin batchSize range[%ld, %ld]", batchSize, shapeRanges[0].first, shapeRanges[0].second);
                 acl::AclErrorLogManager::ReportInputError(acl::INVALID_AIPP_MSG,
@@ -843,7 +843,7 @@ static aclError GetAndCheckAippOutputShape(uint32_t modelId, const aclmdlDesc &m
     int32_t aippOutputW = 0;
     int32_t aippOutputH = 0;
     int64_t batchSize = static_cast<int64_t>(aippParmsSet->batchSize);
-    std::vector<std::pair<int64_t, int64_t>> &shapeRanges = modelDesc.inputDesc[index].shapeRanges;
+    auto &shapeRanges = modelDesc.inputDesc[index].shapeRanges;
     aclError result = GetAippOutputHW(aippParmsSet, 0, GetSocVersion(), aippOutputW, aippOutputH);
     if (result != ACL_SUCCESS) {
         return result;
@@ -866,7 +866,7 @@ static aclError GetAndCheckAippOutputShape(uint32_t modelId, const aclmdlDesc &m
             if (mdlOriN != batchSize) {
                 ACL_LOG_ERROR("[Check][mdlOriN]the dynamic aipp batchSize[%lu] is not equal to model origin batch[%ld]",
                     batchSize, mdlOriN);
-                std::string errMsg = acl::AclErrorLogManager::FormatStr("batchSize[%lu] is not equal to "
+                std::string errMsg = acl::AclErrorLogManager::FormatStr("batchSize[%ld] is not equal to "
                     "model origin batch[%ld]", aippParmsSet->batchSize, mdlOriN);
                 acl::AclErrorLogManager::ReportInputError(acl::INVALID_AIPP_MSG,
                     std::vector<std::string>({"param", "reason"}),
@@ -874,9 +874,16 @@ static aclError GetAndCheckAippOutputShape(uint32_t modelId, const aclmdlDesc &m
                 return ACL_ERROR_INVALID_PARAM;
             }
             if ((aippOutputW != mdlOriW) || (aippOutputH != mdlOriH)) {
-                ACL_LOG_INNER_ERROR("[Check][Params]aipp output size by ACL must be equal to aipp output "
-                    "size in the model! AclAippOutputW = %d, AclAippOutputH = %d, ModelAippOutputW = %d, "
-                    "ModelAippOutputH = %d.", aippOutputW, aippOutputH, mdlOriW, mdlOriH);
+                ACL_LOG_ERROR("[Check][Params]aipp output size by ACL must be equal to aipp output "
+                    "size in the model! AclAippOutputW = %ld, AclAippOutputH = %ld, ModelAippOutputW = %ld, "
+                    "ModelAippOutputH = %ld.", aippOutputW, aippOutputH, mdlOriW, mdlOriH);
+                std::string errMsg = acl::AclErrorLogManager::FormatStr("aipp output size by ACL "
+                    "must be equal to aipp output size in the model! AclAippOutputW = %ld, "
+                    "AclAippOutputH = %ld, ModelAippOutputW = %ld, ModelAippOutputH = %ld.",
+                    aippOutputW, aippOutputH, mdlOriW, mdlOriH);
+                acl::AclErrorLogManager::ReportInputError(acl::INVALID_AIPP_MSG,
+                    std::vector<std::string>({"param", "reason"}),
+                    std::vector<std::string>({"dynamic aipp output size", errMsg}));
                 return ACL_ERROR_INVALID_PARAM;
             }
         } else {
