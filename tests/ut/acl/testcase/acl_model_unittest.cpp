@@ -1711,7 +1711,7 @@ TEST_F(UTEST_ACL_Model, AippParamsCheck)
     ret = aclmdlSetAIPPScfParams(aippDynamicSet, 0, 224, 224, 120, 120, 1);
     ret = aclmdlSetAIPPPaddingParams(aippDynamicSet, 1, 10, 10, 10, 10, 0);
     ret = aclmdlSetAIPPPaddingParams(aippDynamicSet, 1, 10, 10, 10, 10, 1);
-    ret = AippParamsCheck(aippDynamicSet, "Ascend310", 100, 100, true);
+    ret = AippParamsCheck(aippDynamicSet, "Ascend310");
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
     ret = AippParamsCheck(aippDynamicSet, "Hi3796CV300ES");
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
