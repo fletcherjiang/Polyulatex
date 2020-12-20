@@ -1526,21 +1526,21 @@ TEST_F(UTEST_ACL_Model, AippParamsCheck)
 
     //InputFormat not setted
     (void)GetSrcImageSize(aippDynamicSet);
-    ret = AippParamsCheck(aippDynamicSet, "Ascend310", 120, 120, true);
+    ret = AippParamsCheck(aippDynamicSet, "Ascend310");
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     //aipp not support Ascend910
     std::string socVersion = "Ascend910";
     (void)aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_ARGB8888_U8);
     (void)GetSrcImageSize(aippDynamicSet);
-    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    ret = AippParamsCheck(aippDynamicSet, socVersion);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     //Ascend310 not support YUYV_U8
     socVersion = "Ascend310";
     (void)aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_YUYV_U8);
     (void)GetSrcImageSize(aippDynamicSet);
-    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    ret = AippParamsCheck(aippDynamicSet, socVersion);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     //Ascend310 not support RAW10,for cover GetSrcImageSize
@@ -1571,33 +1571,33 @@ TEST_F(UTEST_ACL_Model, AippParamsCheck)
     (void)aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_YUV420SP_U8);
     ret = aclmdlSetAIPPScfParams(aippDynamicSet, 0, 1, 1, 1, 1, 0);
     (void)GetSrcImageSize(aippDynamicSet);
-    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    ret = AippParamsCheck(aippDynamicSet, socVersion);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     //Ascend610 not support RAW24
     socVersion = "Ascend610";
     (void)aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_RAW24);
-    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    ret = AippParamsCheck(aippDynamicSet, socVersion);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     //ES not support RAW24
     socVersion = "Hi3796CV300ES";
     (void)aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_RAW24);
-    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    ret = AippParamsCheck(aippDynamicSet, socVersion);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     //YUV400_U8 not support csc
     ret = aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_YUV400_U8);
     ret = aclmdlSetAIPPCscParams(aippDynamicSet, 1, 256, 443, 0, 256, -86, -178, 256, 0, 350, 0, 0, 0, 0, 128, 128);
     (void)GetSrcImageSize(aippDynamicSet);
-    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    ret = AippParamsCheck(aippDynamicSet, socVersion);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     //YUV420SP_U8,src_image_h and src_image_w must be even
     (void)aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_YUV420SP_U8);
     (void)GetSrcImageSize(aippDynamicSet);
     (void)aclmdlSetAIPPSrcImageSize(aippDynamicSet, 223, 223);
-    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    ret = AippParamsCheck(aippDynamicSet, socVersion);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     //ES,YUV420SP_U8, src_image_w must be multiples of 16
@@ -1609,14 +1609,14 @@ TEST_F(UTEST_ACL_Model, AippParamsCheck)
     (void)aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_ARGB8888_U8);
     (void)aclmdlSetAIPPSrcImageSize(aippDynamicSet, 5, 224);
     (void)GetSrcImageSize(aippDynamicSet);
-    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    ret = AippParamsCheck(aippDynamicSet, socVersion);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     //ES,RGB888_U8, src_image_w*3 must be multiples of 16
     (void)aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_RGB888_U8);
     (void)aclmdlSetAIPPSrcImageSize(aippDynamicSet, 6, 224);
     (void)GetSrcImageSize(aippDynamicSet);
-    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    ret = AippParamsCheck(aippDynamicSet, socVersion);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     //enable scf, disable crop,scfInputSizeW==srcImageSizeW,scfInputSizeH==srcImageSizeH
@@ -1631,7 +1631,7 @@ TEST_F(UTEST_ACL_Model, AippParamsCheck)
     (void)aclmdlSetAIPPSrcImageSize(aippDynamicSet, 224, 224);
     ret = aclmdlSetAIPPCropParams(aippDynamicSet, 1, 0, 0, 220, 220, 0);
     ret = aclmdlSetAIPPScfParams(aippDynamicSet, 1, 210, 210, 1, 1, 0);
-    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    ret = AippParamsCheck(aippDynamicSet, socVersion);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     //the first batch, enable crop,scf,padding, aippOutputW and aippOutputH is 120,120
@@ -1640,75 +1640,68 @@ TEST_F(UTEST_ACL_Model, AippParamsCheck)
 
     //the second batch, enable crop, cropStartPosW + cropSizeW > srcImageSizeW
     ret = aclmdlSetAIPPCropParams(aippDynamicSet, 1, 5, 1, 221, 221, 1);
-    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    ret = AippParamsCheck(aippDynamicSet, socVersion);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     //the second batch, enable crop, cropStartPosH + cropSizeH > srcImageSizeH
     ret = aclmdlSetAIPPCropParams(aippDynamicSet, 1, 1, 5, 221, 221, 1);
-    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    ret = AippParamsCheck(aippDynamicSet, socVersion);
     //ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     //the second batch, enable crop, cropStartPosW，cropStartPosH，cropSizeW，cropSizeH must be even
     ret = aclmdlSetAIPPCropParams(aippDynamicSet, 1, 1, 1, 221, 221, 1);
-    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    ret = AippParamsCheck(aippDynamicSet, socVersion);
     //ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     //the second batch, enable scf, scfInputSizeW is within [16,4096]
     ret = aclmdlSetAIPPScfParams(aippDynamicSet, 1, 10, 220, 100, 100, 1);
-    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    ret = AippParamsCheck(aippDynamicSet, socVersion);
     //ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     //the second batch, enable scf, scfInputSizeH is within [16,4096]
     ret = aclmdlSetAIPPScfParams(aippDynamicSet, 1, 20, 10, 100, 100, 1);
-    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    ret = AippParamsCheck(aippDynamicSet, socVersion);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     //the second batch, enable scf, scfOutputSizeW is within [16,1920]
     ret = aclmdlSetAIPPScfParams(aippDynamicSet, 1, 20, 20, 10, 100, 1);
-    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    ret = AippParamsCheck(aippDynamicSet, socVersion);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     //the second batch, enable scf, scfOutputSizeH is within [16,4096]
     ret = aclmdlSetAIPPScfParams(aippDynamicSet, 1, 20, 20, 100, 10, 1);
-    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    ret = AippParamsCheck(aippDynamicSet, socVersion);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     //the second batch, enable scf, scfOutputSizeW/scfInputSizeW is within [1/16,16]
     ret = aclmdlSetAIPPScfParams(aippDynamicSet, 1, 20, 20, 1000, 100, 1);
-    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    ret = AippParamsCheck(aippDynamicSet, socVersion);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     //the second batch, enable scf, scfOutputSizeH/scfInputSizeH在[1/16,16]
     ret = aclmdlSetAIPPScfParams(aippDynamicSet, 1, 20, 20, 100, 1000, 1);
-    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    ret = AippParamsCheck(aippDynamicSet, socVersion);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     //the second batch, disable crop, enable scf，scfInputSizeW==srcImageSizeW，scfInputSizeH==srcImageSizeH
     ret = aclmdlSetAIPPCropParams(aippDynamicSet, 0, 0, 0, 20, 20, 1);
     ret = aclmdlSetAIPPScfParams(aippDynamicSet, 1, 10, 20, 100, 100, 1);
-    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    ret = AippParamsCheck(aippDynamicSet, socVersion);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     //the first batch aippOutputH and aippOutputW is 120,120，祎he second batch aippOutputH and aippOutputW is100,100
     ret = aclmdlSetAIPPCropParams(aippDynamicSet, 0, 0, 0, 20, 20, 1);
     ret = aclmdlSetAIPPScfParams(aippDynamicSet, 1, 224, 224, 100, 100, 1);
-    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    ret = AippParamsCheck(aippDynamicSet, socVersion);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     //aipp output size by ACL is 120,120, aipp output size in the model is 100,100
     ret = aclmdlSetAIPPScfParams(aippDynamicSet, 1, 224, 224, 120, 120, 1);
-    ret = AippParamsCheck(aippDynamicSet, socVersion, 100, 100, true);
-    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
-
-    //model is old
-    ret = aclmdlSetAIPPScfParams(aippDynamicSet, 1, 224, 224, 120, 120, 1);
-    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, false);
-
-    ret = aclmdlSetAIPPScfParams(aippDynamicSet, 1, 224, 224, 120, 120, 1);
-    ret = AippParamsCheck(aippDynamicSet, socVersion, 120, 120, true);
+    ret = AippParamsCheck(aippDynamicSet, socVersion);
+    EXPECT_EQ(ret, ACL_SUCCESS);
 
     //after padding,mini/1951:aippOutputW <= 1080;ES/CS:aippOutputW <= 4096
     (void)aclmdlSetAIPPSrcImageSize(aippDynamicSet, 4096, 4096);
@@ -1720,21 +1713,21 @@ TEST_F(UTEST_ACL_Model, AippParamsCheck)
     ret = aclmdlSetAIPPPaddingParams(aippDynamicSet, 1, 10, 10, 10, 10, 1);
     ret = AippParamsCheck(aippDynamicSet, "Ascend310", 100, 100, true);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
-    ret = AippParamsCheck(aippDynamicSet, "Hi3796CV300ES", 100, 100, true);
+    ret = AippParamsCheck(aippDynamicSet, "Hi3796CV300ES");
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     ret = aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_YUV420SP_U8);
     ret = aclmdlSetAIPPCropParams(aippDynamicSet, 1, 4, 2, 221, 221, 0);
-    ret = AippParamsCheck(aippDynamicSet, "Hi3796CV300ES", 100, 100, true);
+    ret = AippParamsCheck(aippDynamicSet, "Hi3796CV300ES");
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     ret = aclmdlSetAIPPInputFormat(aippDynamicSet, ACL_YUV422SP_U8);
     ret = aclmdlSetAIPPCropParams(aippDynamicSet, 1, 4, 2, 221, 221, 0);
-    ret = AippParamsCheck(aippDynamicSet, "Hi3796CV300ES", 100, 100, true);
+    ret = AippParamsCheck(aippDynamicSet, "Hi3796CV300ES");
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     ret = aclmdlSetAIPPCropParams(aippDynamicSet, 1, 3, 2, 221, 221, 0);
-    ret = AippParamsCheck(aippDynamicSet, "Hi3796CV300ES", 100, 100, true);
+    ret = AippParamsCheck(aippDynamicSet, "Hi3796CV300ES");
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     ret = aclmdlDestroyAIPP(aippDynamicSet);
