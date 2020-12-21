@@ -273,6 +273,7 @@ Status aclStub::GetOpAttr(uint32_t model_id, const std::string &op_name, const s
 Status aclStub::GetAIPPInfo(uint32_t model_id, uint32_t index, AippConfigInfo &aipp_params)
 {
     aipp_params.input_format = 1;
+    aipp_params.related_input_rank = 0;
     return SUCCESS;
 }
 
