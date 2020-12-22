@@ -843,6 +843,7 @@ static aclError GetAndCheckAippOutputShape(uint32_t modelId, const aclmdlDesc &m
     int32_t aippOutputW = 0;
     int32_t aippOutputH = 0;
     int64_t batchSize = static_cast<int64_t>(aippParmsSet->batchSize);
+    ACL_LOG_ERROR("related input rank %zu, model input size %zu.", index, modelDesc.inputDesc.size());
     if (index >= modelDesc.inputDesc.size()) {
         ACL_LOG_INNER_ERROR("[Check][Params]index[%zu] can not greater than or equal to tensor "
             "size[%zu]", index, modelDesc.inputDesc.size());
