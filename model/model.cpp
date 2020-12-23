@@ -402,9 +402,6 @@ aclError aclmdlGetDesc(aclmdlDesc *modelDesc, uint32_t modelId)
         ge::Shape shapeV2 = inputDescV2[i].GetShape();
         tensorDesc.dimsV2 = shapeV2.GetDims();
         inputDesc[i].GetShapeRange(tensorDesc.shapeRanges);
-        if (tensorDesc.shapeRanges.size() != 0) {
-            ACL_LOG_ERROR("the %zu input tensor has shape range.", i);
-        }
         modelDesc->inputDesc.push_back(tensorDesc);
     }
 
