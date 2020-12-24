@@ -2150,6 +2150,8 @@ TEST_F(UTEST_ACL_Model, aclmdlSetInputAIPPTest01)
     aippDynamicSet->aippParms.srcImageSizeW = 1;
     aippDynamicSet->aippParms.srcImageSizeH = 511373560;
     aippDynamicSet->batchSize = 1;
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetModelDescInfo(_, _,_,_))
+        .WillRepeatedly(Invoke((GetModelDescInfo_Invoke)));
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetAippType(_, _,_,_))
         .WillRepeatedly(Invoke(GetAippTypeSuccessInvoke));
     aclError ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
@@ -2172,6 +2174,8 @@ TEST_F(UTEST_ACL_Model, aclmdlSetInputAIPPTest02)
     aippDynamicSet->aippParms.srcImageSizeW = 1;
     aippDynamicSet->aippParms.srcImageSizeH = 2;
     aclmdlDataset *dataset = aclmdlCreateDataset();
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetModelDescInfo(_, _,_,_))
+        .WillRepeatedly(Invoke((GetModelDescInfo_Invoke)));
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetAippType(_, _,_,_))
         .WillRepeatedly(Invoke(GetAippTypeSuccessInvoke));
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetAllAippInputOutputDims(_, _, _, _))

@@ -765,8 +765,8 @@ TEST_F(JpegTest, acldvppJpegPredictDecSize)
     const void *data;
     uint32_t dataSize;
     acldvppPixelFormat outputPixelFormat;
-    uint32_t *size;
+    uint32_t size;
 
-    aclError ret = acldvppJpegPredictDecSize(data, dataSize, outputPixelFormat, size);
+    aclError ret = acldvppJpegPredictDecSize(data, dataSize, outputPixelFormat, &size);
     EXPECT_NE(ret, ACL_SUCCESS);
 }
