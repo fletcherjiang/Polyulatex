@@ -274,6 +274,7 @@ Status aclStub::GetAIPPInfo(uint32_t model_id, uint32_t index, AippConfigInfo &a
 {
     aipp_params.input_format = 1;
     aipp_params.related_input_rank = 0;
+    aipp_params.max_src_image_size = 1207959552;
     return SUCCESS;
 }
 
@@ -467,9 +468,6 @@ std::map<string, GeAttrValue> g_geAttrMap;
 
     Status GeExecutor::GetAIPPInfo(uint32_t model_id, uint32_t index, AippConfigInfo &aipp_params)
     {
-        aipp_params.input_format = 1;
-        aipp_params.related_input_rank = 0;
-        aipp_params.max_src_image_size = 1207959552;
         return MockFunctionTest::aclStubInstance().GetAIPPInfo(model_id, index, aipp_params);
     }
 
