@@ -755,8 +755,8 @@ TEST_F(JpegTest, acldvppJpegPredictEncSize)
 {
     acldvppPicDesc *inputDesc = nullptr;
     acldvppJpegeConfig *config = nullptr;
-    uint32_t *size;
-    aclError ret = acldvppJpegPredictEncSize(inputDesc, config, size);
+    uint32_t size;
+    aclError ret = acldvppJpegPredictEncSize(inputDesc, config, &size);
     EXPECT_NE(ret, ACL_SUCCESS);
 }
 
