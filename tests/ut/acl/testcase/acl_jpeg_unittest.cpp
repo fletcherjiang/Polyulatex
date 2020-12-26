@@ -762,7 +762,7 @@ TEST_F(JpegTest, acldvppJpegPredictEncSize)
 
 TEST_F(JpegTest, acldvppJpegPredictDecSize)
 {
-    const void *data;
+    const void *data = nullptr;
     uint32_t dataSize;
     acldvppPixelFormat outputPixelFormat;
     uint32_t size;
