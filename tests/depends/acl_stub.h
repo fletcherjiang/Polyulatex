@@ -79,6 +79,8 @@ public:
     virtual graphStatus GetOpsTypeList(std::vector<ge::AscendString> &all_ops);
     virtual Status GetModelDescInfo(uint32_t modelId, std::vector<TensorDesc>& inputDesc,
                                  std::vector<TensorDesc>& outputDesc, bool new_model_desc);
+    virtual graphStatus GetShapeRange(std::vector<std::pair<int64_t,int64_t>> &range);
+    virtual Format GetFormat();
     virtual Status GetDynamicBatchInfo(uint32_t model_id, std::vector<std::vector<int64_t>> &batch_info,
                                     int32_t &dynamic_type);
     virtual Status LoadModelFromData(uint32_t &model_id, const ModelData &modelData,
@@ -260,6 +262,8 @@ public:
     MOCK_METHOD1(GetOpsTypeList, graphStatus(std::vector<ge::AscendString> &all_ops));
     MOCK_METHOD4(GetModelDescInfo, Status(uint32_t modelId, std::vector<TensorDesc>& inputDesc,
                 std::vector<TensorDesc>& outputDesc, bool new_model_desc));
+    MOCK_METHOD1(GetShapeRange, graphStatus(std::vector<std::pair<int64_t,int64_t>> &range));
+    MOCK_METHOD0(GetFormat, Format());
     MOCK_METHOD3(GetDynamicBatchInfo, Status(uint32_t model_id, std::vector<std::vector<int64_t>> &batch_info, int32_t &dynamic_type));
     MOCK_METHOD6(LoadModelFromData, Status(uint32_t &model_id, const ModelData &modelData,
                                 void *dev_ptr, size_t memsize, void *weight_ptr, size_t weightsize));

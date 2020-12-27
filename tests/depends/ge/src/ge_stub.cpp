@@ -169,6 +169,17 @@ Status aclStub::GetModelDescInfo(uint32_t modelId, std::vector<TensorDesc>& inpu
     return SUCCESS;
 }
 
+graphStatus aclStub::GetShapeRange(std::vector<std::pair<int64_t,int64_t>> &range)
+{
+    return 0;
+}
+
+Format aclStub::GetFormat()
+{
+    Format format = FORMAT_NCHW;
+    return format;
+}
+
 Status aclStub::GetDynamicBatchInfo(uint32_t model_id, std::vector<std::vector<int64_t>> &batch_info,
                                     int32_t &dynamic_type)
 {
@@ -534,8 +545,7 @@ std::map<string, GeAttrValue> g_geAttrMap;
 
     Format TensorDesc::GetFormat() const
     {
-        Format format = FORMAT_NCHW;
-        return format;
+        return MockFunctionTest::aclStubInstance().GetFormat();
     }
 
     DataType TensorDesc::GetDataType() const
@@ -553,7 +563,7 @@ std::map<string, GeAttrValue> g_geAttrMap;
 
     graphStatus TensorDesc::GetShapeRange(std::vector<std::pair<int64_t,int64_t>> &range) const
     {
-        return 0;
+        return MockFunctionTest::aclStubInstance().GetShapeRange(range);
     }
 
     const char* AscendString::GetString() const
