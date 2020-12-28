@@ -2200,6 +2200,52 @@ TEST_F(UTEST_ACL_Model, aclmdlSetInputAIPPTest02)
     aclmdlDestroyDataset(dataset);
 }
 
+TEST_F(UTEST_ACL_Model, aclmdlSetInputAIPPTest03)
+{
+    uint32_t batchNumber = 1;
+    aclmdlAIPP *aippDynamicSet = aclmdlCreateAIPP(batchNumber);
+    aclmdlDataset *dataset = aclmdlCreateDataset();
+    aippDynamicSet->aippParms.inputFormat = CCE_YUV400_U8;
+    aippDynamicSet->aippParms.srcImageSizeW = 1;
+    aippDynamicSet->aippParms.srcImageSizeH = 511373560;
+    aippDynamicSet->batchSize = 1;
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetModelDescInfo(_, _,_,_))
+        .WillRepeatedly(Invoke((GetModelDescInfo_Invoke)));
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetAippType(_, _,_,_))
+        .WillRepeatedly(Invoke(GetAippTypeSuccessInvoke));
+    aclError ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
+    EXPECT_NE(ret, ACL_SUCCESS);
+
+    aippDynamicSet->aippParms.srcImageSizeH = 1;
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetOrigInputInfo(_, _, _))
+        .WillOnce(Return(FAILED));
+    ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
+    EXPECT_NE(ret, ACL_SUCCESS);
+    aclmdlDestroyAIPP(aippDynamicSet);
+    aclmdlDestroyDataset(dataset);
+}
+
+TEST_F(UTEST_ACL_Model, aclmdlSetInputAIPPTest04)
+{
+    uint32_t batchNumber = 1;
+    aclmdlAIPP *aippDynamicSet = aclmdlCreateAIPP(batchNumber);
+    aclmdlDataset *dataset = aclmdlCreateDataset();
+    aippDynamicSet->aippParms.inputFormat = CCE_YUV400_U8;
+    aippDynamicSet->aippParms.srcImageSizeW = 1;
+    aippDynamicSet->aippParms.srcImageSizeH = 1;
+    aippDynamicSet->batchSize = 1;
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetModelDescInfo(_, _,_,_))
+        .WillRepeatedly(Invoke((GetModelDescInfo_Invoke)));
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetAippType(_, _,_,_))
+        .WillRepeatedly(Invoke(GetAippTypeSuccessInvoke));
+
+    aclError ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
+    EXPECT_NE(ret, ACL_SUCCESS);
+
+    aclmdlDestroyAIPP(aippDynamicSet);
+    aclmdlDestroyDataset(dataset);
+}
+
 TEST_F(UTEST_ACL_Model, aclmdlSetInputAIPPWithDynamicShapeTest01)
 {
     uint32_t batchNumber = 1;
@@ -2327,7 +2373,7 @@ TEST_F(UTEST_ACL_Model, aclmdlGetFirstAippInfoTest)
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetAllAippInputOutputDims(_, _, _, _))
         .WillOnce(Return(SUCCESS));
     ret = aclmdlGetFirstAippInfo(modelId, index, &aippInfo);
-    EXPECT_NE(ret, ACL_SUCCESS);
+    EXPECT_EQ(ret, ACL_SUCCESS);
 }
 
 extern aclError AippScfSizeCheck(const aclmdlAIPP *aippParmsSet, int32_t batchIndex);

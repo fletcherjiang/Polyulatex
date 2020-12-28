@@ -288,15 +288,11 @@ Status aclStub::GetAIPPInfo(uint32_t model_id, uint32_t index, AippConfigInfo &a
 
 Status aclStub::GetBatchInfoSize(uint32_t model_id, size_t &shape_count)
 {
-    shape_count = 2;
     return SUCCESS;
 }
 
 Status aclStub::GetOrigInputInfo(uint32_t model_id, uint32_t index, OriginInputInfo &origOutputInfo)
 {
-    origOutputInfo.format = static_cast<Format>(1);
-    origOutputInfo.data_type = static_cast<DataType>(4);
-    origOutputInfo.dim_num = 4;
     return SUCCESS;
 }
 
@@ -304,17 +300,6 @@ Status aclStub::GetAllAippInputOutputDims(uint32_t model_id, uint32_t index,
                                         std::vector<InputOutputDims> &input_dims,
                                         std::vector<InputOutputDims> &output_dims)
 {
-    InputOutputDims inputDims1;
-    inputDims1.dim_num = 4;
-    inputDims1.dims.push_back(1);
-    inputDims1.dims.push_back(224);
-    inputDims1.dims.push_back(224);
-    inputDims1.dims.push_back(3);
-    InputOutputDims inputDims2;
-    input_dims.push_back(inputDims1);
-    input_dims.push_back(inputDims2);
-    output_dims.push_back(inputDims1);
-    output_dims.push_back(inputDims2);
     return SUCCESS;
 }
 
@@ -489,11 +474,15 @@ std::map<string, GeAttrValue> g_geAttrMap;
 
     Status GeExecutor::GetBatchInfoSize(uint32_t model_id, size_t &shape_count)
     {
+        shape_count = 1;
         return MockFunctionTest::aclStubInstance().GetBatchInfoSize(model_id, shape_count);
     }
 
     Status GeExecutor::GetOrigInputInfo(uint32_t model_id, uint32_t index, OriginInputInfo &origOutputInfo)
     {
+        origOutputInfo.format = static_cast<Format>(1);
+        origOutputInfo.data_type = static_cast<DataType>(4);
+        origOutputInfo.dim_num = 4;
         return MockFunctionTest::aclStubInstance().GetOrigInputInfo(model_id, index, origOutputInfo);
     }
 
@@ -501,6 +490,14 @@ std::map<string, GeAttrValue> g_geAttrMap;
                                                  std::vector<InputOutputDims> &input_dims,
                                                  std::vector<InputOutputDims> &output_dims)
     {
+        InputOutputDims inputDims1;
+        inputDims1.dim_num = 4;
+        inputDims1.dims.push_back(1);
+        inputDims1.dims.push_back(224);
+        inputDims1.dims.push_back(224);
+        inputDims1.dims.push_back(3);
+        input_dims.push_back(inputDims1);
+        output_dims.push_back(inputDims1);
         return MockFunctionTest::aclStubInstance().GetAllAippInputOutputDims(model_id, index, input_dims, output_dims);
     }
 
