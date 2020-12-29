@@ -885,11 +885,12 @@ static aclError GetAndCheckAippOutputShape(uint32_t modelId, const aclmdlDesc &m
         } else {
             ACL_LOG_INFO("cant not get model H W N, current used model is old");
         }
-    } else {
-        aclFormat format = modelDesc.inputDesc[index].format;
-        aclError ret = CheckAippOutputShapeRange(format, shapeRanges, aippOutputW, aippOutputH, batchSize);
-        return ret;
+        return ACL_SUCCESS;
     }
+
+    aclFormat format = modelDesc.inputDesc[index].format;
+    aclError ret = CheckAippOutputShapeRange(format, shapeRanges, aippOutputW, aippOutputH, batchSize);
+    return ret;
 }
 
 static aclError GetAndCheckAippParams(uint32_t modelId, const aclmdlDesc &modelDesc,
