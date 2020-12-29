@@ -865,10 +865,10 @@ static aclError GetAndCheckAippOutputShape(uint32_t modelId, const aclmdlDesc &m
         }
 
         if (isGetDim) {
-            ACL_LOG_INFO("relatedInputRank[%u], mdlOriH[%ld], mdlOriW[%ld], mdlOriN[%ld]",
+            ACL_LOG_INFO("relatedInputRank[%zu], mdlOriH[%ld], mdlOriW[%ld], mdlOriN[%ld]",
                 index, mdlOriH, mdlOriW, mdlOriN);
             // check batchSize
-            if ((mdlOriN != batchSize) || (aippOutputW != mdlOriW) || (aippOutputH != mdlOriH)) {
+            if ((batchSize != mdlOriN) || (aippOutputW != mdlOriW) || (aippOutputH != mdlOriH)) {
                 ACL_LOG_ERROR("[Check][Params]aipp output shape set by ACL must be equal to aipp output "
                     "shape in the model! AclAippBatchSize = %ld, AclAippOutputW = %ld, AclAippOutputH = %ld, "
                     "ModelAippBatchSize = %ld, ModelAippOutputW = %ld, ModelAippOutputH = %ld.",
