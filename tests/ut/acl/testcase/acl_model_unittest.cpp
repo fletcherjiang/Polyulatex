@@ -2246,7 +2246,7 @@ TEST_F(UTEST_ACL_Model, aclmdlSetInputAIPPTest04)
     aclmdlDestroyDataset(dataset);
 }
 
-TEST_F(UTEST_ACL_Model, aclmdlSetInputAIPPWithDynamicShapeTest01)
+TEST_F(UTEST_ACL_Model, aclmdlSetInputAIPPWithDynamicShapeTest)
 {
     uint32_t batchNumber = 1;
     aclmdlAIPP *aippDynamicSet = aclmdlCreateAIPP(batchNumber);
@@ -2263,63 +2263,6 @@ TEST_F(UTEST_ACL_Model, aclmdlSetInputAIPPWithDynamicShapeTest01)
         .WillRepeatedly(Invoke(GetAippTypeSuccessInvoke));
 
     aclError ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
-    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
-
-    aippDynamicSet->aippParms.srcImageSizeW = 17;
-    aippDynamicSet->aippParms.srcImageSizeH = 2;
-    ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
-    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
-
-    aippDynamicSet->aippParms.srcImageSizeW = 1;
-    aippDynamicSet->aippParms.srcImageSizeH = 20;
-    ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
-    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
-
-    aippDynamicSet->batchSize = 20;
-    aippDynamicSet->aippParms.srcImageSizeW = 1;
-    aippDynamicSet->aippParms.srcImageSizeH = 2;
-    ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
-    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
-
-    aclmdlDestroyAIPP(aippDynamicSet);
-    aclmdlDestroyDataset(dataset);
-}
-
-TEST_F(UTEST_ACL_Model, aclmdlSetInputAIPPWithDynamicShapeTest02)
-{
-    uint32_t batchNumber = 1;
-    aclmdlAIPP *aippDynamicSet = aclmdlCreateAIPP(batchNumber);
-    aippDynamicSet->aippParms.inputFormat = CCE_YUV420SP_U8;
-    aippDynamicSet->aippParms.srcImageSizeW = 1;
-    aippDynamicSet->aippParms.srcImageSizeH = 2;
-    aclmdlDataset *dataset = aclmdlCreateDataset();
-
-    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetModelDescInfo(_, _,_,_))
-        .WillRepeatedly(Invoke((GetModelDescInfo_Invoke)));
-    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetShapeRange(_))
-        .WillRepeatedly(Invoke((GetShapeRange_Invoke)));
-    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetAippType(_, _,_,_))
-        .WillRepeatedly(Invoke(GetAippTypeSuccessInvoke));
-    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetFormat())
-        .WillRepeatedly(Return(ge::FORMAT_NHWC));
-
-    aclError ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
-    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
-
-    aippDynamicSet->aippParms.srcImageSizeW = 17;
-    aippDynamicSet->aippParms.srcImageSizeH = 2;
-    ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
-    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
-
-    aippDynamicSet->aippParms.srcImageSizeW = 1;
-    aippDynamicSet->aippParms.srcImageSizeH = 20;
-    ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
-    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
-
-    aippDynamicSet->batchSize = 20;
-    aippDynamicSet->aippParms.srcImageSizeW = 1;
-    aippDynamicSet->aippParms.srcImageSizeH = 2;
-    ret = aclmdlSetInputAIPP(1, dataset, 0, aippDynamicSet);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     aclmdlDestroyAIPP(aippDynamicSet);
