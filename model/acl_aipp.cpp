@@ -747,96 +747,6 @@ static aclError GetModelOriDims(uint32_t modelId, uint32_t relatedInputRank, boo
     return ACL_SUCCESS;
 }
 
-static bool IsInRange(int64_t start, int64_t end, int64_t val)
-{
-    if (val < start) {
-        return false;
-    } else if (end == UNKNOW_DIM) {
-        return true;
-    } else if (val > end) {
-        return false;
-    }
-
-    return true;
-}
-
-static aclError CheckAippOutputShapeRange(aclFormat format, const std::vector<std::pair<int64_t, int64_t>> &shapeRanges,
-    int32_t aippOutputW, int32_t aippOutputH, int64_t batchSize)
-{
-    switch (format) {
-        case ACL_FORMAT_NCHW:
-            if (!IsInRange(shapeRanges[0].first, shapeRanges[0].second, batchSize)) {
-                ACL_LOG_ERROR("[Check][Params]the dynamic aipp batchSize[%ld] is not in "
-                    "model origin batchSize range [%ld, %ld]", batchSize, shapeRanges[0].first, shapeRanges[0].second);
-                std::string errMsg = acl::AclErrorLogManager::FormatStr("the dynamic aipp batchSize[%ld] is not in "
-                    "model origin batchSize range[%ld, %ld]", batchSize, shapeRanges[0].first, shapeRanges[0].second);
-                acl::AclErrorLogManager::ReportInputError(acl::INVALID_AIPP_MSG,
-                    std::vector<std::string>({"param", "reason"}),
-                    std::vector<std::string>({"dynamic aipp batchSize", errMsg}));
-                return ACL_ERROR_INVALID_PARAM;
-            }
-            if (!IsInRange(shapeRanges[2].first, shapeRanges[2].second, aippOutputH)) {
-                ACL_LOG_ERROR("[Check][Params]the dynamic aipp outputH[%ld] is not in "
-                    "model origin inputH range[%ld, %ld]", aippOutputH, shapeRanges[2].first, shapeRanges[2].second);
-                std::string errMsg = acl::AclErrorLogManager::FormatStr("the dynamic aipp outputH[%ld] is not in "
-                    "model origin inputH range[%ld, %ld]", aippOutputH, shapeRanges[2].first, shapeRanges[2].second);
-                acl::AclErrorLogManager::ReportInputError(acl::INVALID_AIPP_MSG,
-                    std::vector<std::string>({"param", "reason"}),
-                    std::vector<std::string>({"dynamic aipp outputH", errMsg}));
-                return ACL_ERROR_INVALID_PARAM;
-            }
-            if (!IsInRange(shapeRanges[3].first, shapeRanges[3].second, aippOutputW)) {
-                ACL_LOG_ERROR("[Check][Params]the dynamic aipp outputW[%ld] is not in "
-                    "model origin inputW range[%ld, %ld]", aippOutputH, shapeRanges[3].first, shapeRanges[3].second);
-                std::string errMsg = acl::AclErrorLogManager::FormatStr("the dynamic aipp outputW[%ld] is not in "
-                    "model origin inputW range[%ld, %ld]", aippOutputW, shapeRanges[3].first, shapeRanges[3].second);
-                acl::AclErrorLogManager::ReportInputError(acl::INVALID_AIPP_MSG,
-                    std::vector<std::string>({"param", "reason"}),
-                    std::vector<std::string>({"dynamic aipp outputW", errMsg}));
-                return ACL_ERROR_INVALID_PARAM;
-            }
-            break;
-        case ACL_FORMAT_NHWC:
-            if (!IsInRange(shapeRanges[0].first, shapeRanges[0].second, batchSize)) {
-                ACL_LOG_ERROR("[Check][Params]the dynamic aipp batchSize[%ld] is not in "
-                    "model origin batchSize range [%ld, %ld]", batchSize, shapeRanges[0].first, shapeRanges[0].second);
-                std::string errMsg = acl::AclErrorLogManager::FormatStr("the dynamic aipp batchSize[%ld] is not in "
-                    "model origin batchSize range[%ld, %ld]", batchSize, shapeRanges[0].first, shapeRanges[0].second);
-                acl::AclErrorLogManager::ReportInputError(acl::INVALID_AIPP_MSG,
-                    std::vector<std::string>({"param", "reason"}),
-                    std::vector<std::string>({"dynamic aipp batchSize", errMsg}));
-                return ACL_ERROR_INVALID_PARAM;
-            }
-            if (!IsInRange(shapeRanges[1].first, shapeRanges[1].second, aippOutputH)) {
-                ACL_LOG_ERROR("[Check][Params]the dynamic aipp outputH[%ld] is not in "
-                    "model origin inputH range[%ld, %ld]", aippOutputH, shapeRanges[1].first, shapeRanges[1].second);
-                std::string errMsg = acl::AclErrorLogManager::FormatStr("the dynamic aipp outputH[%ld] is not in "
-                    "model origin inputH range[%ld, %ld]", aippOutputH, shapeRanges[1].first, shapeRanges[1].second);
-                acl::AclErrorLogManager::ReportInputError(acl::INVALID_AIPP_MSG,
-                    std::vector<std::string>({"param", "reason"}),
-                    std::vector<std::string>({"dynamic aipp outputH", errMsg}));
-                return ACL_ERROR_INVALID_PARAM;
-            }
-            if (!IsInRange(shapeRanges[2].first, shapeRanges[2].second, aippOutputW)) {
-                ACL_LOG_ERROR("[Check][Params]the dynamic aipp outputW[%ld] is not in "
-                    "model origin inputW range[%ld, %ld]", aippOutputH, shapeRanges[2].first, shapeRanges[2].second);
-                std::string errMsg = acl::AclErrorLogManager::FormatStr("the dynamic aipp outputW[%ld] is not in "
-                    "model origin inputW range[%ld, %ld]", aippOutputW, shapeRanges[2].first, shapeRanges[2].second);
-                acl::AclErrorLogManager::ReportInputError(acl::INVALID_AIPP_MSG,
-                    std::vector<std::string>({"param", "reason"}),
-                    std::vector<std::string>({"dynamic aipp outputW", errMsg}));
-                return ACL_ERROR_INVALID_PARAM;
-            }
-            break;
-        default :
-            ACL_LOG_WARN("the model origin format[%d] is invalid, only support ACL_FORMAT_NHWC or ACL_FORMAT_NCHW",
-                static_cast<int32_t>(format));
-            break;
-    }
-
-    return ACL_SUCCESS;
-}
-
 static aclError GetAndCheckAippOutputShape(uint32_t modelId, const aclmdlDesc &modelDesc,
     size_t index, const aclmdlAIPP *aippParmsSet)
 {
@@ -885,12 +795,9 @@ static aclError GetAndCheckAippOutputShape(uint32_t modelId, const aclmdlDesc &m
         } else {
             ACL_LOG_INFO("cant not get model H W N, current used model is old");
         }
-        return ACL_SUCCESS;
     }
 
-    aclFormat format = modelDesc.inputDesc[index].format;
-    aclError ret = CheckAippOutputShapeRange(format, shapeRanges, aippOutputW, aippOutputH, batchSize);
-    return ret;
+    return ACL_SUCCESS;
 }
 
 static aclError GetAndCheckAippParams(uint32_t modelId, const aclmdlDesc &modelDesc,
