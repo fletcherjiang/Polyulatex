@@ -764,6 +764,7 @@ static aclError GetAndCheckAippOutputShape(uint32_t modelId, const aclmdlDesc &m
         return result;
     }
     if (shapeRanges.empty()) {
+        ACL_LOG_INFO("check aipp parameters of static shape model[%u]", modelId);
         bool isGetDim = false;
         int64_t mdlOriH = 0;
         int64_t mdlOriW = 0;
@@ -795,6 +796,8 @@ static aclError GetAndCheckAippOutputShape(uint32_t modelId, const aclmdlDesc &m
         } else {
             ACL_LOG_INFO("cant not get model H W N, current used model is old");
         }
+    } else {
+        ACL_LOG_INFO("check aipp parameters of dynamic shape model[%u]", modelId);
     }
 
     return ACL_SUCCESS;
