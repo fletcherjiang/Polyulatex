@@ -750,8 +750,6 @@ static aclError GetModelOriDims(uint32_t modelId, uint32_t relatedInputRank, boo
 static aclError GetAndCheckAippOutputShape(uint32_t modelId, const aclmdlDesc &modelDesc,
     size_t index, const aclmdlAIPP *aippParmsSet)
 {
-    int32_t aippOutputW = 0;
-    int32_t aippOutputH = 0;
     int64_t batchSize = static_cast<int64_t>(aippParmsSet->batchSize);
     if (index >= modelDesc.inputDesc.size()) {
         ACL_LOG_INNER_ERROR("[Check][Params]index[%zu] can not greater than or equal to tensor "
@@ -759,45 +757,48 @@ static aclError GetAndCheckAippOutputShape(uint32_t modelId, const aclmdlDesc &m
         return ACL_ERROR_INVALID_PARAM;
     }
     auto &shapeRanges = modelDesc.inputDesc[index].shapeRanges;
+    if (!shapeRanges.empty()) {
+        ACL_LOG_INFO("check aipp parameters of dynamic shape model[%u]", modelId);
+        return ACL_SUCCESS;
+    }
+
+    ACL_LOG_INFO("check aipp parameters of static shape model[%u]", modelId);
+    bool isGetDim = false;
+    int32_t aippOutputW = 0;
+    int32_t aippOutputH = 0;
+    int64_t mdlOriH = 0;
+    int64_t mdlOriW = 0;
+    int64_t mdlOriN = 0;
     aclError result = GetAippOutputHW(aippParmsSet, 0, GetSocVersion(), aippOutputW, aippOutputH);
     if (result != ACL_SUCCESS) {
         return result;
     }
-    if (shapeRanges.empty()) {
-        ACL_LOG_INFO("check aipp parameters of static shape model[%u]", modelId);
-        bool isGetDim = false;
-        int64_t mdlOriH = 0;
-        int64_t mdlOriW = 0;
-        int64_t mdlOriN = 0;
-        aclError mdlRet = GetModelOriDims(modelId, index, isGetDim, mdlOriH, mdlOriW, mdlOriN);
-        if (mdlRet != ACL_SUCCESS) {
-            ACL_LOG_INNER_ERROR("[Get][ModelOriDims]get model original dims fail");
-            return mdlRet;
-        }
+    aclError mdlRet = GetModelOriDims(modelId, index, isGetDim, mdlOriH, mdlOriW, mdlOriN);
+    if (mdlRet != ACL_SUCCESS) {
+        ACL_LOG_INNER_ERROR("[Get][ModelOriDims]get model original dims fail");
+        return mdlRet;
+    }
 
-        if (isGetDim) {
-            ACL_LOG_INFO("relatedInputRank[%zu], mdlOriH[%ld], mdlOriW[%ld], mdlOriN[%ld]",
-                index, mdlOriH, mdlOriW, mdlOriN);
-            // check batchSize
-            if ((batchSize != mdlOriN) || (aippOutputW != mdlOriW) || (aippOutputH != mdlOriH)) {
-                ACL_LOG_ERROR("[Check][Params]aipp output shape set by ACL must be equal to aipp output "
-                    "shape in the model! AclAippBatchSize = %ld, AclAippOutputW = %ld, AclAippOutputH = %ld, "
-                    "ModelAippBatchSize = %ld, ModelAippOutputW = %ld, ModelAippOutputH = %ld.",
-                    batchSize, aippOutputW, aippOutputH, mdlOriN, mdlOriW, mdlOriH);
-                std::string errMsg = acl::AclErrorLogManager::FormatStr("aipp output shape set by ACL "
-                    "must be equal to aipp output shape in the model! AclAippBatchSize = %ld, AclAippOutputW = %ld, "
-                    "AclAippOutputH = %ld, ModelAippBatchSize = %ld, ModelAippOutputW = %ld, ModelAippOutputH = %ld.",
-                    batchSize, aippOutputW, aippOutputH, mdlOriN, mdlOriW, mdlOriH);
-                acl::AclErrorLogManager::ReportInputError(acl::INVALID_AIPP_MSG,
-                    std::vector<std::string>({"param", "reason"}),
-                    std::vector<std::string>({"dynamic aipp shape", errMsg}));
-                return ACL_ERROR_INVALID_PARAM;
-            }
-        } else {
-            ACL_LOG_INFO("cant not get model H W N, current used model is old");
+    if (isGetDim) {
+        ACL_LOG_INFO("relatedInputRank[%zu], mdlOriH[%ld], mdlOriW[%ld], mdlOriN[%ld]",
+            index, mdlOriH, mdlOriW, mdlOriN);
+        // check batchSize
+        if ((batchSize != mdlOriN) || (aippOutputW != mdlOriW) || (aippOutputH != mdlOriH)) {
+            ACL_LOG_ERROR("[Check][Params]aipp output shape set by ACL must be equal to aipp output "
+                "shape in the model! AclAippBatchSize = %ld, AclAippOutputW = %ld, AclAippOutputH = %ld, "
+                "ModelAippBatchSize = %ld, ModelAippOutputW = %ld, ModelAippOutputH = %ld.",
+                batchSize, aippOutputW, aippOutputH, mdlOriN, mdlOriW, mdlOriH);
+            std::string errMsg = acl::AclErrorLogManager::FormatStr("aipp output shape set by ACL "
+                "must be equal to aipp output shape in the model! AclAippBatchSize = %ld, AclAippOutputW = %ld, "
+                "AclAippOutputH = %ld, ModelAippBatchSize = %ld, ModelAippOutputW = %ld, ModelAippOutputH = %ld.",
+                batchSize, aippOutputW, aippOutputH, mdlOriN, mdlOriW, mdlOriH);
+            acl::AclErrorLogManager::ReportInputError(acl::INVALID_AIPP_MSG,
+                std::vector<std::string>({"param", "reason"}),
+                std::vector<std::string>({"dynamic aipp shape", errMsg}));
+            return ACL_ERROR_INVALID_PARAM;
         }
     } else {
-        ACL_LOG_INFO("check aipp parameters of dynamic shape model[%u]", modelId);
+        ACL_LOG_INFO("cant not get model H W N, current used model is old");
     }
 
     return ACL_SUCCESS;
