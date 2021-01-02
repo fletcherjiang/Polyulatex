@@ -42,7 +42,7 @@
       GraphUtils::DumpGEGraph(sub_graph_func, sub_graph_func_name);                                                \
       GraphUtils::DumpGEGraphToOnnx(*sub_graph_func, sub_graph_func_name);                                         \
     }                                                                                                              \
-  } while (0)
+  } while (false)
 
 namespace ge {
 enum IOType { kIn, kOut };

@@ -36,7 +36,7 @@
       DOMI_LOGE("param[%s] is not a positive number", #size); \
       return PARAM_INVALID;                                   \
     }                                                         \
-  } while (0)
+  } while (false)
 
 #define CHECK_FALSE_EXEC(expr, exec_expr, ...) \
   {                                            \
@@ -63,7 +63,7 @@
   do {                                   \
     const ::ge::Status _status = (expr); \
     if (_status) return _status;         \
-  } while (0)
+  } while (false)
 
 #define GE_RETURN_WITH_LOG_IF_ERROR(expr, ...) \
   do {                                         \
@@ -72,7 +72,7 @@
       DOMI_LOGE(__VA_ARGS__);                  \
       return _status;                          \
     }                                          \
-  } while (0)
+  } while (false)
 
 // check whether the parameter is true. If it is, return FAILED and record the error log
 #define GE_RETURN_WITH_LOG_IF_TRUE(condition, ...) \
@@ -81,7 +81,7 @@
       DOMI_LOGE(__VA_ARGS__);                      \
       return ge::FAILED;                           \
     }                                              \
-  } while (0)
+  } while (false)
 
 // Check if the parameter is false. If yes, return FAILED and record the error log
 #define GE_RETURN_WITH_LOG_IF_FALSE(condition, ...) \
@@ -91,7 +91,7 @@
       DOMI_LOGE(__VA_ARGS__);                       \
       return ge::FAILED;                            \
     }                                               \
-  } while (0)
+  } while (false)
 
 // Checks whether the parameter is true. If so, returns PARAM_INVALID and records the error log
 #define GE_RT_PARAM_INVALID_WITH_LOG_IF_TRUE(condition, ...) \
@@ -100,7 +100,7 @@
       DOMI_LOGE(__VA_ARGS__);                                \
       return ge::PARAM_INVALID;                              \
     }                                                        \
-  } while (0)
+  } while (false)
 
 // Check if the parameter is false. If yes, return PARAM_INVALID and record the error log
 #define GE_RT_PARAM_INVALID_WITH_LOG_IF_FALSE(condition, ...) \
@@ -110,7 +110,7 @@
       DOMI_LOGE(__VA_ARGS__);                                 \
       return ge::PARAM_INVALID;                               \
     }                                                         \
-  } while (0)
+  } while (false)
 
 // Check if the parameter is null. If yes, return PARAM_INVALID and record the error
 #define GE_CHECK_NOTNULL(val)                                                   \
@@ -120,7 +120,7 @@
       DOMI_LOGE("[Check][Param:%s]null is invalid.", #val);                     \
       return ge::PARAM_INVALID;                                                 \
     }                                                                           \
-  } while (0)
+  } while (false)
 
 // Check if the parameter is null. If yes, just return and record the error
 #define GE_CHECK_NOTNULL_JUST_RETURN(val)             \
@@ -129,7 +129,7 @@
       DOMI_LOGE("param[%s] must not be null.", #val); \
       return;                                         \
     }                                                 \
-  } while (0)
+  } while (false)
 
 // Check whether the parameter is null. If so, execute the exec_expr expression and record the error log
 #define GE_CHECK_NOTNULL_EXEC(val, exec_expr)         \
@@ -138,7 +138,7 @@
       DOMI_LOGE("param[%s] must not be null.", #val); \
       exec_expr;                                      \
     }                                                 \
-  } while (0)
+  } while (false)
 
 // Check whether the parameter is null. If yes, return directly and record the error log
 #define GE_RT_VOID_CHECK_NOTNULL(val)                 \
@@ -147,7 +147,7 @@
       DOMI_LOGE("param[%s] must not be null.", #val); \
       return;                                         \
     }                                                 \
-  } while (0)
+  } while (false)
 
 // Check if the parameter is null. If yes, return false and record the error log
 #define GE_RT_FALSE_CHECK_NOTNULL(val)                \
@@ -156,7 +156,7 @@
       DOMI_LOGE("param[%s] must not be null.", #val); \
       return false;                                   \
     }                                                 \
-  } while (0)
+  } while (false)
 
 // Check if the parameter is out of bounds
 #define GE_CHECK_SIZE(size)                          \
@@ -165,7 +165,7 @@
       DOMI_LOGE("param[%s] is out of range", #size); \
       return ge::PARAM_INVALID;                      \
     }                                                \
-  } while (0)
+  } while (false)
 
 // Check if the value on the left is greater than or equal to the value on the right
 #define GE_CHECK_GE(lhs, rhs)                              \
@@ -174,7 +174,7 @@
       DOMI_LOGE("param[%s] is less than[%s]", #lhs, #rhs); \
       return ge::PARAM_INVALID;                            \
     }                                                      \
-  } while (0)
+  } while (false)
 
 // Check if the value on the left is less than or equal to the value on the right
 #define GE_CHECK_LE(lhs, rhs)                                 \
@@ -183,7 +183,7 @@
       DOMI_LOGE("param[%s] is greater than[%s]", #lhs, #rhs); \
       return ge::PARAM_INVALID;                               \
     }                                                         \
-  } while (0)
+  } while (false)
 
 #define GE_DELETE_NEW_SINGLE(var) \
   do {                            \
@@ -191,7 +191,7 @@
       delete var;                 \
       var = nullptr;              \
     }                             \
-  } while (0)
+  } while (false)
 
 #define GE_DELETE_NEW_ARRAY(var) \
   do {                           \
@@ -199,7 +199,7 @@
       delete[] var;              \
       var = nullptr;             \
     }                            \
-  } while (0)
+  } while (false)
 
 #define GE_FREE_RT_LOG(addr)                                        \
   do {                                                              \
@@ -210,7 +210,7 @@
       }                                                             \
       addr = nullptr;                                               \
     }                                                               \
-  } while (0)
+  } while (false)
 
 /**
  * @ingroup domi_common
