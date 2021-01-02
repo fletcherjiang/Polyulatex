@@ -683,7 +683,8 @@ TEST_F(UTEST_ACL_RetrOps, aclfvSearch_002)
         reinterpret_cast<uint32_t *>(tableDataDev),
         reinterpret_cast<float *>(tableDataDev),
         20);
-    aclfvSearchResult *searchRst;
+    aclfvSearchResult search;
+    aclfvSearchResult *searchRst = &search;
     searchRst->searchResult.retCode = 0;
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtStreamCreate(_, _))
         .WillOnce(Return(ACL_ERROR_RT_PARAM_INVALID));

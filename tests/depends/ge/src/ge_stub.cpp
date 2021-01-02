@@ -169,6 +169,17 @@ Status aclStub::GetModelDescInfo(uint32_t modelId, std::vector<TensorDesc>& inpu
     return SUCCESS;
 }
 
+graphStatus aclStub::GetShapeRange(std::vector<std::pair<int64_t,int64_t>> &range)
+{
+    return 0;
+}
+
+Format aclStub::GetFormat()
+{
+    Format format = FORMAT_NCHW;
+    return format;
+}
+
 Status aclStub::GetDynamicBatchInfo(uint32_t model_id, std::vector<std::vector<int64_t>> &batch_info,
                                     int32_t &dynamic_type)
 {
@@ -272,21 +283,16 @@ Status aclStub::GetOpAttr(uint32_t model_id, const std::string &op_name, const s
 
 Status aclStub::GetAIPPInfo(uint32_t model_id, uint32_t index, AippConfigInfo &aipp_params)
 {
-    aipp_params.input_format = 1;
     return SUCCESS;
 }
 
 Status aclStub::GetBatchInfoSize(uint32_t model_id, size_t &shape_count)
 {
-    shape_count = 2;
     return SUCCESS;
 }
 
 Status aclStub::GetOrigInputInfo(uint32_t model_id, uint32_t index, OriginInputInfo &origOutputInfo)
 {
-    origOutputInfo.format = static_cast<Format>(1);
-    origOutputInfo.data_type = static_cast<DataType>(4);
-    origOutputInfo.dim_num = 4;
     return SUCCESS;
 }
 
@@ -294,17 +300,6 @@ Status aclStub::GetAllAippInputOutputDims(uint32_t model_id, uint32_t index,
                                         std::vector<InputOutputDims> &input_dims,
                                         std::vector<InputOutputDims> &output_dims)
 {
-    InputOutputDims inputDims1;
-    inputDims1.dim_num = 4;
-    inputDims1.dims.push_back(1);
-    inputDims1.dims.push_back(224);
-    inputDims1.dims.push_back(224);
-    inputDims1.dims.push_back(3);
-    InputOutputDims inputDims2;
-    input_dims.push_back(inputDims1);
-    input_dims.push_back(inputDims2);
-    output_dims.push_back(inputDims1);
-    output_dims.push_back(inputDims2);
     return SUCCESS;
 }
 
@@ -467,6 +462,8 @@ std::map<string, GeAttrValue> g_geAttrMap;
     Status GeExecutor::GetAIPPInfo(uint32_t model_id, uint32_t index, AippConfigInfo &aipp_params)
     {
         aipp_params.input_format = 1;
+        aipp_params.related_input_rank = 0;
+        aipp_params.max_src_image_size = 150528;
         return MockFunctionTest::aclStubInstance().GetAIPPInfo(model_id, index, aipp_params);
     }
 
@@ -477,11 +474,15 @@ std::map<string, GeAttrValue> g_geAttrMap;
 
     Status GeExecutor::GetBatchInfoSize(uint32_t model_id, size_t &shape_count)
     {
+        shape_count = 1;
         return MockFunctionTest::aclStubInstance().GetBatchInfoSize(model_id, shape_count);
     }
 
     Status GeExecutor::GetOrigInputInfo(uint32_t model_id, uint32_t index, OriginInputInfo &origOutputInfo)
     {
+        origOutputInfo.format = static_cast<Format>(1);
+        origOutputInfo.data_type = static_cast<DataType>(4);
+        origOutputInfo.dim_num = 4;
         return MockFunctionTest::aclStubInstance().GetOrigInputInfo(model_id, index, origOutputInfo);
     }
 
@@ -489,6 +490,14 @@ std::map<string, GeAttrValue> g_geAttrMap;
                                                  std::vector<InputOutputDims> &input_dims,
                                                  std::vector<InputOutputDims> &output_dims)
     {
+        InputOutputDims inputDims1;
+        inputDims1.dim_num = 4;
+        inputDims1.dims.push_back(1);
+        inputDims1.dims.push_back(224);
+        inputDims1.dims.push_back(224);
+        inputDims1.dims.push_back(3);
+        input_dims.push_back(inputDims1);
+        output_dims.push_back(inputDims1);
         return MockFunctionTest::aclStubInstance().GetAllAippInputOutputDims(model_id, index, input_dims, output_dims);
     }
 
@@ -533,8 +542,7 @@ std::map<string, GeAttrValue> g_geAttrMap;
 
     Format TensorDesc::GetFormat() const
     {
-        Format format = FORMAT_NCHW;
-        return format;
+        return MockFunctionTest::aclStubInstance().GetFormat();
     }
 
     DataType TensorDesc::GetDataType() const
@@ -552,7 +560,7 @@ std::map<string, GeAttrValue> g_geAttrMap;
 
     graphStatus TensorDesc::GetShapeRange(std::vector<std::pair<int64_t,int64_t>> &range) const
     {
-        return 0;
+        return MockFunctionTest::aclStubInstance().GetShapeRange(range);
     }
 
     const char* AscendString::GetString() const

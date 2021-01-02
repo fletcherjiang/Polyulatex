@@ -341,8 +341,7 @@ aclError GetAippOutputHW(const aclmdlAIPP *aippParmsSet, int32_t batchIndex, std
     return ACL_SUCCESS;
 }
 
-aclError AippDynamicBatchParaCheck(const aclmdlAIPP *aippParmsSet, std::string socVersion,
-                                   int32_t aippOutputW, int32_t aippOutputH, bool isNewModel)
+static aclError AippDynamicBatchParaCheck(const aclmdlAIPP *aippParmsSet, std::string socVersion)
 {
     int8_t scfSwitch = 0;
     int8_t cropSwitch = 0;
@@ -396,25 +395,10 @@ aclError AippDynamicBatchParaCheck(const aclmdlAIPP *aippParmsSet, std::string s
         }
     }
 
-    if (isNewModel) {
-        flag = ((aippFirstOutputW != aippOutputW) || (aippFirstOutputH != aippOutputH));
-        if (flag) {
-            ACL_LOG_INNER_ERROR("[Check][Params]aipp output size by ACL must be equal to aipp output "
-                "size in the model! AclAippOutputW = %d, AclAippOutputH = %d, ModelAippOutputW = %d, "
-                "ModelAippOutputH = %d.", aippFirstOutputW, aippFirstOutputH, aippOutputW, aippOutputH);
-            return ACL_ERROR_INVALID_PARAM;
-        }
-    } else {
-        ACL_LOG_INFO("[Check][Params]isNewModel= %d, current used model is old, user needs to ensure that "
-            "aipp output H and W in the model are equal to aipp output H[%d] and W[%d] by acl configure!",
-            isNewModel, aippBatchOutputH, aippBatchOutputW);
-    }
-
     return ACL_SUCCESS;
 }
 
-aclError AippParamsCheck(const aclmdlAIPP *aippParmsSet, std::string socVersion,
-    int32_t aippOutputW, int32_t aippOutputH, bool isNewModel)
+aclError AippParamsCheck(const aclmdlAIPP *aippParmsSet, std::string socVersion)
 {
     ACL_LOG_INFO("start to execute aclAippParamsCheck");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
@@ -444,7 +428,7 @@ aclError AippParamsCheck(const aclmdlAIPP *aippParmsSet, std::string socVersion,
         return result;
     }
 
-    result = AippDynamicBatchParaCheck(aippParmsSet, socVersion, aippOutputW, aippOutputH, isNewModel);
+    result = AippDynamicBatchParaCheck(aippParmsSet, socVersion);
     if (result != ACL_SUCCESS) {
         return result;
     }

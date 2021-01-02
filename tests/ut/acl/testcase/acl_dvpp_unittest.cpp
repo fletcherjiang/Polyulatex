@@ -1774,7 +1774,7 @@ TEST_F(DvppTest, LaunchDvppTask)
     channelDesc.isNeedNotify = false;
     char *args;
     uint32_t argsSize;
-    char *kernelName;
+    const char *kernelName = acl::dvpp::DVPP_KERNELNAME_DECODE_JPEG;
     aclrtStream stream;
 
     auto imageProcessor = acl::dvpp::DvppManager::GetInstance().GetImageProcessor();

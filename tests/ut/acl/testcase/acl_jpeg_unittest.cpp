@@ -755,18 +755,18 @@ TEST_F(JpegTest, acldvppJpegPredictEncSize)
 {
     acldvppPicDesc *inputDesc = nullptr;
     acldvppJpegeConfig *config = nullptr;
-    uint32_t *size;
-    aclError ret = acldvppJpegPredictEncSize(inputDesc, config, size);
+    uint32_t size;
+    aclError ret = acldvppJpegPredictEncSize(inputDesc, config, &size);
     EXPECT_NE(ret, ACL_SUCCESS);
 }
 
 TEST_F(JpegTest, acldvppJpegPredictDecSize)
 {
-    const void *data;
+    const void *data = nullptr;
     uint32_t dataSize;
     acldvppPixelFormat outputPixelFormat;
-    uint32_t *size;
+    uint32_t size;
 
-    aclError ret = acldvppJpegPredictDecSize(data, dataSize, outputPixelFormat, size);
+    aclError ret = acldvppJpegPredictDecSize(data, dataSize, outputPixelFormat, &size);
     EXPECT_NE(ret, ACL_SUCCESS);
 }
