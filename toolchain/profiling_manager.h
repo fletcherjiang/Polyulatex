@@ -13,6 +13,9 @@
 #include "profiling.h"
 #include <mutex>
 #include <unordered_set>
+#include <map>
+
+#define PROF_RESERVE_BYTES 24
 
 enum ProfFuncType {
     ACL_PROF_FUNC_OP = 1,
@@ -43,6 +46,8 @@ namespace acl {
         MsprofCtrlCallback GetProfCtrlCallback() { return ctrlCallback_; };
         void SetProfReporterCallback(MsprofReporterCallback callback) { reporterCallback_ = callback; };
         MsprofReporterCallback GetProfReporterCallback() { return reporterCallback_; };
+        aclError QueryHashValue(const char *funcName, int &deviceId, uint64_t &hashId);
+
     private:
         ~AclProfilingManager();
         AclProfilingManager();
@@ -51,6 +56,7 @@ namespace acl {
         std::unordered_set<uint32_t> deviceList_;
         MsprofCtrlCallback ctrlCallback_ = nullptr;
         MsprofReporterCallback reporterCallback_ = nullptr;
+        std::map<std::string, uint64_t> HashMap = {};
     };
 
     class ACL_FUNC_VISIBILITY AclProfilingReporter {
@@ -60,9 +66,21 @@ namespace acl {
     private:
         int64_t startTime_ = 0;
         int32_t deviceId_ = -1;
-        const char* funcType_ = nullptr;
+        ProfFuncType funcType_;
         const char* funcTag_ = nullptr;
         const char* funcName_;
+    };
+
+    struct ProfData {
+        char magicNumber[2];
+        uint16_t dataTag;
+        uint32_t apiType;
+        uint64_t apiHashValue;
+        uint64_t beginTime;
+        uint64_t endTime;
+        uint32_t processId;
+        uint32_t threadId;
+        char reserve[PROF_RESERVE_BYTES];
     };
 } // namespace acl
 
