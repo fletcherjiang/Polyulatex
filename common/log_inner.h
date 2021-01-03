@@ -21,7 +21,7 @@
 #include "acl/acl_base.h"
 
 #define ACL_MODE_ID static_cast<int>(ASCENDCL)
-#define APP_MODE_ID APP
+#define APP_MODE_ID static_cast<int>(APP)
 
 constexpr int MAX_LOG_STRING = 1024;
 
@@ -90,43 +90,43 @@ public:
                 printf("INFO %d %s:%s:%d: "#fmt "\n",acl:: AclLog::GetTid(), __FUNCTION__,       \
                     __FILE__, __LINE__, ##__VA_ARGS__);                                             \
             }                                                                                       \
-    } while (0)
+    } while (false)
 #define ACL_LOG_DEBUG(fmt, ...)                                                                     \
     do {                                                                                            \
             if (acl::AclLog::IsLogOutputEnable(ACL_DEBUG)) {                                        \
                 printf("DEBUG %d %s:%s:%d: "#fmt "\n", acl::AclLog::GetTid(), __FUNCTION__,   \
                     __FILE__, __LINE__, ##__VA_ARGS__);                                             \
             }                                                                                       \
-    } while (0)
+    } while (false)
 #define ACL_LOG_WARN(fmt, ...)                                                                      \
     do {                                                                                            \
             if (acl::AclLog::IsLogOutputEnable(ACL_WARNING)) {                                      \
                 printf("WARN %d %s:%s:%d: "#fmt "\n", acl::AclLog::GetTid(), __FUNCTION__,    \
                     __FILE__, __LINE__, ##__VA_ARGS__);                                             \
             }                                                                                       \
-    } while (0)
+    } while (false)
 #define ACL_LOG_ERROR(fmt, ...)                                                                     \
     do {                                                                                            \
             printf("ERROR %d %s:%s:%d: %s" fmt "\n", acl::AclLog::GetTid(), __FUNCTION__,       \
                 __FILE__, __LINE__, acl::AclErrorLogManager::GetStagesHeader().c_str(), ##__VA_ARGS__);  \
-    } while (0)
+    } while (false)
 #define ACL_LOG_INNER_ERROR(fmt, ...)                                                               \
     do {                                                                                            \
             printf("ERROR %d %s:%s:%d: %s" fmt "\n", acl::AclLog::GetTid(), __FUNCTION__,             \
                 __FILE__, __LINE__, acl::AclErrorLogManager::GetStagesHeader().c_str(), ##__VA_ARGS__); \
-    } while (0)
+    } while (false)
 #define ACL_LOG_CALL_ERROR(fmt, ...)                                                                \
     do {                                                                                            \
             printf("ERROR %d %s:%s:%d: %s" fmt "\n", acl::AclLog::GetTid(), __FUNCTION__,             \
                 __FILE__, __LINE__, acl::AclErrorLogManager::GetStagesHeader().c_str(), ##__VA_ARGS__); \
-    } while (0)
+    } while (false)
 #define ACL_LOG_EVENT(fmt, ...)                                                                     \
     do {                                                                                            \
             if (acl::AclLog::IsEventLogOutputEnable()) {                                            \
                 printf("EVENT %d %s:%s:%d: "#fmt "\n", acl::AclLog::GetTid(), __FUNCTION__,   \
                     __FILE__, __LINE__, ##__VA_ARGS__);                                             \
             }                                                                                       \
-    } while (0)
+    } while (false)
 #else
 #define ACL_LOG_INFO(fmt, ...)                                                                      \
     do {                                                                                            \
@@ -134,45 +134,45 @@ public:
                 dlog_info(ACL_MODE_ID, "%d %s: " fmt,acl:: AclLog::GetTid(), __FUNCTION__,          \
                     ##__VA_ARGS__);                                                                 \
             }                                                                                       \
-    } while (0)
+    } while (false)
 #define ACL_LOG_DEBUG(fmt, ...)                                                                     \
     do {                                                                                            \
             if (acl::AclLog::IsLogOutputEnable(ACL_DEBUG)) {                                        \
                 dlog_debug(ACL_MODE_ID, "%d %s: " fmt, acl::AclLog::GetTid(), __FUNCTION__,         \
                     ##__VA_ARGS__);                                                                 \
             }                                                                                       \
-    } while (0)
+    } while (false)
 #define ACL_LOG_WARN(fmt, ...)                                                                      \
     do {                                                                                            \
             if (acl::AclLog::IsLogOutputEnable(ACL_WARNING)) {                                      \
                 dlog_warn(ACL_MODE_ID, "%d %s: " fmt, acl::AclLog::GetTid(), __FUNCTION__,          \
                     ##__VA_ARGS__);                                                                 \
             }                                                                                       \
-    } while (0)
+    } while (false)
 #define ACL_LOG_ERROR(fmt, ...)                                                                     \
     do {                                                                                            \
             dlog_error(ACL_MODE_ID, "%d %s: %s" fmt, acl::AclLog::GetTid(), __FUNCTION__,           \
                 acl::AclErrorLogManager::GetStagesHeader().c_str(), ##__VA_ARGS__);                 \
-    } while (0)
+    } while (false)
 #define ACL_LOG_INNER_ERROR(fmt, ...)                                                               \
     do {                                                                                            \
             dlog_error(ACL_MODE_ID, "%d %s: %s" fmt, acl::AclLog::GetTid(), __FUNCTION__,           \
                 acl::AclErrorLogManager::GetStagesHeader().c_str(), ##__VA_ARGS__);                 \
             acl::AclErrorLogManager::ReportInnerError(fmt, ##__VA_ARGS__);                          \
-    } while (0)
+    } while (false)
 #define ACL_LOG_CALL_ERROR(fmt, ...)                                                                \
     do {                                                                                            \
             dlog_error(ACL_MODE_ID, "%d %s: %s" fmt, acl::AclLog::GetTid(), __FUNCTION__,           \
                 acl::AclErrorLogManager::GetStagesHeader().c_str(), ##__VA_ARGS__);                 \
             acl::AclErrorLogManager::ReportCallError(fmt, ##__VA_ARGS__);                           \
-    } while (0)
+    } while (false)
 #define ACL_LOG_EVENT(fmt, ...)                                                                     \
     do {                                                                                            \
             if (acl::AclLog::IsEventLogOutputEnable()) {                                            \
                 dlog_event(ACL_MODE_ID, "%d %s: " fmt, acl::AclLog::GetTid(), __FUNCTION__,         \
                     ##__VA_ARGS__);                                                                 \
             }                                                                                       \
-    } while (0)
+    } while (false)
 #endif
 
 inline bool IsDebugLogEnabled()
@@ -201,7 +201,7 @@ inline bool IsInfoLogEnabled()
             return __ret; \
         } \
     } \
-    while (0)
+    while (false)
 
 // Validate whether the expr value is true
 #define ACL_REQUIRES_TRUE(expr, errCode, errDesc) \
@@ -212,7 +212,7 @@ inline bool IsInfoLogEnabled()
             return (errCode); \
         } \
     } \
-    while (0)
+    while (false)
 
 #ifndef ENABLE_DVPP_INTERFACE
 #define ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(val) \
@@ -222,7 +222,7 @@ inline bool IsInfoLogEnabled()
         acl::AclErrorLogManager::ReportInputError("EH0002", {"param"}, {#val}); \
         return ACL_ERROR_INVALID_PARAM; } \
     } \
-    while (0)
+    while (false)
 #else
 #define ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(val) \
     do { \
@@ -233,7 +233,7 @@ inline bool IsInfoLogEnabled()
         acl::AclErrorLogManager::ReportInputErrorWithChar("EH0002", argList, argVal, 1); \
         return ACL_ERROR_INVALID_PARAM; } \
     } \
-    while (0)
+    while (false)
 #endif
 
 #define ACL_REQUIRES_NOT_NULL(val) \
@@ -242,7 +242,7 @@ inline bool IsInfoLogEnabled()
             ACL_LOG_ERROR("[Check][%s]param must not be null.", #val); \
             return ACL_ERROR_INVALID_PARAM; } \
         } \
-    while (0)
+    while (false)
 
 #define ACL_REQUIRES_NOT_NULL_WITH_INNER_REPORT(val) \
     do { \
@@ -250,7 +250,7 @@ inline bool IsInfoLogEnabled()
             ACL_LOG_INNER_ERROR("[Check][%s]param must not be null.", #val); \
             return ACL_ERROR_INVALID_PARAM; } \
         } \
-    while (0)
+    while (false)
 
 #define ACL_REQUIRES_NOT_NULL_RET_NULL(val) \
     do { \
@@ -258,7 +258,7 @@ inline bool IsInfoLogEnabled()
             ACL_LOG_ERROR("[Check][%s]param must not be null.", #val); \
             return nullptr; } \
         } \
-    while (0)
+    while (false)
 
 #define ACL_REQUIRES_NOT_NULL_RET_NULL_INPUT_REPORT(val) \
     do { \
@@ -267,7 +267,7 @@ inline bool IsInfoLogEnabled()
             acl::AclErrorLogManager::ReportInputError("EH0002", {"param"}, {#val}); \
             return nullptr; } \
         } \
-    while (0)
+    while (false)
 
 #define ACL_REQUIRES_NOT_NULL_RET_STR(val) \
     do { \
@@ -275,7 +275,7 @@ inline bool IsInfoLogEnabled()
             ACL_LOG_ERROR("[Check][%s]param must not be null.", #val); \
             return ""; } \
         } \
-    while (0)
+    while (false)
 
 #define ACL_REQUIRES_NOT_NULL_RET_VOID(val) \
     do { \
@@ -283,7 +283,7 @@ inline bool IsInfoLogEnabled()
             ACL_LOG_ERROR("[Check][%s]param must not be null.", #val); \
             return; } \
         } \
-    while (0)
+    while (false)
 
 #define ACL_CHECK_RANGE_INT(val, min, max) \
     do { \
@@ -291,7 +291,7 @@ inline bool IsInfoLogEnabled()
             ACL_LOG_ERROR("[Check][%s]param:[%d] must be in range of [%d] and [%d]", #val, val, min, max); \
             return ACL_ERROR_INVALID_PARAM; } \
         } \
-    while (0)
+    while (false)
 
 #define ACL_CHECK_RANGE_UINT(val, min, max) \
     do { \
@@ -299,7 +299,7 @@ inline bool IsInfoLogEnabled()
             ACL_LOG_ERROR("[Check][%s]param:[%u] must be in range of [%u] and [%u]", #val, val, min, max); \
             return ACL_ERROR_INVALID_PARAM; } \
         } \
-    while (0)
+    while (false)
 
 #define ACL_CHECK_RANGE_FLOAT(val, min, max) \
     do { \
@@ -307,7 +307,7 @@ inline bool IsInfoLogEnabled()
             ACL_LOG_ERROR("[Check][%s]param:[%.2f] must be in range of [%.2f] and [%.2f]", #val, val, min, max); \
             return ACL_ERROR_INVALID_PARAM; } \
         } \
-    while (0)
+    while (false)
 
 #define ACL_CHECK_MALLOC_RESULT(val) \
     do { \
@@ -315,7 +315,7 @@ inline bool IsInfoLogEnabled()
             ACL_LOG_ERROR("[Check][Malloc]Allocate memory for [%s] failed.", #val); \
             return ACL_ERROR_BAD_ALLOC; } \
         } \
-    while (0)
+    while (false)
 
 #define ACL_REQUIRES_NON_NEGATIVE(val) \
     do { \
@@ -323,7 +323,7 @@ inline bool IsInfoLogEnabled()
             ACL_LOG_ERROR("[Check][%s]param must be non-negative.", #val); \
             return ACL_ERROR_INVALID_PARAM; } \
         } \
-    while (0)
+    while (false)
 
 #define ACL_REQUIRES_NON_NEGATIVE_WITH_INPUT_REPORT(val) \
     do { \
@@ -333,7 +333,7 @@ inline bool IsInfoLogEnabled()
             std::vector<string>({#val, std::to_string(val), "must be non-negative"})); \
             return ACL_ERROR_INVALID_PARAM; } \
         } \
-    while (0)
+    while (false)
 
 #define ACL_REQUIRES_POSITIVE(val) \
     do { \
@@ -341,7 +341,7 @@ inline bool IsInfoLogEnabled()
             ACL_LOG_ERROR("[Check][%s]param must be positive.", #val); \
             return ACL_ERROR_INVALID_PARAM; } \
         } \
-    while (0)
+    while (false)
 
 #define ACL_REQUIRES_POSITIVE_WITH_INPUT_REPORT(val) \
     do { \
@@ -351,7 +351,7 @@ inline bool IsInfoLogEnabled()
             std::vector<string>({#val, std::to_string(val), "must be positive"})); \
             return ACL_ERROR_INVALID_PARAM; } \
         } \
-    while (0)
+    while (false)
 
 #define ACL_REQUIRES_POSITIVE_RET_NULL(val) \
     do { \
@@ -359,14 +359,14 @@ inline bool IsInfoLogEnabled()
             ACL_LOG_ERROR("[Check][%s]param must be positive.", #val); \
             return nullptr; } \
         } \
-    while (0)
+    while (false)
 
 #define ACL_DELETE(memory) \
     do { \
         delete (memory); \
         (memory) = nullptr; \
     } \
-    while (0)
+    while (false)
 
 #define ACL_DELETE_ARRAY(memory) \
     do { \
@@ -375,7 +375,7 @@ inline bool IsInfoLogEnabled()
             (memory) = nullptr; \
         } \
     } \
-    while (0)
+    while (false)
 
 #define ACL_CHECK_WITH_MESSAGE_AND_RETURN(exp, ret, ...) \
     do { \
@@ -384,7 +384,7 @@ inline bool IsInfoLogEnabled()
             return (ret); \
         } \
     } \
-    while (0)
+    while (false)
 
 #define ACL_CHECK_WITH_MESSAGE_AND_NO_RETURN(exp, ...) \
     do { \
@@ -394,7 +394,7 @@ inline bool IsInfoLogEnabled()
             ACL_LOG_INNER_ERROR(__VA_ARGS__); \
         } \
     } \
-    while (0)
+    while (false)
 
 #define ACL_DELETE_AND_SET_NULL(var) \
     do { \
@@ -403,7 +403,7 @@ inline bool IsInfoLogEnabled()
             var = nullptr; \
         } \
     } \
-    while (0)
+    while (false)
 
 #define ACL_DELETE_ARRAY_AND_SET_NULL(var) \
     do { \
@@ -412,7 +412,7 @@ inline bool IsInfoLogEnabled()
             var = nullptr; \
         } \
     } \
-    while (0)
+    while (false)
 
 #define ACL_FREE(var) \
     do { \
@@ -421,7 +421,7 @@ inline bool IsInfoLogEnabled()
             var = nullptr; \
         } \
     } \
-    while (0)
+    while (false)
 
 #define ACL_ALIGN_FREE(var) \
     do { \
@@ -430,7 +430,7 @@ inline bool IsInfoLogEnabled()
             var = nullptr; \
         } \
     } \
-    while (0)
+    while (false)
 
 // If make_shared is abnormal, print the log and execute the statement
 #define ACL_MAKE_SHARED(expr0, expr1) \
@@ -449,6 +449,6 @@ inline bool IsInfoLogEnabled()
             return nullptr; \
         } \
     } \
-    while (0)
+    while (false)
 
 #endif // ACL_COMMON_LOG_H_

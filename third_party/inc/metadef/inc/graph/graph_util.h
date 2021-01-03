@@ -64,7 +64,7 @@ const char levelStr[8][8] = {"EMERG", "ALERT", "CRIT", "ERROR", "WARNING", "NOTI
       syslog(level, "%s %s:%d] [%s] %s " format "\n", "", __FILE__, __LINE__, "OPTIMIZER", __FUNCTION__,      \
              ##__VA_ARGS__);                                                                                  \
     }                                                                                                         \
-  } while (0)
+  } while (false)
 #define D_GRAPH_LOGI(MOD_NAME, fmt, ...) D_GRAPH_LOG(ANDROID_LOG_INFO, #fmt, ##__VA_ARGS__)
 #define D_GRAPH_LOGW(MOD_NAME, fmt, ...) D_GRAPH_LOG(ANDROID_LOG_INFO, #fmt, ##__VA_ARGS__)
 #define D_GRAPH_LOGE(MOD_NAME, fmt, ...) D_GRAPH_LOG(ANDROID_LOG_INFO, #fmt, ##__VA_ARGS__)
@@ -84,7 +84,7 @@ const char levelStr[8][8] = {"EMERG", "ALERT", "CRIT", "ERROR", "WARNING", "NOTI
       syslog(level, "%s %s:%d] [%s] %s " format "\n", "", __FILE__, __LINE__, "OPTIMIZER", __FUNCTION__,      \
              ##__VA_ARGS__);                                                                                  \
     }                                                                                                         \
-  } while (0)
+  } while (false)
 #define GRAPH_LOGI(fmt, ...) GRAPH_LOG(ANDROID_LOG_INFO, #fmt, ##__VA_ARGS__)
 #define GRAPH_LOGW(fmt, ...) GRAPH_LOG(ANDROID_LOG_INFO, #fmt, ##__VA_ARGS__)
 #define GRAPH_LOGE(fmt, ...) GRAPH_LOG(ANDROID_LOG_INFO, #fmt, ##__VA_ARGS__)
@@ -96,7 +96,7 @@ const char levelStr[8][8] = {"EMERG", "ALERT", "CRIT", "ERROR", "WARNING", "NOTI
     if (_status != domi::GRAPH_SUCCESS) {     \
       return _status;                         \
     }                                         \
-  } while (0)
+  } while (false)
 
 #define GRAPH_CHK_BOOL_RET_STATUS(expr, _status, ...) \
   do {                                                \
@@ -105,7 +105,7 @@ const char levelStr[8][8] = {"EMERG", "ALERT", "CRIT", "ERROR", "WARNING", "NOTI
       GRAPH_LOGE(__VA_ARGS__);                        \
       return _status;                                 \
     }                                                 \
-  } while (0)
+  } while (false)
 
 #define GRAPH_CHK_BOOL_EXEC_NOLOG(expr, exec_expr) \
   {                                                \
@@ -129,6 +129,6 @@ const char levelStr[8][8] = {"EMERG", "ALERT", "CRIT", "ERROR", "WARNING", "NOTI
       GRAPH_LOGE(__VA_ARGS__);                    \
       return _status;                             \
     }                                             \
-  } while (0)
+  } while (false)
 
 #endif  // INC_GRAPH_GRAPH_UTIL_H_

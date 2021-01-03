@@ -65,7 +65,7 @@
       DOMI_LOGE(__VA_ARGS__);          \
       return _status;                  \
     }                                  \
-  } while (0);
+  } while (false);
 
 // If expr is not SUCCESS, print the log and do not execute return
 #define GE_CHK_STATUS(expr, ...)       \
@@ -74,7 +74,7 @@
     if (_status != ge::SUCCESS) {      \
       DOMI_LOGE(__VA_ARGS__);          \
     }                                  \
-  } while (0);
+  } while (false);
 
 // If expr is not SUCCESS, return the same value
 #define GE_CHK_STATUS_RET_NOLOG(expr)  \
@@ -83,7 +83,7 @@
     if (_status != ge::SUCCESS) {      \
       return _status;                  \
     }                                  \
-  } while (0);
+  } while (false);
 
 // If expr is not GRAPH_SUCCESS, print the log and return FAILED
 #define GE_CHK_GRAPH_STATUS_RET(expr, ...)                  \
@@ -93,14 +93,14 @@
       DOMI_LOGE(__VA_ARGS__);                               \
       return FAILED;                                        \
     }                                                       \
-  } while (0);
+  } while (false);
 
 // If expr is not SUCCESS, print the log and execute a custom statement
 #define GE_CHK_STATUS_EXEC(expr, exec_expr, ...)                  \
   do {                                                            \
     const ge::Status _status = (expr);                            \
     GE_CHK_BOOL_EXEC(_status == SUCCESS, exec_expr, __VA_ARGS__); \
-  } while (0);
+  } while (false);
 
 // If expr is not true, print the log and return the specified status
 #define GE_CHK_BOOL_RET_STATUS(expr, _status, ...) \
@@ -111,7 +111,7 @@
       GELOGE(_status, __VA_ARGS__);                \
       return _status;                              \
     }                                              \
-  } while (0);
+  } while (false);
 
 // If expr is not true, print the log and return the specified status
 #define GE_CHK_BOOL_RET_STATUS_NOLOG(expr, _status, ...) \
@@ -120,7 +120,7 @@
     if (!b) {                                            \
       return _status;                                    \
     }                                                    \
-  } while (0);
+  } while (false);
 
 // If expr is not true, print the log and execute a custom statement
 #define GE_CHK_BOOL_EXEC(expr, exec_expr, ...) \
@@ -220,7 +220,7 @@
     if (_rt_ret != RT_ERROR_NONE) {                        \
       DOMI_LOGE("Call rt api failed, ret: 0x%X", _rt_ret); \
     }                                                      \
-  } while (0);
+  } while (false);
 
 // If expr is not RT_ERROR_NONE, print the log and execute the exec_expr expression
 #define GE_CHK_RT_EXEC(expr, exec_expr)                    \
@@ -241,7 +241,7 @@
       DOMI_LOGE("Call rt api failed, ret: 0x%X", _rt_ret);                    \
       return RT_ERROR_TO_GE_STATUS(_rt_ret);                                  \
     }                                                                         \
-  } while (0);
+  } while (false);
 
 // If expr is true, execute exec_expr without printing logs
 #define GE_IF_BOOL_EXEC(expr, exec_expr) \
@@ -280,7 +280,7 @@
       ErrorManager::GetInstance().ATCReportErrMessage("E19021", {"reason"}, {errormsg}); \
       return _status;                                                                    \
     }                                                                                    \
-  } while (0)
+  } while (false)
 
 template <typename T>
 GE_FUNC_VISIBILITY std::string FmtToStr(const T &t) {

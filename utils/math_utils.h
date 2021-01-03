@@ -76,7 +76,7 @@ aclError GetAlignedSize(size_t size, size_t &alignedSize);
             if (ret != ACL_SUCCESS) {                             \
                 return ret;                                          \
             }                                                        \
-    } while (0)
+    } while (false)
 
 #define ACL_CHECK_ASSIGN_SIZET_MULTI_RET_NUM(a, b, res)                      \
     do {                                                             \
@@ -84,7 +84,7 @@ aclError GetAlignedSize(size_t size, size_t &alignedSize);
             if (ret != ACL_SUCCESS) {                             \
                 return 0;                                          \
             }                                                       \
-    } while (0)
+    } while (false)
 
 #define ACL_CHECK_ASSIGN_UINT32_MULTI(a, b, res)                      \
     do {                                                             \
@@ -92,7 +92,7 @@ aclError GetAlignedSize(size_t size, size_t &alignedSize);
             if (ret != ACL_SUCCESS) {                             \
                 return ret;                                          \
             }                                                        \
-    } while (0)
+    } while (false)
 
 #define ACL_CHECK_ASSIGN_INT32_ADD(a, b, res)                        \
     do {                                                             \
@@ -100,7 +100,7 @@ aclError GetAlignedSize(size_t size, size_t &alignedSize);
             if (ret != ACL_SUCCESS) {                             \
                 return ret;                                          \
             }                                                        \
-    } while (0)
+    } while (false)
 
 #define ACL_CHECK_ASSIGN_SIZET_ADD(a, b, res)                       \
     do {                                                            \
@@ -108,7 +108,7 @@ aclError GetAlignedSize(size_t size, size_t &alignedSize);
             if (ret != ACL_SUCCESS) {                            \
                 return ret;                                         \
             }                                                       \
-    } while (0)
+    } while (false)
 
 #define ACL_CHECK_ASSIGN_UINT32T_ADD(a, b, res)                       \
     do {                                                            \
@@ -116,6 +116,6 @@ aclError GetAlignedSize(size_t size, size_t &alignedSize);
             if (ret != ACL_SUCCESS) {                            \
                 return ret;                                         \
             }                                                       \
-    } while (0)
+    } while (false)
 
 #endif // MATH_UTILS_H
