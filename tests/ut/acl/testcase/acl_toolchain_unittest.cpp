@@ -360,3 +360,15 @@ TEST_F(UTEST_ACL_toolchain, HandleProfilingConfig)
     ret = aclProf.HandleProfilingConfig("../tests/ut/acl/json/profilingConfig.json");
     EXPECT_EQ(ret, ACL_SUCCESS);
 }
+
+TEST_F(UTEST_ACL_toolchain, AclProfilingReporter)
+{
+    AclProfilingManager::GetInstance().isProfiling_ = true;
+    AclProfilingManager::GetInstance().deviceList_.insert(-1);
+    AclProfilingManager::GetInstance().deviceList_.insert(0);
+    AclProfilingReporter reporter("testProf", ACL_PROF_FUNC_MODEL);
+    reporter.~AclProfilingReporter();
+    AclProfilingManager::GetInstance().isProfiling_ = false;
+    AclProfilingManager::GetInstance().deviceList_.erase(-1);
+    AclProfilingManager::GetInstance().deviceList_.erase(0);
+}
