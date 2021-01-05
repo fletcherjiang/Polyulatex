@@ -158,7 +158,7 @@ aclError AclProfilingManager::QueryHashValue(const char *funcName, int &deviceId
     return ACL_SUCCESS;
 }
 
-AclProfilingReporter::AclProfilingReporter(const char *funcName, ProfFuncType funcType) : funcType_(funcType), funcName_(funcName)
+AclProfilingReporter::AclProfilingReporter(const char *funcName, ProfFuncType funcType) : funcName_(funcName), funcType_(funcType) 
 {
     if (AclProfilingManager::GetInstance().AclProfilingIsRun()) {
         if (aclrtGetDevice(&deviceId_) != ACL_SUCCESS) {

@@ -66,9 +66,9 @@ namespace acl {
     private:
         int64_t startTime_ = 0;
         int32_t deviceId_ = -1;
-        ProfFuncType funcType_;
         const char* funcTag_ = nullptr;
         const char* funcName_;
+        ProfFuncType funcType_;
     };
 
     struct ProfData {
