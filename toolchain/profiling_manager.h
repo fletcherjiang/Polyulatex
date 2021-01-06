@@ -15,8 +15,6 @@
 #include <unordered_set>
 #include <map>
 
-#define PROF_RESERVE_BYTES 24
-
 enum ProfFuncType {
     ACL_PROF_FUNC_OP = 1,
     ACL_PROF_FUNC_MODEL,
@@ -71,6 +69,7 @@ namespace acl {
         ProfFuncType funcType_;
     };
 
+    const int PROF_RESERVE_BYTES = 24;
     struct ProfData {
         char magicNumber[2];
         uint16_t dataTag;
