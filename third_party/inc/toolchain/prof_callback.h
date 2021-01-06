@@ -55,10 +55,10 @@ struct ReporterData {
 };
 
 struct HashData {
-    int deviceId;
-    size_t dataLen;
-    unsigned char *data;
-    uint64_t hashId;
+    int deviceId;                             // the index of device
+    size_t dataLen;                           // the length of data
+    unsigned char *data;                      // the data content
+    uint64_t hashId;                          // the id of hashed data 
 };
 /**
  * @name  MsprofReporterModuleId
@@ -81,7 +81,7 @@ enum MsprofReporterCallbackType {
     MSPROF_REPORTER_INIT,                 // init reporter
     MSPROF_REPORTER_UNINIT,               // uninit reporter
     MSPROF_REPORTER_DATA_MAX_LEN,         // data max length for calling report callback
-    MSPROF_REPORTER_HASH
+    MSPROF_REPORTER_HASH                  // hash data to id
 };
 
 /**
