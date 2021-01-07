@@ -135,13 +135,14 @@ bool AclProfilingManager::IsDeviceEnable(const uint32_t &deviceId)
 
 aclError AclProfilingManager::QueryHashValue(const char *funcName, int &deviceId, uint64_t &hashId)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
     string apiName = string(funcName);
+    std::lock_guard<std::mutex> lock(mutex_);
     auto iter = AclProfilingManager::GetInstance().HashMap.find(apiName);
     if (iter != AclProfilingManager::GetInstance().HashMap.end()) {
         hashId = iter->second;
     } else {
         if (reporterCallback_ == nullptr) {
+            ACL_LOG_INNER_ERROR("[Check][Param]reporter callback is nullptr");
             return ACL_ERROR_PROFILING_FAILURE;
         }
         HashData hashData;
@@ -178,8 +179,10 @@ AclProfilingReporter::AclProfilingReporter(const char *funcName, ProfFuncType fu
                 funcTag_ = "acl_rts";
                 break;
 
-            default:
+            case ACL_PROF_FUNC_OTHERS:
                 funcTag_ = "acl_others";
+                break;
+            default:
                 break;
         }
         mmTimespec timespec = mmGetTickCount();
@@ -194,7 +197,7 @@ AclProfilingReporter::~AclProfilingReporter()
         mmTimespec timespec = mmGetTickCount();
         // 1000 ^ 3 converts second to nanosecond
         int64_t endTime = timespec.tv_sec * 1000 * 1000 * 1000 + timespec.tv_nsec;
-        if ((funcTag_ == nullptr) || (funcType_ == 0) || (funcName_ == nullptr)) {
+        if ((funcTag_ == nullptr) || (funcName_ == nullptr)) {
             ACL_LOG_WARN("function context is nullptr!");
             return;
         }
