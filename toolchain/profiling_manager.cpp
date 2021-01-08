@@ -149,8 +149,9 @@ aclError AclProfilingManager::QueryHashValue(const char *funcName, int &deviceId
         hashData.deviceId = deviceId;
         hashData.dataLen = apiName.size();
         hashData.data = reinterpret_cast<unsigned char *>(const_cast<char *>(funcName));
-        if (reporterCallback_(MSPROF_MODULE_ACL, MSPROF_REPORTER_HASH, &hashData, sizeof(HashData)) != 0) {
-            ACL_LOG_CALL_ERROR("[Get][HashId]Faield to get hasdId from apiName");
+        int32_t ret = reporterCallback_(MSPROF_MODULE_ACL, MSPROF_REPORTER_HASH, &hashData, sizeof(HashData));
+        if ( ret != 0) {
+            ACL_LOG_CALL_ERROR("[Get][HashId]Faield to get hasdId from apiName, result = %u", ret);
             return ACL_ERROR_PROFILING_FAILURE;
         }
         AclProfilingManager::GetInstance().HashMap.insert({apiName, hashData.hashId});
