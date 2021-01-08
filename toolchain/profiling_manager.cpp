@@ -148,7 +148,7 @@ aclError AclProfilingManager::QueryHashValue(const char *funcName, int &deviceId
         HashData hashData;
         hashData.deviceId = deviceId;
         hashData.dataLen = apiName.size();
-        hashData.data = (unsigned char *)funcName;
+        hashData.data = reinterpret_cast<unsigned char *>(const_cast<char *>(funcName));
         if (reporterCallback_(MSPROF_MODULE_ACL, MSPROF_REPORTER_HASH, &hashData, sizeof(HashData)) != 0) {
             ACL_LOG_CALL_ERROR("[Get][HashId]Faield to get hasdId from apiName");
             return ACL_ERROR_PROFILING_FAILURE;
@@ -243,7 +243,7 @@ AclProfilingReporter::~AclProfilingReporter()
         profData.processId = pid;
         profData.threadId = tid;
 
-        reporter_data.data = (unsigned char *)&profData;
+        reporter_data.data = reinterpret_cast<unsigned char *>(&profData);
         reporter_data.dataLen = sizeof(ProfData);
         ACL_LOG_DEBUG("AclProfiling reporter reports in %s, device id = %d", funcName_, deviceId_);
         ret = AclProfilingManager::GetInstance().ProfilingData(reporter_data);
