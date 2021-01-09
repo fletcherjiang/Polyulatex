@@ -135,7 +135,7 @@ bool AclProfilingManager::IsDeviceEnable(const uint32_t &deviceId)
 
 aclError AclProfilingManager::QueryHashValue(const char *funcName, int &deviceId, uint64_t &hashId)
 {
-    string apiName = string(funcName);
+    string apiName(funcName);
     std::lock_guard<std::mutex> lock(mutex_);
     auto iter = AclProfilingManager::GetInstance().HashMap.find(apiName);
     if (iter != AclProfilingManager::GetInstance().HashMap.end()) {
