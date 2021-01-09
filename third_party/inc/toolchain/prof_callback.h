@@ -60,6 +60,7 @@ struct HashData {
     unsigned char *data;                      // the data content
     uint64_t hashId;                          // the id of hashed data 
 };
+
 /**
  * @name  MsprofReporterModuleId
  * @brief module id of data to report
