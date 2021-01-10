@@ -69,18 +69,6 @@ namespace acl {
         ProfFuncType funcType_;
     };
 
-    const int PROF_RESERVE_BYTES = 24;
-    struct ProfData {
-        char magicNumber[2];
-        uint16_t dataTag;
-        uint32_t apiType;
-        uint64_t apiHashValue;
-        uint64_t beginTime;
-        uint64_t endTime;
-        uint32_t processId;
-        uint32_t threadId;
-        char reserve[PROF_RESERVE_BYTES];
-    };
 } // namespace acl
 
 #define ACL_PROFILING_REG(funcType) \

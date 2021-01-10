@@ -17,6 +17,7 @@
 
 #include "framework/common/ge_format_util.h"
 #include "mmpa/mmpa_api.h"
+#include "toolchain/prof_common.h"
 
 #include "acl/acl_rt.h"
 #include "common/log_inner.h"
@@ -234,7 +235,7 @@ AclProfilingReporter::~AclProfilingReporter()
         mmPid_t pid = static_cast<mmPid_t>(mmGetPid());
         int32_t tid = mmGetTid();
         //magic number is "5A5A" and tag is 0 for acl
-        acl::ProfData profData{{0x5A, 0x5A}, 0};
+        MsprofAclProfData profData{0x5A5A, 0};
         profData.apiType = static_cast<uint32_t>(funcType_);
         profData.apiHashValue = hashId;
         profData.beginTime = startTime_;
@@ -243,7 +244,7 @@ AclProfilingReporter::~AclProfilingReporter()
         profData.threadId = tid;
 
         reporter_data.data = reinterpret_cast<unsigned char *>(&profData);
-        reporter_data.dataLen = sizeof(ProfData);
+        reporter_data.dataLen = sizeof(MsprofAclProfData);
         ACL_LOG_DEBUG("AclProfiling reporter reports in %s, device id = %d", funcName_, deviceId_);
         ret = AclProfilingManager::GetInstance().ProfilingData(reporter_data);
         if (ret != ACL_SUCCESS) {
