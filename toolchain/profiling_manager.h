@@ -65,7 +65,7 @@ namespace acl {
         int32_t deviceId_ = -1;
         const char* funcTag_ = nullptr;
         const char* funcName_;
-        MsprofAclApiType funcType_;
+        const MsprofAclApiType funcType_;
     };
 
 } // namespace acl
