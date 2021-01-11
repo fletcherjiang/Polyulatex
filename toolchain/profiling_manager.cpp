@@ -17,7 +17,6 @@
 
 #include "framework/common/ge_format_util.h"
 #include "mmpa/mmpa_api.h"
-#include "toolchain/prof_common.h"
 
 #include "acl/acl_rt.h"
 #include "common/log_inner.h"
@@ -161,7 +160,7 @@ aclError AclProfilingManager::QueryHashValue(const char *funcName, int &deviceId
     return ACL_SUCCESS;
 }
 
-AclProfilingReporter::AclProfilingReporter(const char *funcName, ProfFuncType funcType) : funcName_(funcName), funcType_(funcType) 
+AclProfilingReporter::AclProfilingReporter(const char *funcName, MsprofAclApiType funcType) : funcName_(funcName), funcType_(funcType) 
 {
     if (AclProfilingManager::GetInstance().AclProfilingIsRun()) {
         if (aclrtGetDevice(&deviceId_) != ACL_SUCCESS) {

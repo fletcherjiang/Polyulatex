@@ -29,14 +29,14 @@ extern "C" {
 #include "stdint.h"
 
 /**
- * @name AclApiType
- * @brief acl api type
+ * @name MsprofAclApiType
+ * @brief acl api types
  */
 enum MsprofAclApiType {
-    MSPROF_API_TYPE_OP = 1,
-    MSPROF_API_TYPE_MODEL,
-    MSPROF_API_TYPE_RUNTIME,
-    MSPROF_API_TYPE_OTHERS,
+    MSPROF_ACL_API_TYPE_OP = 1,
+    MSPROF_ACL_API_TYPE_MODEL,
+    MSPROF_ACL_API_TYPE_RUNTIME,
+    MSPROF_ACL_API_TYPE_OTHERS,
 };
 
 /**
