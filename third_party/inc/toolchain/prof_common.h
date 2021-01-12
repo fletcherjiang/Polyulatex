@@ -1,5 +1,5 @@
 /**
- * Copyright 2020-2021 Huawei Technologies Co., Ltd
+ * Copyright 2021-2021 Huawei Technologies Co., Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,9 +41,9 @@ enum MsprofAclApiType {
 
 /**
  * @name AclProfData
- * @brief struct of data to reported by acl
+ * @brief struct of data reported by acl
  */
-#define ACL_PROF_DATA_RESERVE_BYTES 24
+#define MSPROF_ACL_DATA_RESERVE_BYTES 24
 struct MsprofAclProfData {
     uint16_t magicNumber;    // 5A5A
     uint16_t dataTag;
@@ -53,7 +53,7 @@ struct MsprofAclProfData {
     uint64_t endTime;
     uint32_t processId;
     uint32_t threadId;
-    uint8_t reserve[ACL_PROF_DATA_RESERVE_BYTES];
+    uint8_t reserve[MSPROF_ACL_DATA_RESERVE_BYTES];
 };
 
 #ifdef __cplusplus
