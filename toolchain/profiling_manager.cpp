@@ -151,7 +151,7 @@ aclError AclProfilingManager::QueryHashValue(const char *funcName, int &deviceId
         hashData.data = reinterpret_cast<unsigned char *>(const_cast<char *>(funcName));
         int32_t ret = reporterCallback_(MSPROF_MODULE_ACL, MSPROF_REPORTER_HASH, &hashData, sizeof(HashData));
         if ( ret != 0) {
-            ACL_LOG_CALL_ERROR("[Get][HashId]Faield to get hashId from apiName, result = %d", ret);
+            ACL_LOG_CALL_ERROR("[Get][HashId]call reporter failed, type is MSPROF_REPORTER_HASH, result = %d", ret);
             return ACL_ERROR_PROFILING_FAILURE;
         }
         AclProfilingManager::GetInstance().HashMap.insert({apiName, hashData.hashId});
@@ -234,7 +234,7 @@ AclProfilingReporter::~AclProfilingReporter()
         mmPid_t pid = static_cast<mmPid_t>(mmGetPid());
         int32_t tid = mmGetTid();
         //magic number is "5A5A" and tag is 0 for acl
-        MsprofAclProfData profData{0x5A5A, 0};
+        MsprofAclProfData profData{MSPROF_DATA_HEAD_MAGIC_NUM, 0};
         profData.apiType = static_cast<uint32_t>(funcType_);
         profData.apiHashValue = hashId;
         profData.beginTime = startTime_;

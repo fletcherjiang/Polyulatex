@@ -1,5 +1,5 @@
 /**
- * Copyright 2021-2021 Huawei Technologies Co., Ltd
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. ALL rights reserved 
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,13 @@
 #ifndef MSPROFILER_PROF_COMMON_H_
 #define MSPROFILER_PROF_COMMON_H_
 
+#include "stdint.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
 
-
-#include "stddef.h"
-#include "stdint.h"
+#define MSPROF_DATA_HEAD_MAGIC_NUM 0x5a5a
 
 /**
  * @name MsprofAclApiType
