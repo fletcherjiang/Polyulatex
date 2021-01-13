@@ -17,8 +17,8 @@
  * @brief declaraion of profiling common datas and functions
  */
 
-#ifndef MSPROFILER_PROF_COMMON_H
-#define MSPROFILER_PROF_COMMON_H
+#ifndef MSPROFILER_PROF_COMMON_H_
+#define MSPROFILER_PROF_COMMON_H_
 
 #ifdef __cplusplus
 extern "C" {
