@@ -46,7 +46,7 @@ enum MsprofAclApiType {
 #define MSPROF_ACL_DATA_RESERVE_BYTES 24
 struct MsprofAclProfData {
     uint16_t magicNumber;    // 5A5A
-    uint16_t dataTag;
+    uint16_t dataTag;        // the value must be 0
     uint32_t apiType;        // enum MsprofAclApiType
     uint64_t apiHashValue;
     uint64_t beginTime;
