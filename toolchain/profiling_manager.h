@@ -13,13 +13,13 @@
 #include "profiling.h"
 #include <mutex>
 #include <unordered_set>
+#include <map>
+#include "toolchain/prof_common.h"
 
-enum ProfFuncType {
-    ACL_PROF_FUNC_OP = 1,
-    ACL_PROF_FUNC_MODEL,
-    ACL_PROF_FUNC_RUNTIME,
-    ACL_PROF_FUNC_OTHERS,
-};
+#define ACL_PROF_FUNC_OP MSPROF_ACL_API_TYPE_OP
+#define ACL_PROF_FUNC_MODEL MSPROF_ACL_API_TYPE_MODEL
+#define ACL_PROF_FUNC_RUNTIME MSPROF_ACL_API_TYPE_RUNTIME
+#define ACL_PROF_FUNC_OTHERS MSPROF_ACL_API_TYPE_OTHERS
 
 namespace acl {
     class AclProfilingManager final {
@@ -43,6 +43,8 @@ namespace acl {
         MsprofCtrlCallback GetProfCtrlCallback() { return ctrlCallback_; };
         void SetProfReporterCallback(MsprofReporterCallback callback) { reporterCallback_ = callback; };
         MsprofReporterCallback GetProfReporterCallback() { return reporterCallback_; };
+        aclError QueryHashValue(const char *funcName, int &deviceId, uint64_t &hashId);
+
     private:
         ~AclProfilingManager();
         AclProfilingManager();
@@ -51,19 +53,21 @@ namespace acl {
         std::unordered_set<uint32_t> deviceList_;
         MsprofCtrlCallback ctrlCallback_ = nullptr;
         MsprofReporterCallback reporterCallback_ = nullptr;
+        std::map<std::string, uint64_t> HashMap = {};
     };
 
     class ACL_FUNC_VISIBILITY AclProfilingReporter {
     public:
-        AclProfilingReporter(const char *funcName, ProfFuncType funcType);
+        AclProfilingReporter(const char *funcName, MsprofAclApiType funcType);
         virtual ~AclProfilingReporter();
     private:
         int64_t startTime_ = 0;
         int32_t deviceId_ = -1;
-        const char* funcType_ = nullptr;
         const char* funcTag_ = nullptr;
         const char* funcName_;
+        const MsprofAclApiType funcType_;
     };
+
 } // namespace acl
 
 #define ACL_PROFILING_REG(funcType) \

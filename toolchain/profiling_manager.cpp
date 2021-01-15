@@ -133,7 +133,34 @@ bool AclProfilingManager::IsDeviceEnable(const uint32_t &deviceId)
     return false;
 }
 
-AclProfilingReporter::AclProfilingReporter(const char *funcName, ProfFuncType funcType) : funcName_(funcName)
+aclError AclProfilingManager::QueryHashValue(const char *funcName, int &deviceId, uint64_t &hashId)
+{
+    string apiName(funcName);
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto iter = AclProfilingManager::GetInstance().HashMap.find(apiName);
+    if (iter != AclProfilingManager::GetInstance().HashMap.end()) {
+        hashId = iter->second;
+    } else {
+        if (reporterCallback_ == nullptr) {
+            ACL_LOG_INNER_ERROR("[Check][Param]reporter callback is nullptr");
+            return ACL_ERROR_PROFILING_FAILURE;
+        }
+        HashData hashData;
+        hashData.deviceId = deviceId;
+        hashData.dataLen = apiName.size();
+        hashData.data = reinterpret_cast<unsigned char *>(const_cast<char *>(funcName));
+        int32_t ret = reporterCallback_(MSPROF_MODULE_ACL, MSPROF_REPORTER_HASH, &hashData, sizeof(HashData));
+        if ( ret != 0) {
+            ACL_LOG_CALL_ERROR("[Get][HashId]call reporter failed, type is MSPROF_REPORTER_HASH, result = %d", ret);
+            return ACL_ERROR_PROFILING_FAILURE;
+        }
+        AclProfilingManager::GetInstance().HashMap.insert({apiName, hashData.hashId});
+        hashId = hashData.hashId;
+    }
+    return ACL_SUCCESS;
+}
+
+AclProfilingReporter::AclProfilingReporter(const char *funcName, MsprofAclApiType funcType) : funcName_(funcName), funcType_(funcType) 
 {
     if (AclProfilingManager::GetInstance().AclProfilingIsRun()) {
         if (aclrtGetDevice(&deviceId_) != ACL_SUCCESS) {
@@ -143,22 +170,18 @@ AclProfilingReporter::AclProfilingReporter(const char *funcName, ProfFuncType fu
         switch (funcType) {
             case ACL_PROF_FUNC_OP:
                 funcTag_ = "acl_op";
-                funcType_ = "op";
                 break;
 
             case ACL_PROF_FUNC_MODEL:
                 funcTag_ = "acl_model";
-                funcType_ = "model";
                 break;
 
             case ACL_PROF_FUNC_RUNTIME:
                 funcTag_ = "acl_rts";
-                funcType_ = "runtime";
                 break;
 
             default:
                 funcTag_ = "acl_others";
-                funcType_ = "others";
                 break;
         }
         mmTimespec timespec = mmGetTickCount();
@@ -173,7 +196,7 @@ AclProfilingReporter::~AclProfilingReporter()
         mmTimespec timespec = mmGetTickCount();
         // 1000 ^ 3 converts second to nanosecond
         int64_t endTime = timespec.tv_sec * 1000 * 1000 * 1000 + timespec.tv_nsec;
-        if ((funcTag_ == nullptr) || (funcType_ == nullptr) || (funcName_ == nullptr)) {
+        if ((funcTag_ == nullptr) || (funcName_ == nullptr)) {
             ACL_LOG_WARN("function context is nullptr!");
             return;
         }
@@ -191,7 +214,7 @@ AclProfilingReporter::~AclProfilingReporter()
         }
 
         ReporterData reporter_data{};
-        reporter_data.deviceId = static_cast<int>(deviceId_);
+        reporter_data.deviceId = deviceId_;
         string tag_name = funcTag_;
         errno_t err = EOK;
         err = memcpy_s(reporter_data.tag, MSPROF_ENGINE_MAX_TAG_LEN,
@@ -201,21 +224,28 @@ AclProfilingReporter::~AclProfilingReporter()
             return;
         }
 
-        mmPid_t pid = static_cast<mmPid_t>(mmGetPid());
-        string data = funcName_;
-        int32_t tid = mmGetTid();
-        data = data.append(" ").append(string(funcType_))
-            .append(" ").append(std::to_string(startTime_))
-            .append(" ").append(std::to_string(endTime))
-            .append(" ").append(std::to_string(pid))
-            .append(" ").append(std::to_string(tid))
-            .append("\n");
+        uint64_t hashId = 0;
+        aclError ret = AclProfilingManager::GetInstance().QueryHashValue(funcName_, deviceId_, hashId);
+        if (ret != ACL_SUCCESS) {
+            ACL_LOG_INNER_ERROR("[Query][HashValue]Failed to query hash value, error code is %u", ret);
+            return;
+        }
 
-        reporter_data.data = (unsigned char *)data.c_str();
-        reporter_data.dataLen = data.size();
-        ACL_LOG_DEBUG("AclProfiling reporter reports in %s, device id = %d, data = %s",
-            funcName_, deviceId_, data.c_str());
-        aclError ret = AclProfilingManager::GetInstance().ProfilingData(reporter_data);
+        mmPid_t pid = static_cast<mmPid_t>(mmGetPid());
+        int32_t tid = mmGetTid();
+        //magic number is "5A5A" and tag is 0 for acl
+        MsprofAclProfData profData{MSPROF_DATA_HEAD_MAGIC_NUM, 0};
+        profData.apiType = static_cast<uint32_t>(funcType_);
+        profData.apiHashValue = hashId;
+        profData.beginTime = startTime_;
+        profData.endTime = endTime;
+        profData.processId = pid;
+        profData.threadId = tid;
+
+        reporter_data.data = reinterpret_cast<unsigned char *>(&profData);
+        reporter_data.dataLen = sizeof(MsprofAclProfData);
+        ACL_LOG_DEBUG("AclProfiling reporter reports in %s, device id = %d", funcName_, deviceId_);
+        ret = AclProfilingManager::GetInstance().ProfilingData(reporter_data);
         if (ret != ACL_SUCCESS) {
             ACL_LOG_DEBUG("AclProfiling reporter reports failed, result = %d", ret);
         }
