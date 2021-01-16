@@ -54,11 +54,15 @@ struct ReporterData {
     unsigned char *data;                      // the data content
 };
 
-struct HashData {
+/**
+ * @name  MsprofHashData
+ * @brief struct of data to hash
+ */
+struct MsprofHashData {
     int deviceId;                             // the index of device
     size_t dataLen;                           // the length of data
     unsigned char *data;                      // the data content
-    uint64_t hashId;                          // the id of hashed data 
+    uint64_t hashId;                          // the id of hashed data
 };
 
 /**
