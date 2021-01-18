@@ -372,3 +372,14 @@ TEST_F(UTEST_ACL_toolchain, AclProfilingReporter)
     AclProfilingManager::GetInstance().deviceList_.erase(-1);
     AclProfilingManager::GetInstance().deviceList_.erase(0);
 }
+TEST_F(UTEST_ACL_toolchain, AclProfilingReporter_2)
+{
+    AclProfilingManager::GetInstance().isProfiling_ = true;
+    AclProfilingManager::GetInstance().deviceList_.insert(-1);
+    AclProfilingManager::GetInstance().deviceList_.insert(0);
+    AclProfilingReporter reporter("testProf", ACL_PROF_FUNC_MODEL);
+    reporter.~AclProfilingReporter();
+    AclProfilingManager::GetInstance().isProfiling_ = false;
+    AclProfilingManager::GetInstance().deviceList_.erase(-1);
+    AclProfilingManager::GetInstance().deviceList_.erase(0);
+}

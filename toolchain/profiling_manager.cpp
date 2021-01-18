@@ -145,11 +145,11 @@ aclError AclProfilingManager::QueryHashValue(const char *funcName, int &deviceId
             ACL_LOG_INNER_ERROR("[Check][Param]reporter callback is nullptr");
             return ACL_ERROR_PROFILING_FAILURE;
         }
-        HashData hashData;
+        MsprofHashData hashData;
         hashData.deviceId = deviceId;
         hashData.dataLen = apiName.size();
         hashData.data = reinterpret_cast<unsigned char *>(const_cast<char *>(funcName));
-        int32_t ret = reporterCallback_(MSPROF_MODULE_ACL, MSPROF_REPORTER_HASH, &hashData, sizeof(HashData));
+        int32_t ret = reporterCallback_(MSPROF_MODULE_ACL, MSPROF_REPORTER_HASH, &hashData, sizeof(MsprofHashData));
         if ( ret != 0) {
             ACL_LOG_CALL_ERROR("[Get][HashId]call reporter failed, type is MSPROF_REPORTER_HASH, result = %d", ret);
             return ACL_ERROR_PROFILING_FAILURE;
