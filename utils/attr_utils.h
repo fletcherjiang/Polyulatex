@@ -21,6 +21,7 @@
 #include "types/op_attr.h"
 #include "types/acl_op.h"
 #include "types/tensor_desc_internal.h"
+#include "types/op_model.h"
 
 namespace acl {
 namespace attr_utils {
@@ -38,6 +39,8 @@ ACL_FUNC_VISIBILITY uint64_t GetCurrentTimestamp();
 
 bool ValueRangeCheck(const std::map<AttrRangeType, ge::GeAttrValue> &valueRange,
                      const aclDataBuffer *value, aclDataType dataType);
+
+bool SaveConstToAttr(OpModelDef& modelDef);
 
 bool SaveConstToAttr(const AclOp &aclOp, aclopAttr *opAttr);
 } // namespace attr_utils

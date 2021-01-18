@@ -162,6 +162,7 @@ set(SRC_LIST
     utils/file_utils.cpp
     utils/string_utils.cpp
     utils/math_utils.cpp
+    utils/hash_utils.cpp
     toolchain/dump.cpp
     toolchain/profiling.cpp
     toolchain/profiling_manager.cpp

@@ -17,7 +17,9 @@
 #include <climits>
 #include "types/acl_op.h"
 #include "utils/attr_utils.h"
+#include "utils/hash_utils.h"
 #include <chrono>
+#include <unordered_map>
 
 namespace acl {
 template<typename T>
@@ -28,7 +30,7 @@ public:
         return entries_.empty();
     }
 
-    void Insert(const AclOp &aclOp, const T &entry, T &agingT);
+    aclError Insert(const AclOp &aclOp, const T &entry, T &agingT);
 
     aclError Get(const AclOp &aclOp, T &entry, bool needUpdateTimestamp = false);
 
@@ -37,11 +39,13 @@ public:
 private:
     static std::string TensorDescArr2Str(int num, const aclTensorDesc *const descArr[]);
     static std::string ShapeRangeArr2Str(int num, const aclTensorDesc *const descArr[]);
-    void Aging(T &agingT);
+    aclError Aging(T &agingT);
     void Updatetimestamp(T &entry);
-    void AddMemAndAging(std::vector<std::pair<aclopAttr, T>> &modelVec,
-                        const aclopAttr &attr, const T &entry, T &agingT);
+    aclError AddMemAndAging(std::vector<std::pair<aclopAttr, T>> &modelVec,
+                        const aclopAttr &attr, const T &entry, T &agingT, size_t &seed);
     bool CheckValueRange(const AclOp &aclOp, T &entry);
+
+    using HashMap = std::unordered_map<size_t, std::vector<T>>;
 
     using RangeMap = std::map<std::string, std::vector<std::pair<aclopAttr, T>>>;
     using AttrMap = std::map<size_t, RangeMap>;
@@ -49,6 +53,7 @@ private:
     using InputMap = std::map<std::string, OutputMap>;
     using ModelMap = std::map<std::string, InputMap>;
 
+    HashMap hashMap_;
     ModelMap entries_;
     mutable std::mutex mutex_;
     uint64_t count{0};
@@ -93,7 +98,7 @@ std::string AclShapeRangeMap<T>::ShapeRangeArr2Str(int num, const aclTensorDesc 
 }
 
 template<typename T>
-void AclShapeRangeMap<T>::Aging(T &agingT)
+aclError AclShapeRangeMap<T>::Aging(T &agingT)
 {
     typename ModelMap::iterator itTypeMin;
     typename InputMap::iterator itInputMin;
@@ -136,7 +141,7 @@ void AclShapeRangeMap<T>::Aging(T &agingT)
     }
     if (!found) {
         ACL_LOG_WARN("AclShapeRangeMap::Aging IN, can not find minimum value");
-        return;
+        return ACL_SUCCESS;
     }
     ACL_LOG_INFO("AclShapeRangeMap::Aging IN, type = %s, input = %s, output = %s, digest = %zu, range = %s",
                  itTypeMin->first.c_str(), itInputMin->first.c_str(),
@@ -144,9 +149,10 @@ void AclShapeRangeMap<T>::Aging(T &agingT)
     auto &model_vec = itRangeMin->second;
     if (index >= model_vec.size()) {
         ACL_LOG_WARN("AclShapeRangeMap::Aging IN, index %zu is larger than vec size %zu", index, model_vec.size());
-        return;
+        return ACL_SUCCESS;
     }
     agingT = model_vec[index].second;
+    ACL_LOG_INFO("AclShapeRangeMap::Aging model in model map success, time stamp is %lu", agingT->timestamp);
     model_vec.erase(model_vec.begin() + index);
     --count;
     if (model_vec.empty()) {
@@ -164,7 +170,33 @@ void AclShapeRangeMap<T>::Aging(T &agingT)
             }
         }
     }
-    return;
+
+    // remove model in hash map while time stamp in hash map is equal to model map 
+    bool foundHash = false;
+    for (auto hashMapIter = hashMap_.begin(); hashMapIter != hashMap_.end(); ++hashMapIter) {
+        for (auto vecIter = hashMapIter->second.begin(); vecIter != hashMapIter->second.end(); ++vecIter) {
+            ACL_LOG_INFO("AclShapeRangeMap::seed is %zu, time stamp is %lu", hashMapIter->first, (*vecIter)->timestamp);
+            if ((*vecIter).get() == agingT.get())  {
+                ACL_LOG_INFO("AclShapeRangeMap::Aging model in hash map success, hash seed is %zu, hash time stamp is %zu, "
+                    "aging time stamp is %zu", hashMapIter->first, (*vecIter)->timestamp, agingT->timestamp);
+                hashMapIter->second.erase(vecIter);
+                foundHash = true;
+                break;
+            }
+        }
+        if (foundHash && hashMapIter->second.empty()) {
+            ACL_LOG_INFO("AclShapeRangeMap::After delete model, hash map empty while seed is %zu, delete seed in HashMap", 
+                hashMapIter->first);
+            hashMap_.erase(hashMapIter);
+            break;
+        }
+    }
+    if (!foundHash) {
+        ACL_LOG_ERROR("[Check][foundHash]AclShapeRangeMap::Aging model with time stamp is %lu, ModelMap has aging model"
+            "while HashMap has node aging", agingT->timestamp);
+        return ACL_ERROR_FAILURE;
+    }
+    return ACL_SUCCESS;
 }
 
 template<typename T>
@@ -179,17 +211,21 @@ void AclShapeRangeMap<T>::Updatetimestamp(T &entry)
 }
 
 template<typename T>
-void AclShapeRangeMap<T>::AddMemAndAging(std::vector<std::pair<aclopAttr, T>> &modelVec,
-                                         const aclopAttr &attr, const T &entry, T &agingT)
+aclError AclShapeRangeMap<T>::AddMemAndAging(std::vector<std::pair<aclopAttr, T>> &modelVec,
+                                         const aclopAttr &attr, const T &entry, T &agingT, size_t &seed)
 {
     modelVec.emplace_back(attr, entry);
+    hashMap_[seed].emplace_back(entry);
+    ACL_LOG_INFO("AclShapeRangeMap::Insert aclOp into HashMap success, seed = %zu", seed);
     ++count;
     if ((entry->timestamp == ULLONG_MAX) || (count <= maxOpNum)) {
         ACL_LOG_INFO("AclShapeRangeMap::AddMemAndAging in, count is %llu, maxOpNum is %llu, no need aging",
             count, maxOpNum);
-        return;
+        return ACL_SUCCESS;
     }
-    Aging(agingT);
+    ACL_LOG_INFO("AclShapeRangeMap::time stamp is %lu, count is %lu, maxOpNum is %lu, start aging", 
+        entry->timestamp, count, maxOpNum);
+    return Aging(agingT);
 }
 
 template<typename T>
@@ -219,7 +255,7 @@ bool AclShapeRangeMap<T>::CheckValueRange(const AclOp &aclOp, T &entry)
 }
 
 template<typename T>
-void AclShapeRangeMap<T>::Insert(const AclOp &aclOp, const T &entry, T &agingT)
+aclError AclShapeRangeMap<T>::Insert(const AclOp &aclOp, const T &entry, T &agingT)
 {
     ACL_LOG_INFO("AclShapeRangeMap::Insert IN, aclOp = %s", aclOp.DebugString().c_str());
     string inputDescStr = TensorDescArr2Str(aclOp.numInputs, aclOp.inputDesc);
@@ -230,44 +266,45 @@ void AclShapeRangeMap<T>::Insert(const AclOp &aclOp, const T &entry, T &agingT)
     ACL_LOG_INFO("inputDescStr = %s, outputDescStr = %s, inputRangeStr = %s, outputRangeStr = %s, rangeKeyStr = %s",
         inputDescStr.c_str(), outputDescStr.c_str(), inputRangeStr.c_str(),
         outputRangeStr.c_str(), rangeKeyStr.c_str());
-    if (aclOp.opAttr != nullptr) {
-        if (!attr_utils::SaveConstToAttr(aclOp, const_cast<aclopAttr *>(aclOp.opAttr))) {
+    
+    size_t digest = 0;
+    auto *opAttr = aclOp.opAttr;
+    aclopAttr emptyAttr; 
+    if (opAttr != nullptr) {
+        if (!attr_utils::SaveConstToAttr(aclOp, const_cast<aclopAttr *>(opAttr))) {
             ACL_LOG_ERROR("[Check][ConstData]save const data buffer to attr fail");
-            return;
+            return ACL_ERROR_FAILURE;
         }
-        size_t digest = attr_utils::AttrMapToDigest(aclOp.opAttr->Attrs());
-        std::lock_guard<std::mutex> lk(mutex_);
-        entries_[aclOp.opType][inputDescStr][outputDescStr][digest][rangeKeyStr].emplace_back(*aclOp.opAttr, entry);
-        AddMemAndAging(entries_[aclOp.opType][inputDescStr][outputDescStr][digest][rangeKeyStr],
-                       *aclOp.opAttr, entry, agingT);
+        digest = attr_utils::AttrMapToDigest(opAttr->Attrs());
     } else {
-        aclopAttr emptyAttr;
         if (!attr_utils::SaveConstToAttr(aclOp, &emptyAttr)) {
             ACL_LOG_ERROR("[Check][ConstData]save const data buffer to attr fail");
-            return;
+            return ACL_ERROR_FAILURE;
         }
-        size_t digest = attr_utils::AttrMapToDigest(emptyAttr.Attrs());
-        std::lock_guard<std::mutex> lk(mutex_);
-        entries_[aclOp.opType][inputDescStr][outputDescStr][digest][rangeKeyStr].emplace_back(emptyAttr, entry);
-        AddMemAndAging(entries_[aclOp.opType][inputDescStr][outputDescStr][digest][rangeKeyStr],
-                       emptyAttr, entry, agingT);
+        digest = attr_utils::AttrMapToDigest(emptyAttr.Attrs());
+        opAttr = &emptyAttr;
     }
+    size_t seed = 0;
+    if (hash_utils::GetAclOpHash(aclOp, digest, seed) != ACL_SUCCESS) {
+        ACL_LOG_ERROR("[Check][GetAclOpHash]GetAclOpHash failed, seed = %zu, aclOp = %s",
+            seed, aclOp.DebugString().c_str());
+        return ACL_ERROR_FAILURE;
+    }
+    // Lock
+    {
+        std::lock_guard<std::mutex> lk(mutex_);
+        auto &modelVec = entries_[aclOp.opType][inputDescStr][outputDescStr][digest][rangeKeyStr];
+        ACL_REQUIRES_OK(AddMemAndAging(modelVec, *opAttr, entry, agingT, seed));
+        ACL_LOG_INFO("AclShapeRangeMap::Insert success, seed = %zu, aclOp = %s", seed, aclOp.DebugString().c_str());
+    }
+
+    return ACL_SUCCESS;
 }
 
 template<typename T>
 aclError AclShapeRangeMap<T>::Get(const AclOp &aclOp, T &entry, bool needUpdateTimestamp)
 {
-    ACL_LOG_INFO("AclShapeRangeMap::Get Out, aclOp = %s", aclOp.DebugString().c_str());
-    const string &opType = aclOp.opType;
-    auto *opAttr = aclOp.opAttr;
-    string inputDescStr = TensorDescArr2Str(aclOp.numInputs, aclOp.inputDesc);
-    string outputDescStr = TensorDescArr2Str(aclOp.numOutputs, aclOp.outputDesc);
-    string inputRangeStr = ShapeRangeArr2Str(aclOp.numInputs, aclOp.inputDesc);
-    string outputRangeStr = ShapeRangeArr2Str(aclOp.numOutputs, aclOp.outputDesc);
-    string rangeKeyStr = inputRangeStr + outputRangeStr;
-    ACL_LOG_INFO("inputDescStr = %s, outputDescStr = %s, inputRangeStr = %s, outputRangeStr = %s, rangeKeyStr = %s",
-        inputDescStr.c_str(), outputDescStr.c_str(), inputRangeStr.c_str(),
-        outputRangeStr.c_str(), rangeKeyStr.c_str());
+    auto opAttr = aclOp.opAttr;
     size_t digest = 0;
     aclopAttr emptyAttr;
     if (opAttr != nullptr) {
@@ -279,69 +316,109 @@ aclError AclShapeRangeMap<T>::Get(const AclOp &aclOp, T &entry, bool needUpdateT
             ACL_ERROR_INVALID_PARAM, "save const data buffer to attr fail");
         opAttr = &emptyAttr;
     }
-
+    
+    size_t seed = 0;
+    ACL_REQUIRES_OK(hash_utils::GetAclOpHash(aclOp, digest, seed));
     std::lock_guard<std::mutex> lk(mutex_);
+    auto iter = hashMap_.find(seed);
+    if (iter == hashMap_.end()) {
+        ACL_LOG_INFO("Get aclOp from AclShapeRangeMap failed due to hashMap_ is empty when seed = %zu, aclOp = %s", 
+            seed, aclOp.DebugString().c_str());
+        return ACL_ERROR_FAILURE;
+    } else if (iter->second.size() == 1) {
+        ACL_LOG_INFO("Get aclOp from AclShapeRangeMap success! seed = %zu, aclOp = %s",
+            seed, aclOp.DebugString().c_str());
+        if (needUpdateTimestamp) {
+            Updatetimestamp(iter->second.back());
+        }
 
-    auto it = entries_.find(opType);
-    if (it == entries_.end()) {
-        ACL_LOG_WARN("Match op type failed. opType = %s", opType.c_str());
-        return ACL_ERROR_OP_TYPE_NOT_MATCH;
-    }
-
-    auto &filteredByType = it->second;
-    auto iter = filteredByType.find(inputDescStr);
-    if (iter == filteredByType.end()) {
-        ACL_LOG_WARN("Match op inputs failed. opType = %s, inputDesc = %s",
-            opType.c_str(), inputDescStr.c_str());
-        return ACL_ERROR_OP_INPUT_NOT_MATCH;
-    }
-
-    auto &filteredByInputs = iter->second;
-    auto iter2 = filteredByInputs.find(outputDescStr);
-    if (iter2 == filteredByInputs.end()) {
-        ACL_LOG_WARN("Match op outputs failed. opType = %s, outputDesc = %s",
-            opType.c_str(), outputDescStr.c_str());
-        return ACL_ERROR_OP_OUTPUT_NOT_MATCH;
-    }
-
-    auto &filteredByOutputs = iter2->second;
-    auto iter3 = filteredByOutputs.find(digest);
-    if (iter3 == filteredByOutputs.end()) {
-        ACL_LOG_WARN("Match attr by digest failed. user input attr = %s",
-            opAttr == nullptr ? "None" : opAttr->DebugString().c_str());
-        return ACL_ERROR_OP_ATTR_NOT_MATCH;
-    }
-
-    // matches by shapeRange
-    auto &filteredByAttr = iter3->second;
-    auto iter4 = filteredByAttr.find(rangeKeyStr);
-    if (iter4 == filteredByAttr.end()) {
-        ACL_LOG_WARN("Match op rangeKey failed. opType = %s, rangeKey = %s", opType.c_str(), rangeKeyStr.c_str());
-        return ACL_ERROR_OP_ATTR_NOT_MATCH;
-    }
-
-    auto &entries = iter4->second;
-    T *matchedByRange = nullptr;
-    for (auto &attrAndValue : entries) {
-        if (attr_utils::OpAttrEquals(&attrAndValue.first, opAttr)) {
-            if (CheckValueRange(aclOp, attrAndValue.second)) {
-                ACL_LOG_INFO("check value range success");
-                matchedByRange = &attrAndValue.second;
-                break;
+        if (CheckValueRange(aclOp, iter->second.back())) {
+            if (hash_utils::CheckModelMatch(aclOp, iter->second.back())) {
+                ACL_LOG_INFO("Get aclOp from aclOpMap success! seed = %zu, aclOp = %s", seed,
+                    aclOp.DebugString().c_str());
+                entry = iter->second.back();
+                return ACL_SUCCESS;
+            } else {
+                ACL_LOG_INFO("Get aclOp from aclOpMap failed due to CheckModelMatch failed! seed = %zu, aclOp = %s",
+                    seed, aclOp.DebugString().c_str());
+                return ACL_ERROR_FAILURE;
             }
         }
-    }
+    } else {
+        ACL_LOG_INFO("Match aclOp by string from AclShapeRangeMap due to seed has conflict! seed = %zu, aclOp = %s", 
+            seed, aclOp.DebugString().c_str());
+        const string &opType = aclOp.opType;
+        string inputDescStr = TensorDescArr2Str(aclOp.numInputs, aclOp.inputDesc);
+        string outputDescStr = TensorDescArr2Str(aclOp.numOutputs, aclOp.outputDesc);
+        string inputRangeStr = ShapeRangeArr2Str(aclOp.numInputs, aclOp.inputDesc);
+        string outputRangeStr = ShapeRangeArr2Str(aclOp.numOutputs, aclOp.outputDesc);
+        string rangeKeyStr = inputRangeStr + outputRangeStr;
 
-    if (matchedByRange == nullptr) {
-        ACL_LOG_WARN("Match op attr or constData failed. opType = %s, attr = %s",
-            opType.c_str(), opAttr == nullptr ? "None" : opAttr->DebugString().c_str());
-        return ACL_ERROR_OP_ATTR_NOT_MATCH;
+        auto it = entries_.find(opType);
+        if (it == entries_.end()) {
+            ACL_LOG_WARN("Match op type failed. opType = %s", opType.c_str());
+            return ACL_ERROR_OP_TYPE_NOT_MATCH;
+        }
+
+        ACL_LOG_INFO("inputDescStr = %s, outputDescStr = %s, inputRangeStr = %s, outputRangeStr = %s, rangeKeyStr = %s",
+            inputDescStr.c_str(), outputDescStr.c_str(), inputRangeStr.c_str(),
+            outputRangeStr.c_str(), rangeKeyStr.c_str());
+
+        auto &filteredByType = it->second;
+        auto iter = filteredByType.find(inputDescStr);
+        if (iter == filteredByType.end()) {
+            ACL_LOG_WARN("Match op inputs failed. opType = %s, inputDesc = %s",
+                opType.c_str(), inputDescStr.c_str());
+            return ACL_ERROR_OP_INPUT_NOT_MATCH;
+        }
+
+        auto &filteredByInputs = iter->second;
+        auto iter2 = filteredByInputs.find(outputDescStr);
+        if (iter2 == filteredByInputs.end()) {
+            ACL_LOG_WARN("Match op outputs failed. opType = %s, outputDesc = %s",
+                opType.c_str(), outputDescStr.c_str());
+            return ACL_ERROR_OP_OUTPUT_NOT_MATCH;
+        }
+
+        auto &filteredByOutputs = iter2->second;
+        auto iter3 = filteredByOutputs.find(digest);
+        if (iter3 == filteredByOutputs.end()) {
+            ACL_LOG_WARN("Match attr by digest failed. user input attr = %s",
+                opAttr == nullptr ? "None" : opAttr->DebugString().c_str());
+            return ACL_ERROR_OP_ATTR_NOT_MATCH;
+        }
+
+        // matches by shapeRange
+        auto &filteredByAttr = iter3->second;
+        auto iter4 = filteredByAttr.find(rangeKeyStr);
+        if (iter4 == filteredByAttr.end()) {
+            ACL_LOG_WARN("Match op rangeKey failed. opType = %s, rangeKey = %s", opType.c_str(), rangeKeyStr.c_str());
+            return ACL_ERROR_OP_ATTR_NOT_MATCH;
+        }
+
+        auto &entries = iter4->second;
+        T *matchedByRange = nullptr;
+        for (auto &attrAndValue : entries) {
+            if (attr_utils::OpAttrEquals(&attrAndValue.first, opAttr)) {
+                if (CheckValueRange(aclOp, attrAndValue.second)) {
+                    ACL_LOG_INFO("check value range success");
+                    matchedByRange = &attrAndValue.second;
+                    break;
+                }
+            }
+        }
+
+        if (matchedByRange == nullptr) {
+            ACL_LOG_WARN("Match op attr or constData failed. opType = %s, attr = %s",
+                opType.c_str(), opAttr == nullptr ? "None" : opAttr->DebugString().c_str());
+            return ACL_ERROR_OP_ATTR_NOT_MATCH;
+        }
+        if (needUpdateTimestamp) {
+            Updatetimestamp(*matchedByRange);
+        }
+        entry = *matchedByRange;
+        return ACL_SUCCESS;
     }
-    if (needUpdateTimestamp) {
-        Updatetimestamp(*matchedByRange);
-    }
-    entry = *matchedByRange;
-    return ACL_SUCCESS;
 }
 } // namespace acl
 

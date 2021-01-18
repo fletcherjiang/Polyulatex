@@ -19,6 +19,8 @@
 
 #include "common/log_inner.h"
 
+#include "utils/attr_utils.h"
+
 using ge::MODEL_FILE_MAGIC_NUM;
 using ge::ModelFileHeader;
 using ge::OmFileLoadHelper;
@@ -276,6 +278,11 @@ aclError OpModelParser::ToModelConfig(ge::Model &model, OpModelDef &modelDef)
     model.DelAttr(ATTR_KEY_OP_TYPE);
     ACL_LOG_INFO("after delete attrs");
 
+    // parser const buffer
+    if (!attr_utils::SaveConstToAttr(modelDef)) {
+        ACL_LOG_ERROR("[Save][ConstData]save const data buffer to attr fail");
+        return ACL_ERROR_INVALID_PARAM;
+    }
     // parse attr
     ParseOpAttrs(model, modelDef.opAttr);
     ACL_LOG_INFO("after parseOpAttrs");

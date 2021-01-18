@@ -29,6 +29,10 @@ constexpr int OM_FILE_SUFFIX_LEN = 3;
 constexpr int OM_DIR_MAX_DEPTH = 3;
 constexpr int DECIMAL = 10;
 const std::string ACL_MAX_OPQUEUE_NUM = "max_opqueue_num";
+const int DEFAULT_STRING_SIZE = 64;
+const std::string UNKNOWN_RANK_DIM_STR = "-2_";
+const std::string DYNAMIC_SHAPE_DIM_STR = "-1_";
+const std::string STATIC_SHAPE_DIM_STR = "0_";
 }
 
 void OpModelManager::SetCompileFlag(int32_t flag)
@@ -261,19 +265,17 @@ void OpModelManager::GetTensorShapeStatus(const AclOp &aclOp,
 std::string OpModelManager::TensorStatusToStr(const std::vector<aclTensorShapeStatus> &tensorShapeStatus)
 {
     std::string tensorShapeStatusDesc;
+    tensorShapeStatusDesc.reserve(DEFAULT_STRING_SIZE);
     for (size_t i = 0; i < tensorShapeStatus.size(); ++i) {
         tensorShapeStatusDesc.push_back('|');
         if (tensorShapeStatus[i].isUnkownRank) {
-            tensorShapeStatusDesc += std::to_string(-2); // -2 means unkwon rank dim
-            tensorShapeStatusDesc.push_back('_');
+            tensorShapeStatusDesc += UNKNOWN_RANK_DIM_STR; // -2 means unkwon rank dim
         }
         for (size_t j = 0; j < tensorShapeStatus[i].shapeStatus.size(); ++j) {
             if (tensorShapeStatus[i].shapeStatus[j]) {
-                tensorShapeStatusDesc += std::to_string(1); // 1 means dynamic shape dim
-                tensorShapeStatusDesc.push_back('_');
+                tensorShapeStatusDesc += DYNAMIC_SHAPE_DIM_STR; // 1 means dynamic shape dim
             } else {
-                tensorShapeStatusDesc += std::to_string(0); // 0 means static shape dim
-                tensorShapeStatusDesc.push_back('_');
+                tensorShapeStatusDesc += STATIC_SHAPE_DIM_STR; // 0 means static shape dim
             }
         }
     }
@@ -381,13 +383,13 @@ aclError OpModelManager::RegisterModel(OpModelDef &&modelConfig,
         std::vector<aclTensorShapeStatus> shapeStatus;
         SetTensorShapeStatus(aclOp, shapeStatus);
         SetTensorShapeRange(aclOp, shapeStatus);
-        opDynamicModelDefs.Insert(aclOp, modelDefPtr, agingModelDef);
+        ACL_REQUIRES_OK(opDynamicModelDefs.Insert(aclOp, modelDefPtr, agingModelDef));
         if (agingModelDef != nullptr) {
             dynamicModelCache_.Delete(*agingModelDef);
         }
     } else {
         ACL_LOG_INFO("The model is static shape");
-        opModelDefs.Insert(aclOp, modelDefPtr, agingModelDef);
+        ACL_REQUIRES_OK(opModelDefs.Insert(aclOp, modelDefPtr, agingModelDef));
         if (agingModelDef != nullptr) {
             modelCache_.Delete(*agingModelDef);
         }
@@ -765,8 +767,10 @@ aclError OpModelManager::MatchDynamicOpModel(const AclOp &aclOp, OpModel &opMode
     ACL_LOG_INFO("aclOp.numInputs is %d, aclOp.numOutputs is %d", aclOp.numInputs, aclOp.numOutputs);
     std::vector<std::vector<aclTensorShapeStatus>> shapeStatus;
     GetTensorShapeStatus(aclOp, shapeStatus);
+    std::vector<std::vector<std::pair<int64_t, int64_t>>> shapeRanges;
+    std::vector<std::vector<int64_t>> tensorDims;
+    std::vector<int64_t> storageTensorDims;
     for (size_t i = 0; i < shapeStatus.size(); ++i) {
-        std::vector<std::vector<std::pair<int64_t, int64_t>>> shapeRanges;
         GetTensorShapeRange(shapeStatus[i], shapeRanges);
         for (size_t j = 0; j < shapeRanges.size(); ++j) {
             ACL_LOG_INFO("shapeRanges[%d] size is %zu, shapeStatus[%d] size is %zu",
@@ -782,8 +786,8 @@ aclError OpModelManager::MatchDynamicOpModel(const AclOp &aclOp, OpModel &opMode
             }
             AclOp aclOpMatch = AclOp(aclOp);
             ACL_LOG_INFO("before FixedAclopMatch aclOpMatch = %s", aclOpMatch.DebugString().c_str());
-            std::vector<std::vector<int64_t>> tensorDims;
-            std::vector<int64_t> storageTensorDims;
+            tensorDims.clear();
+            storageTensorDims.clear();
             FixedAclopMatch(aclOpMatch, shapeStatus[i], shapeRanges[j], tensorDims, storageTensorDims);
             ACL_LOG_INFO("after FixedAclopMatch aclOpMatch = %s", aclOpMatch.DebugString().c_str());
             ret = dynamicOpModels_.Get(aclOpMatch, modelDef, true);

@@ -649,6 +649,50 @@ uint64_t GetCurrentTimestamp()
     return total_use_time;
 }
 
+static bool ConstToAttr(const vector<aclTensorDesc> tensorDesc,
+                        std::vector<std::string> &constStr)
+{
+    for (auto &desc : tensorDesc) {
+        if (desc.isConst) {
+            if ((desc.constDataBuf != nullptr) && (desc.constDataLen <= 0)) {
+                ACL_LOG_INNER_ERROR("[Check][constDataBuf]constDataBuf is not nullptr and dataLen is <= 0");
+                return false;
+            }
+            if ((desc.constDataBuf == nullptr) && (desc.constDataLen > 0)) {
+                ACL_LOG_INNER_ERROR("[Check][constDataBuf]constDataBuf is nullptr and dataLen is > 0");
+                return false;
+            }
+            std::string constBufStr =
+                    std::string(reinterpret_cast<const char *>(desc.constDataBuf.get()), desc.constDataLen);
+            constStr.emplace_back(constBufStr);
+            ACL_LOG_INFO("aclopAttr insert constDataBuf:[%s] when execute", constBufStr.c_str());
+        }
+    }
+    return true;
+}
+
+bool SaveConstToAttr(OpModelDef &modelDef)
+{
+    std::vector<std::string> constStr;
+    ACL_LOG_INFO("begin to inset constDataBuf in aclopAttr");
+    bool ret = ConstToAttr(modelDef.inputDescArr, constStr);
+    if (!ret) {
+        ACL_LOG_INNER_ERROR("[Check][InputTenspr]inputTenspr get const dataLen failed");
+        return false;
+    }
+    ret = ConstToAttr(modelDef.outputDescArr, constStr);
+    if (!ret) {
+        ACL_LOG_INNER_ERROR("[Check][OutputTensor]outputTensor get const dataLen failed");
+        return false;
+    }
+    // opAttr is not nullptr
+    for (size_t i = 0; i < constStr.size(); ++i) {
+        ACL_LOG_INFO("Get the [%zu] constBuf is [%s] to emplace emptyAttr", i, constStr[i].c_str());
+        modelDef.opAttr.EmplaceConstBuf(constStr[i]);
+    }
+    return true;
+}
+
 static bool ConstToAttr(int tensorNum,
                         const aclTensorDesc *const tensorDesc[],
                         std::vector<std::string> &constStr)

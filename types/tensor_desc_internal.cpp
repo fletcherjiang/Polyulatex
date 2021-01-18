@@ -207,6 +207,38 @@ bool aclTensorDesc::CheckShapeRange() const
     return true;
 }
 
+bool aclTensorDesc::operator==(const aclTensorDesc* other)
+{
+    ACL_LOG_DEBUG("Check aclTensorDesc is equal start!");
+    ACL_REQUIRES_NOT_NULL(other);
+
+    ACL_CHECK_EQUAL(this->dataType, other->dataType);
+
+    ACL_CHECK_EQUAL(this->format, other->format);
+
+    ACL_CHECK_EQUAL(this->storageFormat, other->storageFormat);
+
+    if (this->dims != other->dims) {
+        auto thisDim = acl::string_utils::VectorToString(this->dims);
+        auto otherDim = acl::string_utils::VectorToString(other->dims);
+        ACL_LOG_INFO("leftDim [%s] is not equal to otherDim [%s]", thisDim.c_str(), otherDim.c_str());
+        return false;
+    }
+    if (this->shapeRange != other->shapeRange) {
+        auto thisshapeRange = acl::string_utils::VectorToString(this->shapeRange);
+        auto othershapeRange = acl::string_utils::VectorToString(other->shapeRange);
+        ACL_LOG_INFO("thisShapeRange [%s] is not equal to otherShapeRange [%s]",
+             thisshapeRange.c_str(), othershapeRange.c_str());
+        return false;
+    }
+    ACL_CHECK_EQUAL(this->isConst, other->isConst);
+
+    ACL_CHECK_EQUAL(this->memtype, other->memtype);
+
+    ACL_LOG_INFO("aclTensorDesc is equal!");
+    return true;
+}
+
 size_t aclDataTypeSize(aclDataType dataType)
 {
     switch (dataType) {
@@ -678,3 +710,4 @@ aclError aclSetTensorPlaceMent(aclTensorDesc *desc, aclMemType memType)
     desc->memtype = memType;
     return ACL_SUCCESS;
 }
+
