@@ -8,8 +8,6 @@
 #undef private
 #undef protected
 
-<<<<<<< Updated upstream
-=======
 #define protected public
 #define private public
 #include "utils/acl_op_map.h"
@@ -22,7 +20,6 @@
 #undef private
 #undef protected
 
->>>>>>> Stashed changes
 #include "acl/acl.h"
 #include "runtime/rt.h"
 #include "json_parser.h"
@@ -232,13 +229,6 @@ TEST_F(UTEST_ACL_OpModelManager, MatchModelDynamicTest)
     modelDef.opAttr.SetAttr<string>("testAttr", "attrValue");
     modelDef.opAttr.SetAttr<string>("truncate", "1");
 
-<<<<<<< Updated upstream
-    auto &instance = OpModelManager::GetInstance();
-    EXPECT_EQ(instance.RegisterModel(std::move(modelDef), instance.opModels_, instance.dynamicOpModels_, true), ACL_SUCCESS);
-
-=======
-
-
     auto &instance = OpModelManager::GetInstance();
     EXPECT_EQ(instance.RegisterModel(std::move(modelDef), instance.opModels_, instance.dynamicOpModels_, true), ACL_SUCCESS);
 
@@ -254,10 +244,7 @@ TEST_F(UTEST_ACL_OpModelManager, MatchModelDynamicTest)
     modelDef_2.opAttr.SetAttr<string>("testAttr", "attrValue");
     modelDef_2.opAttr.SetAttr<string>("truncate", "1");
 
-    auto modelDefPtr = shared_ptr<OpModelDef>(new (std::nothrow)OpModelDef(std::move(modelDef_2)));
-    instance.dynamicOpModels_.hashMap_[10042533503826078819].push_back(std::move(modelDefPtr));
 
->>>>>>> Stashed changes
     AclOp aclOp;
     aclopAttr *opAttr = aclopCreateAttr();
     const aclTensorDesc *inputDesc[2];
@@ -273,11 +260,7 @@ TEST_F(UTEST_ACL_OpModelManager, MatchModelDynamicTest)
     OpModel opModel;
     bool isDynamic;
     aclOp.opType = "Cast";
-<<<<<<< Updated upstream
     EXPECT_NE(instance.MatchOpModel(aclOp, opModel, isDynamic), ACL_SUCCESS);
-=======
-
->>>>>>> Stashed changes
     aclOp.numInputs = 1;
     EXPECT_NE(instance.MatchOpModel(aclOp, opModel, isDynamic), ACL_SUCCESS);
     aclOp.numInputs = 2;
@@ -324,12 +307,6 @@ TEST_F(UTEST_ACL_OpModelManager, MatchModelDynamicTest)
     aclDestroyTensorDesc(inputDesc[1]);
     aclDestroyTensorDesc(outputDesc[0]);
     aclopDestroyAttr(opAttr);
-<<<<<<< Updated upstream
-=======
-
-    instance.opModels_.hashMap_[6687538955415257199].clear();
-    instance.dynamicOpModels_.hashMap_[6687538955415257199].clear();
-
 }
 
 
@@ -441,7 +418,6 @@ TEST_F(UTEST_ACL_OpModelManager, MatchModelHashTest)
     aclopDestroyAttr(opAttr);
 
     instance.opModels_.hashMap_[6687538955415257199].clear();
->>>>>>> Stashed changes
 }
 
 TEST_F(UTEST_ACL_OpModelManager, MatchModelTest)
@@ -457,8 +433,6 @@ TEST_F(UTEST_ACL_OpModelManager, MatchModelTest)
     auto &instance = OpModelManager::GetInstance();
     EXPECT_EQ(instance.RegisterModel(std::move(modelDef), instance.opModels_, instance.dynamicOpModels_, false), ACL_SUCCESS);
 
-<<<<<<< Updated upstream
-=======
     OpModelDef modelDef_2;
     modelDef.opType = "acltest";
     int64_t shape_2[]{16, 16};
@@ -467,10 +441,6 @@ TEST_F(UTEST_ACL_OpModelManager, MatchModelTest)
     modelDef.outputDescArr.emplace_back(ACL_FLOAT16, 2, shape_2, ACL_FORMAT_ND);
     modelDef.opAttr.SetAttr<string>("testAttr", "attrValue");
 
-    auto modelDefPtr = shared_ptr<OpModelDef>(new (std::nothrow)OpModelDef(std::move(modelDef_2)));
-    instance.opModels_.hashMap_[6687538955415257199].push_back(std::move(modelDefPtr));
-
->>>>>>> Stashed changes
     AclOp aclOp;
     aclopAttr *opAttr = aclopCreateAttr();
     const aclTensorDesc *inputDesc[2];
