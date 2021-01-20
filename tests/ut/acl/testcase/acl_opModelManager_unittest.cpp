@@ -441,14 +441,6 @@ TEST_F(UTEST_ACL_OpModelManager, MatchModelTest)
     modelDef.outputDescArr.emplace_back(ACL_FLOAT16, 2, shape_2, ACL_FORMAT_ND);
     modelDef.opAttr.SetAttr<string>("testAttr", "attrValue");
 
-    AclOp aclOp;
-    aclopAttr *opAttr = aclopCreateAttr();
-    const aclTensorDesc *inputDesc[2];
-    const aclTensorDesc *outputDesc[1];
-    inputDesc[0] = aclCreateTensorDesc(ACL_FLOAT16, 2, shape, ACL_FORMAT_ND);
-    inputDesc[1] = aclCreateTensorDesc(ACL_FLOAT16, 2, shape, ACL_FORMAT_ND);
-    outputDesc[0] = aclCreateTensorDesc(ACL_FLOAT16, 2, shape, ACL_FORMAT_ND);
-
     aclOp.inputDesc = inputDesc;
     aclOp.outputDesc = outputDesc;
 

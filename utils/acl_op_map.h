@@ -185,26 +185,33 @@ aclError AclOpMap<T>::AddMemAndAging(std::vector<std::pair<aclopAttr, T>> &model
 {
     // Check if it needs to be overwritten
     bool found = false;
-    T found_entry;
+    T foundEntry;
     for (std::pair<aclopAttr, T> &attr_and_entry : modelVec) {
         if (attr_utils::OpAttrEquals(&attr_and_entry.first, &attr)) {
             ACL_LOG_DEBUG("Override entry with same op_desc in ModelMap");
-            found_entry = attr_and_entry.second;
+            foundEntry = attr_and_entry.second;
             attr_and_entry.second = entry;
             found = true;
             break;
         }
     }
     if (found) {
+        bool foundHash = false;
         for (auto hashMapIter = hashMap_.begin(); hashMapIter != hashMap_.end(); ++hashMapIter) {
             for (auto vecIter = hashMapIter->second.begin(); vecIter != hashMapIter->second.end(); ++vecIter) {
                 ACL_LOG_INFO("AclOpMap::seed is %zu, time stamp is %lu", hashMapIter->first, (*vecIter)->timestamp);
-                if ((*vecIter).get() == found_entry.get()) {
+                if ((*vecIter).get() == foundEntry.get()) {
+                    foundHash = true;
                     *vecIter = entry;
                     ACL_LOG_DEBUG("Override entry with same op_desc in HashMap");
                     return ACL_SUCCESS;
                 }
             }
+        }
+        if (!foundHash) {
+            ACL_LOG_ERROR("[Check][foundHash]AclOpMap::Override entry with same op_desc in ModelMap while not found in "
+                          "HashMap");
+            return ACL_ERROR_FAILURE;
         }
     }
 
