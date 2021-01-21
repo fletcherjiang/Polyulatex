@@ -212,10 +212,13 @@ bool aclTensorDesc::operator==(const aclTensorDesc* other)
     ACL_LOG_DEBUG("Check aclTensorDesc is equal start!");
     ACL_REQUIRES_NOT_NULL(other);
 
+    ACL_LOG_DEBUG("Check dataType is equal");
     ACL_CHECK_EQUAL(this->dataType, other->dataType);
 
+    ACL_LOG_DEBUG("Check format is equal");
     ACL_CHECK_EQUAL(this->format, other->format);
 
+    ACL_LOG_DEBUG("Check storageFormat is equal");
     ACL_CHECK_EQUAL(this->storageFormat, other->storageFormat);
 
     if (this->dims != other->dims) {
@@ -231,8 +234,11 @@ bool aclTensorDesc::operator==(const aclTensorDesc* other)
              thisshapeRange.c_str(), othershapeRange.c_str());
         return false;
     }
+
+    ACL_LOG_DEBUG("Check isConst is equal");
     ACL_CHECK_EQUAL(this->isConst, other->isConst);
 
+    ACL_LOG_DEBUG("Check memtype is equal");
     ACL_CHECK_EQUAL(this->memtype, other->memtype);
 
     ACL_LOG_INFO("aclTensorDesc is equal!");

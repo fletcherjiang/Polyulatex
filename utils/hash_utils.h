@@ -39,6 +39,7 @@ bool CheckModelMatch(const AclOp &aclOp, const T &entry)
         return false;
     }
 
+    ACL_LOG_DEBUG("Check input size is equal");
     ACL_CHECK_EQUAL(aclOp.numInputs, entry->inputDescArr.size());
     for (int32_t i = 0; i < aclOp.numInputs; ++i) {
         if (!(entry->inputDescArr[i] == aclOp.inputDesc[i])) {
@@ -47,6 +48,7 @@ bool CheckModelMatch(const AclOp &aclOp, const T &entry)
         }
     }
 
+    ACL_LOG_DEBUG("Check output size is equal");
     ACL_CHECK_EQUAL(aclOp.numOutputs, entry->outputDescArr.size());
     for (int32_t i = 0; i < aclOp.numOutputs; ++i) {
         if (!(entry->outputDescArr[i] == aclOp.outputDesc[i])) {
