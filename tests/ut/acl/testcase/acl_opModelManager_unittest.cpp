@@ -327,20 +327,6 @@ TEST_F(UTEST_ACL_OpModelManager, MatchModelDynamicHashTest)
     auto &instance = OpModelManager::GetInstance();
     EXPECT_EQ(instance.RegisterModel(std::move(modelDef), instance.opModels_, instance.dynamicOpModels_, true), ACL_SUCCESS);
 
-    OpModelDef modelDef_2;
-    modelDef.opType = "test_acl";
-    int64_t shape_2[]{16, -1};
-    int64_t shapeStatic_2[]{16, 16};
-    int64_t range_2[2][2] = {{16, 16}, {1, 16}};
-    modelDef_2.inputDescArr.emplace_back(ACL_FLOAT16, 2, shape_2, ACL_FORMAT_ND);
-    modelDef_2.inputDescArr.emplace_back(ACL_FLOAT16, 2, shapeStatic_2, ACL_FORMAT_ND);
-    modelDef_2.outputDescArr.emplace_back(ACL_FLOAT16, 2, shapeStatic_2, ACL_FORMAT_ND);
-    aclSetTensorShapeRange(&modelDef_2.inputDescArr[0], 2, range_2);
-    modelDef.opAttr.SetAttr<string>("testAttr", "attrValue");
-
-    auto modelDefPtr = shared_ptr<OpModelDef>(new (std::nothrow)OpModelDef(std::move(modelDef_2)));
-    instance.dynamicOpModels_.hashMap_[17836075261947842321].push_back(std::move(modelDefPtr));
-
     AclOp aclOp;
     const aclTensorDesc *inputDesc[2];
     const aclTensorDesc *outputDesc[1];
@@ -348,7 +334,6 @@ TEST_F(UTEST_ACL_OpModelManager, MatchModelDynamicHashTest)
     inputDesc[0] = aclCreateTensorDesc(ACL_FLOAT16, 2, shapeFind, ACL_FORMAT_ND);
     inputDesc[1] = aclCreateTensorDesc(ACL_FLOAT16, 2, shapeFind, ACL_FORMAT_ND);
     outputDesc[0] = aclCreateTensorDesc(ACL_FLOAT16, 2, shapeFind, ACL_FORMAT_ND);
-
     aclOp.inputDesc = inputDesc;
     aclOp.outputDesc = outputDesc;
 
@@ -363,8 +348,23 @@ TEST_F(UTEST_ACL_OpModelManager, MatchModelDynamicHashTest)
 
     EXPECT_NE(instance.MatchOpModel(aclOp, opModel, isDynamic), ACL_SUCCESS);
 
-    instance.dynamicOpModels_.hashMap_[17836075261947842321].clear();
+    OpModelDef modelDef_2;
+    modelDef.opType = "test_acl";
+    int64_t shape_2[]{16, -1};
+    int64_t shapeStatic_2[]{16, 16};
+    int64_t range_2[2][2] = {{16, 16}, {1, 16}};
+    modelDef_2.inputDescArr.emplace_back(ACL_FLOAT16, 2, shape_2, ACL_FORMAT_ND);
+    modelDef_2.inputDescArr.emplace_back(ACL_FLOAT16, 2, shapeStatic_2, ACL_FORMAT_ND);
+    modelDef_2.outputDescArr.emplace_back(ACL_FLOAT16, 2, shapeStatic_2, ACL_FORMAT_ND);
+    aclSetTensorShapeRange(&modelDef_2.inputDescArr[0], 2, range_2);
+    modelDef.opAttr.SetAttr<string>("testAttr", "attrValue");
 
+    auto modelDefPtr = shared_ptr<OpModelDef>(new (std::nothrow)OpModelDef(std::move(modelDef_2)));
+    instance.dynamicOpModels_.hashMap_[17836075261947842321].push_back(std::move(modelDefPtr));
+
+    EXPECT_NE(instance.MatchOpModel(aclOp, opModel, isDynamic), ACL_SUCCESS);
+
+    instance.dynamicOpModels_.hashMap_[17836075261947842321].clear();
 }
 
 TEST_F(UTEST_ACL_OpModelManager, MatchModelHashTest)
@@ -380,21 +380,12 @@ TEST_F(UTEST_ACL_OpModelManager, MatchModelHashTest)
     auto &instance = OpModelManager::GetInstance();
     EXPECT_EQ(instance.RegisterModel(std::move(modelDef), instance.opModels_, instance.dynamicOpModels_, false), ACL_SUCCESS);
 
-    OpModelDef modelDef_2;
-    modelDef.opType = "acltest";
-    int64_t shape_2[]{16, 16};
-    modelDef.inputDescArr.emplace_back(ACL_FLOAT16, 2, shape_2, ACL_FORMAT_ND);
-    modelDef.inputDescArr.emplace_back(ACL_FLOAT16, 2, shape_2, ACL_FORMAT_ND);
-    modelDef.outputDescArr.emplace_back(ACL_FLOAT16, 2, shape_2, ACL_FORMAT_ND);
-    modelDef.opAttr.SetAttr<string>("testAttr", "attrValue");
-
-    auto modelDefPtr = shared_ptr<OpModelDef>(new (std::nothrow)OpModelDef(std::move(modelDef_2)));
-    instance.opModels_.hashMap_[6687538955415257199].push_back(std::move(modelDefPtr));
-
     AclOp aclOp;
     aclopAttr *opAttr = aclopCreateAttr();
     const aclTensorDesc *inputDesc[2];
     const aclTensorDesc *outputDesc[1];
+    int64_t shape1[]{32, 32};
+
     inputDesc[0] = aclCreateTensorDesc(ACL_FLOAT16, 2, shape, ACL_FORMAT_ND);
     inputDesc[1] = aclCreateTensorDesc(ACL_FLOAT16, 2, shape, ACL_FORMAT_ND);
     outputDesc[0] = aclCreateTensorDesc(ACL_FLOAT16, 2, shape, ACL_FORMAT_ND);
@@ -409,6 +400,18 @@ TEST_F(UTEST_ACL_OpModelManager, MatchModelHashTest)
     aclOp.opAttr = opAttr;
     aclOp.numInputs = 2;
     aclOp.numOutputs = 1;
+    EXPECT_NE(instance.MatchOpModel(aclOp, opModel, isDynamic), ACL_SUCCESS);
+
+    OpModelDef modelDef_2;
+    modelDef.opType = "acltest";
+    int64_t shape_2[]{16, 16};
+    modelDef.inputDescArr.emplace_back(ACL_FLOAT16, 2, shape_2, ACL_FORMAT_ND);
+    modelDef.inputDescArr.emplace_back(ACL_FLOAT16, 2, shape_2, ACL_FORMAT_ND);
+    modelDef.outputDescArr.emplace_back(ACL_FLOAT16, 2, shape_2, ACL_FORMAT_ND);
+    modelDef.opAttr.SetAttr<string>("testAttr", "attrValue");
+
+    auto modelDefPtr = shared_ptr<OpModelDef>(new (std::nothrow)OpModelDef(std::move(modelDef_2)));
+    instance.opModels_.hashMap_[6687538955415257199].push_back(std::move(modelDefPtr));
 
     EXPECT_NE(instance.MatchOpModel(aclOp, opModel, isDynamic), ACL_SUCCESS);
 

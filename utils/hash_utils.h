@@ -39,27 +39,30 @@ bool CheckModelMatch(const AclOp &aclOp, const T &entry)
         return false;
     }
 
-    ACL_LOG_DEBUG("Check input size is equal");
     ACL_CHECK_EQUAL(aclOp.numInputs, entry->inputDescArr.size());
+    ACL_LOG_DEBUG("Check numInputs success!");
+
     for (int32_t i = 0; i < aclOp.numInputs; ++i) {
         if (!(entry->inputDescArr[i] == aclOp.inputDesc[i])) {
-            ACL_LOG_INFO("Check inputDescArr failed!");
             return false;
         }
     }
+    ACL_LOG_DEBUG("Check inputDesc success!");
 
-    ACL_LOG_DEBUG("Check output size is equal");
     ACL_CHECK_EQUAL(aclOp.numOutputs, entry->outputDescArr.size());
+    ACL_LOG_DEBUG("Check numOutputs success!");
+
     for (int32_t i = 0; i < aclOp.numOutputs; ++i) {
         if (!(entry->outputDescArr[i] == aclOp.outputDesc[i])) {
-            ACL_LOG_INFO("Check outputDescArr failed!");
             return false;
         }
     }
+    ACL_LOG_DEBUG("Check outputDesc success!");
+
     if (!attr_utils::OpAttrEquals(aclOp.opAttr, &(entry->opAttr))) {
-        ACL_LOG_INFO("Check attr failed!");
         return false;
     }
+    ACL_LOG_DEBUG("Check opAttr success!");
     return true;
 }
 
