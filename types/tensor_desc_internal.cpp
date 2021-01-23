@@ -222,16 +222,15 @@ bool aclTensorDesc::operator==(const aclTensorDesc* other)
     ACL_CHECK_EQUAL(this->storageFormat, other->storageFormat);
 
     if (this->dims != other->dims) {
-        auto thisDim = acl::string_utils::VectorToString(this->dims);
-        auto otherDim = acl::string_utils::VectorToString(other->dims);
-        ACL_LOG_INFO("leftDim [%s] is not equal to otherDim [%s]", thisDim.c_str(), otherDim.c_str());
+        ACL_LOG_INFO("leftDim [%s] is not equal to otherDim [%s]",
+            acl::string_utils::VectorToString(this->dims).c_str(),
+            acl::string_utils::VectorToString(other->dims).c_str());
         return false;
     }
     if (this->shapeRange != other->shapeRange) {
-        auto thisshapeRange = acl::string_utils::VectorToString(this->shapeRange);
-        auto othershapeRange = acl::string_utils::VectorToString(other->shapeRange);
         ACL_LOG_INFO("thisShapeRange [%s] is not equal to otherShapeRange [%s]",
-             thisshapeRange.c_str(), othershapeRange.c_str());
+            acl::string_utils::VectorToString(this->shapeRange).c_str(),
+            acl::string_utils::VectorToString(other->shapeRange).c_str());
         return false;
     }
 

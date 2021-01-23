@@ -279,10 +279,9 @@ aclError OpModelParser::ToModelConfig(ge::Model &model, OpModelDef &modelDef)
     ACL_LOG_INFO("after delete attrs");
 
     // parser const buffer
-    if (!attr_utils::SaveConstToAttr(modelDef)) {
-        ACL_LOG_ERROR("[Save][ConstData]save const data buffer to attr fail");
-        return ACL_ERROR_INVALID_PARAM;
-    }
+    ACL_CHECK_WITH_MESSAGE_AND_RETURN(attr_utils::SaveConstToAttr(modelDef), ACL_ERROR_INVALID_PARAM,
+        "[Save][ConstData]save const data buffer to attr fail");
+
     // parse attr
     ParseOpAttrs(model, modelDef.opAttr);
     ACL_LOG_INFO("after parseOpAttrs");

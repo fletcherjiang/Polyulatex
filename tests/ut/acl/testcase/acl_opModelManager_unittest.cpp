@@ -309,7 +309,6 @@ TEST_F(UTEST_ACL_OpModelManager, MatchModelDynamicTest)
     aclopDestroyAttr(opAttr);
 }
 
-
 TEST_F(UTEST_ACL_OpModelManager, MatchModelDynamicHashTest)
 {
     SetCastHasTruncateAttr(false);

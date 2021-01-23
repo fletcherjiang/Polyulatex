@@ -16,6 +16,9 @@
 #include "framework/common/helper/om_file_helper.h"
 #include "framework/common/types.h"
 #include "acl_stub.h"
+#include "graph/utils/attr_utils.h"
+#include "graph/ge_tensor.h"
+
 
 using namespace std;
 using namespace testing;
@@ -28,7 +31,7 @@ protected:
         Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
     }
 };
-
+//
 ge::GeAttrValue::NAMED_ATTRS value1;
 vector<ge::GeAttrValue::NAMED_ATTRS> g_value{value1};
 
