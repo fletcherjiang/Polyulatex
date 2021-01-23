@@ -108,6 +108,7 @@ set(SRC_FILES
     "${BASE_DIR}/utils/attr_utils.cpp"
     "${BASE_DIR}/utils/math_utils.cpp"
     "${BASE_DIR}/utils/file_utils.cpp"
+    "${BASE_DIR}/utils/hash_utils.cpp"
     "${BASE_DIR}/utils/string_utils.cpp"
     "${BASE_DIR}/single_op/blas/gemm_ops.cpp"
     "${BASE_DIR}/single_op/blas/gemv_ops.cpp"

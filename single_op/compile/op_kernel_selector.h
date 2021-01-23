@@ -20,6 +20,8 @@
 #include "acl/acl.h"
 #include "types/acl_op.h"
 #include "utils/acl_op_map.h"
+#include "types/tensor_desc_internal.h"
+#include "types/op_attr.h"
 
 struct aclopKernelDesc {
     std::string kernelId;
@@ -28,6 +30,11 @@ struct aclopKernelDesc {
     std::vector<size_t> workspaceSizes;
     std::string extendArgs;
     uint64_t timestamp = ULLONG_MAX;
+
+    std::string opType;
+    std::vector<aclTensorDesc> inputDescArr;
+    std::vector<aclTensorDesc> outputDescArr;
+    aclopAttr opAttr;
 };
 
 namespace acl {

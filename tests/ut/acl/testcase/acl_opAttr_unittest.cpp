@@ -196,3 +196,39 @@ TEST_F(UTEST_ACL_OpAttr, ListFloatEqualsTest)
     rhsValue[0] = 1.0002f;
     ASSERT_FALSE(attr_utils::IsListFloatEquals(lhsValue, rhsValue));
 }
+
+
+TEST_F(UTEST_ACL_OpAttr, TestSaveConstToAttr)
+{
+    OpModelDef modelDef1;
+
+    modelDef1.opType = "test";
+    int64_t shape[]{4};
+    aclTensorDesc desc1(ACL_FLOAT16, 2, shape, ACL_FORMAT_ND);
+    desc1.isConst = true;
+    desc1.constDataBuf = nullptr;
+    desc1.constDataLen = 4;
+    modelDef1.inputDescArr.emplace_back(desc1);
+    ASSERT_FALSE(attr_utils::SaveConstToAttr(modelDef1));
+
+    OpModelDef modelDef2;
+    modelDef2.opType = "test";
+    auto *data = new (std::nothrow) int[4];
+    std::shared_ptr<void> modelData;
+    modelData.reset(data, [](const int *p) { delete[]p; });
+    aclTensorDesc desc2(ACL_FLOAT16, 2, shape, ACL_FORMAT_ND);
+    desc2.constDataBuf = modelData;
+    desc2.isConst = true;
+    desc2.constDataLen = 0;
+    modelDef2.inputDescArr.emplace_back(desc2);
+    ASSERT_FALSE(attr_utils::SaveConstToAttr(modelDef2));
+
+    OpModelDef modelDef3;
+    modelDef3.opType = "test";
+    aclTensorDesc desc3(ACL_FLOAT16, 2, shape, ACL_FORMAT_ND);
+    desc3.constDataBuf = modelData;
+    desc3.isConst = true;
+    desc3.constDataLen = 4;
+    modelDef3.inputDescArr.emplace_back(desc3);
+    ASSERT_TRUE(attr_utils::SaveConstToAttr(modelDef3));
+}

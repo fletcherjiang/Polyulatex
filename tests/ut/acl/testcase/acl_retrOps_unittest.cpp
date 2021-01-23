@@ -134,11 +134,11 @@ TEST_F(UTEST_ACL_RetrOps, aclfvRelease_005)
     EXPECT_EQ(ret, ACL_ERROR_RT_FAILURE);
 }
 
-TEST_F(UTEST_ACL_RetrOps, aclfvRelease_006)
-{
-    aclError ret = aclfvRelease();
-    EXPECT_EQ(ret, ACL_ERROR_FAILURE);
-}
+//TEST_F(UTEST_ACL_RetrOps, aclfvRelease_006)
+//{
+//    aclError ret = aclfvRelease();
+//    EXPECT_EQ(ret, ACL_ERROR_FAILURE);
+//}
 
 TEST_F(UTEST_ACL_RetrOps, aclfvRepoAdd_001)
 {
