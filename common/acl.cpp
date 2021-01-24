@@ -50,7 +50,7 @@ aclError aclInit(const char *configPath)
         return ACL_ERROR_REPEAT_INITIALIZE;
     }
     ACL_LOG_INFO("call ErrorManager.Initialize");
-    ge::Status geRet = ErrorManager::GetInstance().Init();
+    ge::Status geRet = static_cast<uint32_t>(ErrorManager::GetInstance().Init());
     if (geRet != ge::SUCCESS) {
         ACL_LOG_WARN("init ge error manager failed, ge result = %u", geRet);
     }
@@ -92,7 +92,7 @@ aclError aclInit(const char *configPath)
     geRet = executor.Initialize();
     if (geRet != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Init][Geexecutor]init ge executor failed, ge result = %u", geRet);
-        return ACL_GET_ERRCODE_GE(geRet);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(geRet));
     }
     // get socVersion
     ret = InitSocVersion();
@@ -139,7 +139,7 @@ aclError aclFinalize()
     ge::Status geRet = executor.Finalize();
     if (geRet != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Finalize][Ge]finalize ge executor failed, ge result = %u", geRet);
-        return ACL_GET_ERRCODE_GE(geRet);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(geRet));
     }
 
     if (acl::AclDump::GetInstance().GetAclDumpFlag()) {

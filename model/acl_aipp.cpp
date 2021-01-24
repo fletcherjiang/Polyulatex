@@ -693,7 +693,7 @@ static aclError GetModelOriDims(uint32_t modelId, uint32_t relatedInputRank, boo
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Get][OrigInputInfo]GetOrigInputInfo failed, modelId[%u], index[%zu], "
                                        "ge result[%u]", modelId, relatedInputRank, ret);
-        return ACL_GET_ERRCODE_GE(ret);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
     aclFormat srcFormat = static_cast<aclFormat>(inputInfo.format);
 
@@ -705,7 +705,7 @@ static aclError GetModelOriDims(uint32_t modelId, uint32_t relatedInputRank, boo
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Get][AllAippInputOutputDims]GetAllAippInputOutputDims failed, modelId[%u], "
             "index[%zu], ge result[%u]", modelId, relatedInputRank, ret);
-        return ACL_GET_ERRCODE_GE(ret);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
 
     // Parse NHW from input Dims when inputDims is not empty
@@ -811,7 +811,7 @@ static aclError CheckAippDataIndex(uint32_t modelId, size_t index, aclmdlDesc* m
     auto ret = executor.GetAippType(modelId, index, type, aippIndex);
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Get][AippType]Get aipp type failed, ge result[%u]", ret);
-        return ACL_GET_ERRCODE_GE(ret);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
     if (type == ge::DYNAMIC_AIPP_NODE) {
         ACL_LOG_INFO("Index [%zu] entered by the user is dynamic aipp data", index);
@@ -895,7 +895,7 @@ aclError aclmdlSetInputAIPP(uint32_t modelId,
         aippParmsSet->aippBatchPara, aippParmsSet->aippParms);
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Set][DynamicAippData]SetDynamicImageSize failed, ge result[%u]", ret);
-        return ACL_GET_ERRCODE_GE(ret);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
     return ACL_SUCCESS;
 }
@@ -910,7 +910,7 @@ aclError aclmdlGetAippType(uint32_t modelId, size_t index, aclmdlInputAippType *
     auto ret = executor.GetAippType(modelId, index, typeTmp, *dynamicAttachedDataIndex);
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Get][AippType]Get aipp type failed, ge result[%u]", ret);
-        return ACL_GET_ERRCODE_GE(ret);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
     *type = (aclmdlInputAippType)typeTmp;
     ACL_LOG_INFO("successfully execute aclmdlGetAippType, modelId[%u], index[%zu]", modelId, index);
@@ -1122,11 +1122,11 @@ aclError aclmdlGetFirstAippInfo(uint32_t modelId, size_t index, aclAippInfo *aip
     if (ret == ACL_ERROR_GE_AIPP_NOT_EXIST) {
         ACL_LOG_WARN("the tensor index[%lu] is not configured with aipp, modelId[%u], index[%zu], ge result[%u]",
             index, modelId, index, ret);
-        return ACL_GET_ERRCODE_GE(ret);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     } else if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Get][AIPPInfo]GetAIPPInfo failed, modelId[%u], index[%zu], ge result[%u]",
             modelId, index, ret);
-        return ACL_GET_ERRCODE_GE(ret);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
     SetAippInfo(aippInfo, aippParams);
 
@@ -1136,7 +1136,7 @@ aclError aclmdlGetFirstAippInfo(uint32_t modelId, size_t index, aclAippInfo *aip
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Get][BatchInfo]GetBatchInfoSize failed, modelId[%u], index[%zu], ge result[%u]",
             modelId, index, ret);
-        return ACL_GET_ERRCODE_GE(ret);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
     ACL_LOG_DEBUG("get shapeCount[%zu]", shapeCount);
     aippInfo->shapeCount = shapeCount;
@@ -1147,7 +1147,7 @@ aclError aclmdlGetFirstAippInfo(uint32_t modelId, size_t index, aclAippInfo *aip
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Get][OrigInputInfo]GetOrigInputInfo failed, modelId[%u], index[%zu], ge result[%u]",
             modelId, index, ret);
-        return ACL_GET_ERRCODE_GE(ret);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
     aippInfo->srcFormat = static_cast<aclFormat>(inputInfo.format);
     aippInfo->srcDatatype = static_cast<aclDataType>(inputInfo.data_type);
@@ -1161,11 +1161,11 @@ aclError aclmdlGetFirstAippInfo(uint32_t modelId, size_t index, aclAippInfo *aip
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Get][AllAippInputOutputDims]GetAllAippInputOutputDims failed, modelId[%u], index[%zu], "
             "ge result[%u]", modelId, index, ret);
-        return ACL_GET_ERRCODE_GE(ret);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
 
     ACL_LOG_DEBUG("GetAllAippInputOutputDims success");
-    if ((shapeCount > ACL_MAX_SHAPE_COUNT) || (shapeCount != inputDims.size()) || (shapeCount != outputDims.size())) {
+    if ((shapeCount > static_cast<size_t>(ACL_MAX_SHAPE_COUNT)) || (shapeCount != inputDims.size()) || (shapeCount != outputDims.size())) {
         ACL_LOG_INNER_ERROR("[Check][Params]shapeCount[%zu] should be smaller than ACL_MAX_SHAPE_COUNT(128) and it "
             "should be equal to size of inputDims[%zu], size of outputDims[%zu]",
             shapeCount, inputDims.size(), outputDims.size());

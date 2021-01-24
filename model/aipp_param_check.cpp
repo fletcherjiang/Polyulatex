@@ -94,7 +94,7 @@ aclError AippSrcImageSizeCheck(enum CceAippInputFormat inputFormat,
             (inputFormat == CCE_YUV400_U8) || (inputFormat == CCE_RAW10) ||
             (inputFormat == CCE_RAW12) || (inputFormat == CCE_RAW16));
         if (flag) {
-            if (srcImageSizeW % MULTIPLE != 0) {
+            if (srcImageSizeW % static_cast<int32_t>(MULTIPLE) != 0) {
                 ACL_LOG_INNER_ERROR("[Check][Params]srcImageSizeW[%d] must be multiples of 16!", srcImageSizeW);
                 return ACL_ERROR_INVALID_PARAM;
             }
@@ -103,7 +103,7 @@ aclError AippSrcImageSizeCheck(enum CceAippInputFormat inputFormat,
         flag = ((inputFormat == CCE_ARGB8888_U8) || (inputFormat == CCE_XRGB8888_U8) ||
             (inputFormat == CCE_AYUV444_U8));
         if (flag) {
-            if ((srcImageSizeW * FOUR_CHANNEL) % MULTIPLE != 0) {
+            if ((srcImageSizeW * static_cast<int32_t>(FOUR_CHANNEL)) % MULTIPLE != 0) {
                 ACL_LOG_INNER_ERROR("[Check][Params]srcImageSizeW*4 must be multiples of 16!");
                 return ACL_ERROR_INVALID_PARAM;
             }
@@ -111,7 +111,7 @@ aclError AippSrcImageSizeCheck(enum CceAippInputFormat inputFormat,
 
         flag = (inputFormat == CCE_RGB888_U8);
         if (flag) {
-            if ((srcImageSizeW * THREE_CHANNEL) % MULTIPLE != 0) {
+            if ((srcImageSizeW * static_cast<int32_t>(THREE_CHANNEL)) % static_cast<int32_t>(MULTIPLE) != 0) {
                 ACL_LOG_INNER_ERROR("[Check][Params]srcImageSizeW*3 must be multiples of 16!");
                 return ACL_ERROR_INVALID_PARAM;
             }
@@ -119,7 +119,7 @@ aclError AippSrcImageSizeCheck(enum CceAippInputFormat inputFormat,
 
         flag = (inputFormat == CCE_YUYV_U8);
         if (flag) {
-            if ((srcImageSizeW * TWO_CHANNEL) % MULTIPLE != 0) {
+            if ((srcImageSizeW * static_cast<int32_t>(TWO_CHANNEL)) % static_cast<int32_t>(MULTIPLE) != 0) {
                 ACL_LOG_INNER_ERROR("[Check][Params]srcImageSizeW*2 must be multiples of 16!");
                 return ACL_ERROR_INVALID_PARAM;
             }
@@ -367,7 +367,7 @@ aclError AippDynamicBatchParaCheck(const aclmdlAIPP *aippParmsSet, std::string s
                 return ACL_ERROR_INVALID_PARAM;
             }
 
-            result = AippScfSizeCheck(aippParmsSet, i);
+            result = AippScfSizeCheck(aippParmsSet, static_cast<int32_t>(i));
             if (result != ACL_SUCCESS) {
                 return result;
             }
@@ -375,13 +375,13 @@ aclError AippDynamicBatchParaCheck(const aclmdlAIPP *aippParmsSet, std::string s
 
         cropSwitch = aippParmsSet->aippBatchPara[i].cropSwitch;
         if (cropSwitch == 1) {
-            result = AippCropSizeCheck(aippParmsSet, socVersion, i);
+            result = AippCropSizeCheck(aippParmsSet, socVersion, static_cast<int32_t>(i));
             if (result != ACL_SUCCESS) {
                 return result;
             }
         }
 
-        result = GetAippOutputHW(aippParmsSet, i, socVersion, aippBatchOutputW, aippBatchOutputH);
+        result = GetAippOutputHW(aippParmsSet, static_cast<int32_t>(i), socVersion, aippBatchOutputW, aippBatchOutputH);
         if (result != ACL_SUCCESS) {
             return result;
         }
@@ -429,7 +429,7 @@ aclError AippParamsCheck(const aclmdlAIPP *aippParmsSet, std::string socVersion,
     bool flag = false;
     flag = ((inputFormat == CCE_YUV400_U8) || (inputFormat == CCE_RAW10) ||
         (inputFormat == CCE_RAW12) || (inputFormat == CCE_RAW16));
-    if (flag == 1) {
+    if (flag) {
         if (cscSwitch == 1) {
             ACL_LOG_INNER_ERROR("[Check][Params]YUV400 or raw not support csc switch!");
             return ACL_ERROR_INVALID_PARAM;
