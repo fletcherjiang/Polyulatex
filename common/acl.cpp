@@ -120,7 +120,7 @@ aclError aclFinalize()
     acl::ResourceStatistics::GetInstance().TraverseStatistics();
     MsprofCtrlCallback callback = acl::AclProfilingManager::GetInstance().GetProfCtrlCallback();
     if (callback != nullptr) {
-        int32_t profRet = callback(MSPROF_CTRL_FINALIZE, nullptr, 0);
+        int32_t profRet = callback(static_cast<uint32_t>(MSPROF_CTRL_FINALIZE), nullptr, 0);
         if (profRet != MSPROF_ERROR_NONE) {
             ACL_LOG_CALL_ERROR("[Handle][Json]handle json config of profiling failed, prof result = %d",
                 static_cast<int32_t>(profRet));

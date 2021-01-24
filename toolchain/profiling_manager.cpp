@@ -46,7 +46,7 @@ aclError AclProfilingManager::Init()
         return ACL_ERROR_PROFILING_FAILURE;
     }
 
-    int32_t result = reporterCallback_(MSPROF_MODULE_ACL, MSPROF_REPORTER_INIT, nullptr, 0);
+    int32_t result = reporterCallback_(static_cast<uint32_t>(MSPROF_MODULE_ACL), static_cast<uint32_t>(MSPROF_REPORTER_INIT), nullptr, 0);
     if (result != 0) {
         ACL_LOG_INNER_ERROR("[Init][ProfEngine]init acl profiling engine failed, result = %d", result);
         return ACL_ERROR_PROFILING_FAILURE;
@@ -63,7 +63,7 @@ aclError AclProfilingManager::UnInit()
         return ACL_ERROR_PROFILING_FAILURE;
     }
 
-    int32_t result = reporterCallback_(MSPROF_MODULE_ACL, MSPROF_REPORTER_UNINIT, nullptr, 0);
+    int32_t result = reporterCallback_(static_cast<uint32_t>(MSPROF_MODULE_ACL), static_cast<uint32_t>(MSPROF_REPORTER_UNINIT), nullptr, 0);
     if (result != MSPROF_ERROR_NONE) {
         ACL_LOG_CALL_ERROR("[Uninit][ProfEngine]Uninit profiling engine failed, result = %d", result);
         return ACL_ERROR_PROFILING_FAILURE;
@@ -83,7 +83,7 @@ aclError AclProfilingManager::ProfilingData(ReporterData &data)
     if (reporterCallback_ == nullptr) {
         return ACL_ERROR_PROFILING_FAILURE;
     } else {
-        if (reporterCallback_(MSPROF_MODULE_ACL, MSPROF_REPORTER_REPORT, &data, sizeof(ReporterData)) != 0) {
+        if (reporterCallback_(static_cast<uint32_t>(MSPROF_MODULE_ACL), static_cast<uint32_t>(MSPROF_REPORTER_REPORT), &data, sizeof(ReporterData)) != 0) {
             return ACL_ERROR_PROFILING_FAILURE;
         }
     }

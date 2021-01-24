@@ -29,7 +29,7 @@ aclError aclrtCreateContext(aclrtContext *context, int32_t deviceId)
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(context);
 
     rtContext_t rtCtx = nullptr;
-    rtError_t rtErr = rtCtxCreateEx(&rtCtx, RT_CTX_NORMAL_MODE, deviceId);
+    rtError_t rtErr = rtCtxCreateEx(&rtCtx, static_cast<uint32_t>(RT_CTX_NORMAL_MODE), deviceId);
     if (rtErr != RT_ERROR_NONE) {
         ACL_LOG_CALL_ERROR("create context failed, device is %d, runtime result is %d",
             deviceId, static_cast<int32_t>(rtErr));
