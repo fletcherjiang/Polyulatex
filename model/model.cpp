@@ -162,7 +162,7 @@ static aclError GetModelOutputShapeInfo(aclmdlDesc *modelDesc)
     ge::Status ret = executor.GetModelAttr(modelId, geDynamicOutputShape);
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Get][ModelAttr]get model attribute failed, ge result[%u], model id[%u]", ret, modelId);
-        return ACL_GET_ERRCODE_GE(ret);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
 
     if (geDynamicOutputShape.empty()) {

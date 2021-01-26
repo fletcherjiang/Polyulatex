@@ -105,7 +105,7 @@ std::string AclErrorLogManager::FormatStr(const char *fmt, ...)
     va_list ap;
     va_start(ap, fmt);
     char str[MAX_LOG_STRING] = { '\0' };
-    int32_t printRet = vsnprintf_s(str, MAX_LOG_STRING, MAX_LOG_STRING - 1, fmt, ap);
+    int32_t printRet = vsnprintf_s(str, static_cast<size_t>(MAX_LOG_STRING), static_cast<size_t>(MAX_LOG_STRING - 1), fmt, ap);
     if (printRet == -1) {
         va_end(ap);
         return "";
@@ -125,7 +125,7 @@ void AclErrorLogManager::ReportInnerError(const char *fmt, ...)
     va_list ap;
     va_start(ap, fmt);
     char errorMsgStr[LIMIT_PER_MESSAGE] = { '\0' };
-    int32_t ret = vsnprintf_s(errorMsgStr, LIMIT_PER_MESSAGE, LIMIT_PER_MESSAGE - 1, fmt, ap);
+    int32_t ret = vsnprintf_s(errorMsgStr, static_cast<size_t>(LIMIT_PER_MESSAGE), static_cast<size_t>(LIMIT_PER_MESSAGE - 1), fmt, ap);
     if (ret == -1) {
         va_end(ap);
         ACL_LOG_ERROR("[Call][Vsnprintf]call vsnprintf failed, ret = %d", ret);
@@ -140,7 +140,7 @@ void AclErrorLogManager::ReportCallError(const char *fmt, ...)
     va_list ap;
     va_start(ap, fmt);
     char errorMsgStr[LIMIT_PER_MESSAGE] = { '\0' };
-    int32_t ret = vsnprintf_s(errorMsgStr, LIMIT_PER_MESSAGE, LIMIT_PER_MESSAGE - 1, fmt, ap);
+    int32_t ret = vsnprintf_s(errorMsgStr, static_cast<size_t>(LIMIT_PER_MESSAGE), static_cast<size_t>(LIMIT_PER_MESSAGE - 1), fmt, ap);
     if (ret == -1) {
         va_end(ap);
         ACL_LOG_ERROR("[Call][Vsnprintf]call vsnprintf failed, ret = %d", ret);

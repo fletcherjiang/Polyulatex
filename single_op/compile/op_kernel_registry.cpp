@@ -75,7 +75,7 @@ aclError OpKernelRegistry::Register(std::unique_ptr<OpKernelRegistration> &&regi
     }
 
     auto rtRet = rtFunctionRegister(binHandle, registration->stubName.c_str(), registration->stubName.c_str(),
-        registration->kernelName.c_str(), FUNC_MODE_NORMAL);
+        registration->kernelName.c_str(), static_cast<uint32_t>(FUNC_MODE_NORMAL));
     if (rtRet != RT_ERROR_NONE) {
         rtDevBinaryUnRegister(binHandle);
         ACL_LOG_CALL_ERROR("[Register][Dev]rtFunctionRegister failed. bin key = %s, kernel name = %s, runtime result = %d",
