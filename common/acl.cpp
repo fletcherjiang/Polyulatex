@@ -50,7 +50,7 @@ aclError aclInit(const char *configPath)
         return ACL_ERROR_REPEAT_INITIALIZE;
     }
     ACL_LOG_INFO("call ErrorManager.Initialize");
-    ge::Status geRet = static_cast<uint32_t>(ErrorManager::GetInstance().Init());
+    ge::Status geRet = static_cast<ge::Status>(ErrorManager::GetInstance().Init());
     if (geRet != ge::SUCCESS) {
         ACL_LOG_WARN("init ge error manager failed, ge result = %u", geRet);
     }
