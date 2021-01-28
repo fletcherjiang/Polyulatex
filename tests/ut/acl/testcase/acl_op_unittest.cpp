@@ -193,6 +193,8 @@ TEST_F(OpApiTest, TestGetTensorSize)
     aclDestroyTensorDesc(desc);
 
     EXPECT_EQ(aclDataTypeSize(ACL_DT_UNDEFINED), 0);
+    EXPECT_EQ(aclDataTypeSize(ACL_COMPLEX128), 16);
+    EXPECT_EQ(aclDataTypeSize(ACL_COMPLEX64), 8);
 }
 
 TEST_F(OpApiTest, TestGetTensorDescFormat)
