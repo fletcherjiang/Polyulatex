@@ -210,6 +210,7 @@ bool aclTensorDesc::CheckShapeRange() const
 size_t aclDataTypeSize(aclDataType dataType)
 {
     switch (dataType) {
+        case ACL_STRING:
         case ACL_DT_UNDEFINED:
             return 0;
         case ACL_BOOL:
