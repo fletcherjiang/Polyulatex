@@ -358,8 +358,8 @@ namespace acl {
         dumpConfig.dump_mode = config.dumpMode;
         dumpConfig.dump_status = ACL_DUMP_STATUS_SWITCH_ON;
         dumpConfig.dump_op_switch = config.dumpOpSwitch;
-        ge::ModelDumpConfig modelDumpConfig;
         for (size_t i = 0; i < config.dumpList.size(); ++i) {
+            ge::ModelDumpConfig modelDumpConfig;
             if (config.dumpList[i].modelName.empty()) {
                 ACL_LOG_INNER_ERROR("[Check][modelName]the %zu modelName field is null", i);
                 continue;
