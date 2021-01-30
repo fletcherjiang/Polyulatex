@@ -247,6 +247,7 @@ bool aclTensorDesc::operator==(const aclTensorDesc* other)
 size_t aclDataTypeSize(aclDataType dataType)
 {
     switch (dataType) {
+        case ACL_STRING:
         case ACL_DT_UNDEFINED:
             return 0;
         case ACL_BOOL:
@@ -261,9 +262,12 @@ size_t aclDataTypeSize(aclDataType dataType)
         case ACL_INT32:
         case ACL_UINT32:
             return sizeof(int32_t);
+        case ACL_COMPLEX128:
+            return 2 * sizeof(int64_t);
         case ACL_INT64:
         case ACL_UINT64:
         case ACL_DOUBLE:
+        case ACL_COMPLEX64:
         default:
             return sizeof(int64_t);
     }

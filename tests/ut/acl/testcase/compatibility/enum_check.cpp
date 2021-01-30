@@ -66,6 +66,12 @@ TEST_F(UTEST_ACL_compatibility_enum_check, aclDataType)
 
     dataType = (aclDataType)13;
     EXPECT_EQ(dataType, ACL_STRING);
+
+    dataType = (aclDataType)16;
+    EXPECT_EQ(dataType, ACL_COMPLEX64);
+
+    dataType = (aclDataType)17;
+    EXPECT_EQ(dataType, ACL_COMPLEX128);
 }
 
 TEST_F(UTEST_ACL_compatibility_enum_check, aclFormat)
