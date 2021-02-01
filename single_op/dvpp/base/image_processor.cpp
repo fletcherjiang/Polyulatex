@@ -2151,7 +2151,6 @@ namespace acl {
         aclDvppChannelDesc = new (hostAddr)acldvppChannelDesc;
         if ((aclDvppChannelDesc == nullptr) || (aclDvppChannelDesc->dvppDesc.extendInfo == nullptr)) {
             ACL_LOG_INNER_ERROR("[Create][VdecChannelDesc]create aclvdecChannelDesc with function new failed");
-            aclDvppChannelDesc->~acldvppChannelDesc();
             ACL_ALIGN_FREE(hostAddr);
             return nullptr;
         }
@@ -2260,8 +2259,8 @@ namespace acl {
             ACL_LOG_CALL_ERROR("[Alloc][Mem]alloc device memory for channel tmp buffer failed, "
                 "size = %zu, runtime result = %d", tmpDataSize, rtErr);
             (void) rtFree(aclDvppChannelDesc->shareBuffer.data);
-            (void) rtFree(devAddr);
             aclDvppChannelDesc->shareBuffer.data = nullptr;
+            (void) rtFree(devAddr);
             devAddr = nullptr;
             return nullptr;
         }

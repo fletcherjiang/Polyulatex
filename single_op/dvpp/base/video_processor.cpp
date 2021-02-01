@@ -1867,7 +1867,6 @@ namespace acl {
         aclChannelDesc = new (devAddr)aclvdecChannelDesc;
         if ((aclChannelDesc == nullptr) || (aclChannelDesc->vdecDesc.extendInfo == nullptr)) {
             ACL_LOG_INNER_ERROR("[Create][ChannelDesc]create aclvdecChannelDesc with function new failed");
-            aclChannelDesc->~aclvdecChannelDesc();
             (void) rtFree(devAddr);
             devAddr = nullptr;
             return nullptr;
