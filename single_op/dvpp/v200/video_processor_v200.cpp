@@ -981,7 +981,8 @@ namespace acl {
                                                       void *userData,
                                                       bool isSkipFlag)
         {
-            ACL_LOG_INFO("start to execute aclvdecSendFrame, isSkipFlag = %d.", static_cast<int32_t>(isSkipFlag));
+            ACL_LOG_INFO("start to execute aclvdecSendFrame, channelId=%u, isSkipFlag=%d.",
+                channelDesc->vdecDesc.channelId, static_cast<int32_t>(isSkipFlag));
             ACL_REQUIRES_NOT_NULL(channelDesc);
             ACL_REQUIRES_NOT_NULL(channelDesc->callback);
             ACL_REQUIRES_NOT_NULL(channelDesc->dataBuffer.data);
@@ -1037,7 +1038,8 @@ namespace acl {
                 } else {
                     // save get frame task info to queue of current channel
                     channelDesc->taskQueue.push(callbackInfoPtr);
-                    ACL_LOG_INFO("task queue size is %zu.", channelDesc->taskQueue.size());
+                    ACL_LOG_INFO("channelId=%u, task queue size is %zu.",
+                        channelDesc->vdecDesc.channelId, channelDesc->taskQueue.size());
                 }
             }
 
@@ -1083,9 +1085,8 @@ namespace acl {
                 return ACL_SUCCESS;
             }
 
-            ACL_LOG_INFO("end to send frame. frame size = %u, channelId = %u, frame number = %u, sendNtfId = %u, "
-                "getNtfId = %u, sendStreamId = %d, getStreamId = %d.",
-                input->dvppStreamDesc.size, channelId, sendFrameCount[channelId],
+            ACL_LOG_INFO("end to send frame. channelId = %u, frame number = %u, sendNtfId = %u, "
+                "getNtfId = %u, sendStreamId = %d, getStreamId = %d.", channelId, sendFrameCount[channelId],
                 channelDesc->vdecDesc.sendFrameNotifyId, channelDesc->vdecDesc.getFrameNotifyId,
                 channelDesc->sendStreamId, channelDesc->getStreamId);
             return ACL_SUCCESS;
