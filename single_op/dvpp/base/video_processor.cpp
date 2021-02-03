@@ -276,14 +276,14 @@ namespace acl {
                                               void *userData,
                                               bool isSkipFlag)
     {
-        ACL_LOG_INFO("start to execute aclvdecSendFrame, channelId=%u, isSkipFlag=%d.",
-            channelDesc->vdecDesc.channelId, static_cast<int32_t>(isSkipFlag));
         ACL_REQUIRES_NOT_NULL(channelDesc);
         ACL_REQUIRES_NOT_NULL(channelDesc->callback);
         ACL_REQUIRES_NOT_NULL(channelDesc->dataBuffer.data);
         ACL_REQUIRES_NOT_NULL(channelDesc->sendFrameStream);
         ACL_REQUIRES_NOT_NULL(channelDesc->getFrameStream);
 
+        ACL_LOG_INFO("start to execute aclvdecSendFrame, channelId=%u, isSkipFlag=%d.",
+            channelDesc->vdecDesc.channelId, static_cast<int32_t>(isSkipFlag));
         aclError memcpyRet = CheckAndCopyVdecInfoData(input, output, isSkipFlag);
         if (memcpyRet != ACL_SUCCESS) {
             ACL_LOG_INNER_ERROR("[Check][Stream]check and copy stream desc or pic desc failed, "
@@ -334,7 +334,8 @@ namespace acl {
         }
 
         if (needLaunchTaskForGetStream) {
-            ACL_LOG_INFO("launch tasks in get stream only for first frame.");
+            ACL_LOG_INFO("launch tasks in get stream only for first frame, channelId=%u.",
+                channelDesc->vdecDesc.channelId);
             aclError launchRet = LaunchTaskForGetStream(channelDesc);
             if (launchRet != ACL_SUCCESS) {
                 {

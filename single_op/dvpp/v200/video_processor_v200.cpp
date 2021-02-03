@@ -981,14 +981,14 @@ namespace acl {
                                                       void *userData,
                                                       bool isSkipFlag)
         {
-            ACL_LOG_INFO("start to execute aclvdecSendFrame, channelId=%u, isSkipFlag=%d.",
-                channelDesc->vdecDesc.channelId, static_cast<int32_t>(isSkipFlag));
             ACL_REQUIRES_NOT_NULL(channelDesc);
             ACL_REQUIRES_NOT_NULL(channelDesc->callback);
             ACL_REQUIRES_NOT_NULL(channelDesc->dataBuffer.data);
             ACL_REQUIRES_NOT_NULL(channelDesc->sendFrameStream);
             ACL_REQUIRES_NOT_NULL(channelDesc->getFrameStream);
 
+            ACL_LOG_INFO("start to execute aclvdecSendFrame, channelId=%u, isSkipFlag=%d.",
+                channelDesc->vdecDesc.channelId, static_cast<int32_t>(isSkipFlag));
             // channel range : [0, V200_CHANNEL_ID_CEILING]
             static uint32_t sendFrameCount[V200_CHANNEL_ID_CEILING + 1];
             auto channelId = channelDesc->vdecDesc.channelId;
@@ -1044,7 +1044,8 @@ namespace acl {
             }
 
             if (needLaunchTaskForGetStream) {
-                ACL_LOG_INFO("launch tasks in get stream only for first frame.");
+                ACL_LOG_INFO("launch tasks in get stream only for first frame, channelId=%u.",
+                    channelDesc->vdecDesc.channelId);
                 aclError launchRet = LaunchTaskForGetStream(channelDesc, callbackInfoPtr);
                 if (launchRet != ACL_SUCCESS) {
                     {
