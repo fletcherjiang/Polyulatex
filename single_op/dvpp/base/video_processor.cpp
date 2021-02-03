@@ -379,8 +379,7 @@ namespace acl {
                 channelDesc->sendStreamId, channelDesc->getStreamId);
         } else {
             ACL_LOG_INFO("end to send frame. channelId=%u, sendStreamId=%d, getStreamId=%d.",
-                input->dvppStreamDesc.size, channelDesc->vdecDesc.channelId,
-                channelDesc->sendStreamId, channelDesc->getStreamId);
+                channelDesc->vdecDesc.channelId, channelDesc->sendStreamId, channelDesc->getStreamId);
         }
         return ACL_SUCCESS;
     }
