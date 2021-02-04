@@ -276,13 +276,14 @@ namespace acl {
                                               void *userData,
                                               bool isSkipFlag)
     {
-        ACL_LOG_INFO("start to execute aclvdecSendFrame, isSkipFlag = %d.", static_cast<int32_t>(isSkipFlag));
         ACL_REQUIRES_NOT_NULL(channelDesc);
         ACL_REQUIRES_NOT_NULL(channelDesc->callback);
         ACL_REQUIRES_NOT_NULL(channelDesc->dataBuffer.data);
         ACL_REQUIRES_NOT_NULL(channelDesc->sendFrameStream);
         ACL_REQUIRES_NOT_NULL(channelDesc->getFrameStream);
 
+        ACL_LOG_INFO("start to execute aclvdecSendFrame, channelId=%u, isSkipFlag=%d.",
+            channelDesc->vdecDesc.channelId, static_cast<int32_t>(isSkipFlag));
         aclError memcpyRet = CheckAndCopyVdecInfoData(input, output, isSkipFlag);
         if (memcpyRet != ACL_SUCCESS) {
             ACL_LOG_INNER_ERROR("[Check][Stream]check and copy stream desc or pic desc failed, "
@@ -327,12 +328,14 @@ namespace acl {
             } else {
                 // save get frame task info to queue of current channel
                 channelDesc->taskQueue.push(callbackInfoPtr);
-                ACL_LOG_INFO("task queue size is %zu.", channelDesc->taskQueue.size());
+                ACL_LOG_INFO("channelId=%u, task queue size is %zu.",
+                    channelDesc->vdecDesc.channelId, channelDesc->taskQueue.size());
             }
         }
 
         if (needLaunchTaskForGetStream) {
-            ACL_LOG_INFO("launch tasks in get stream only for first frame.");
+            ACL_LOG_INFO("launch tasks in get stream only for first frame, channelId=%u.",
+                channelDesc->vdecDesc.channelId);
             aclError launchRet = LaunchTaskForGetStream(channelDesc);
             if (launchRet != ACL_SUCCESS) {
                 {
@@ -370,15 +373,13 @@ namespace acl {
         }
 
         if (channelDesc->isNeedNotify) {
-            ACL_LOG_INFO("end to send frame. frame size=%u, channelId=%u, sendFrameNotifyId=%u, getFrameNotifyId=%u, "
-                "sendStreamId=%d, getStreamId=%d.",
-                input->dvppStreamDesc.size, channelDesc->vdecDesc.channelId,
+            ACL_LOG_INFO("end to send frame. channelId=%u, sendFrameNotifyId=%u, getFrameNotifyId=%u, "
+                "sendStreamId=%d, getStreamId=%d.", channelDesc->vdecDesc.channelId,
                 channelDesc->vdecDesc.sendFrameNotifyId, channelDesc->vdecDesc.getFrameNotifyId,
                 channelDesc->sendStreamId, channelDesc->getStreamId);
         } else {
-            ACL_LOG_INFO("end to send frame. frame size=%u, channelId=%u, sendStreamId=%d, getStreamId=%d.",
-                input->dvppStreamDesc.size, channelDesc->vdecDesc.channelId,
-                channelDesc->sendStreamId, channelDesc->getStreamId);
+            ACL_LOG_INFO("end to send frame. channelId=%u, sendStreamId=%d, getStreamId=%d.",
+                channelDesc->vdecDesc.channelId, channelDesc->sendStreamId, channelDesc->getStreamId);
         }
         return ACL_SUCCESS;
     }
@@ -1965,7 +1966,7 @@ namespace acl {
         input = callbackInfoPtr->inputStreamDesc;
         userData = callbackInfoPtr->callbackData;
         eos = callbackInfoPtr->eos;
-        ACL_LOG_DEBUG("vdec callback: channelId=%u, frameId = %lu, eos = %d",
+        ACL_LOG_INFO("vdec callback: channelId=%u, frameId = %lu, eos = %d",
             channelDesc->vdecDesc.channelId, frameId, eos);
 
         return ACL_SUCCESS;
