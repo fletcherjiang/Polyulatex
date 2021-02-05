@@ -20,7 +20,7 @@ namespace acl {
         static aclError HandleProfilingConfig(const char *configPath);
 
     private:
-        static aclError HandleProfilingCommand(const std::string &config, bool configFileFlag, bool validConfig);
+        static aclError HandleProfilingCommand(const std::string &config, bool configFileFlag, bool noValidConfig);
 
         static bool GetProfilingConfigFile(std::string &fileName);
     };

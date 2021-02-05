@@ -212,6 +212,10 @@ public:
     virtual int32_t TdtHostPushData(const std::string &channelName, const std::vector<tdt::DataItem> &item, uint32_t deviceId);
     virtual int32_t TdtHostPopData(const std::string &channelName, std::vector<tdt::DataItem> &item);
 
+    //prof function
+    virtual int32_t MsprofFinalize();
+    virtual int32_t MsprofInit(uint32_t aclDataType, void *data, uint32_t dataLen);
+
     // adx function
     virtual int AdxDataDumpServerInit();
     virtual int AdxDataDumpServerUnInit();
@@ -390,6 +394,11 @@ public:
     MOCK_METHOD4(rtGetDeviceCapability, rtError_t(int32_t device, int32_t moduleType, int32_t featureType, int32_t *value));
     MOCK_METHOD1(rtSetOpWaitTimeOut, rtError_t(uint32_t timeout));
     MOCK_METHOD1(rtSetOpExecuteTimeOut, rtError_t(uint32_t timeout));
+
+    //prof function stub
+    MOCK_METHOD0(MsprofFinalize, int32_t());
+    MOCK_METHOD3(MsprofInit, int32_t(uint32_t aclDataType, void *data, uint32_t dataLen));
+
 
     // adx function stub
     MOCK_METHOD0(AdxDataDumpServerInit, int());

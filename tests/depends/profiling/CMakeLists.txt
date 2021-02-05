@@ -19,10 +19,25 @@ file(GLOB_RECURSE SRC_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
         "src/profiling_stub.cpp"
 )
 
+include_directories(${BASE_DIR}/inc/external)
 include_directories(${BASE_DIR}/third_party/inc)
+include_directories(${BASE_DIR}/third_party/inc/runtime/external/)
+include_directories(${BASE_DIR}/third_party/inc/graphengine/inc/framework)
+include_directories(${BASE_DIR}/third_party/inc/metadef/inc)
+include_directories(${BASE_DIR}/third_party/inc/metadef/inc/external)
+include_directories(${BASE_DIR}/third_party/inc/graphengine/inc/external)
+include_directories(${BASE_DIR}/third_party/inc/graphengine/inc)
+include_directories(${BASE_DIR}/third_party/inc/toolchain/ide/ide-daemon/external)
+include_directories(${BASE_DIR}/tests/depends/)
 
 add_library(profiling_stub SHARED ${SRC_FILES})
 
 target_link_libraries(profiling_stub PRIVATE
-        $<BUILD_INTERFACE:intf_pub>
+    $<BUILD_INTERFACE:intf_pub>
+    c_sec
+    static_turbojpeg
+    gtest
+    gtest_main
+    gmock
+    gmock_main
 )

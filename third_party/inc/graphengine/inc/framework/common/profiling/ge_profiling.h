@@ -38,7 +38,6 @@ struct ProfCommandHandleData {
   uint32_t modelId;
 };
 
-GE_FUNC_VISIBILITY ge::Status RegProfCtrlCallback(MsprofCtrlCallback func);
 GE_FUNC_VISIBILITY ge::Status RegProfSetDeviceCallback(MsprofSetDeviceCallback func);
 GE_FUNC_VISIBILITY ge::Status RegProfReporterCallback(MsprofReporterCallback func);
 GE_FUNC_VISIBILITY ge::Status ProfCommandHandle(ProfCommandHandleType type, void *data, uint32_t len);
