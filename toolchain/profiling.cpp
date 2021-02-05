@@ -18,25 +18,34 @@
 namespace {
     const std::string ACL_PROF_CONFIG_NAME = "profiler";
     const uint32_t MAX_ENV_VALVE_LENGTH = 4096;
+    std::mutex g_aclProfMutex;
+    const uint64_t ACL_PROF_ACL_API = 0x0001;
 }
 
 namespace acl {
-    aclError AclProfiling::HandleProfilingCommand(const std::string &config, bool configFileFlag)
+    aclError AclProfiling::HandleProfilingCommand(const std::string &config, bool configFileFlag, bool noValidConfig)
     {
         ACL_LOG_INFO("start to execute HandleProfilingCommand");
-        MsprofCtrlCallback callback = AclProfilingManager::GetInstance().GetProfCtrlCallback();
-        ACL_REQUIRES_NOT_NULL(callback);
-        if (configFileFlag) {
-            int32_t ret = callback(MSPROF_CTRL_INIT_ACL_JSON, const_cast<char *>(config.c_str()), config.size());
-            if (ret != 0) {
-                ACL_LOG_INNER_ERROR("[Handle][Json]handle json config of profiling failed, profiling result = %d", ret);
+        int32_t ret = MSPROF_ERROR_NONE;
+        if (noValidConfig) {
+            ret = MsprofInit(MSPROF_CTRL_INIT_DYNA, nullptr, 0);
+            if (ret != MSPROF_ERROR_NONE) {
+                ACL_LOG_CALL_ERROR("[Init][Profiling]init profiling with nullptr failed, profiling result = %d", ret);
                 return ACL_ERROR_INVALID_PARAM;
-            }
+            } 
         } else {
-            int32_t ret = callback(MSPROF_CTRL_INIT_ACL_ENV, const_cast<char *>(config.c_str()), config.size());
-            if (ret != 0) {
-                ACL_LOG_INNER_ERROR("[Handle][Env]handle env config of profiling failed, profiling result = %d", ret);
-                return ACL_ERROR_INVALID_PARAM;
+            if (configFileFlag) {
+                ret = MsprofInit(MSPROF_CTRL_INIT_ACL_JSON, const_cast<char *>(config.c_str()), config.size());
+                if (ret != MSPROF_ERROR_NONE) {
+                    ACL_LOG_INNER_ERROR("[Handle][Json]handle json config of profiling failed, profiling result = %d", ret);
+                    return ACL_ERROR_INVALID_PARAM;
+                }
+            } else {
+                ret = MsprofInit(MSPROF_CTRL_INIT_ACL_ENV, const_cast<char *>(config.c_str()), config.size());
+                if (ret != MSPROF_ERROR_NONE) {
+                    ACL_LOG_CALL_ERROR("[Init][Profiling]handle env config of profiling failed, profiling result = %d", ret);
+                    return ACL_ERROR_INVALID_PARAM;
+                }
             }
         }
         ACL_LOG_INFO("set profiling config successfully");
@@ -63,6 +72,7 @@ namespace acl {
         std::string strConfig;
         acl::JsonParser jsonParser;
         bool configFileFlag = true; // flag of using config flie mode or not
+        bool noValidConfig = false;
         aclError ret = ACL_SUCCESS;
         std::string envValue;
         // use profiling config from env variable if exist
@@ -75,24 +85,29 @@ namespace acl {
         if (configFileFlag == true) {
             if (configPath == nullptr || strlen(configPath) == 0) {
                 ACL_LOG_INFO("configPath is null, no need to do profiling.");
-                return ACL_SUCCESS;
+                noValidConfig = true;
+                ret = HandleProfilingCommand(strConfig, configFileFlag, noValidConfig);
+                if (ret != ACL_SUCCESS) {
+                    ACL_LOG_INNER_ERROR("[Handle][Command]handle profiling command failed, result = %d", ret);
+                    return ret;
+                }
             }
             ret = jsonParser.ParseJsonFromFile(configPath, js, &strConfig, ACL_PROF_CONFIG_NAME.c_str());
             if (ret != ACL_SUCCESS) {
                 ACL_LOG_INFO("parse profiling config from file[%s] failed, result = %d", configPath, ret);
-                return ACL_SUCCESS;
+                noValidConfig = true;
             }
 
             if (strConfig.empty()) {
                 ACL_LOG_INFO("profiling config file[%s] is empty", configPath);
-                return ACL_SUCCESS;
+                noValidConfig = true;
             }
 
             ACL_LOG_INFO("start to use profiling config by config file mode");
         }
 
         ACL_LOG_INFO("ParseJsonFromFile ok in HandleProfilingConfig");
-        ret = HandleProfilingCommand(strConfig, configFileFlag);
+        ret = HandleProfilingCommand(strConfig, configFileFlag, noValidConfig);
         if (ret != ACL_SUCCESS) {
             ACL_LOG_INNER_ERROR("[Handle][Command]handle profiling command failed, result = %d", ret);
             return ret;
@@ -101,4 +116,78 @@ namespace acl {
         ACL_LOG_INFO("set HandleProfilingConfig success");
         return ret;
     }
+}
+
+static aclError aclProfInnerStart(rtProfCommandHandle_t *profilerConfig)
+{
+    ACL_LOG_INFO("start to execute aclprofInnerStart");
+    ACL_LOG_DEBUG("acl profiling has been configed by api mode");
+    if (!acl::AclProfilingManager::GetInstance().AclProfilingIsRun()) {
+        aclError ret = acl::AclProfilingManager::GetInstance().Init();
+        if (ret != ACL_SUCCESS) {
+            ACL_LOG_INNER_ERROR("[Init][ProfilingManager]start acl profiling module failed,"" result = %d", ret);
+            return ret;
+        }
+    }
+    acl::AclProfilingManager::GetInstance().AddDeviceList(profilerConfig->devIdList, profilerConfig->devNums);
+    ACL_LOG_INFO("successfully execute aclprofInnerStart");
+    return ACL_SUCCESS;
+}
+
+// inner interface for stoping profiling
+static aclError aclProfInnerStop(rtProfCommandHandle_t *profilerConfig)
+{
+    ACL_LOG_INFO("start to execute aclprofInnerStop");
+    if (!acl::AclProfilingManager::GetInstance().IsDeviceListEmpty()) {
+        acl::AclProfilingManager::GetInstance().RemoveDeviceList(profilerConfig->devIdList, profilerConfig->devNums);
+    }
+
+    if ((acl::AclProfilingManager::GetInstance().IsDeviceListEmpty()) &&
+        (acl::AclProfilingManager::GetInstance().AclProfilingIsRun())) {
+        aclError ret = acl::AclProfilingManager::GetInstance().UnInit();
+        if (ret != ACL_SUCCESS) {
+            ACL_LOG_INNER_ERROR("[Uninit][ProfilingManager]stop acl failed, result = %d", ret);
+            return ret;
+        }
+    }
+    ACL_LOG_INFO("successfully execute aclprofInnerStop");
+    return ACL_SUCCESS;
+}
+
+static aclError aclProcessProfData(void *data, uint32_t len)
+{
+    ACL_LOG_INFO("start to execute aclProcessProfData");
+    std::lock_guard<std::mutex> lock(g_aclProfMutex);
+    ACL_REQUIRES_NOT_NULL(data);
+    size_t commandLen = sizeof(rtProfCommandHandle_t);
+    if ((len == 0) || len != commandLen) {
+        ACL_LOG_INNER_ERROR("[Check][Len]len[%u] is invalid, it should be %zu", len, commandLen);
+        return ACL_ERROR_INVALID_PARAM;
+    }
+    rtProfCommandHandle_t *profilerConfig = static_cast<rtProfCommandHandle_t *>(data);
+    if ((profilerConfig->profSwitch & ACL_PROF_ACL_API) != 0) {
+        aclProfInnerStart(profilerConfig);
+    } else {
+        aclProfInnerStop(profilerConfig);
+    }
+
+    return ACL_SUCCESS;
+}
+
+aclError aclMsprofCtrlHandle(uint32_t dataType, void* data, uint32_t dataLen)
+{
+    ACL_REQUIRES_NOT_NULL(data);
+    if (dataType == RT_PROF_CTRL_REPORTER) {
+        MsprofReporterCallback callback = reinterpret_cast<MsprofReporterCallback>(data);
+        acl::AclProfilingManager::GetInstance().SetProfReporterCallback(callback);
+    } else if (dataType == RT_PROF_CTRL_SWITCH) {
+        aclError ret = aclProcessProfData(data, dataLen);
+        if (ret != ACL_SUCCESS) {
+            ACL_LOG_ERROR("failed to call aclProcessProfData");
+            return ret;
+       }
+    } else {
+        ACL_LOG_ERROR("get unsupported dataType %u while processing profiling data", dataType);
+    }
+    return ACL_SUCCESS;
 }

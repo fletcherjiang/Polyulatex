@@ -39,8 +39,6 @@ namespace acl {
         aclError RemoveDeviceList(const uint32_t *deviceIdList, uint32_t deviceNums);
         void RemoveAllDeviceList();
         bool IsDeviceEnable(const uint32_t &deviceId);
-        void SetProfCtrlCallback(MsprofCtrlCallback callback) { ctrlCallback_ = callback; };
-        MsprofCtrlCallback GetProfCtrlCallback() { return ctrlCallback_; };
         void SetProfReporterCallback(MsprofReporterCallback callback) { reporterCallback_ = callback; };
         MsprofReporterCallback GetProfReporterCallback() { return reporterCallback_; };
         aclError QueryHashValue(const char *funcName, int &deviceId, uint64_t &hashId);
@@ -51,7 +49,6 @@ namespace acl {
         bool isProfiling_ = false;
         std::mutex mutex_;
         std::unordered_set<uint32_t> deviceList_;
-        MsprofCtrlCallback ctrlCallback_ = nullptr;
         MsprofReporterCallback reporterCallback_ = nullptr;
         std::map<std::string, uint64_t> HashMap = {};
     };
