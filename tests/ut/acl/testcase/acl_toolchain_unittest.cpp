@@ -170,7 +170,7 @@ TEST_F(UTEST_ACL_toolchain, repeatExecuteAclmdlInitDumpTest)
 TEST_F(UTEST_ACL_toolchain, SetDumpConfigFailedTest)
 {
     aclInit(nullptr);
-    acl::AclDump::GetInstance().aclDumpFlag_ = false;
+    acl::AclDump::GetInstance().aclDumpFlag_ = false; 
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), SetDump(_))
         .WillOnce(Return((FAILED)));
 
@@ -237,18 +237,22 @@ TEST_F(UTEST_ACL_toolchain, HandleProfilingConfig)
     EXPECT_EQ(ret, ACL_SUCCESS);
 }
 
-TEST_F(UTEST_ACL_toolchain, HandleProfilingConfig)
+TEST_F(UTEST_ACL_toolchain, HandleProfilingConfig_2)
 {
     acl::AclProfiling aclProf;
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), MsprofInit(_,_,_))
         .WillOnce(Return(1));
     aclError ret = aclProf.HandleProfilingConfig(nullptr);
-    EXPECT_EQ(ret, ACL_SUCCESS);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     char environment[MMPA_MAX_PATH] = "../tests/ut/acl/json/profConfig.json";
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), MsprofInit(_,_,_))
+        .WillOnce(Return(0));
     ret = aclProf.HandleProfilingConfig("../tests/ut/acl/json/profConfig.json");
     EXPECT_EQ(ret, ACL_SUCCESS);
 
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), MsprofInit(_,_,_))
+        .WillOnce(Return(0));
     ret = aclProf.HandleProfilingConfig("../tests/ut/acl/json/profilingConfig.json");
     EXPECT_EQ(ret, ACL_SUCCESS);
 }
@@ -275,6 +279,9 @@ TEST_F(UTEST_ACL_toolchain, MsprofCtrlHandle)
     command.profSwitch = 0;
     ret = aclMsprofCtrlHandle(RT_PROF_CTRL_SWITCH, static_cast<void *>(&command), sizeof(rtProfCommandHandle_t));
     EXPECT_EQ(ret, ACL_SUCCESS);
+
+    ret = aclMsprofCtrlHandle(RT_PROF_CTRL_SWITCH, static_cast<void *>(&command), sizeof(rtProfCommandHandle_t) - 1);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 }
 
 TEST_F(UTEST_ACL_toolchain, AclProfilingReporter)
