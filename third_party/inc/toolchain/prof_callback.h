@@ -121,7 +121,7 @@ enum MsprofCtrlCallbackType {
     MSPROF_CTRL_INIT_ACL_JSON,              // start profiling with acl.json
     MSPROF_CTRL_INIT_GE_OPTIONS,            // start profiling with ge env and options
     MSPROF_CTRL_FINALIZE,                   // stop profiling
-    MSPROF_CTRL_INIT_DYNA = 0xFF            // start profiling for dynamic profiling        
+    MSPROF_CTRL_INIT_DYNA = 0xFF,            // start profiling for dynamic profiling
 };
 
 enum MSprofCommandHandleType {
@@ -129,8 +129,8 @@ enum MSprofCommandHandleType {
     PROF_COMMANDHANDLE_TYPE_START,
     PROF_COMMANDHANDLE_TYPE_STOP,
     PROF_COMMANDHANDLE_TYPE_FINALIZE,
-    PROF_COMMANDHANDLE_TYPE_SUBSCRIBLE,
-    PROF_COMMANDHANDLE_TYPE_UNSUBSCRIBLE
+    PROF_COMMANDHANDLE_TYPE_MODEL_SUBSCRIBLE,
+    PROF_COMMANDHANDLE_TYPE_MODEL_UNSUBSCRIBLE
 };
 
 /**
@@ -153,11 +153,11 @@ typedef void (*MsprofSetDeviceCallback)(uint32_t devId, bool isOpenDevice);
 
 /**
  * @name  MsprofInit
- * @brief callback to start/stop profiling
+ * @brief Profiling module init
  * @param DataType      [IN] profiling type: ACL env/ACl json/GE Option
- * @param data      [IN] profiling switch data
+ * @param data          [IN] profiling switch data
  * @param datalen       [IN] Length of data
- * @return enum MsprofErrorCode
+ * @return 0:SUCCESS, >0:FAILED
  */
 int32_t MsprofInit(uint32_t aclDataType, void *data, uint32_t dataLen);
 

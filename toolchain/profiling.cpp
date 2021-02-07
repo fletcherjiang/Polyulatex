@@ -32,12 +32,12 @@ namespace acl {
             if (ret != MSPROF_ERROR_NONE) {
                 ACL_LOG_CALL_ERROR("[Init][Profiling]init profiling with nullptr failed, profiling result = %d", ret);
                 return ACL_ERROR_INVALID_PARAM;
-            } 
+            }
         } else {
             if (configFileFlag) {
                 ret = MsprofInit(MSPROF_CTRL_INIT_ACL_JSON, const_cast<char *>(config.c_str()), config.size());
                 if (ret != MSPROF_ERROR_NONE) {
-                    ACL_LOG_INNER_ERROR("[Handle][Json]handle json config of profiling failed, profiling result = %d", ret);
+                    ACL_LOG_CALL_ERROR("[Init][Profiling]handle json config of profiling failed, profiling result = %d", ret);
                     return ACL_ERROR_INVALID_PARAM;
                 }
             } else {
