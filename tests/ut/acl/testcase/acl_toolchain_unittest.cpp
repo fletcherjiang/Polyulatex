@@ -237,24 +237,21 @@ TEST_F(UTEST_ACL_toolchain, HandleProfilingConfig)
     EXPECT_EQ(ret, ACL_SUCCESS);
 }
 
-TEST_F(UTEST_ACL_toolchain, HandleProfilingConfig_2)
+TEST_F(UTEST_ACL_toolchain, HandleProfilingCommand)
 {
-    acl::AclProfiling aclProf;
+    acl::AclProfiling aclprof;
+    const string config = "test";
+    bool configFileFlag = false;
+    bool noValidConfig = false;
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), MsprofInit(_,_,_))
-        .WillOnce(Return(1));
-    aclError ret = aclProf.HandleProfilingConfig(nullptr);
+        .WillRepeatedly(Return(1));
+    aclError ret = aclprof.HandleProfilingCommand(config, configFileFlag, noValidConfig);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
-    char environment[MMPA_MAX_PATH] = "../tests/ut/acl/json/profConfig.json";
-    EXPECT_CALL(MockFunctionTest::aclStubInstance(), MsprofInit(_,_,_))
-        .WillOnce(Return(0));
-    ret = aclProf.HandleProfilingConfig("../tests/ut/acl/json/profConfig.json");
-    EXPECT_EQ(ret, ACL_SUCCESS);
-
-    EXPECT_CALL(MockFunctionTest::aclStubInstance(), MsprofInit(_,_,_))
-        .WillOnce(Return(0));
-    ret = aclProf.HandleProfilingConfig("../tests/ut/acl/json/profilingConfig.json");
-    EXPECT_EQ(ret, ACL_SUCCESS);
+    configFileFlag = true;
+    noValidConfig = false;
+    ret = aclprof.HandleProfilingCommand(config, configFileFlag, noValidConfig);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 }
 
 extern aclError aclMsprofCtrlHandle(uint32_t dataType, void* data, uint32_t dataLen);
