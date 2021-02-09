@@ -126,8 +126,7 @@ aclError aclFinalize()
     acl::ResourceStatistics::GetInstance().TraverseStatistics();
     int32_t profRet = MsprofFinalize();
     if (profRet != MSPROF_ERROR_NONE) {
-        ACL_LOG_CALL_ERROR("handle json config of profiling failed, prof result = %d",
-            static_cast<int32_t>(profRet));
+        ACL_LOG_CALL_ERROR("[Finalize][Profiling]failed to call MsprofFinalize, prof result = %d", profRet);
     }
 
     if (aclGeFinalizeCallback != nullptr) {

@@ -121,7 +121,6 @@ namespace acl {
 static aclError aclProfInnerStart(rtProfCommandHandle_t *profilerConfig)
 {
     ACL_LOG_INFO("start to execute aclprofInnerStart");
-    ACL_LOG_DEBUG("acl profiling has been configed by api mode");
     if (!acl::AclProfilingManager::GetInstance().AclProfilingIsRun()) {
         aclError ret = acl::AclProfilingManager::GetInstance().Init();
         if (ret != ACL_SUCCESS) {
@@ -160,7 +159,7 @@ static aclError aclProcessProfData(void *data, uint32_t len)
     std::lock_guard<std::mutex> lock(g_aclProfMutex);
     ACL_REQUIRES_NOT_NULL(data);
     size_t commandLen = sizeof(rtProfCommandHandle_t);
-    if ((len == 0) || len != commandLen) {
+    if (len != commandLen) {
         ACL_LOG_INNER_ERROR("[Check][Len]len[%u] is invalid, it should be %zu", len, commandLen);
         return ACL_ERROR_INVALID_PARAM;
     }
@@ -181,13 +180,13 @@ aclError aclMsprofCtrlHandle(uint32_t dataType, void* data, uint32_t dataLen)
         MsprofReporterCallback callback = reinterpret_cast<MsprofReporterCallback>(data);
         acl::AclProfilingManager::GetInstance().SetProfReporterCallback(callback);
     } else if (dataType == RT_PROF_CTRL_SWITCH) {
-        aclError ret = aclProcessProfData(data, dataLen);
+        aclError ret = aclProcessProfData(data, static_cast<size_t>(dataLen));
         if (ret != ACL_SUCCESS) {
-            ACL_LOG_ERROR("failed to call aclProcessProfData");
+            ACL_LOG_INNER_ERROR("[Process][ProfSwitch]failed to call aclProcessProfData, result is %u", ret);
             return ret;
        }
     } else {
-        ACL_LOG_ERROR("get unsupported dataType %u while processing profiling data", dataType);
+        ACL_LOG_WARN("get unsupported dataType %u while processing profiling data", dataType);
     }
     return ACL_SUCCESS;
 }
