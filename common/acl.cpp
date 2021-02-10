@@ -59,10 +59,6 @@ aclError aclInit(const char *configPath)
         ACL_LOG_WARN("init device's log failed");
     }
 
-    rtError_t rtRet = rtProfRegisterCtrlCallback(ASCENDCL, aclMsprofCtrlHandle);
-    if (rtRet != RT_ERROR_NONE) {
-        ACL_LOG_WARN("register Callback failed, rt result = %u", rtRet);
-    }
     aclError ret = ACL_SUCCESS;
     if ((configPath != nullptr) && (strlen(configPath) != 0)) {
         // config dump
@@ -81,6 +77,11 @@ aclError aclInit(const char *configPath)
             return ret;
         }
         ACL_LOG_INFO("set HandleMaxOpQueueConfig success in aclInit");
+    }
+
+    rtError_t rtRet = rtProfRegisterCtrlCallback(ASCENDCL, aclMsprofCtrlHandle);
+    if (rtRet != RT_ERROR_NONE) {
+        ACL_LOG_WARN("register Callback failed, rt result = %u", rtRet);
     }
 
     // init GeExecutor
