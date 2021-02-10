@@ -163,14 +163,15 @@ static aclError aclProcessProfData(void *data, uint32_t len)
         ACL_LOG_INNER_ERROR("[Check][Len]len[%u] is invalid, it should be %zu", len, commandLen);
         return ACL_ERROR_INVALID_PARAM;
     }
+    aclError ret = ACL_SUCCESS;
     rtProfCommandHandle_t *profilerConfig = static_cast<rtProfCommandHandle_t *>(data);
     if ((profilerConfig->profSwitch & ACL_PROF_ACL_API) != 0) {
-        aclProfInnerStart(profilerConfig);
+        ret = aclProfInnerStart(profilerConfig);
     } else {
-        aclProfInnerStop(profilerConfig);
+        ret = aclProfInnerStop(profilerConfig);
     }
 
-    return ACL_SUCCESS;
+    return ret;
 }
 
 aclError aclMsprofCtrlHandle(uint32_t dataType, void* data, uint32_t dataLen)
