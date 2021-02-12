@@ -314,7 +314,8 @@ target_link_libraries(ascendcl PRIVATE
     adump_server
     static_mmpa
     -Wl,--no-as-needed
-    msprofiler_fwk_share
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:msprofiler_fwk_share>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:msprofiler>
     ge_common
     graph
     ascend_protobuf
@@ -481,7 +482,8 @@ target_link_libraries(fwk_ascendcl PRIVATE
     static_mmpa
     -Wl,--no-as-needed
     c_sec
-    msprofiler_fwk_share
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:msprofiler_fwk_share>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:msprofiler>
     runtime
     slog
     ge_common
