@@ -74,7 +74,7 @@ else()
     find_module(ge_common libge_common.so ${ASCEND_ACL_DIR})
     find_module(graph libgraph.so ${ASCEND_ACL_DIR})
     find_module(error_manager liberror_manager.so ${ASCEND_ACL_DIR})
-    find_module(msprofiler_fwk_share libmsprofiler.so ${ACL_LIB_PATH})
+    find_module(msprofiler_fwk_share libmsprofiler.so ${ASCEND_ACL_DIR})
 
     if(PLATFORM STREQUAL "train")
         find_module(adump_server libadump_server.a ${ASCEND_RUNTIME_DIR})
