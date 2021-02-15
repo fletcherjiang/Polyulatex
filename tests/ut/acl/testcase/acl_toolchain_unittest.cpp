@@ -270,10 +270,11 @@ TEST_F(UTEST_ACL_toolchain, MsprofCtrlHandle)
     command.profSwitch = 1;
     command.devNums = 1;
     command.devIdList[0] = 0;
+    command.type = 1;
     ret = aclMsprofCtrlHandle(RT_PROF_CTRL_SWITCH, static_cast<void *>(&command), sizeof(rtProfCommandHandle_t));
     EXPECT_EQ(ret, ACL_SUCCESS);
 
-    command.profSwitch = 0;
+    command.type = 2;
     ret = aclMsprofCtrlHandle(RT_PROF_CTRL_SWITCH, static_cast<void *>(&command), sizeof(rtProfCommandHandle_t));
     EXPECT_EQ(ret, ACL_SUCCESS);
 
