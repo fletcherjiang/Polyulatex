@@ -31,7 +31,7 @@ namespace acl {
             ret = MsprofInit(MSPROF_CTRL_INIT_DYNA, nullptr, 0);
             if (ret != MSPROF_ERROR_NONE) {
                 ACL_LOG_CALL_ERROR("[Init][Profiling]init profiling with nullptr failed, profiling result = %d", ret);
-                return ACL_ERROR_INVALID_PARAM;
+                return ACL_SUCCESS;
             }
         } else {
             if (configFileFlag) {
