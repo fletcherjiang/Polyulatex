@@ -268,7 +268,7 @@ aclError AclShapeRangeMap<T>::Insert(const AclOp &aclOp, const T &entry, T &agin
         outputRangeStr.c_str(), rangeKeyStr.c_str());
     
     size_t digest = 0;
-    auto *opAttr = aclOp.opAttr;
+    auto opAttr = aclOp.opAttr;
     aclopAttr emptyAttr; 
     if (opAttr != nullptr) {
         if (!attr_utils::SaveConstToAttr(aclOp, const_cast<aclopAttr *>(opAttr))) {
@@ -324,7 +324,7 @@ aclError AclShapeRangeMap<T>::Get(const AclOp &aclOp, T &entry, bool needUpdateT
     if (iter == hashMap_.end()) {
         ACL_LOG_INFO("Get aclOp from AclShapeRangeMap failed due to hashMap_ is empty when seed = %zu, aclOp = %s", 
             seed, aclOp.DebugString().c_str());
-        return ACL_ERROR_FAILURE;
+        return ACL_ERROR_OP_NOT_FOUND;
     } else if (iter->second.size() == 1) {
         ACL_LOG_INFO("Get aclOp from AclShapeRangeMap success! seed = %zu, aclOp = %s",
             seed, aclOp.DebugString().c_str());
@@ -333,7 +333,8 @@ aclError AclShapeRangeMap<T>::Get(const AclOp &aclOp, T &entry, bool needUpdateT
         }
 
         if (CheckValueRange(aclOp, iter->second.back())) {
-            if (hash_utils::CheckModelMatch(aclOp, iter->second.back())) {
+            // should use local variable opAttr due to we create emptyAttr object when aclOp.opAttr is nullptr
+            if (hash_utils::CheckModelMatchWithAttr(aclOp, opAttr, iter->second.back())) {
                 ACL_LOG_INFO("Get aclOp from aclOpMap success! seed = %zu, aclOp = %s", seed,
                     aclOp.DebugString().c_str());
                 entry = iter->second.back();
@@ -341,7 +342,7 @@ aclError AclShapeRangeMap<T>::Get(const AclOp &aclOp, T &entry, bool needUpdateT
             } else {
                 ACL_LOG_INFO("Get aclOp from aclOpMap failed due to CheckModelMatch failed! seed = %zu, aclOp = %s",
                     seed, aclOp.DebugString().c_str());
-                return ACL_ERROR_FAILURE;
+                return ACL_ERROR_OP_NOT_FOUND;
             }
         }
     } else {

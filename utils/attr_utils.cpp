@@ -649,7 +649,7 @@ uint64_t GetCurrentTimestamp()
     return total_use_time;
 }
 
-static bool ConstToAttr(const vector<aclTensorDesc> tensorDesc,
+static bool ConstToAttr(const vector<aclTensorDesc> &tensorDesc,
                         std::vector<std::string> &constStr)
 {
     for (auto &desc : tensorDesc) {

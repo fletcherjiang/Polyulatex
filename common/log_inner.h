@@ -285,6 +285,14 @@ inline bool IsInfoLogEnabled()
         } \
     while (false)
 
+#define ACL_REQUIRES_NOT_NULL_RET_BOOL(val) \
+    do { \
+        if ((val) == nullptr) { \
+            ACL_LOG_ERROR("[Check][%s]param must not be null.", #val); \
+            return false; } \
+        } \
+    while (false)
+
 #define ACL_CHECK_RANGE_INT(val, min, max) \
     do { \
         if (((val) < (min)) || ((val) > (max))) { \
@@ -451,10 +459,10 @@ inline bool IsInfoLogEnabled()
     } \
     while (false)
 
-#define ACL_CHECK_EQUAL(leftValue, rightValue) \
+#define ACL_CHECK_INT32_EQUAL(leftValue, rightValue) \
     do { \
         if ((leftValue) != (rightValue)) { \
-            ACL_LOG_INFO("%d is not equal to [%d].", leftValue, rightValue); \
+            ACL_LOG_INFO("[%d] is not equal to [%d].", leftValue, rightValue); \
             return false; \
         } else { \
             ACL_LOG_INFO("[%d] is equal to [%d]", leftValue, rightValue); \
