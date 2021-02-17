@@ -16,6 +16,8 @@
 
 #include "toolchain/prof_engine.h"
 #include "toolchain/prof_acl_api.h"
+#include "toolchain/prof_callback.h"
+#include "acl_stub.h"
 
 
 namespace Msprof {
@@ -47,4 +49,25 @@ int Reporter::Flush()
 int32_t ProfAclCfgToSampleCfg(const std::string &aclCfg, std::string &sampleCfg)
 {
     return 0;
+}
+
+
+ int32_t aclStub::MsprofFinalize()
+ {
+     return 0;
+ }
+
+int32_t aclStub::MsprofInit(uint32_t aclDataType, void *data, uint32_t dataLen)
+{
+    return 0;
+}
+
+int32_t MsprofFinalize()
+{
+    return MockFunctionTest::aclStubInstance().MsprofFinalize(); 
+}
+
+int32_t MsprofInit(uint32_t aclDataType, void *data, uint32_t dataLen)
+{
+    return MockFunctionTest::aclStubInstance().MsprofInit(aclDataType, data, dataLen);
 }

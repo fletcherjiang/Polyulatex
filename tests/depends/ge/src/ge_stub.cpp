@@ -1449,11 +1449,6 @@ const uint32_t MODEL_VERSION = 0x10000000;
 
 }// namespace ge
 
-ge::Status RegProfCtrlCallback(MsprofCtrlCallback func)
-{
-    return 0;
-}
-
 ge::Status RegProfReporterCallback(MsprofReporterCallback func)
 {
     return 0;

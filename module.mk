@@ -41,7 +41,6 @@ acl_src_file := \
     toolchain/profiling.cpp \
     toolchain/profiling_manager.cpp \
     toolchain/resource_statistics.cpp \
-    toolchain/acl_prof_api.cpp \
     single_op/compile/op_kernel_selector.cpp \
     single_op/compile/op_kernel_registry.cpp \
     single_op/executor/op_task.cpp \

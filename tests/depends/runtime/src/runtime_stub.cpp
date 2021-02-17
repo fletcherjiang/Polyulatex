@@ -382,6 +382,11 @@ rtError_t aclStub::rtSetGroup(int32_t groupid)
     return RT_ERROR_NONE;
 }
 
+rtError_t rtProfRegisterCtrlCallback(uint32_t logId, rtProfCtrlHandle callback)
+{
+    return RT_ERROR_NONE;
+}
+
 rtError_t aclStub::rtGetDevicePhyIdByIndex(uint32_t devIndex, uint32_t *phyId)
 {
     *phyId = 10;

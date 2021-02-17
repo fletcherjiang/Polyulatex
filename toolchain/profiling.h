@@ -20,11 +20,13 @@ namespace acl {
         static aclError HandleProfilingConfig(const char *configPath);
 
     private:
-        static aclError HandleProfilingCommand(const std::string &config, bool configFileFlag);
+        static aclError HandleProfilingCommand(const std::string &config, bool configFileFlag, bool noValidConfig);
 
         static bool GetProfilingConfigFile(std::string &fileName);
     };
 }
+
+aclError aclMsprofCtrlHandle(uint32_t dataType, void* data, uint32_t dataLen);
 
 #endif // ACL_PROFILING_H_
 

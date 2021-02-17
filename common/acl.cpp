@@ -28,6 +28,7 @@
 #include "toolchain/profiling_manager.h"
 #include "toolchain/resource_statistics.h"
 #include "graph/ge_local_context.h"
+#include "runtime/base.h"
 
 namespace {
     bool aclInitFlag = false;
@@ -77,13 +78,10 @@ aclError aclInit(const char *configPath)
         }
         ACL_LOG_INFO("set HandleMaxOpQueueConfig success in aclInit");
     }
-    // config profiling
-    ACL_LOG_INFO("set ProfilingConfig in aclInit");
-    acl::AclProfiling aclProf;
-    ret = aclProf.HandleProfilingConfig(configPath);
-    if (ret != ACL_SUCCESS) {
-        ACL_LOG_INNER_ERROR("[Process][ProfConfig]process HandleProfilingConfig failed");
-        return ret;
+
+    rtError_t rtRet = rtProfRegisterCtrlCallback(ASCENDCL, aclMsprofCtrlHandle);
+    if (rtRet != RT_ERROR_NONE) {
+        ACL_LOG_WARN("register Callback failed, rt result = %u", rtRet);
     }
 
     // init GeExecutor
@@ -93,6 +91,15 @@ aclError aclInit(const char *configPath)
     if (geRet != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Init][Geexecutor]init ge executor failed, ge result = %u", geRet);
         return ACL_GET_ERRCODE_GE(static_cast<int32_t>(geRet));
+    }
+
+    // config profiling
+    ACL_LOG_INFO("set ProfilingConfig in aclInit");
+    acl::AclProfiling aclProf;
+    ret = aclProf.HandleProfilingConfig(configPath);
+    if (ret != ACL_SUCCESS) {
+        ACL_LOG_INNER_ERROR("[Process][ProfConfig]process HandleProfilingConfig failed");
+        return ret;
     }
     // get socVersion
     ret = InitSocVersion();
@@ -118,13 +125,9 @@ aclError aclFinalize()
         ACL_LOG_WARN("finalize device's log failed");
     }
     acl::ResourceStatistics::GetInstance().TraverseStatistics();
-    MsprofCtrlCallback callback = acl::AclProfilingManager::GetInstance().GetProfCtrlCallback();
-    if (callback != nullptr) {
-        int32_t profRet = callback(static_cast<uint32_t>(MSPROF_CTRL_FINALIZE), nullptr, 0);
-        if (profRet != MSPROF_ERROR_NONE) {
-            ACL_LOG_CALL_ERROR("[Handle][Json]handle json config of profiling failed, prof result = %d",
-                static_cast<int32_t>(profRet));
-        }
+    int32_t profRet = MsprofFinalize();
+    if (profRet != MSPROF_ERROR_NONE) {
+        ACL_LOG_CALL_ERROR("[Finalize][Profiling]failed to call MsprofFinalize, prof result = %d", profRet);
     }
 
     if (aclGeFinalizeCallback != nullptr) {

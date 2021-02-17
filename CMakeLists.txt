@@ -58,8 +58,7 @@ if(DEFINED ENV{D_LINK_PATH})
     find_module(register libregister.so ${ACL_LIB_PATH})
     find_module(datatransfer libdatatransfer.so ${ACL_LIB_PATH})
     find_module(error_manager liberror_manager.so ${ACL_LIB_PATH})
-    find_module(msprofiler_ext libmsprofiler.a ${ACL_LIB_PATH})
-    find_module(msprofiler_fwkacl_ext libmsprofiler_fwkacl.a ${ACL_LIB_PATH})
+    find_module(msprofiler_fwk_share libmsprofiler.so ${ACL_LIB_PATH})
 elseif(ENABLE_ACL_COV OR ENABLE_ACL_UT)
     add_subdirectory(tests)
 else()
@@ -75,7 +74,7 @@ else()
     find_module(ge_common libge_common.so ${ASCEND_ACL_DIR})
     find_module(graph libgraph.so ${ASCEND_ACL_DIR})
     find_module(error_manager liberror_manager.so ${ASCEND_ACL_DIR})
-    find_module(msprofiler_ext libmsprofiler.a ${ASCEND_ACL_DIR})
+    find_module(msprofiler_fwk_share libmsprofiler.so ${ASCEND_ACL_DIR})
 
     if(PLATFORM STREQUAL "train")
         find_module(adump_server libadump_server.a ${ASCEND_RUNTIME_DIR})
@@ -84,7 +83,7 @@ else()
         find_module(ge_runner libge_runner.so ${ASCEND_RUNTIME_DIR})
         find_module(register libregister.so ${ASCEND_RUNTIME_DIR})
         find_module(datatransfer libdatatransfer.so ${ASCEND_RUNTIME_DIR})
-        find_module(msprofiler_fwkacl_ext libmsprofiler_fwkacl.a ${ASCEND_RUNTIME_DIR})
+        find_module(msprofiler_fwk_share libmsprofiler.so ${ASCEND_RUNTIME_DIR})
         if(PRODUCT STREQUAL "flr3")
             message(FATAL_ERROR "This platform is not supported in train mode, build terminated")
         endif()
@@ -96,16 +95,16 @@ else()
             find_module(ge_runner libge_runner.so ${ASCEND_RUNTIME_DIR})
             find_module(datatransfer libdatatransfer.so ${ASCEND_RUNTIME_DIR})
             find_module(ascend_hal_stub libascend_hal.so ${ASCEND_DRIVER_DIR})
-            find_module(msprofiler_fwkacl_ext libmsprofiler_fwkacl.a ${ASCEND_RUNTIME_DIR})
+            find_module(msprofiler_fwk_share libmsprofiler.so ${ASCEND_RUNTIME_DIR})
         endif()
     elseif(PLATFORM STREQUAL "all")
         find_module(ge_runner libge_runner.so ${ASCEND_RUNTIME_DIR})
         find_module(register libregister.so ${ASCEND_RUNTIME_DIR})
         find_module(datatransfer libdatatransfer.so ${ASCEND_RUNTIME_DIR})
         find_module(adump_server libadump_server.a ${ASCEND_RUNTIME_DIR})
-        find_module(msprofiler_fwkacl_ext libmsprofiler_fwkacl.a ${ASCEND_RUNTIME_DIR})
         find_module(runtime libruntime.so ${ASCEND_RUNTIME_DIR})
         find_module(ascend_hal_stub libascend_hal.so ${ASCEND_DRIVER_DIR})
+        find_module(msprofiler_fwk_share libmsprofiler.so ${ASCEND_RUNTIME_DIR})
     else()
         message(STATUS "PLATFORM param is invalid, should be train or inference, you choose nothing!")
     endif()
@@ -167,7 +166,6 @@ set(SRC_LIST
     toolchain/profiling.cpp
     toolchain/profiling_manager.cpp
     toolchain/resource_statistics.cpp
-    toolchain/acl_prof_api.cpp
     single_op/compile/op_kernel_selector.cpp
     single_op/compile/op_kernel_registry.cpp
     single_op/executor/op_task.cpp
@@ -179,7 +177,7 @@ set(SRC_LIST
 if(${TARGET_SYSTEM_NAME} STREQUAL "Windows")
 add_library(ascendcl SHARED ${SRC_LIST} ${PROTO_SRCS} $<TARGET_OBJECTS:msprofiler>)
 else()
-add_library(ascendcl SHARED ${SRC_LIST} ${PROTO_HDRS} $<TARGET_OBJECTS:$<IF:$<TARGET_EXISTS:msprofiler>,msprofiler,msprofiler_object>>)
+add_library(ascendcl SHARED ${SRC_LIST} ${PROTO_HDRS})
 endif()
 
 if(ENABLE_OPEN_SRC)
@@ -321,6 +319,7 @@ target_link_libraries(ascendcl PRIVATE
     adump_server
     static_mmpa
     -Wl,--no-as-needed
+    msprofiler_fwk_share
     ge_common
     graph
     ascend_protobuf
@@ -416,7 +415,6 @@ if(NOT (ENABLE_OPEN_SRC AND ((PRODUCT STREQUAL "flr2") OR (PRODUCT STREQUAL "flr
 add_library(fwk_ascendcl SHARED
     tensor_data_transfer/tensor_data_transfer.cpp
     ${SRC_LIST}
-    $<TARGET_OBJECTS:$<IF:$<TARGET_EXISTS:msprofiler_fwkacl>,msprofiler_fwkacl,msprofiler_fwkacl_object>>
 )
 
 if (ENABLE_OPEN_SRC)
@@ -488,6 +486,7 @@ target_link_libraries(fwk_ascendcl PRIVATE
     static_mmpa
     -Wl,--no-as-needed
     c_sec
+    msprofiler_fwk_share
     runtime
     slog
     ge_common

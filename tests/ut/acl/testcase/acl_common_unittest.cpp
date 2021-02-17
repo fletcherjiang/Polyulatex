@@ -77,11 +77,6 @@ static void ExceptionInfoCallback(aclrtExceptionInfo *exceptionInfo)
     uint32_t thread_id = aclrtGetThreadIdFromExceptionInfo(nullptr);
 }
 
-static int32_t ctrl_callback(uint32_t type, void *data, uint32_t len)
-{
-    return 0;
-}
-
 static int32_t reporter_callback(uint32_t moduleId, uint32_t type, void *data, uint32_t len)
 {
     return 0;

@@ -41,28 +41,11 @@ class UTEST_ACL_toolchain : public testing::Test
         }
 };
 
-struct AclprofCommandHandle {
-    uint64_t profSwitch;
-    uint32_t devNums; // length of device id list
-    uint32_t devIdList[64];
-    uint32_t modelId;
-};
-
 INT32 mmGetEnvStub(const CHAR *name, CHAR *value, UINT32 len)
 {
     char environment[MMPA_MAX_PATH] = "";
     (void)memcpy_s(value, MMPA_MAX_PATH, environment, MMPA_MAX_PATH);
     return 0;
-}
-
-static int32_t ctrl_callback(uint32_t type, void *data, uint32_t len)
-{
-    return 0;
-}
-
-static int32_t ctrl_callback1(uint32_t type, void *data, uint32_t len)
-{
-    return 1;
 }
 
 TEST_F(UTEST_ACL_toolchain, dumpApiNotSupportTest)
@@ -187,7 +170,7 @@ TEST_F(UTEST_ACL_toolchain, repeatExecuteAclmdlInitDumpTest)
 TEST_F(UTEST_ACL_toolchain, SetDumpConfigFailedTest)
 {
     aclInit(nullptr);
-    acl::AclDump::GetInstance().aclDumpFlag_ = false;
+    acl::AclDump::GetInstance().aclDumpFlag_ = false; 
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), SetDump(_))
         .WillOnce(Return((FAILED)));
 
@@ -215,24 +198,6 @@ TEST_F(UTEST_ACL_toolchain, dumpFinalizeFailedTest)
 }
 
 // ========================== profiling testcase =============================
-extern aclError _aclprofCommandHandle(uint32_t type, void *data, uint32_t len);
-extern aclError _aclprofGetDeviceByModelId(uint32_t modelId, uint32_t &deviceId);
-extern aclError _aclprofRegisterCtrlCallback(MsprofCtrlCallback callback);
-extern aclError _aclprofRegisterSetDeviceCallback(MsprofSetDeviceCallback callback);
-extern aclError _aclprofRegisterReporterCallback(MsprofReporterCallback callback);
-
-TEST_F(UTEST_ACL_toolchain, HandleProfilingConfigFailed)
-{
-    AclProfilingManager::GetInstance().SetProfCtrlCallback(ctrl_callback);
-    acl::AclProfiling aclProf;
-    aclError ret = aclProf.HandleProfilingConfig(nullptr);
-    EXPECT_EQ(ret, ACL_SUCCESS);
-
-    AclProfilingManager::GetInstance().SetProfCtrlCallback(ctrl_callback1);
-    ret = aclProf.HandleProfilingCommand(string(""), true);
-    AclProfilingManager::GetInstance().SetProfCtrlCallback(ctrl_callback);
-    EXPECT_NE(ret, ACL_SUCCESS);
-}
 
 TEST_F(UTEST_ACL_toolchain, setDeviceSuccess)
 {
@@ -258,95 +223,6 @@ TEST_F(UTEST_ACL_toolchain, AclProfilingManagerUnInitFailed)
     EXPECT_NE(ret, ACL_SUCCESS);
 }
 
-TEST_F(UTEST_ACL_toolchain, aclprofCommandHandleSuccessTest)
-{
-    AclprofCommandHandle command;
-    command.profSwitch |= ACL_PROF_ACL_API;
-    command.devIdList[0] = 1;
-    command.devNums = 1;
-    aclError ret = _aclprofCommandHandle(0, nullptr, 0);
-    EXPECT_EQ(ret, ACL_SUCCESS);
-
-    ret = _aclprofCommandHandle(1, (void*)(&command), sizeof(command));
-    EXPECT_EQ(ret, ACL_SUCCESS);
-
-    ret = _aclprofCommandHandle(2, (void*)(&command), sizeof(command));
-    EXPECT_EQ(ret, ACL_SUCCESS);
-
-    ret = _aclprofCommandHandle(3, nullptr, 0);
-    EXPECT_EQ(ret, ACL_SUCCESS);
-
-    ret = _aclprofCommandHandle(4, (void*)(&command), sizeof(command));
-    EXPECT_EQ(ret, ACL_SUCCESS);
-
-    ret = _aclprofCommandHandle(5, (void*)(&command), sizeof(command));
-    EXPECT_EQ(ret, ACL_SUCCESS);
-}
-
-TEST_F(UTEST_ACL_toolchain, aclprofCommandHandleFailedTest)
-{
-    AclprofCommandHandle command;
-    // aclprofInnerInit fail
-    aclError ret = _aclprofCommandHandle(1, (void*)(&command), 3);
-    EXPECT_NE(ret, ACL_SUCCESS);
-
-    // aclprofInnerStart fail
-    ret = _aclprofCommandHandle(2, (void*)(&command), 3);
-    EXPECT_NE(ret, ACL_SUCCESS);
-
-    // aclprofInnerModelSubscribe fail
-    ret = _aclprofCommandHandle(4, (void*)(&command), 3);
-    EXPECT_NE(ret, ACL_SUCCESS);
-
-    // aclprofInnerModelUnSubscribe fail
-    ret = _aclprofCommandHandle(5, (void*)(&command), 3);
-    EXPECT_NE(ret, ACL_SUCCESS);
-}
-
-TEST_F(UTEST_ACL_toolchain, invalidCommandTypeTest)
-{
-    AclprofCommandHandle command;
-    aclError ret = _aclprofCommandHandle(6, nullptr, 0);
-    EXPECT_NE(ret, ACL_SUCCESS);
-}
-
-TEST_F(UTEST_ACL_toolchain, aclprofGetDeviceByModelIdSuccessTest)
-{
-    uint32_t modelId = 1;
-    uint32_t deviceId = 2;
-    aclError ret = _aclprofGetDeviceByModelId(modelId, deviceId);
-    EXPECT_EQ(ret, ACL_SUCCESS);
-}
-
-TEST_F(UTEST_ACL_toolchain, repeatRegisterCtrlCallbackTest)
-{
-    MsprofCtrlCallback callback1 = (MsprofCtrlCallback)0x0001;
-    uint32_t deviceId;
-    aclError ret = _aclprofGetDeviceByModelId(0, deviceId);
-    EXPECT_EQ(ret, ACL_SUCCESS);
-
-    ret = _aclprofRegisterCtrlCallback(callback1);
-    EXPECT_EQ(ret, ACL_SUCCESS);
-}
-
-TEST_F(UTEST_ACL_toolchain, repeatRegisterReporterCallbackTest)
-{
-    MsprofSetDeviceCallback callback2 = (MsprofSetDeviceCallback)0x0001;
-    MsprofReporterCallback callback3 = (MsprofReporterCallback)0x0001;
-    aclError ret = _aclprofRegisterSetDeviceCallback(callback2);
-    EXPECT_EQ(ret, ACL_SUCCESS);
-
-    ret = _aclprofRegisterReporterCallback(callback3);
-    EXPECT_EQ(ret, ACL_SUCCESS);
-}
-
-TEST_F(UTEST_ACL_toolchain, RegisterSetDeviceCallbackSuccess)
-{
-    MsprofSetDeviceCallback callback = (MsprofSetDeviceCallback)0x0001;
-    aclError ret = _aclprofRegisterSetDeviceCallback(callback);
-    EXPECT_EQ(ret, ACL_SUCCESS);
-}
-
 TEST_F(UTEST_ACL_toolchain, HandleProfilingConfig)
 {
     acl::AclProfiling aclProf;
@@ -359,6 +235,51 @@ TEST_F(UTEST_ACL_toolchain, HandleProfilingConfig)
 
     ret = aclProf.HandleProfilingConfig("../tests/ut/acl/json/profilingConfig.json");
     EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_ACL_toolchain, HandleProfilingCommand)
+{
+    acl::AclProfiling aclprof;
+    const string config = "test";
+    bool configFileFlag = false;
+    bool noValidConfig = false;
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), MsprofInit(_,_,_))
+        .WillRepeatedly(Return(1));
+    aclError ret = aclprof.HandleProfilingCommand(config, configFileFlag, noValidConfig);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    configFileFlag = true;
+    noValidConfig = false;
+    ret = aclprof.HandleProfilingCommand(config, configFileFlag, noValidConfig);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+}
+
+extern aclError aclMsprofCtrlHandle(uint32_t dataType, void* data, uint32_t dataLen);
+int32_t MsprofReporterCallbackImpl(uint32_t moduleId, uint32_t type, void *data, uint32_t len)
+{
+    return 0;
+}
+
+TEST_F(UTEST_ACL_toolchain, MsprofCtrlHandle)
+{
+
+    aclError ret = aclMsprofCtrlHandle(RT_PROF_CTRL_REPORTER, (void*)MsprofReporterCallbackImpl, sizeof(int));
+    EXPECT_EQ(ret, ACL_SUCCESS);
+
+    rtProfCommandHandle_t command;
+    command.profSwitch = 1;
+    command.devNums = 1;
+    command.devIdList[0] = 0;
+    command.type = 1;
+    ret = aclMsprofCtrlHandle(RT_PROF_CTRL_SWITCH, static_cast<void *>(&command), sizeof(rtProfCommandHandle_t));
+    EXPECT_EQ(ret, ACL_SUCCESS);
+
+    command.type = 2;
+    ret = aclMsprofCtrlHandle(RT_PROF_CTRL_SWITCH, static_cast<void *>(&command), sizeof(rtProfCommandHandle_t));
+    EXPECT_EQ(ret, ACL_SUCCESS);
+
+    ret = aclMsprofCtrlHandle(RT_PROF_CTRL_SWITCH, static_cast<void *>(&command), sizeof(rtProfCommandHandle_t) - 1);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 }
 
 TEST_F(UTEST_ACL_toolchain, AclProfilingReporter)

@@ -95,6 +95,14 @@ typedef void (*rtTaskFailCallback)(rtExceptionInfo *exceptionInfo);
 typedef void (*rtDeviceStateCallback)(uint32_t devId, bool isOpen);
 
 /**
+ * @ingroup profiling_base
+ * @brief dataType: rtprofCtrlType_t
+ * @brief data: data switch or reporter function
+ * @brief dataLen: length of data
+ */
+typedef rtError_t (*rtProfCtrlHandle)(uint32_t dataType, void *data, uint32_t dataLen);
+
+/**
  * @ingroup dvrt_base
  * @brief stream handle.
  */
@@ -117,6 +125,32 @@ typedef void *rtLabel_t;
  * @brief model handle.
  */
 typedef void *rtModel_t;
+
+#define RT_PROF_MAX_DEV_NUM 64
+
+/**
+ * @ingroup profiling_base
+ * @brief  profiling command info
+*/
+typedef struct rtProfCommandHandle {
+    uint64_t profSwitch;
+    uint64_t profSwitchHi;
+    uint32_t devNums;
+    uint32_t devIdList[RT_PROF_MAX_DEV_NUM];
+    uint32_t modelId;
+    uint32_t type;
+} rtProfCommandHandle_t;
+
+/**
+ * @ingroup profiling_base
+ * @brief  app register profiling weitch and reporter callback
+ */
+typedef enum {
+    RT_PROF_CTRL_INVALID = 0,
+    RT_PROF_CTRL_SWITCH,
+    RT_PROF_CTRL_REPORTER,
+    RT_PROF_CTRL_BUTT
+} rtProfCtrlType_t;
 
 /**
  * @ingroup profiling_base
@@ -165,6 +199,57 @@ RTS_API rtError_t rtProfilerTraceEx(uint64_t id, uint64_t modelId, uint16_t tagI
  * @brief ts set profiling reporter callback.
  */
 RTS_API rtError_t rtSetMsprofReporterCallback(MsprofReporterCallback callback);
+
+/**
+ * @ingroup profiling_base 
+ * @brief add the map of deviceId and GE modelId, called by GE
+ * @brief [in] geModelIdx The index of GE model
+ * @brief [in] deviceId the id of device
+ * @return RT_ERROR_NONE for ok
+ * @return ACL_ERROR_RT_PARAM_INVALID for error input
+ */
+RTS_API rtError_t rtSetDeviceIdByModelIdx(uint32_t geModelIdx, uint32_t deviceId);
+
+/**
+ * @ingroup profiling_base 
+ * @brief delete the map of deviceId and GE modelId, called by GE
+ * @brief [in] geModelIdx The index of GE model
+ * @brief [in] deviceId the id of device
+ * @return RT_ERROR_NONE for ok
+ * @return ACL_ERROR_RT_PARAM_INVALID for error input
+ */
+RTS_API rtError_t rtUnsetDeviceIdByModelIdx(uint32_t geModelIdx, uint32_t deviceId);
+
+/**
+ * @ingroup profiling_base 
+ * @brief find deviceId by GE modelId, called by profiling
+ * @brief [in] geModelIdx The index of GE model
+ * @brief [in] deviceId the id of device
+ * @return RT_ERROR_NONE for ok
+ * @return ACL_ERROR_RT_PARAM_INVALID for error input
+ * @return ACL_ERROR_RT_INTERNAL_ERROR for can't find deviceId by geModelIdx
+ */
+RTS_API rtError_t rtGetDeviceIdByModelIdx(uint32_t geModelIdx, uint32_t deviceId);
+
+/**
+ * @ingroup profiling_base 
+ * @brief set profiling switch, called by profiling
+ * @brief [in] data rtProfCommandHandle
+ * @brief [out] len length of data 
+ * @return RT_ERROR_NONE for ok
+ * @return ACL_ERROR_RT_PARAM_INVALID for error input
+ */
+RTS_API rtError_t rtProfSetProfSwitch(void* data, uint32_t len);
+
+/**
+ * @ingroup profiling_base 
+ * @brief register callback of uppper app, called by ge or acl
+ * @brief [in] moduleId of APP
+ * @brief [in] callback function of ge or acl
+ * @return RT_ERROR_NONE for ok
+ * @return ACL_ERROR_RT_PARAM_INVALID for error input
+ */
+RTS_API rtError_t rtProfRegisterCtrlCallback(uint32_t moduleId, rtProfCtrlHandle callback);
 
 /**
  * @ingroup dvrt_base
