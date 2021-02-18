@@ -628,13 +628,13 @@ TEST_F(UTEST_ACL_OpModelManager, ModelHashCheckTest)
     AclOp aclOp;
     aclOp.opType = "acltesterror";
     aclopAttr *opAttr = nullptr;
-    EXPECT_EQ(hash_utils::CheckModelMatchWithAttr(aclOp, opAttr, modelDefPtr), false);
+    EXPECT_EQ(hash_utils::CheckModelAndAttrMatch(aclOp, opAttr, modelDefPtr), false);
 
     aclOp.opType = "acltest";
-    EXPECT_EQ(hash_utils::CheckModelMatchWithAttr(aclOp, opAttr, modelDefPtr), false);
+    EXPECT_EQ(hash_utils::CheckModelAndAttrMatch(aclOp, opAttr, modelDefPtr), false);
 
     aclOp.numInputs = 1;
-    EXPECT_EQ(hash_utils::CheckModelMatchWithAttr(aclOp, opAttr, modelDefPtr), false);
+    EXPECT_EQ(hash_utils::CheckModelAndAttrMatch(aclOp, opAttr, modelDefPtr), false);
 
     aclOp.numInputs = 2;
     const aclTensorDesc *inputDesc[2];
@@ -642,7 +642,7 @@ TEST_F(UTEST_ACL_OpModelManager, ModelHashCheckTest)
     inputDesc[0] = aclCreateTensorDesc(ACL_FLOAT16, 2, shape2, ACL_FORMAT_ND);
     inputDesc[1] = aclCreateTensorDesc(ACL_FLOAT16, 2, shape2, ACL_FORMAT_ND);
     aclOp.inputDesc = inputDesc;
-    EXPECT_EQ(hash_utils::CheckModelMatchWithAttr(aclOp, opAttr, modelDefPtr), false);
+    EXPECT_EQ(hash_utils::CheckModelAndAttrMatch(aclOp, opAttr, modelDefPtr), false);
 
     aclOp.numInputs = 2;
     inputDesc[0] = aclCreateTensorDesc(ACL_FLOAT16, 2, shape, ACL_FORMAT_ND);
@@ -650,20 +650,20 @@ TEST_F(UTEST_ACL_OpModelManager, ModelHashCheckTest)
     aclOp.inputDesc = inputDesc;
 
     aclOp.numOutputs = 2;
-    EXPECT_EQ(hash_utils::CheckModelMatchWithAttr(aclOp, opAttr, modelDefPtr), false);
+    EXPECT_EQ(hash_utils::CheckModelAndAttrMatch(aclOp, opAttr, modelDefPtr), false);
 
     aclOp.numOutputs = 1;
     const aclTensorDesc *outputDesc[1];
     outputDesc[0] = aclCreateTensorDesc(ACL_FLOAT16, 2, shape2, ACL_FORMAT_ND);
     aclOp.outputDesc = outputDesc;
-    EXPECT_EQ(hash_utils::CheckModelMatchWithAttr(aclOp, opAttr, modelDefPtr), false);
+    EXPECT_EQ(hash_utils::CheckModelAndAttrMatch(aclOp, opAttr, modelDefPtr), false);
 
     outputDesc[0] = aclCreateTensorDesc(ACL_FLOAT16, 2, shape, ACL_FORMAT_ND);
     aclOp.outputDesc = outputDesc;
-    EXPECT_EQ(hash_utils::CheckModelMatchWithAttr(aclOp, opAttr, modelDefPtr), false);
+    EXPECT_EQ(hash_utils::CheckModelAndAttrMatch(aclOp, opAttr, modelDefPtr), false);
 
     aclopSetAttrString(opAttr, "testAttr", "attrValue");
-    EXPECT_EQ(hash_utils::CheckModelMatchWithAttr(aclOp, opAttr, modelDefPtr), false);
+    EXPECT_EQ(hash_utils::CheckModelAndAttrMatch(aclOp, opAttr, modelDefPtr), false);
 
 
     aclDestroyTensorDesc(inputDesc[0]);

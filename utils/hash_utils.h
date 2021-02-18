@@ -32,7 +32,7 @@ aclError GetTensorDescHash(const int32_t num, const aclTensorDesc *const descArr
 aclError GetAclOpHash(const AclOp &aclOp, const size_t &attrDigest, size_t &seed);
 
 template<typename T>
-bool CheckModelMatchWithAttr(const AclOp &aclOp, const aclopAttr* opAttr, const T &entry)
+bool CheckModelAndAttrMatch(const AclOp &aclOp, const aclopAttr* opAttr, const T &entry)
 {
     ACL_LOG_INFO("Start to check model is matched!");
     ACL_REQUIRES_NOT_NULL_RET_BOOL(entry);

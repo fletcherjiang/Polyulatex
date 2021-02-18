@@ -334,7 +334,7 @@ aclError AclShapeRangeMap<T>::Get(const AclOp &aclOp, T &entry, bool needUpdateT
 
         if (CheckValueRange(aclOp, iter->second.back())) {
             // should use local variable opAttr due to we create emptyAttr object when aclOp.opAttr is nullptr
-            if (hash_utils::CheckModelMatchWithAttr(aclOp, opAttr, iter->second.back())) {
+            if (hash_utils::CheckModelAndAttrMatch(aclOp, opAttr, iter->second.back())) {
                 ACL_LOG_INFO("Get aclOp from aclOpMap success! seed = %zu, aclOp = %s", seed,
                     aclOp.DebugString().c_str());
                 entry = iter->second.back();
