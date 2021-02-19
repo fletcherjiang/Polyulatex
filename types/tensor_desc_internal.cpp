@@ -210,7 +210,11 @@ bool aclTensorDesc::CheckShapeRange() const
 bool aclTensorDesc::operator==(const aclTensorDesc* other)
 {
     ACL_LOG_DEBUG("Check aclTensorDesc is equal start!");
-    ACL_REQUIRES_NOT_NULL_RET_BOOL(other);
+    // when check model matched failed, we should report WARNING log not ERROR
+    if (other == nullptr) {
+        ACL_LOG_WARN("[Check][aclTensorDesc]param must not be null.");
+        return false;
+    }
 
     ACL_LOG_DEBUG("Check dataType is equal");
     ACL_CHECK_INT32_EQUAL(this->dataType, other->dataType);

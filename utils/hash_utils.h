@@ -35,33 +35,36 @@ template<typename T>
 bool CheckModelAndAttrMatch(const AclOp &aclOp, const aclopAttr* opAttr, const T &entry)
 {
     ACL_LOG_INFO("Start to check model is matched!");
-    ACL_REQUIRES_NOT_NULL_RET_BOOL(entry);
-    if(aclOp.opType != entry->opType) {
+    if (entry == nullptr) {
+        ACL_LOG_WARN("entry must not be null.");
+        return false;
+    }
+    if (aclOp.opType != entry->opType) {
         return false;
     }
 
     if (aclOp.numInputs != entry->inputDescArr.size()) {
-        ACL_LOG_ERROR("[Check][numInputs] Check numInputs is equal to inputDescArr size failed, numInputs is %d, "
+        ACL_LOG_WARN("Check numInputs is equal to inputDescArr size failed, numInputs is %d, "
             "inputDescArr size is %zu", aclOp.numInputs, entry->inputDescArr.size());
             return false;
     }
 
     for (int32_t i = 0; i < aclOp.numInputs; ++i) {
         if (!(entry->inputDescArr[i] == aclOp.inputDesc[i])) {
-            ACL_LOG_ERROR("[Check][inputDescArr] Check inputDescArr is equal to inputDesc failed");
+            ACL_LOG_WARN("Check inputDescArr is equal to inputDesc failed");
             return false;
         }
     }
 
     if (aclOp.numOutputs != entry->outputDescArr.size()) {
-        ACL_LOG_ERROR("[Check][numOutputs] Check numOutputs is equal to outputDescArr size failed, numOutputs is %d, "
+        ACL_LOG_WARN("Check numOutputs is equal to outputDescArr size failed, numOutputs is %d, "
             "outputDescArr size is %zu", aclOp.numOutputs, entry->outputDescArr.size());
             return false;
     }
 
     for (int32_t i = 0; i < aclOp.numOutputs; ++i) {
         if (!(entry->outputDescArr[i] == aclOp.outputDesc[i])) {
-            ACL_LOG_ERROR("[Check][outputDescArr] Check outputDescArr is equal to outputDesc failed");
+            ACL_LOG_WARN("Check outputDescArr is equal to outputDesc failed");
             return false;
         }
     }
