@@ -273,7 +273,7 @@ std::string OpModelManager::TensorStatusToStr(const std::vector<aclTensorShapeSt
         }
         for (size_t j = 0; j < tensorShapeStatus[i].shapeStatus.size(); ++j) {
             if (tensorShapeStatus[i].shapeStatus[j]) {
-                tensorShapeStatusDesc += DYNAMIC_SHAPE_DIM_STR; // 1 means dynamic shape dim
+                tensorShapeStatusDesc += DYNAMIC_SHAPE_DIM_STR; // -1 means dynamic shape dim
             } else {
                 tensorShapeStatusDesc += STATIC_SHAPE_DIM_STR; // 0 means static shape dim
             }
