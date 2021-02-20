@@ -212,7 +212,7 @@ bool aclTensorDesc::operator==(const aclTensorDesc* other)
     ACL_LOG_DEBUG("Check aclTensorDesc is equal start!");
     // when check model matched failed, we should report WARNING log not ERROR
     if (other == nullptr) {
-        ACL_LOG_WARN("[Check][aclTensorDesc]param must not be null.");
+        ACL_LOG_WARN("aclTensorDesc must not be null.");
         return false;
     }
 
