@@ -322,16 +322,13 @@ aclError AclShapeRangeMap<T>::Get(const AclOp &aclOp, T &entry, bool needUpdateT
     std::lock_guard<std::mutex> lk(mutex_);
     auto iter = hashMap_.find(seed);
     if (iter == hashMap_.end()) {
-        ACL_LOG_INFO("Get aclOp from AclShapeRangeMap failed due to hashMap_ is empty when seed = %zu, aclOp = %s", 
+        ACL_LOG_WARN("Get aclOp from AclShapeRangeMap failed due to hashMap_ is empty when seed = %zu, aclOp = %s", 
             seed, aclOp.DebugString().c_str());
         return ACL_ERROR_OP_NOT_FOUND;
     } else if (iter->second.size() == 1) {
-        ACL_LOG_INFO("Get aclOp from AclShapeRangeMap success! seed = %zu, aclOp = %s",
-            seed, aclOp.DebugString().c_str());
         if (needUpdateTimestamp) {
             Updatetimestamp(iter->second.back());
         }
-
         if (CheckValueRange(aclOp, iter->second.back())) {
             // should use local variable opAttr due to we create emptyAttr object when aclOp.opAttr is nullptr
             if (hash_utils::CheckModelAndAttrMatch(aclOp, opAttr, iter->second.back())) {
@@ -340,7 +337,7 @@ aclError AclShapeRangeMap<T>::Get(const AclOp &aclOp, T &entry, bool needUpdateT
                 entry = iter->second.back();
                 return ACL_SUCCESS;
             } else {
-                ACL_LOG_INFO("Get aclOp from aclOpMap failed due to CheckModelMatch failed! seed = %zu, aclOp = %s",
+                ACL_LOG_WARN("Get aclOp from aclOpMap failed due to CheckModelMatch failed! seed = %zu, aclOp = %s",
                     seed, aclOp.DebugString().c_str());
                 return ACL_ERROR_OP_NOT_FOUND;
             }

@@ -294,7 +294,7 @@ aclError AclOpMap<T>::Get(const AclOp &aclOp, T &entry, bool needUpdateTimestamp
     std::lock_guard<std::mutex> lk(mutex_);
     auto iter = hashMap_.find(seed);
     if (iter == hashMap_.end()) {
-        ACL_LOG_INFO("Get aclOp from aclOpMap failed due to hashMap_ is empty when seed = %zu, aclOp = %s", 
+        ACL_LOG_WARN("Get aclOp from aclOpMap failed due to hashMap_ is empty when seed = %zu, aclOp = %s", 
             seed, aclOp.DebugString().c_str());
         return ACL_ERROR_OP_NOT_FOUND;
     } else if (iter->second.size() == 1) {
@@ -307,7 +307,7 @@ aclError AclOpMap<T>::Get(const AclOp &aclOp, T &entry, bool needUpdateTimestamp
             entry = iter->second.back();
             return ACL_SUCCESS;
         } else {
-            ACL_LOG_INFO("Get aclOp from aclOpMap failed due to CheckModelMatch failed! seed = %zu, aclOp = %s",
+            ACL_LOG_WARN("Get aclOp from aclOpMap failed due to CheckModelMatch failed! seed = %zu, aclOp = %s",
                  seed, aclOp.DebugString().c_str());
             return ACL_ERROR_OP_NOT_FOUND;
         }
