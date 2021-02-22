@@ -451,10 +451,10 @@ inline bool IsInfoLogEnabled()
     } \
     while (false)
 
-#define ACL_CHECK_EQUAL(leftValue, rightValue) \
+#define ACL_CHECK_INT32_EQUAL(leftValue, rightValue) \
     do { \
         if ((leftValue) != (rightValue)) { \
-            ACL_LOG_INFO("%d is not equal to [%d].", leftValue, rightValue); \
+            ACL_LOG_INFO("[%d] is not equal to [%d].", leftValue, rightValue); \
             return false; \
         } else { \
             ACL_LOG_INFO("[%d] is equal to [%d]", leftValue, rightValue); \

@@ -210,16 +210,20 @@ bool aclTensorDesc::CheckShapeRange() const
 bool aclTensorDesc::operator==(const aclTensorDesc* other)
 {
     ACL_LOG_DEBUG("Check aclTensorDesc is equal start!");
-    ACL_REQUIRES_NOT_NULL(other);
+    // when check model matched failed, we should report WARNING log not ERROR
+    if (other == nullptr) {
+        ACL_LOG_WARN("aclTensorDesc must not be null.");
+        return false;
+    }
 
     ACL_LOG_DEBUG("Check dataType is equal");
-    ACL_CHECK_EQUAL(this->dataType, other->dataType);
+    ACL_CHECK_INT32_EQUAL(this->dataType, other->dataType);
 
     ACL_LOG_DEBUG("Check format is equal");
-    ACL_CHECK_EQUAL(this->format, other->format);
+    ACL_CHECK_INT32_EQUAL(this->format, other->format);
 
     ACL_LOG_DEBUG("Check storageFormat is equal");
-    ACL_CHECK_EQUAL(this->storageFormat, other->storageFormat);
+    ACL_CHECK_INT32_EQUAL(this->storageFormat, other->storageFormat);
 
     if (this->dims != other->dims) {
         ACL_LOG_INFO("leftDim [%s] is not equal to otherDim [%s]",
@@ -235,10 +239,10 @@ bool aclTensorDesc::operator==(const aclTensorDesc* other)
     }
 
     ACL_LOG_DEBUG("Check isConst is equal");
-    ACL_CHECK_EQUAL(this->isConst, other->isConst);
+    ACL_CHECK_INT32_EQUAL(this->isConst, other->isConst);
 
     ACL_LOG_DEBUG("Check memtype is equal");
-    ACL_CHECK_EQUAL(this->memtype, other->memtype);
+    ACL_CHECK_INT32_EQUAL(this->memtype, other->memtype);
 
     ACL_LOG_INFO("aclTensorDesc is equal!");
     return true;

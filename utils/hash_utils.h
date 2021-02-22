@@ -32,37 +32,47 @@ aclError GetTensorDescHash(const int32_t num, const aclTensorDesc *const descArr
 aclError GetAclOpHash(const AclOp &aclOp, const size_t &attrDigest, size_t &seed);
 
 template<typename T>
-bool CheckModelMatch(const AclOp &aclOp, const T &entry)
+bool CheckModelAndAttrMatch(const AclOp &aclOp, const aclopAttr* opAttr, const T &entry)
 {
-    ACL_REQUIRES_NOT_NULL(entry);
-    if(aclOp.opType != entry->opType) {
+    ACL_LOG_INFO("Start to check model is matched!");
+    if (entry == nullptr) {
+        ACL_LOG_WARN("entry must not be null.");
+        return false;
+    }
+    if (aclOp.opType != entry->opType) {
         return false;
     }
 
-    ACL_CHECK_EQUAL(aclOp.numInputs, entry->inputDescArr.size());
-    ACL_LOG_DEBUG("Check numInputs success!");
+    if (aclOp.numInputs != entry->inputDescArr.size()) {
+        ACL_LOG_WARN("Check numInputs is equal to inputDescArr size failed, numInputs is %d, "
+            "inputDescArr size is %zu", aclOp.numInputs, entry->inputDescArr.size());
+            return false;
+    }
 
     for (int32_t i = 0; i < aclOp.numInputs; ++i) {
         if (!(entry->inputDescArr[i] == aclOp.inputDesc[i])) {
+            ACL_LOG_WARN("Check inputDescArr is equal to inputDesc failed");
             return false;
         }
     }
-    ACL_LOG_DEBUG("Check inputDesc success!");
 
-    ACL_CHECK_EQUAL(aclOp.numOutputs, entry->outputDescArr.size());
-    ACL_LOG_DEBUG("Check numOutputs success!");
+    if (aclOp.numOutputs != entry->outputDescArr.size()) {
+        ACL_LOG_WARN("Check numOutputs is equal to outputDescArr size failed, numOutputs is %d, "
+            "outputDescArr size is %zu", aclOp.numOutputs, entry->outputDescArr.size());
+            return false;
+    }
 
     for (int32_t i = 0; i < aclOp.numOutputs; ++i) {
         if (!(entry->outputDescArr[i] == aclOp.outputDesc[i])) {
+            ACL_LOG_WARN("Check outputDescArr is equal to outputDesc failed");
             return false;
         }
     }
-    ACL_LOG_DEBUG("Check outputDesc success!");
 
-    if (!attr_utils::OpAttrEquals(aclOp.opAttr, &(entry->opAttr))) {
+    if (!attr_utils::OpAttrEquals(opAttr, &(entry->opAttr))) {
         return false;
     }
-    ACL_LOG_DEBUG("Check opAttr success!");
+    ACL_LOG_INFO("Check model matched success!");
     return true;
 }
 
