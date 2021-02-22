@@ -342,6 +342,9 @@ aclError AclShapeRangeMap<T>::Get(const AclOp &aclOp, T &entry, bool needUpdateT
                 return ACL_ERROR_OP_NOT_FOUND;
             }
         }
+        ACL_LOG_WARN("Get aclOp from aclOpMap failed due to CheckValueRange failed! seed = %zu, aclOp = %s",
+            seed, aclOp.DebugString().c_str());
+        return ACL_ERROR_OP_NOT_FOUND;
     } else {
         ACL_LOG_INFO("Match aclOp by string from AclShapeRangeMap due to seed has conflict! seed = %zu, aclOp = %s", 
             seed, aclOp.DebugString().c_str());
