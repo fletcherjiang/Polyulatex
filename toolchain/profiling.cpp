@@ -33,7 +33,7 @@ namespace acl {
             ret = MsprofInit(MSPROF_CTRL_INIT_DYNA, nullptr, 0);
             if (ret != MSPROF_ERROR_NONE) {
                 ACL_LOG_CALL_ERROR("[Init][Profiling]init profiling with nullptr failed, profiling result = %d", ret);
-                return ACL_ERROR_INVALID_PARAM;
+                return ACL_SUCCESS;
             }
         } else {
             if (configFileFlag) {
@@ -91,8 +91,8 @@ namespace acl {
                 ret = HandleProfilingCommand(strConfig, configFileFlag, noValidConfig);
                 if (ret != ACL_SUCCESS) {
                     ACL_LOG_INNER_ERROR("[Handle][Command]handle profiling command failed, result = %d", ret);
-                    return ret;
                 }
+                return ret;
             }
             ret = jsonParser.ParseJsonFromFile(configPath, js, &strConfig, ACL_PROF_CONFIG_NAME.c_str());
             if (ret != ACL_SUCCESS) {
