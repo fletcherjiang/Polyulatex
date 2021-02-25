@@ -20,6 +20,8 @@ namespace {
     const uint32_t MAX_ENV_VALVE_LENGTH = 4096;
     std::mutex g_aclProfMutex;
     const uint64_t ACL_PROF_ACL_API = 0x0001;
+    const uint32_t START_PROFILING = 1;
+    const uint32_t STOP_PROFILING = 2;
 }
 
 namespace acl {
@@ -89,8 +91,8 @@ namespace acl {
                 ret = HandleProfilingCommand(strConfig, configFileFlag, noValidConfig);
                 if (ret != ACL_SUCCESS) {
                     ACL_LOG_INNER_ERROR("[Handle][Command]handle profiling command failed, result = %d", ret);
-                    return ret;
                 }
+                return ret;
             }
             ret = jsonParser.ParseJsonFromFile(configPath, js, &strConfig, ACL_PROF_CONFIG_NAME.c_str());
             if (ret != ACL_SUCCESS) {
@@ -167,10 +169,10 @@ static aclError aclProcessProfData(void *data, uint32_t len)
     aclError ret = ACL_SUCCESS;
     uint64_t profSwitch = profilerConfig->profSwitch;
     uint32_t type = profilerConfig->type;
-    if (((profSwitch & ACL_PROF_ACL_API) != 0) && (type == 1)) {
+    if (((profSwitch & ACL_PROF_ACL_API) != 0) && (type == START_PROFILING)) {
         ret = aclProfInnerStart(profilerConfig);
     }
-    if (((profSwitch & ACL_PROF_ACL_API) != 0) && (type == 2)) {
+    if (((profSwitch & ACL_PROF_ACL_API) != 0) && (type == STOP_PROFILING)) {
         ret = aclProfInnerStop(profilerConfig);
     }
 
