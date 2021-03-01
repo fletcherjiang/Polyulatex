@@ -66,7 +66,7 @@ aclError OpKernelSelector::SelectOpKernel(const AclOp &aclOp)
 
     auto desc = std::shared_ptr<OpKernelDesc>(new (std::nothrow)OpKernelDesc);
     ACL_CHECK_MALLOC_RESULT(desc);
-    InsertAclop2KernelDesc(aclOp, desc);
+    ACL_REQUIRES_OK(InsertAclop2KernelDesc(aclOp, desc));
     ACL_LOG_DEBUG("To invoke select func, opType = %s", aclOp.opType.c_str());
     auto ret = func(aclOp.numInputs, aclOp.inputDesc, aclOp.numOutputs, aclOp.outputDesc, aclOp.opAttr, desc.get());
     if (ret != ACL_SUCCESS) {
