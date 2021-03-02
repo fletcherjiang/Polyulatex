@@ -63,7 +63,7 @@ private:
     OpKernelSelector() = default;
     aclopCompileFunc GetSelectFunc(const std::string &opType);
 
-    aclError InsertAclop2KernelDesc(const AclOp &aclOp, std::shared_ptr<OpKernelDesc> &desc);
+    aclError InsertAclop2KernelDesc(const AclOp &aclOp, std::shared_ptr<OpKernelDesc> desc);
 
     std::mutex mu_;
     std::map<std::string, aclopCompileFunc> selectors_;
