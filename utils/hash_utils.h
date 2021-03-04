@@ -58,7 +58,7 @@ bool CheckModelAndAttrMatch(const AclOp &aclOp, const aclopAttr* opAttr, const T
 
     if (aclOp.numOutputs != static_cast<int>(entry->outputDescArr.size())) {
         ACL_LOG_WARN("Check numOutputs is equal to outputDescArr size failed, numOutputs is %d, "
-            "outputDescArr size is %zd", aclOp.numOutputs, static_cast<int>(entry->outputDescArr.size()));
+            "outputDescArr size is %d", aclOp.numOutputs, static_cast<int>(entry->outputDescArr.size()));
             return false;
     }
 
