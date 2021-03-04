@@ -42,12 +42,15 @@ bool CheckModelAndAttrMatch(const AclOp &aclOp, const aclopAttr* opAttr, const T
     if (aclOp.opType != entry->opType) {
         return false;
     }
+    ACL_LOG_DEBUG("Check opType success!");
 
     if (aclOp.numInputs != static_cast<int>(entry->inputDescArr.size())) {
         ACL_LOG_WARN("Check numInputs is equal to inputDescArr size failed, numInputs is %d, "
             "inputDescArr size is %d", aclOp.numInputs, static_cast<int>(entry->inputDescArr.size()));
             return false;
     }
+    ACL_LOG_DEBUG("Check numInputs is equal success!");
+
 
     for (int32_t i = 0; i < aclOp.numInputs; ++i) {
         if (!(entry->inputDescArr[i] == aclOp.inputDesc[i])) {
@@ -55,12 +58,15 @@ bool CheckModelAndAttrMatch(const AclOp &aclOp, const aclopAttr* opAttr, const T
             return false;
         }
     }
+    ACL_LOG_DEBUG("Check inputDesc is equal success!");
+
 
     if (aclOp.numOutputs != static_cast<int>(entry->outputDescArr.size())) {
         ACL_LOG_WARN("Check numOutputs is equal to outputDescArr size failed, numOutputs is %d, "
             "outputDescArr size is %d", aclOp.numOutputs, static_cast<int>(entry->outputDescArr.size()));
             return false;
     }
+    ACL_LOG_DEBUG("Check numOutputs is equal success!");
 
     for (int32_t i = 0; i < aclOp.numOutputs; ++i) {
         if (!(entry->outputDescArr[i] == aclOp.outputDesc[i])) {
@@ -68,6 +74,7 @@ bool CheckModelAndAttrMatch(const AclOp &aclOp, const aclopAttr* opAttr, const T
             return false;
         }
     }
+    ACL_LOG_DEBUG("Check outputDesc is equal success!");
 
     if (!attr_utils::OpAttrEquals(opAttr, &(entry->opAttr))) {
         return false;
