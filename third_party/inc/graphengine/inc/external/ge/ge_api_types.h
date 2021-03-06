@@ -112,6 +112,7 @@ const char *const ORIGINAL_MODEL_FILE = "ge.originalModelFile";
 const char *const INPUT_FP16_NODES = "ge.INPUT_NODES_SET_FP16";
 const char *const OP_DEBUG_LEVEL = "ge.opDebugLevel";
 const char *const PERFORMANCE_MODE = "ge.performance_mode";
+const char *const SHAPE_GENERALIZED_BUILD_MODE = "ge.shape_generalized_build_mode";
 const char *const MODIFY_MIXLIST = "ge.exec.modify_mixlist";
 }  // namespace configure_option
 // Configure stream num by Session constructor options param,
@@ -324,6 +325,11 @@ const char *const INPUT_SHAPE_RANGE = "input_shape_range";
 // high: need to recompile, high execute performance mode
 const std::string PERFORMANCE_MODE = "ge.performance_mode";
 
+// For selecting the mode of shape generalization when build graph.
+// shape_generalized: Shape will be generalized during graph build.
+// shape_precise: Shape will not be generalized, use precise shape.
+const std::string SHAPE_GENERALIZED_BUILD_MODE = "ge.shape_generalized_build_mode";
+
 const std::string MODIFY_MIXLIST = "ge.exec.modify_mixlist";
 
 // Graph run mode
@@ -404,6 +410,7 @@ static const char *const OP_BANK_PATH = ge::OP_BANK_PATH_FLAG.c_str();
 static const char *const OP_BANK_UPDATE = ge::OP_BANK_UPDATE_FLAG.c_str();
 static const char *const OP_DEBUG_LEVEL = ge::OP_DEBUG_LEVEL.c_str();
 static const char *const PERFORMANCE_MODE = ge::PERFORMANCE_MODE.c_str();
+static const char *const SHAPE_GENERALIZED_BUILD_MODE = ge::SHAPE_GENERALIZED_BUILD_MODE.c_str();
 static const char *const MODIFY_MIXLIST = ge::MODIFY_MIXLIST.c_str();
 
 // for interface: aclgrphBuildModel
@@ -432,6 +439,7 @@ const std::set<std::string> ir_builder_suppported_options = {INPUT_FORMAT,
                                                              OP_BANK_PATH,
                                                              OP_BANK_UPDATE,
                                                              PERFORMANCE_MODE,
+                                                             SHAPE_GENERALIZED_BUILD_MODE,
                                                              MODIFY_MIXLIST};
 
 // for interface: aclgrphParse
