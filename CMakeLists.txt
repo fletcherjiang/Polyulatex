@@ -563,6 +563,7 @@ add_custom_target(
              ${CMAKE_CURRENT_BINARY_DIR}/cblas_stub.cpp
              ${CMAKE_CURRENT_BINARY_DIR}/op_compiler_stub.cpp
              ${CMAKE_CURRENT_BINARY_DIR}/retr_stub.cpp
+             ${CMAKE_CURRENT_BINARY_DIR}/tdt_channel.cpp
 )
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/acl_stub.cpp
@@ -570,13 +571,15 @@ add_custom_command(
            ${CMAKE_CURRENT_BINARY_DIR}/cblas_stub.cpp
            ${CMAKE_CURRENT_BINARY_DIR}/op_compiler_stub.cpp
            ${CMAKE_CURRENT_BINARY_DIR}/retr_stub.cpp
-    COMMAND echo "Generating stub files:acl_stub.cpp, dvpp_stub.cpp, cblas_stub.cpp, op_compiler_stub.cpp, retr_stub.cpp."
+           ${CMAKE_CURRENT_BINARY_DIR}/tdt_channel.cpp
+    COMMAND echo "Generating stub files:acl_stub.cpp, dvpp_stub.cpp, cblas_stub.cpp, op_compiler_stub.cpp, retr_stub.cpp, tdt_channel.cpp."
             && ${HI_PYTHON} ${BASE_DIR}/stub/gen_stubapi.py ${BASE_DIR}/inc/external/acl
             ${CMAKE_CURRENT_BINARY_DIR}/acl_stub.cpp
             ${CMAKE_CURRENT_BINARY_DIR}/dvpp_stub.cpp
             ${CMAKE_CURRENT_BINARY_DIR}/cblas_stub.cpp
             ${CMAKE_CURRENT_BINARY_DIR}/op_compiler_stub.cpp
             ${CMAKE_CURRENT_BINARY_DIR}/retr_stub.cpp
+            ${CMAKE_CURRENT_BINARY_DIR}/tdt_channel.cpp
             &&  echo "Generating stub files end."
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     DEPENDS stub/gen_stubapi.py ${BASE_DIR}/inc/external/acl
@@ -694,6 +697,28 @@ set_target_properties(stub_acl_op_compiler
 )
 
 target_link_libraries(stub_acl_op_compiler PRIVATE
+    $<BUILD_INTERFACE:intf_pub>
+    $<$<NOT:$<STREQUAL:${TARGET_SYSTEM_NAME},Android>>:-lrt>
+    -ldl
+)
+##################################################################################################################
+
+############ stub/libacl_tdt_channel.so ############
+add_library(stub_acl_tdt_channel SHARED
+    ${CMAKE_CURRENT_BINARY_DIR}/tdt_channel_stub.cpp
+)
+target_include_directories(stub_acl_tdt_channel PRIVATE
+    ${BASE_DIR}/inc/external
+    ${BASE_DIR}/inc
+    ${BASE_DIR}
+)
+set_target_properties(stub_acl_tdt_channel
+    PROPERTIES
+    OUTPUT_NAME stub_acl_tdt_channel
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/stub
+)
+
+target_link_libraries(stub_acl_tdt_channel PRIVATE
     $<BUILD_INTERFACE:intf_pub>
     $<$<NOT:$<STREQUAL:${TARGET_SYSTEM_NAME},Android>>:-lrt>
     -ldl
@@ -977,17 +1002,85 @@ target_link_libraries(acl_op_compiler PRIVATE
 )
 endif()
 
+if(NOT (ENABLE_OPEN_SRC AND ((PRODUCT STREQUAL "flr2") OR (PRODUCT STREQUAL "flr3"))))
+############ libacl_tdt_channel.so ############
+add_library(acl_tdt_channel SHARED
+    tensor_data_transfer/tensor_data_transfer.cpp
+)
+
+target_include_directories(acl_tdt_channel PRIVATE
+    ####yellow zone####
+    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/inc>
+    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/inc/tdt>
+    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/metadef/inc>
+    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/graphengine/inc>
+    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/graphengine/inc/framework>
+    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/metadef/inc/external>
+    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/graphengine/inc/external>
+    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/abl/adump/external>
+    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/inc/driver>
+    ####blue zone####
+    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/>
+    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/tdt>
+    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/metadef/inc>
+    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/graphengine/inc>
+    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/graphengine/inc/framework>
+    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/metadef/inc/external>
+    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/graphengine/inc/external>
+    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/toolchain/ide/ide-daemon/external>
+    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/driver>
+
+    ${BASE_DIR}/inc/external
+    ${BASE_DIR}/inc
+    ${BASE_DIR}
+    ${BASE_DIR}/common
+)
+
+target_compile_options(acl_tdt_channel PRIVATE
+    -ftrapv
+    -O2
+    -Werror
+    -Wno-deprecated-declarations
+    -fvisibility=hidden
+    -fno-common
+)
+
+target_compile_definitions(acl_tdt_channel PRIVATE
+    _FORTIFY_SOURCE=2
+    OS_TYPE=0
+    FUNC_VISIBILITY
+)
+
+target_link_options(acl_tdt_channel PRIVATE
+    -rdynamic
+    -Wl,-Bsymbolic
+    -Wl,--exclude-libs,ALL
+)
+
+target_link_libraries(acl_tdt_channel PRIVATE
+    $<BUILD_INTERFACE:intf_pub>
+    static_mmpa
+    -Wl,--no-as-needed
+    ascendcl
+    c_sec
+    slog
+    -Wl,--as-needed
+    -ldl
+     $<$<NOT:$<STREQUAL:${TARGET_SYSTEM_NAME},Android>>:-lrt>
+)
+endif()
+
 ############ install ############
 set(INSTALL_BASE_DIR "")
 set(INSTALL_LIBRARY_DIR lib)
 
 if(${TARGET_SYSTEM_NAME} STREQUAL "Windows")
-install(TARGETS  ascendcl acl_dvpp acl_cblas acl_retr acl_op_compiler ascendcl_static OPTIONAL
+install(TARGETS  ascendcl acl_dvpp acl_cblas acl_retr acl_op_compiler acl_tdt_channel ascendcl_static OPTIONAL
     LIBRARY DESTINATION ${INSTALL_LIBRARY_DIR}
 )
 install(FILES $<TARGET_PDB_FILE:ascendcl acl_dvpp acl_cblas acl_retr> DESTINATION ${INSTALL_LIBRARY_DIR} OPTIONAL)
 elseif(NOT ENABLE_OPEN_SRC)
-install(TARGETS  ascendcl acl_dvpp acl_cblas acl_retr acl_op_compiler ascendcl_static OPTIONAL
+install(TARGETS  ascendcl acl_dvpp acl_cblas acl_retr acl_op_compiler acl_tdt_channel ascendcl_static OPTIONAL
     LIBRARY DESTINATION ${INSTALL_LIBRARY_DIR}
     ARCHIVE DESTINATION ${INSTALL_LIBRARY_DIR}
 )
@@ -997,14 +1090,14 @@ install(TARGETS  ascendcl acl_dvpp acl_cblas acl_retr OPTIONAL
     ARCHIVE DESTINATION ${INSTALL_LIBRARY_DIR}
 )
 if(NOT (ENABLE_OPEN_SRC AND ((PRODUCT STREQUAL "flr2") OR (PRODUCT STREQUAL "flr3"))))
-install(TARGETS  acl_op_compiler OPTIONAL
+install(TARGETS  acl_op_compiler acl_tdt_channel OPTIONAL
     LIBRARY DESTINATION ${INSTALL_LIBRARY_DIR}
     ARCHIVE DESTINATION ${INSTALL_LIBRARY_DIR}
 )
 endif()
 endif()
 
-install(TARGETS stub_ascendcl stub_acl_dvpp stub_acl_cblas stub_acl_retr stub_acl_op_compiler OPTIONAL
+install(TARGETS stub_ascendcl stub_acl_dvpp stub_acl_cblas stub_acl_retr stub_acl_op_compiler acl_tdt_channel OPTIONAL
     LIBRARY DESTINATION ${INSTALL_LIBRARY_DIR}/stub
 )
 
@@ -1016,7 +1109,7 @@ endif()
 
 add_dependencies(stub_ascendcl stub_src)
 add_dependencies(stub_acl_op_compiler stub_src)
+add_dependencies(stub_acl_tdt_channel stub_src)
 add_dependencies(stub_acl_retr stub_src)
 add_dependencies(stub_acl_cblas stub_src)
 add_dependencies(stub_acl_dvpp stub_src)
-add_dependencies(stub_acl_tdt_channel stub_src)
