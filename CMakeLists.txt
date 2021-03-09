@@ -571,15 +571,15 @@ add_custom_command(
            ${CMAKE_CURRENT_BINARY_DIR}/cblas_stub.cpp
            ${CMAKE_CURRENT_BINARY_DIR}/op_compiler_stub.cpp
            ${CMAKE_CURRENT_BINARY_DIR}/retr_stub.cpp
-           ${CMAKE_CURRENT_BINARY_DIR}/tdt_channel.cpp
-    COMMAND echo "Generating stub files:acl_stub.cpp, dvpp_stub.cpp, cblas_stub.cpp, op_compiler_stub.cpp, retr_stub.cpp, tdt_channel.cpp."
+           ${CMAKE_CURRENT_BINARY_DIR}/tdt_channel_stub.cpp
+    COMMAND echo "Generating stub files:acl_stub.cpp, dvpp_stub.cpp, cblas_stub.cpp, op_compiler_stub.cpp, retr_stub.cpp, tdt_channel_stub.cpp."
             && ${HI_PYTHON} ${BASE_DIR}/stub/gen_stubapi.py ${BASE_DIR}/inc/external/acl
             ${CMAKE_CURRENT_BINARY_DIR}/acl_stub.cpp
             ${CMAKE_CURRENT_BINARY_DIR}/dvpp_stub.cpp
             ${CMAKE_CURRENT_BINARY_DIR}/cblas_stub.cpp
             ${CMAKE_CURRENT_BINARY_DIR}/op_compiler_stub.cpp
             ${CMAKE_CURRENT_BINARY_DIR}/retr_stub.cpp
-            ${CMAKE_CURRENT_BINARY_DIR}/tdt_channel.cpp
+            ${CMAKE_CURRENT_BINARY_DIR}/tdt_channel_stub.cpp
             &&  echo "Generating stub files end."
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     DEPENDS stub/gen_stubapi.py ${BASE_DIR}/inc/external/acl
