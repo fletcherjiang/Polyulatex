@@ -195,11 +195,13 @@ generate_package()
 
   if [ "x${PRODUCT}" != "xflr2" ] && [ "x${PRODUCT}" != "xflr3" ]
   then
-    find ${OUTPUT_PATH}/${ACL_LIB_PATH}/fwkacl -maxdepth 1 -name "libascendcl.so" -exec cp -f {} ${OUTPUT_PATH}/${FWK_LIB64_PATH} \;
+    find ${OUTPUT_PATH}/${ACL_LIB_PATH} -maxdepth 1 -name "libascendcl.so" -exec cp -f {} ${OUTPUT_PATH}/${FWK_LIB64_PATH} \;
     find ${OUTPUT_PATH}/${ACL_LIB_PATH} -maxdepth 1 -name "libacl_op_compiler.so" -exec cp -f {} ${OUTPUT_PATH}/${FWK_LIB64_PATH} \;
+    find ${OUTPUT_PATH}/${ACL_LIB_PATH} -maxdepth 1 -name "libacl_tdt_channel.so" -exec cp -f {} ${OUTPUT_PATH}/${FWK_LIB64_PATH} \;
   fi
   find ${OUTPUT_PATH}/${ACL_LIB_PATH}/stub -maxdepth 1 -name "libascendcl.so" -exec cp -f {} ${OUTPUT_PATH}/${FWK_LIB64_PATH}/stub \;
   find ${OUTPUT_PATH}/${ACL_LIB_PATH}/stub -maxdepth 1 -name "libacl_op_compiler.so" -exec cp -f {} ${OUTPUT_PATH}/${FWK_LIB64_PATH}/stub \;
+  find ${OUTPUT_PATH}/${ACL_LIB_PATH}/stub -maxdepth 1 -name "libacl_tdt_channel.so" -exec cp -f {} ${OUTPUT_PATH}/${FWK_LIB64_PATH}/stub \;
 
   COMMON_INC=("acl_base.h" "acl.h" "acl_mdl.h" "acl_op.h" "acl_prof.h" "acl_rt.h")
   for inc in "${COMMON_INC[@]}";
@@ -287,11 +289,13 @@ generate_package_for_cann()
 
   if [ "x${PRODUCT}" != "xflr2" ] && [ "x${PRODUCT}" != "xflr3" ]
   then
-    find ${OUTPUT_PATH}/${ACL_LIB_PATH}/fwkacl -maxdepth 1 -name "libascendcl.so" -exec cp -f {} ${OUTPUT_PATH}/${COMPILER_LIB64_PATH} \;
+    find ${OUTPUT_PATH}/${ACL_LIB_PATH} -maxdepth 1 -name "libascendcl.so" -exec cp -f {} ${OUTPUT_PATH}/${COMPILER_LIB64_PATH} \;
     find ${OUTPUT_PATH}/${ACL_LIB_PATH} -maxdepth 1 -name "libacl_op_compiler.so" -exec cp -f {} ${OUTPUT_PATH}/${COMPILER_LIB64_PATH} \;
+    find ${OUTPUT_PATH}/${ACL_LIB_PATH} -maxdepth 1 -name "libacl_tdt_channel.so" -exec cp -f {} ${OUTPUT_PATH}/${COMPILER_LIB64_PATH} \;
   fi
   find ${OUTPUT_PATH}/${ACL_LIB_PATH}/stub -maxdepth 1 -name "libascendcl.so" -exec cp -f {} ${OUTPUT_PATH}/${COMPILER_LIB64_PATH}/stub \;
   find ${OUTPUT_PATH}/${ACL_LIB_PATH}/stub -maxdepth 1 -name "libacl_op_compiler.so" -exec cp -f {} ${OUTPUT_PATH}/${COMPILER_LIB64_PATH}/stub \;
+  find ${OUTPUT_PATH}/${ACL_LIB_PATH}/stub -maxdepth 1 -name "libacl_tdt_channel.so" -exec cp -f {} ${OUTPUT_PATH}/${COMPILER_LIB64_PATH}/stub \;
 
   COMMON_INC=("acl_base.h" "acl.h" "acl_mdl.h" "acl_op.h" "acl_prof.h" "acl_rt.h")
   for inc in "${COMMON_INC[@]}";
