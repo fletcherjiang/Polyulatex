@@ -713,7 +713,7 @@ target_include_directories(stub_acl_tdt_channel PRIVATE
 )
 set_target_properties(stub_acl_tdt_channel
     PROPERTIES
-    OUTPUT_NAME stub_acl_tdt_channel
+    OUTPUT_NAME acl_tdt_channel
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/stub
 )
 
@@ -1096,7 +1096,7 @@ install(TARGETS  acl_op_compiler acl_tdt_channel OPTIONAL
 endif()
 endif()
 
-install(TARGETS stub_ascendcl stub_acl_dvpp stub_acl_cblas stub_acl_retr stub_acl_op_compiler acl_tdt_channel OPTIONAL
+install(TARGETS stub_ascendcl stub_acl_dvpp stub_acl_cblas stub_acl_retr stub_acl_op_compiler stub_acl_tdt_channel OPTIONAL
     LIBRARY DESTINATION ${INSTALL_LIBRARY_DIR}/stub
 )
 
