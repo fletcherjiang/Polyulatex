@@ -562,7 +562,7 @@ add_custom_target(
              ${CMAKE_CURRENT_BINARY_DIR}/cblas_stub.cpp
              ${CMAKE_CURRENT_BINARY_DIR}/op_compiler_stub.cpp
              ${CMAKE_CURRENT_BINARY_DIR}/retr_stub.cpp
-             ${CMAKE_CURRENT_BINARY_DIR}/tdt_channel.cpp
+             ${CMAKE_CURRENT_BINARY_DIR}/tdt_channel_stub.cpp
 )
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/acl_stub.cpp
