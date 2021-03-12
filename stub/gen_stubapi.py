@@ -98,7 +98,7 @@ def implement_function(func):
 
 
 def generate_stub_file(inc_dir):
-    acl_header_files, dvpp_header_files, cblas_header_files, op_compiler_header_files, retr_header_files tdt_channel_header_files = collect_header_files(inc_dir)
+    acl_header_files, dvpp_header_files, cblas_header_files, op_compiler_header_files, retr_header_files, tdt_channel_header_files = collect_header_files(inc_dir)
     print("header files has been generated")
     acl_content = generate_function(acl_header_files, inc_dir)
     acl_content.append("extern \"C\" {\n");
