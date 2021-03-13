@@ -35,6 +35,7 @@ def collect_header_files(path):
     cblas_headers = []
     op_compiler_headers = []
     retr_headers = []
+    tdt_channel_headers = []
     for root, dirs, files in os.walk(path):
         files.sort()
         for file in files:
@@ -54,11 +55,15 @@ def collect_header_files(path):
                 file_path = os.path.join(root, file)
                 file_path = file_path.replace('\\', '/')
                 retr_headers.append(file_path)
+            elif file.find("acl_tdt.h") >=0:
+                file_path = os.path.join(root, file)
+                file_path = file_path.replace('\\', '/')
+                tdt_channel_headers.append(file_path)
             else:
                 file_path = os.path.join(root, file)
                 file_path = file_path.replace('\\', '/')
                 acl_headers.append(file_path)
-    return acl_headers, dvpp_headers, cblas_headers, op_compiler_headers, retr_headers
+    return acl_headers, dvpp_headers, cblas_headers, op_compiler_headers, retr_headers, tdt_channel_headers
 
 def collect_functions(file_path):
     signatures = []
@@ -93,7 +98,7 @@ def implement_function(func):
 
 
 def generate_stub_file(inc_dir):
-    acl_header_files, dvpp_header_files, cblas_header_files, op_compiler_header_files, retr_header_files = collect_header_files(inc_dir)
+    acl_header_files, dvpp_header_files, cblas_header_files, op_compiler_header_files, retr_header_files, tdt_channel_header_files = collect_header_files(inc_dir)
     print("header files has been generated")
     acl_content = generate_function(acl_header_files, inc_dir)
     acl_content.append("extern \"C\" {\n");
@@ -109,8 +114,9 @@ def generate_stub_file(inc_dir):
     print("cblas_content has been generate")
     op_compiler_content = generate_function(op_compiler_header_files, inc_dir)
     retr_content = generate_function(retr_header_files, inc_dir)
+    tdt_channel_content = generate_function(tdt_channel_header_files, inc_dir)
     print("retr_content has been generate")
-    return acl_content, dvpp_content, cblas_content, op_compiler_content, retr_content
+    return acl_content, dvpp_content, cblas_content, op_compiler_content, retr_content, tdt_channel_content
 
 def generate_function(header_files, inc_dir):
     includes = []
@@ -145,10 +151,10 @@ def generate_function(header_files, inc_dir):
     print('total functions number is {}'.format(total))
     return content
 
-def gen_code(inc_dir, acl_stub_path, dvpp_stub_path, cblas_stub_path, op_compiler_stub_path, retr_stub_path):
+def gen_code(inc_dir, acl_stub_path, dvpp_stub_path, cblas_stub_path, op_compiler_stub_path, retr_stub_path, tdt_channel_stub_path):
     if not inc_dir.endswith('/'):
         inc_dir += '/'
-    acl_content, dvpp_content, cblas_content, op_compiler_content, retr_content = generate_stub_file(inc_dir)
+    acl_content, dvpp_content, cblas_content, op_compiler_content, retr_content, tdt_channel_content = generate_stub_file(inc_dir)
     print("acl_content, dvpp_content ,cblas_content and op_compiler_content have been generated")
     with open(acl_stub_path, mode='w') as f:
         f.writelines(acl_content)
@@ -160,6 +166,8 @@ def gen_code(inc_dir, acl_stub_path, dvpp_stub_path, cblas_stub_path, op_compile
         f.writelines(op_compiler_content)
     with open(retr_stub_path, mode='w') as f:
         f.writelines(retr_content)
+    with open(tdt_channel_stub_path, mode='w') as f:
+        f.writelines(tdt_channel_content)
 
 if __name__ == '__main__':
     inc_dir = sys.argv[1]
@@ -168,4 +176,5 @@ if __name__ == '__main__':
     cblas_stub_path = sys.argv[4]
     op_compiler_stub_path = sys.argv[5]
     retr_stub_path = sys.argv[6]
-    gen_code(inc_dir, acl_stub_path, dvpp_stub_path, cblas_stub_path, op_compiler_stub_path, retr_stub_path)
+    tdt_channel_stub_path = sys.argv[7]
+    gen_code(inc_dir, acl_stub_path, dvpp_stub_path, cblas_stub_path, op_compiler_stub_path, retr_stub_path, tdt_channel_stub_path)
