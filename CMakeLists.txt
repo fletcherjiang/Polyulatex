@@ -1063,6 +1063,7 @@ target_link_libraries(acl_tdt_channel PRIVATE
     ascendcl
     c_sec
     slog
+    datatransfer
     -Wl,--as-needed
     -ldl
      $<$<NOT:$<STREQUAL:${TARGET_SYSTEM_NAME},Android>>:-lrt>
