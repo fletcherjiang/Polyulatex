@@ -674,7 +674,7 @@ static bool ConstToAttr(const vector<aclTensorDesc> &tensorDesc,
 bool SaveConstToAttr(OpModelDef &modelDef)
 {
     std::vector<std::string> constStr;
-    ACL_LOG_INFO("begin to inset constDataBuf in aclopAttr");
+    ACL_LOG_INFO("begin to insert constDataBuf in aclopAttr");
     bool ret = ConstToAttr(modelDef.inputDescArr, constStr);
     if (!ret) {
         ACL_LOG_INNER_ERROR("[Check][InputTenspr]inputTenspr get const dataLen failed");
@@ -720,7 +720,7 @@ static bool ConstToAttr(int tensorNum,
 bool SaveConstToAttr(const AclOp &aclOp, aclopAttr *opAttr)
 {
     std::vector<std::string> constStr;
-    ACL_LOG_INFO("begin to inset constDataBuf in aclopAttr");
+    ACL_LOG_INFO("begin to insert constDataBuf in aclopAttr");
     bool ret = ConstToAttr(aclOp.numInputs, aclOp.inputDesc, constStr);
     if (!ret) {
         ACL_LOG_INNER_ERROR("[Check][InputTenspr]inputTenspr get const dataLen failed");
