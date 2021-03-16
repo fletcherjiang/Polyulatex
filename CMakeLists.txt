@@ -217,6 +217,7 @@ set(SRC_LIST
     single_op/executor/op_task.cpp
     single_op/executor/resource_manager.cpp
     single_op/executor/stream_executor.cpp
+    tensor_data_transfer/queue.cpp
 )
 
 ############ libascendcl.so ############
