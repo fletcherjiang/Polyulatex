@@ -42,7 +42,7 @@ struct ACL_FUNC_VISIBILITY aclopAttr {
 
     inline void EmplaceConstBuf(std::string &str)
     {
-        ACL_LOG_INFO("inset const:[%s]", str.c_str());
+        ACL_LOG_INFO("insert const:[%s]", str.c_str());
         constDataBuf_.emplace_back(str);
     }
 
