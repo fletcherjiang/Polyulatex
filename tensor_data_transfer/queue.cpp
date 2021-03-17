@@ -11,9 +11,8 @@
 #include <mutex>
 #include "log_inner.h"
 #include "queue_process.h"
-#include "ascend_hal.h"
-#include "rt_mbuff_queue.h"
-#include "dev.h"
+#include "runtime/rt_mbuff_queue.h"
+#include "runtime/dev.h"
 
 
 aclError acltdtCreateQueue(const acltdtQueueAttr *attr, uint32_t *queueId)
