@@ -11,7 +11,7 @@
 #include <mutex>
 #include "common/log_inner.h"
 #include "queue_process.h"
-#include "runtime/rt_mbuff_queue.h"
+#include "runtime/rt_mbuf_queue.h"
 #include "runtime/dev.h"
 
 namespace {
