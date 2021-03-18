@@ -252,6 +252,7 @@ if(NOT ENABLE_OPEN_SRC)
     ${TOP_DIR}/abl/adump/external
     ${TOP_DIR}/inc/driver
     ${TOP_DIR}/abl/msprof/inc
+    ${TOP_DIR}/ace/npuruntime/inc
 else()
     ${BASE_DIR}/third_party/inc/
     ${BASE_DIR}/third_party/inc/metadef/inc

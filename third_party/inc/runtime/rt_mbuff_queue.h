@@ -42,7 +42,7 @@ typedef struct tagMQueueAttr {
  */
 RTS_API rtError_t rtMqueueCreate(int32_t devId, const rtMQueueAttr_t *queAttr, uint32_t *qid);
 
-RTS_API rtError_t rtMqueueDestroy(uint32_t qid);
+RTS_API rtError_t rtMqueueDestroy(int32_t devId, uint32_t qid);
 
 
 

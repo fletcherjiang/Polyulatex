@@ -9,10 +9,15 @@
 */
 #include "queue.h"
 #include <mutex>
-#include "log_inner.h"
+#include "common/log_inner.h"
 #include "queue_process.h"
 #include "runtime/rt_mbuff_queue.h"
 #include "runtime/dev.h"
+
+namespace {
+    bool isHost = true;
+    bool isMdc = true;
+}
 
 
 aclError acltdtCreateQueue(const acltdtQueueAttr *attr, uint32_t *queueId)
@@ -21,11 +26,15 @@ aclError acltdtCreateQueue(const acltdtQueueAttr *attr, uint32_t *queueId)
     ACL_REQUIRES_NOT_NULL(attr);
     // TODO 加锁，控制面一把锁，数据面两把锁
     int32_t deviceId = 0;
-    rtError_t rtRet = rtGetDevice(&deviceId);
-    if (rtRet != ACL_SUCCESS) {
-        ACL_LOG_CALL_ERROR("[Get][DeviceId]fail to get deviceId result = %d", rtRet);
-        return rtRet;
+    rtError_t rtRet = RT_ERROR_NONE;
+    if (!isMdc) {
+        rtRet = rtGetDevice(&deviceId);
+        if (rtRet != ACL_SUCCESS) {
+            ACL_LOG_CALL_ERROR("[Get][DeviceId]fail to get deviceId result = %d", rtRet);
+            return rtRet;
+        }
     }
+    
     rtRet = rtMqueueCreate(deviceId, attr, queueId);
     return rtRet;
 }
@@ -39,7 +48,7 @@ aclError acltdtDestroyQueue(uint32_t queueId)
         ACL_LOG_CALL_ERROR("[Get][DeviceId]fail to get deviceId result = %d", rtRet);
         return rtRet;
     }
-    rtRet = rtMqueueDestroy(queueId);
+    rtRet = rtMqueueDestroy(deviceId, queueId);
     return rtRet;
 }
 
