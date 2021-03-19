@@ -269,7 +269,7 @@ ACL_FUNC_VISIBILITY aclError acltdtReceiveTensor(const acltdtChannelHandle *hand
                                                  acltdtDataset *dataset,
                                                  int32_t timeout);
 
-typedef struct rtMQueueAttr_t acltdtQueueAttr;
+typedef rtMQueueAttr_t acltdtQueueAttr;
 typedef struct acltdtBuf acltdtBuf;
 typedef struct acltdtQueueRouteList acltdtQueueRouteList;
 typedef struct acltdtQueueRouteQueryInfo acltdtQueueRouteQueryInfo;
