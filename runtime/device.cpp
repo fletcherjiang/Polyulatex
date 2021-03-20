@@ -166,6 +166,7 @@ aclError aclrtGetRunMode(aclrtRunMode *runMode)
     ACL_LOG_INFO("start to execute aclrtGetRunMode");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(runMode);
     rtRunMode rtMode;
+    rtGetRunMode(&rtMode);
     rtError_t rtErr = rtGetRunMode(&rtMode);
     if (rtErr != RT_ERROR_NONE) {
         ACL_LOG_CALL_ERROR("get runMode failed, runtime result = %d.", static_cast<int32_t>(rtErr));

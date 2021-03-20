@@ -269,11 +269,15 @@ ACL_FUNC_VISIBILITY aclError acltdtReceiveTensor(const acltdtChannelHandle *hand
                                                  acltdtDataset *dataset,
                                                  int32_t timeout);
 
-typedef rtMQueueAttr_t acltdtQueueAttr;
+typedef struct tagMemQueueAttr acltdtQueueAttr;
 typedef struct acltdtBuf acltdtBuf;
 typedef struct acltdtQueueRouteList acltdtQueueRouteList;
 typedef struct acltdtQueueRouteQueryInfo acltdtQueueRouteQueryInfo;
 typedef struct acltdtQueueRoute acltdtQueueRoute;
+
+#define ACL_TDTQUEUE_PERMISSION_MANAGER 1
+#define ACL_TDTQUEUE_PERMISSION_READ 2
+#define ACL_TDTQUEUE_PERMISSION_WRITE 2
 
 
 enum acltdtQueueAttrType {
@@ -281,8 +285,14 @@ enum acltdtQueueAttrType {
 };
 
 enum acltdtQueueRouteKind {
-    ACL_QUEUE_SRC_ID_UINT32 = 0,
-    ACL_QUEUE_DST_ID_UINT32 = 1
+    ACL_QUEUE_SRC_ID = 0,
+    ACL_QUEUE_DST_ID = 1
+};
+
+enum acltdtQueueRouteQueryMode {
+    ACL_QUEUE_ROUTE_QUERY_SRC = 0,
+    ACL_QUEUE_ROUTE_QUERY_DST,
+    ACL_QUEUE_ROUTE_QUERY_SRC_DST
 };
 
 enum acltdtQueueRouteQueryInfoParamType {
@@ -292,17 +302,17 @@ enum acltdtQueueRouteQueryInfoParamType {
 };
 
 
-ACL_FUNC_VISIBILITY aclError acltdtCreateQueue(const acltdtQueueAttr *attr, uint32_t *queueId);
+ACL_FUNC_VISIBILITY aclError acltdtCreateQueue(const acltdtQueueAttr *attr, uint32_t *qid);
 
-ACL_FUNC_VISIBILITY aclError acltdtDestroyQueue(uint32_t queueId);
+ACL_FUNC_VISIBILITY aclError acltdtDestroyQueue(uint32_t qid);
 
-ACL_FUNC_VISIBILITY aclError acltdtEnqueueBuf(uint32_t queueId, acltdtBuf *buf, int32_t timeout);
+ACL_FUNC_VISIBILITY aclError acltdtEnqueueBuf(uint32_t qid, acltdtBuf *buf, int32_t timeout);
 
-ACL_FUNC_VISIBILITY aclError acltdtDequeueBuf(uint32_t queueId, acltdtBuf **buf, int32_t timeout);
+ACL_FUNC_VISIBILITY aclError acltdtDequeueBuf(uint32_t qid, acltdtBuf *buf, int32_t timeout);
 
-ACL_FUNC_VISIBILITY aclError acltdtGrantQueue(uint32_t queueId, int32_t pid, uint32_t flag);
+ACL_FUNC_VISIBILITY aclError acltdtGrantQueue(uint32_t qid, int32_t pid, uint32_t permission, int32_t timeout);
 
-ACL_FUNC_VISIBILITY aclError acltdtAttachQueue(uint32_t queueId, int32_t timeout, uint32_t *flag);
+ACL_FUNC_VISIBILITY aclError acltdtAttachQueue(uint32_t qid, int32_t timeout, uint32_t *permission);
 
 ACL_FUNC_VISIBILITY aclError acltdtBindQueueRoutes(const acltdtQueueRouteList *qRouteList);
 
@@ -334,13 +344,13 @@ ACL_FUNC_VISIBILITY aclError acltdtGetQueueAttr(const acltdtQueueAttr *attr,
                                                 size_t *paramRetSize,
                                                 void *param);
 
-ACL_FUNC_VISIBILITY acltdtQueueRoute* acltdtCreateQueueRoute(uint32_t srcQueueId, uint32_t dstQueueId);
+ACL_FUNC_VISIBILITY acltdtQueueRoute* acltdtCreateQueueRoute(uint32_t srcQid, uint32_t dstQid);
 
 ACL_FUNC_VISIBILITY aclError acltdtDestroyQueueRoute(const acltdtQueueRoute *route);
 
-ACL_FUNC_VISIBILITY aclError acltdtGetQueueIdFromQueueRoute(const acltdtQueueRoute *route,
+ACL_FUNC_VISIBILITY aclError acltdtGetqidFromQueueRoute(const acltdtQueueRoute *route,
                                                    acltdtQueueRouteKind srcDst,
-                                                   uint32_t *queueId);
+                                                   uint32_t *qid);
 
 ACL_FUNC_VISIBILITY aclError acltdtGetQueueRouteStatus(const acltdtQueueRoute *route, int32_t *routeStatus);
 
