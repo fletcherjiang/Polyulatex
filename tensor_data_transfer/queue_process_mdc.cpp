@@ -51,8 +51,12 @@ namespace acl {
         int32_t deviceId = 0;
         uint64_t startTime = GetTimestamp();
         uint64_t endTime = 0;
+        rtMemQueueShareAttr_t attr = {0};
+        attr.manager = permission & ACL_TDTQUEUE_PERMISSION_MANAGER;
+        attr.read = permission & ACL_TDTQUEUE_PERMISSION_READ;
+        attr.write = permission & ACL_TDTQUEUE_PERMISSION_WRITE;
         do {
-            auto ret = rtMemQueueGrant(deviceId, qid, pid, permission);
+            auto ret = rtMemQueueGrant(deviceId, qid, pid, &attr);
             if (ret == RT_ERROR_NONE) {
                 return ACL_SUCCESS;
             } else if (ret != 11111) {// 不需要重试?
@@ -70,11 +74,11 @@ namespace acl {
         ACL_REQUIRES_CALL_RTS_OK(rtMemQueueAttach(deviceId, qid, timeout), rtMemQueueAttach);
         // 查询queue权限
         // 查询有cp则授权Q权限
-        pid_t cpPid;
-        rtBindHostpidInfo_t info = {0};
-        info.hostPid = mmGetPid();
-        info.cpType = RT_DEV_PROCESS_CP1;
-        info.chipId = deviceId;
+        // pid_t cpPid;
+        // rtBindHostpidInfo_t info = {0};
+        // info.hostPid = mmGetPid();
+        // info.cpType = RT_DEV_PROCESS_CP1;
+        // info.chipId = deviceId;
         // if (rtQueryDevpid(&info, &cpPid) == RT_ERROR_NONE) {
 
         // }

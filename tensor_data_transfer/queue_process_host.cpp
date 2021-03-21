@@ -40,8 +40,12 @@ namespace acl {
         GET_CURRENT_DEVICE_ID(deviceId);
         uint64_t startTime = GetTimestamp();
         uint64_t endTime = 0;
+        rtMemQueueShareAttr_t attr = {0};
+        attr.manager = permission & ACL_TDTQUEUE_PERMISSION_MANAGER;
+        attr.read = permission & ACL_TDTQUEUE_PERMISSION_READ;
+        attr.write = permission & ACL_TDTQUEUE_PERMISSION_WRITE;
         do {
-            auto ret = rtMemQueueGrant(deviceId, qid, pid, permission);
+            auto ret = rtMemQueueGrant(deviceId, qid, pid, &attr);
             if (ret == RT_ERROR_NONE) {
                 return ACL_SUCCESS;
             } else if (ret != 11111) {// 不需要重试

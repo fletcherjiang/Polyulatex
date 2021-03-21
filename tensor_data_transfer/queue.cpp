@@ -231,11 +231,11 @@ aclError acltdtDestroyBuf(acltdtBuf *buf)
         return ACL_SUCCESS;
     }
     ACL_REQUIRES_NOT_NULL(buf->mbuf);
-    rtError_t rtRet = rtMBuffFree(buf->mbuf);
-    if (rtRet != RT_ERROR_NONE) {
-        ACL_LOG_CALL_ERROR("[Free][mbuf]fail to alloc mbuf result = %d", rtRet);
-        return rtRet;
-    }
+    // rtError_t rtRet = rtMBuffFree(buf->mbuf);
+    // if (rtRet != RT_ERROR_NONE) {
+    //     ACL_LOG_CALL_ERROR("[Free][mbuf]fail to alloc mbuf result = %d", rtRet);
+    //     return rtRet;
+    // }
     buf->mbuf = nullptr;
     ACL_DELETE_AND_SET_NULL(buf);
     return ACL_SUCCESS;
@@ -246,8 +246,8 @@ aclError acltdtGetBufData(const acltdtBuf *buf, void **dataPtr, size_t *size)
     ACL_REQUIRES_NOT_NULL(buf);
     ACL_REQUIRES_NOT_NULL(dataPtr);
     ACL_REQUIRES_NOT_NULL(size);
-    ACL_REQUIRES_CALL_RTS_OK(rtMBuffGetBuffAddr(buf->mbuf, dataPtr), rtMemQueueGetMbufAddr);
-    ACL_REQUIRES_CALL_RTS_OK(rtMBuffGetBuffSize(buf->mbuf, size), rtMemQueueGetMbufSize);
+    ACL_REQUIRES_CALL_RTS_OK(rtMbufGetBuffAddr(buf->mbuf, dataPtr), rtMbufGetBuffAddr);
+    ACL_REQUIRES_CALL_RTS_OK(rtMbufGetBuffSize(buf->mbuf, size), rtMbufGetBuffSize);
     return ACL_SUCCESS;
 }
 
@@ -256,7 +256,7 @@ aclError acltdtGetBufPrivData(const acltdtBuf *buf, void **privBuf, size_t *size
     ACL_REQUIRES_NOT_NULL(buf);
     ACL_REQUIRES_NOT_NULL(privBuf);
     ACL_REQUIRES_NOT_NULL(size);
-    ACL_REQUIRES_CALL_RTS_OK(rtMBuffGetPrivInfo(buf->mbuf, privBuf, size), rtMemQueueGetPrivInfo);
+    ACL_REQUIRES_CALL_RTS_OK(rtMbufGetPrivInfo(buf->mbuf, privBuf, size), rtMbufGetPrivInfo);
     return ACL_SUCCESS;
 }
 

@@ -156,7 +156,7 @@ RTS_API rtError_t rtMemQueueDeQueueBuf(int32_t devId, uint32_t qid, rtMemQueueBu
 RTS_API rtError_t rtMemQueueQuery(int32_t devId, rtMemQueueQueryCmd_t cmd, void *inBuff, uint32_t inLen,
                                   void *outBuff, uint32_t *outLen) WEAKFUC;
 
-RTS_API rtError_t rtMemQueueGrant(int32_t devId, uint32_t qid, int32_t pid, int32_t permsion) WEAKFUC;
+RTS_API rtError_t rtMemQueueGrant(int32_t devId, uint32_t qid, int32_t pid, rtMemQueueShareAttr_t *attr) WEAKFUC;
 
 RTS_API rtError_t rtMemQueueAttach(int32_t devId, uint32_t qid, int32_t timeout) WEAKFUC;
 
@@ -170,11 +170,11 @@ RTS_API rtError_t rtMBuffAlloc(rtMbufPtr_t *mbuf, uint64_t size) WEAKFUC;
 
 RTS_API rtError_t rtMBuffFree(rtMbufPtr_t mbuf) WEAKFUC;
 
-RTS_API rtError_t rtMBuffGetBuffAddr(rtMbufPtr_t mbuf, void **databuf) WEAKFUC;
+RTS_API rtError_t rtMbufGetBuffAddr(rtMbufPtr_t mbuf, void **databuf) WEAKFUC;
 
-RTS_API rtError_t rtMBuffGetBuffSize(rtMbufPtr_t mbuf, uint64_t *size) WEAKFUC;
+RTS_API rtError_t rtMbufGetBuffSize(rtMbufPtr_t mbuf, uint64_t *size) WEAKFUC;
 
-RTS_API rtError_t rtMBuffGetPrivInfo(rtMbufPtr_t mbuf, void **priv, uint64_t *size) WEAKFUC;
+RTS_API rtError_t rtMbufGetPrivInfo(rtMbufPtr_t mbuf, void **priv, uint64_t *size) WEAKFUC;
 
 #if defined(__cplusplus) && !defined(COMPILE_OMG_PACKAGE)
 }
