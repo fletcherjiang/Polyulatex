@@ -12,26 +12,15 @@
 #include <map>
 #include "common/log_inner.h"
 #include "queue_process.h"
+#include "queue_manager.h"
 #include "runtime/rt_mem_queue.h"
 #include "runtime/dev.h"
-
-
+#include "aicpu/queue_schedule/qs_client.h"
 
 // 最后需要排查rprofling统计，大小阶段，错误日志上报
 namespace {
     RunEnv RUN_ENV = ENV_UNKNOWN;
-    uint64_t GetTimestamp()
-    {
-        mmTimeval tv{};
-        auto ret = mmGetTimeOfDay(&tv, nullptr);
-        if (ret != EN_OK) {
-            ACL_LOG_WARN("Func mmGetTimeOfDay failed, ret = %d", ret);
-        }
-        // 1000000: seconds to microseconds
-        uint64_t total_use_time = tv.tv_usec + static_cast<uint64_t>(tv.tv_sec) * 1000000;
-        return total_use_time;
-    }
-     aclError CopyParam(const void *src, size_t srcLen, void *dst, size_t dstLen)
+    aclError CopyParam(const void *src, size_t srcLen, void *dst, size_t dstLen, size_t *realCopySize = nullptr)
     {
         ACL_REQUIRES_NOT_NULL(src);
         ACL_REQUIRES_NOT_NULL(dst);
@@ -45,9 +34,23 @@ namespace {
                 ret, srcLen, dstLen);
             return ACL_ERROR_FAILURE;
         }
-
+        if (realCopySize != nullptr) {
+            *realCopySize = srcLen;
+        }
         return ACL_SUCCESS;
     }
+}
+
+uint64_t GetTimestamp()
+{
+    mmTimeval tv{};
+    auto ret = mmGetTimeOfDay(&tv, nullptr);
+    if (ret != EN_OK) {
+        ACL_LOG_WARN("Func mmGetTimeOfDay failed, ret = %d", ret);
+    }
+    // 1000000: seconds to microseconds
+    uint64_t total_use_time = tv.tv_usec + static_cast<uint64_t>(tv.tv_sec) * 1000000;
+    return total_use_time;
 }
 
 aclError GetRunningEnv()
@@ -81,10 +84,10 @@ aclError GetRunningEnv()
 
 aclError acltdtCreateQueue(const acltdtQueueAttr *attr, uint32_t *qid)
 {
+    ACL_LOG_INFO("Start to acltdtCreateQueue");
     ACL_REQUIRES_NOT_NULL(qid);
     ACL_REQUIRES_NOT_NULL(attr);
     ACL_REQUIRES_OK(GetRunningEnv());
-    // TODO 加锁，控制面一把锁，数据面两把锁
     int32_t deviceId = 0;
     rtError_t rtRet = RT_ERROR_NONE;
     if (RUN_ENV != ENV_DEVICE_MDC) {
@@ -96,96 +99,112 @@ aclError acltdtCreateQueue(const acltdtQueueAttr *attr, uint32_t *qid)
     }
     static bool isQueueIint = false;
     if (!isQueueIint) {
-        rtRet = rtMemQueueInit(deviceId);
-        if (rtRet != RT_ERROR_NONE) {
-            ACL_LOG_CALL_ERROR("[Init][Queue]fail to init queue result = %d", rtRet);
-            return rtRet;
-        } 
+        ACL_LOG_INFO("need to init queue once");
+        ACL_REQUIRES_CALL_RTS_OK(rtMemQueueInit(deviceId), rtMemQueueInit);
     }
-    rtRet = rtMemQueueCreate(deviceId, attr, qid);
+    ACL_REQUIRES_CALL_RTS_OK(rtMemQueueCreate(deviceId, attr, qid), rtMemQueueCreate);
+    auto& qManager = acl::QueueManager::GetInstance();
+    qManager.AddQueueProcessor(*qid);
     //TODO ccpu上需要给cp加权限
-    return rtRet;
+    ACL_LOG_INFO("Successfully to execute acltdtCreateQueue, qid is %u", *qid);
+    return ACL_SUCCESS;
 }
 
 aclError acltdtDestroyQueue(uint32_t qid)
 {
-    ACL_REQUIRES_OK(GetRunningEnv());
-    // TODO 加锁和是否绑定
-    int32_t deviceId = 0;
-    GET_CURRENT_DEVICE_ID(deviceId);
-    // TODO 有绑定结果需要报错
-    rtError_t rtRet = rtMemQueueDestroy(deviceId, qid);
-    return rtRet;
+    auto& qManager = acl::QueueManager::GetInstance();
+    // TODO查看有没有绑定关系
+    auto processor = qManager.GetQueueProcessor(qid);
+    if (processor == nullptr) {
+        ACL_LOG_INNER_ERROR("[Check][Queueprocessor] queue processor is nullptr");
+        return ACL_ERROR_FAILURE;
+    }
+    ACL_REQUIRES_OK(processor->acltdtDestroyQueue(qid));
+    acl::QueueManager::GetInstance().DeleteQueueProcessor(qid);
+    return ACL_SUCCESS;
 }
 
 aclError acltdtEnqueueBuf(uint32_t qid, acltdtBuf *buf, int32_t timeout)
 {
-    ACL_REQUIRES_NOT_NULL(buf);
-    int32_t deviceId = 0;
-    GET_CURRENT_DEVICE_ID(deviceId);
-    // 加锁
-    rtError_t rtRet = rtMemQueueEnqueue(deviceId, qid, buf->mbuf);
-    if (rtRet != RT_ERROR_NONE) {
-        ACL_LOG_CALL_ERROR("[Enqueue][Queue]fail to enqueue result = %d", rtRet);
-        return rtRet;
+    auto& qManager = acl::QueueManager::GetInstance();
+    auto processor = qManager.GetQueueProcessor(qid);
+    if (processor == nullptr) {
+        ACL_LOG_INNER_ERROR("[Check][Queueprocessor] queue processor is nullptr");
+        return ACL_ERROR_FAILURE;
     }
+    ACL_REQUIRES_OK(processor->acltdtEnqueueBuf(qid, buf, timeout));
     return ACL_SUCCESS;
 }
 
 aclError acltdtDequeueBuf(uint32_t qid, acltdtBuf *buf, int32_t timeout)
 {
-    ACL_REQUIRES_NOT_NULL(buf);
-    int32_t deviceId = 0;
-    GET_CURRENT_DEVICE_ID(deviceId);
-    // 加锁
-    rtError_t rtRet = rtMemQueueDequeue(deviceId, qid, &buf->mbuf);
-    if (rtRet != RT_ERROR_NONE) {
-        ACL_LOG_CALL_ERROR("[Dequeue][Queue]fail to enqueue result = %d", rtRet);
-        return rtRet;
+    auto& qManager = acl::QueueManager::GetInstance();
+    auto processor = qManager.GetQueueProcessor(qid);
+    if (processor == nullptr) {
+        ACL_LOG_INNER_ERROR("[Check][Queueprocessor] queue processor is nullptr");
+        return ACL_ERROR_FAILURE;
     }
+    ACL_REQUIRES_OK(processor->acltdtDequeueBuf(qid, buf, timeout));
     return ACL_SUCCESS;
 }
 
-aclError acltdtGrantQueue(uint32_t qid, int32_t pid, uint32_t flag, int32_t timeout)
+aclError acltdtGrantQueue(uint32_t qid, int32_t pid, uint32_t permission, int32_t timeout)
 {
-    ACL_REQUIRES_OK(GetRunningEnv());
-    ACL_REQUIRES_POSITIVE(timeout);
-    if (RUN_ENV != ENV_DEVICE_MDC) {
-        if (flag & 0x1) {
-            ACL_LOG_ERROR("[CHECK][permission]permission manager is not allowed");
-            return ACL_ERROR_INVALID_PARAM;
-        };// 校验不能是管理权限
+    auto& qManager = acl::QueueManager::GetInstance();
+    auto processor = qManager.GetQueueProcessor(qid);
+    if (processor == nullptr) {
+        ACL_LOG_INNER_ERROR("[Check][Queueprocessor] queue processor is nullptr");
+        return ACL_ERROR_FAILURE;
     }
-    uint64_t startTime = GetTimestamp();
-    uint64_t endTime = 0;
-    do {
-        if (RUN_ENV == ENV_DEVICE_MDC) {
-            ; // 调用驱动函数
-        }
-        endTime = GetTimestamp();
-    } while ((endTime - startTime >= (timeout * 10000)));
+    ACL_REQUIRES_OK(processor->acltdtGrantQueue(qid, pid, permission, timeout));
     return ACL_SUCCESS;
 }
 
 aclError acltdtAttachQueue(uint32_t qid, int32_t timeout, uint32_t *permission)
 {
-    ACL_REQUIRES_NOT_NULL(permission);
-    ACL_REQUIRES_OK(GetRunningEnv());
+    auto& qManager = acl::QueueManager::GetInstance();
+    auto processor = qManager.GetQueueProcessor(qid);
+    if (processor == nullptr) {
+        ACL_LOG_INNER_ERROR("[Check][Queueprocessor] queue processor is nullptr");
+        return ACL_ERROR_FAILURE;
+    }
+    ACL_REQUIRES_OK(processor->acltdtAttachQueue(qid, timeout, permission));
     return ACL_SUCCESS;
 }
 
-aclError acltdtBindQueueRoutes(const acltdtQueueRouteList *qRouteList)
+aclError acltdtBindQueueRoutes(acltdtQueueRouteList *qRouteList)
 {
+    auto& qManager = acl::QueueManager::GetInstance();
+    auto processor = qManager.GetQueueScheduleProcessor();
+    if (processor == nullptr) {
+        ACL_LOG_INNER_ERROR("[Check][QueueScheduleprocessor] queue schedule processor is nullptr");
+        return ACL_ERROR_FAILURE;
+    }
+    ACL_REQUIRES_OK(processor->acltdtBindQueueRoutes(qRouteList));
     return ACL_SUCCESS;
 }
 
-aclError acltdtUnbindQueueRoutes(const acltdtQueueRouteList *qRouteList)
+aclError acltdtUnbindQueueRoutes(acltdtQueueRouteList *qRouteList)
 {
+    auto& qManager = acl::QueueManager::GetInstance();
+    auto processor = qManager.GetQueueScheduleProcessor();
+    if (processor == nullptr) {
+        ACL_LOG_INNER_ERROR("[Check][QueueScheduleprocessor] queue schedule processor is nullptr");
+        return ACL_ERROR_FAILURE;
+    }
+    ACL_REQUIRES_OK(processor->acltdtUnbindQueueRoutes(qRouteList));
     return ACL_SUCCESS;
 }
 
 aclError acltdtQueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo, acltdtQueueRouteList *qRouteList)
 {
+    auto& qManager = acl::QueueManager::GetInstance();
+    auto processor = qManager.GetQueueScheduleProcessor();
+    if (processor == nullptr) {
+        ACL_LOG_INNER_ERROR("[Check][QueueScheduleprocessor] queue schedule processor is nullptr");
+        return ACL_ERROR_FAILURE;
+    }
+    ACL_REQUIRES_OK(processor->acltdtQueryQueueRoutes(queryInfo, qRouteList));
     return ACL_SUCCESS;
 }
 
@@ -194,12 +213,11 @@ acltdtBuf* acltdtCreateBuf(size_t size)
     if (GetRunningEnv() != ACL_SUCCESS) {
         return nullptr;
     };
-
     if (RUN_ENV == ENV_DEVICE_DEFAULT) {
         ; // 需要创建共享组
     }
-    void *buf = nullptr;
-    rtError_t rtRet = rtMemQueueAllocMbuf(size, &buf);
+    rtMbufPtr_t buf = nullptr;
+    rtError_t rtRet = rtMBuffAlloc(&buf, size);
     if (rtRet != RT_ERROR_NONE) {
         ACL_LOG_CALL_ERROR("[Alloc][mbuf]fail to alloc mbuf result = %d", rtRet);
         return nullptr;
@@ -213,7 +231,7 @@ aclError acltdtDestroyBuf(acltdtBuf *buf)
         return ACL_SUCCESS;
     }
     ACL_REQUIRES_NOT_NULL(buf->mbuf);
-    rtError_t rtRet = rtMemQueueFreeMbuf(buf->mbuf);
+    rtError_t rtRet = rtMBuffFree(buf->mbuf);
     if (rtRet != RT_ERROR_NONE) {
         ACL_LOG_CALL_ERROR("[Free][mbuf]fail to alloc mbuf result = %d", rtRet);
         return rtRet;
@@ -228,9 +246,8 @@ aclError acltdtGetBufData(const acltdtBuf *buf, void **dataPtr, size_t *size)
     ACL_REQUIRES_NOT_NULL(buf);
     ACL_REQUIRES_NOT_NULL(dataPtr);
     ACL_REQUIRES_NOT_NULL(size);
-    // if 判断
-    rtMemQueueGetMbufAddr(buf->mbuf, dataPtr);
-    rtMemQueueGetMbufSize(buf->mbuf, size);
+    ACL_REQUIRES_CALL_RTS_OK(rtMBuffGetBuffAddr(buf->mbuf, dataPtr), rtMemQueueGetMbufAddr);
+    ACL_REQUIRES_CALL_RTS_OK(rtMBuffGetBuffSize(buf->mbuf, size), rtMemQueueGetMbufSize);
     return ACL_SUCCESS;
 }
 
@@ -239,8 +256,7 @@ aclError acltdtGetBufPrivData(const acltdtBuf *buf, void **privBuf, size_t *size
     ACL_REQUIRES_NOT_NULL(buf);
     ACL_REQUIRES_NOT_NULL(privBuf);
     ACL_REQUIRES_NOT_NULL(size);
-    // if 判断
-    rtMemQueueGetPrivInfo(buf->mbuf, privBuf, size);
+    ACL_REQUIRES_CALL_RTS_OK(rtMBuffGetPrivInfo(buf->mbuf, privBuf, size), rtMemQueueGetPrivInfo);
     return ACL_SUCCESS;
 }
 
@@ -267,8 +283,17 @@ aclError acltdtDestroyQueueAttr(const acltdtQueueAttr *attr)
 aclError acltdtSetQueueAttr(acltdtQueueAttr *attr,
                                                 acltdtQueueAttrType type,
                                                 size_t len,
-                                                const void *param)
+                                                const void *value)
 {
+    ACL_REQUIRES_NOT_NULL(attr);
+    ACL_REQUIRES_NOT_NULL(value);
+    switch (type) {
+        case ACL_QUEUE_NAME_PTR:
+            //name是否直接指定？
+            return CopyParam(value, len, static_cast<void *>(attr->name), RT_MQ_MAX_NAME_LEN);
+        case ACL_QUEUE_DEPTH_UINT32:
+            return CopyParam(value, len, static_cast<void *>(&attr->depth), sizeof(uint32_t));
+    }
     return ACL_SUCCESS;
 }
 
@@ -276,14 +301,31 @@ aclError acltdtGetQueueAttr(const acltdtQueueAttr *attr,
                                                 acltdtQueueAttrType type,
                                                 size_t len,
                                                 size_t *paramRetSize,
-                                                void *param)
+                                                void *value)
 {
+    ACL_REQUIRES_NOT_NULL(attr);
+    ACL_REQUIRES_NOT_NULL(value);
+    ACL_REQUIRES_NOT_NULL(paramRetSize);
+    switch (type) {
+        case ACL_QUEUE_NAME_PTR:
+            return CopyParam(static_cast<const void *>(attr->name), sizeof(size_t), value, len, paramRetSize);;
+        case ACL_QUEUE_DEPTH_UINT32:
+            return CopyParam(static_cast<const void *>(&attr->depth), sizeof(uint32_t), value, len, paramRetSize);
+    }
     return ACL_SUCCESS;
 }
 
 acltdtQueueRoute* acltdtCreateQueueRoute(uint32_t srcQid, uint32_t dstQid)
 {
-    return new(std::nothrow) acltdtQueueRoute(srcQid, dstQid);
+    acltdtQueueRoute *route = new(std::nothrow) acltdtQueueRoute();
+    if (route == nullptr) {
+        ACL_LOG_ERROR("new acltdtQueueRoute failed");
+        return nullptr;
+    }
+    route->srcId = srcQid;
+    route->dstId = dstQid;
+    route->status = 0;
+    return route;
 }
 
 aclError acltdtDestroyQueueRoute(const acltdtQueueRoute *route)

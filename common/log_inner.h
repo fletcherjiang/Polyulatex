@@ -203,6 +203,16 @@ inline bool IsInfoLogEnabled()
     } \
     while (false)
 
+#define ACL_REQUIRES_CALL_RTS_OK(expr, interface) \
+    do { \
+        auto __ret = (expr); \
+        if (__ret != RT_ERROR_NONE) { \
+            ACL_LOG_CALL_ERROR("[Call][Rts]call rts api [%s] failed, retCode is %d", #interface, __ret); \
+            return __ret; \
+        } \
+    } \
+    while (false)
+
 // Validate whether the expr value is true
 #define ACL_REQUIRES_TRUE(expr, errCode, errDesc) \
     do { \

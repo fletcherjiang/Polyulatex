@@ -10,85 +10,33 @@
 #ifndef QUEUE_PROCESSOR_H
 #define QUEUE_PROCESSOR_H
 
-#include <map>
-#include <string>
+#include <mutex>
 #include "queue.h"
+#include "mmpa/mmpa_api.h"
 
 namespace acl {
 class QueueProcessor
 {
 public:
+    virtual aclError acltdtCreateQueue(const acltdtQueueAttr *attr, uint32_t *queueId);
 
-    aclError acltdtCreateQueue(const acltdtQueueAttr *attr, uint32_t *queueId);
+    virtual aclError acltdtDestroyQueue(uint32_t queueId);
 
-    aclError acltdtDestroyQueue(uint32_t queueId);
+    virtual aclError acltdtEnqueueBuf(uint32_t queueId, acltdtBuf *buf, int32_t timeout);
 
-    aclError acltdtEnqueueBuf(uint32_t queueId, acltdtBuf *buf, int32_t timeout);
+    virtual aclError acltdtDequeueBuf(uint32_t queueId, acltdtBuf *buf, int32_t timeout);
 
-    aclError acltdtDequeueBuf(uint32_t queueId, acltdtBuf **buf, int32_t timeout);
+    virtual aclError acltdtGrantQueue(uint32_t queueId, int32_t pid, uint32_t flag, int32_t timeout);
 
-    aclError acltdtGrantQueue(uint32_t queueId, int32_t pid, uint32_t flag);
+    virtual aclError acltdtAttachQueue(uint32_t queueId, int32_t timeout, uint32_t *flag);
 
-    aclError acltdtAttachQueue(uint32_t queueId, int32_t timeout, uint32_t *flag);
+    // virtual acltdtBuf* acltdtCreateBuf(size_t size);
 
-    aclError acltdtBindQueueRoutes(const acltdtQueueRouteList *qRouteList);
+    // virtual aclError acltdtDestroyBuf(acltdtBuf *buf);
 
-    aclError acltdtUnbindQueueRoutes(const acltdtQueueRouteList *qRouteList);
+    // virtual aclError acltdtGetBufData(const acltdtBuf *buf, void **dataPtr, size_t *size);
 
-    aclError acltdtQueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo,
-                                                        acltdtQueueRouteList *qRouteList);
-
-    acltdtBuf* acltdtCreateBuf(size_t size);
-
-    aclError acltdtDestroyBuf(acltdtBuf *buf);
-
-    aclError acltdtGetBufData(const acltdtBuf *buf, void **dataPtr, size_t *size);
-
-    aclError acltdtGetBufPrivData(const acltdtBuf *buf, void **privBuf, size_t *size);
-
-    acltdtQueueAttr *acltdtCreateQueueAttr();
-
-    aclError acltdtDestroyQueueAttr(const acltdtQueueAttr *attr);
-
-    aclError acltdtSetQueueAttr(acltdtQueueAttr *attr,
-                                                    acltdtQueueAttrType type,
-                                                    size_t len,
-                                                    const void *param);
-
-    aclError acltdtGetQueueAttr(const acltdtQueueAttr *attr,
-                                                    acltdtQueueAttrType type,
-                                                    size_t len,
-                                                    size_t *paramRetSize,
-                                                    void *param);
-
-    acltdtQueueRoute* acltdtCreateQueueRoute(uint32_t srcQueueId, uint32_t dstQueueId);
-
-    aclError acltdtDestroyQueueRoute(const acltdtQueueRoute *route);
-
-    aclError acltdtGetQueueIdFromQueueRoute(const acltdtQueueRoute *route,
-                                                    acltdtQueueRouteKind srcDst,
-                                                    uint32_t *queueId);
-
-    aclError acltdtGetQueueRouteStatus(const acltdtQueueRoute *route, int32_t *routeStatus);
-
-    acltdtQueueRouteList* acltdtCreateQueueRouteList();
-
-    aclError acltdtDestroyQueueRouteList(const acltdtQueueRouteList *routeList);
-
-    aclError acltdtAddQueueRoute(acltdtQueueRouteList *routeList, const acltdtQueueRoute *route);
-
-    aclError acltdtGetQueueRoute(const acltdtQueueRouteList *routeList,
-                                                    size_t index,
-                                                    acltdtQueueRoute *route);
-
-     acltdtQueueRouteQueryInfo* acltdtCreateQueueRouteQueryInfo();
-
-    aclError acltdtDestroyQueueRouteQueryInfo(const acltdtQueueRouteQueryInfo *param);
-
-    aclError acltdtSetQueueRouteQueryInfo(acltdtQueueRouteQueryInfo *param,
-                                                            acltdtQueueRouteQueryInfoParamType type,
-                                                            size_t len,
-                                                            const void *value);
+    // virtual aclError acltdtGetBufPrivData(const acltdtBuf *buf, void **privBuf, size_t *size);
 
     QueueProcessor() = default;
     ~QueueProcessor() = default;
@@ -102,9 +50,43 @@ public:
 
     QueueProcessor &&operator=(QueueProcessor &&) = delete;
 
+protected:
+    std::recursive_mutex muForQueueCtrl;
+    std::mutex muForQueueEnqueue;
+    std::mutex muForQueueDequeue;
+
 private:
-    void Init();
 };
+
+class QueueScheduleProcessor
+{
+public:
+    virtual aclError acltdtBindQueueRoutes(acltdtQueueRouteList *qRouteList);
+
+    virtual aclError acltdtUnbindQueueRoutes(acltdtQueueRouteList *qRouteList);
+
+    virtual aclError acltdtQueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo,
+                                                        acltdtQueueRouteList *qRouteList);
+
+    QueueScheduleProcessor() = default;
+    ~QueueScheduleProcessor() = default;
+
+    // not allow copy constructor and assignment operators
+    QueueScheduleProcessor(const QueueScheduleProcessor &) = delete;
+
+    QueueScheduleProcessor &operator=(const QueueScheduleProcessor &) = delete;
+
+    QueueScheduleProcessor(QueueScheduleProcessor &&) = delete;
+
+    QueueScheduleProcessor &&operator=(QueueScheduleProcessor &&) = delete;
+
+protected:
+    std::mutex muForQs;
+    bool isQsInit = false;
+
+private:
+};
+
 }
 
 

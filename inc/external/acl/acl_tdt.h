@@ -281,7 +281,8 @@ typedef struct acltdtQueueRoute acltdtQueueRoute;
 
 
 enum acltdtQueueAttrType {
-    ACL_QUEUE_NAME_PTR = 0
+    ACL_QUEUE_NAME_PTR = 0,
+    ACL_QUEUE_DEPTH_UINT32
 };
 
 enum acltdtQueueRouteKind {
@@ -314,9 +315,9 @@ ACL_FUNC_VISIBILITY aclError acltdtGrantQueue(uint32_t qid, int32_t pid, uint32_
 
 ACL_FUNC_VISIBILITY aclError acltdtAttachQueue(uint32_t qid, int32_t timeout, uint32_t *permission);
 
-ACL_FUNC_VISIBILITY aclError acltdtBindQueueRoutes(const acltdtQueueRouteList *qRouteList);
+ACL_FUNC_VISIBILITY aclError acltdtBindQueueRoutes(acltdtQueueRouteList *qRouteList);
 
-ACL_FUNC_VISIBILITY aclError acltdtUnbindQueueRoutes(const acltdtQueueRouteList *qRouteList);
+ACL_FUNC_VISIBILITY aclError acltdtUnbindQueueRoutes(acltdtQueueRouteList *qRouteList);
 
 ACL_FUNC_VISIBILITY aclError acltdtQueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo,
                                                     acltdtQueueRouteList *qRouteList);

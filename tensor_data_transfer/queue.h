@@ -17,6 +17,7 @@
 #include "acl/acl_base.h"
 #include "acl/acl_tdt.h"
 #include "acl/acl_rt.h"
+#include "runtime/rt_mem_queue.h"
 
 
 #define GET_CURRENT_DEVICE_ID(devId) \
@@ -37,12 +38,12 @@ enum RunEnv {
 };
 
 struct acltdtBuf {
-    acltdtBuf(void *buf) 
+    acltdtBuf(rtMbufPtr_t buf) 
     {
         mbuf = buf;
     }
     ~acltdtBuf() = default;
-    void *mbuf;
+    rtMbufPtr_t mbuf;
 };
 
 struct acltdtQueueRouteList {
@@ -56,19 +57,12 @@ struct acltdtQueueRouteQueryInfo {
 };
 
 struct acltdtQueueRoute {
-    acltdtQueueRoute(uint32_t src, uint32_t dst) 
-    {
-        srcId = src;
-        dstId = dst;
-        status = 0;
-    }
-    ~acltdtQueueRoute() = default;
     uint32_t srcId;
     uint32_t dstId;
     int32_t status;
 };
 
 aclError GetRunningEnv(RunEnv &runEnv);
-
+uint64_t GetTimestamp();
 
 #endif //QUEUE_H
