@@ -42,7 +42,7 @@ typedef struct tagMemQueueAttr {
 
 typedef struct tagMemQueueShareAttr
 {
-    int manager:1;
+    int manage:1;
     int read:1;
     int write:1;
     int rsv:29;
@@ -87,7 +87,7 @@ typedef struct tagEschedEventSummary {
     int32_t pid;
     uint32_t grpId;
     int32_t eventId;
-    uint32_t subEventId;
+    uint32_t subeventId;
     uint32_t msgLen;
     char *msg;
     uint32_t dstEngine;

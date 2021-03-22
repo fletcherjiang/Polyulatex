@@ -41,7 +41,7 @@ namespace acl {
         uint64_t startTime = GetTimestamp();
         uint64_t endTime = 0;
         rtMemQueueShareAttr_t attr = {0};
-        attr.manager = permission & ACL_TDTQUEUE_PERMISSION_MANAGER;
+        attr.manage = permission & ACL_TDTQUEUE_PERMISSION_MANAGER;
         attr.read = permission & ACL_TDTQUEUE_PERMISSION_READ;
         attr.write = permission & ACL_TDTQUEUE_PERMISSION_WRITE;
         do {
@@ -90,7 +90,7 @@ namespace acl {
             eventSum.pid = cpPid;
             eventSum.grpId = 0;
             eventSum.eventId = 222222; //EVENT_ID
-            eventSum.subEventId = bqs::ACL_BIND_QUEUE_INIT;
+            eventSum.subeventId = bqs::ACL_BIND_QUEUE_INIT;
             eventSum.msgLen = sizeof(qsInitMsg);
             eventSum.msg = reinterpret_cast<char *>(&qsInitMsg);
             eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
@@ -115,7 +115,7 @@ namespace acl {
         bqs::QueueRouteList bqsBindUnbindMsg = {0};
         bqsBindUnbindMsg.routeNum = qRouteList->routeList.size();
         bqsBindUnbindMsg.routeListAddr = reinterpret_cast<uint64_t>(devPtr);
-        eventSum.subEventId = isBind ? : bqs::ACL_BIND_QUEUE, bqs::ACL_UNBIND_QUEUE;
+        eventSum.subeventId = isBind ? : bqs::ACL_BIND_QUEUE, bqs::ACL_UNBIND_QUEUE;
         eventSum.msgLen = sizeof(bqsBindUnbindMsg);
         eventSum.msg = reinterpret_cast<char *>(&bqsBindUnbindMsg);
         auto ret = rtEschedSubmitEventSync(deviceId, &eventSum, &ack);
@@ -176,7 +176,7 @@ namespace acl {
         eventSum.pid = cpPid;
         eventSum.grpId = 0;
         eventSum.eventId = 222222; //EVENT_ID
-        eventSum.subEventId = bqs::ACL_QUERY_QUEUE_NUM;
+        eventSum.subeventId = bqs::ACL_QUERY_QUEUE_NUM;
         eventSum.msgLen = sizeof(routeQuery);
         eventSum.msg = reinterpret_cast<char *>(&routeQuery);
         eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
@@ -211,7 +211,7 @@ namespace acl {
         routeQuery.routeNum = routeNum;
         routeQuery.routeListAddr = reinterpret_cast<uint64_t>(devPtr);
 
-        eventSum.subEventId = bqs::ACL_QUERY_QUEUE;
+        eventSum.subeventId = bqs::ACL_QUERY_QUEUE;
         eventSum.msgLen = sizeof(routeQuery);
         eventSum.msg = reinterpret_cast<char *>(&routeQuery);
 

@@ -266,6 +266,7 @@ else()
     ${BASE_DIR}/third_party/inc/graphengine/inc/external
     ${BASE_DIR}/third_party/inc/toolchain/ide/ide-daemon/external
     ${BASE_DIR}/third_party/inc/driver
+    ${BASE_DIR}/third_party/inc/aicpu
 endif()
     ${BASE_DIR}/inc/external
     ${BASE_DIR}/inc

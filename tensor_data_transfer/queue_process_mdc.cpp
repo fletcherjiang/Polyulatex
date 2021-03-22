@@ -52,7 +52,7 @@ namespace acl {
         uint64_t startTime = GetTimestamp();
         uint64_t endTime = 0;
         rtMemQueueShareAttr_t attr = {0};
-        attr.manager = permission & ACL_TDTQUEUE_PERMISSION_MANAGER;
+        attr.manage = permission & ACL_TDTQUEUE_PERMISSION_MANAGER;
         attr.read = permission & ACL_TDTQUEUE_PERMISSION_READ;
         attr.write = permission & ACL_TDTQUEUE_PERMISSION_WRITE;
         do {
