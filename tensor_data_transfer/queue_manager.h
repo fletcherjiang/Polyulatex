@@ -19,7 +19,6 @@
 
 namespace acl {
 using QueueProcessorPtr = std::shared_ptr<QueueProcessor>;
-using QueueScheduleProcessorPtr = std::shared_ptr<QueueScheduleProcessor>;
 
 class QueueManager {
 public:
@@ -33,13 +32,7 @@ public:
      * Get queue processor
      * @return queueProcessorPtr queue processor pointer
      */
-    QueueProcessorPtr GetQueueProcessor(uint32_t qid);
-
-    aclError AddQueueProcessor(uint32_t qid);
-
-    void DeleteQueueProcessor(uint32_t qid);
-
-    QueueScheduleProcessorPtr GetQueueScheduleProcessor();
+    QueueProcessorPtr GetQueueProcessor();
 
     QueueManager() = default;
 
@@ -56,9 +49,7 @@ public:
 
 private:
     // queue processor
-    std::mutex mu;
-    std::map<uint32_t, QueueProcessorPtr> queueProcessMap;
-    QueueScheduleProcessorPtr queueScheduleProc = nullptr;
+    QueueProcessorPtr queueProcessProc_ = nullptr;
     RunEnv env_ = ENV_UNKNOWN;
 };
 

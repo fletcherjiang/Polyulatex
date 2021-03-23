@@ -11,10 +11,20 @@
 #define QUEUE_PROCESSOR_H
 
 #include <mutex>
+#include <memory>
+#include <map>
 #include "queue.h"
 #include "mmpa/mmpa_api.h"
 
 namespace acl {
+
+typedef struct QueueDataMutex {
+    std::mutex muForEnqueue;
+    std::mutex muForDequeue;
+} QueueDataMutex;
+
+using QueueDataMutexPtr = std::shared_ptr<QueueDataMutex>;
+
 class QueueProcessor
 {
 public:
@@ -30,13 +40,30 @@ public:
 
     virtual aclError acltdtAttachQueue(uint32_t queueId, int32_t timeout, uint32_t *flag);
 
-    // virtual acltdtBuf* acltdtCreateBuf(size_t size);
+    virtual aclError acltdtBindQueueRoutes(acltdtQueueRouteList *qRouteList);
 
-    // virtual aclError acltdtDestroyBuf(acltdtBuf *buf);
+    virtual aclError acltdtUnbindQueueRoutes(acltdtQueueRouteList *qRouteList);
 
-    // virtual aclError acltdtGetBufData(const acltdtBuf *buf, void **dataPtr, size_t *size);
+    virtual aclError acltdtQueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo,
+                                                        acltdtQueueRouteList *qRouteList);
 
-    // virtual aclError acltdtGetBufPrivData(const acltdtBuf *buf, void **privBuf, size_t *size);
+    virtual acltdtBuf* acltdtCreateBuf(size_t size);
+
+    virtual aclError acltdtDestroyBuf(acltdtBuf *buf);
+
+    virtual aclError acltdtGetBufData(const acltdtBuf *buf, void **dataPtr, size_t *size);
+
+    virtual aclError acltdtGetBufPrivData(const acltdtBuf *buf, void **privBuf, size_t *size);
+
+    aclError SendBindUnbindMsg(acltdtQueueRouteList *qRouteList, bool isDevice, bool isBind);
+    aclError GetDstInfo(int32_t deviceId, bool isDevice, pid_t &dstPid);
+
+    aclError GetQueueRouteNum(const acltdtQueueRouteQueryInfo *queryInfo, bool isDevice,
+                                                          int32_t deviceId,
+                                                          rtEschedEventSummary_t &eventSum,
+                                                          rtEschedEventReply_t &ack);
+
+    aclError QueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo, acltdtQueueRouteList *qRouteList, bool isDevice);
 
     QueueProcessor() = default;
     ~QueueProcessor() = default;
@@ -52,36 +79,8 @@ public:
 
 protected:
     std::recursive_mutex muForQueueCtrl;
-    std::mutex muForQueueEnqueue;
-    std::mutex muForQueueDequeue;
-
-private:
-};
-
-class QueueScheduleProcessor
-{
-public:
-    virtual aclError acltdtBindQueueRoutes(acltdtQueueRouteList *qRouteList);
-
-    virtual aclError acltdtUnbindQueueRoutes(acltdtQueueRouteList *qRouteList);
-
-    virtual aclError acltdtQueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo,
-                                                        acltdtQueueRouteList *qRouteList);
-
-    QueueScheduleProcessor() = default;
-    ~QueueScheduleProcessor() = default;
-
-    // not allow copy constructor and assignment operators
-    QueueScheduleProcessor(const QueueScheduleProcessor &) = delete;
-
-    QueueScheduleProcessor &operator=(const QueueScheduleProcessor &) = delete;
-
-    QueueScheduleProcessor(QueueScheduleProcessor &&) = delete;
-
-    QueueScheduleProcessor &&operator=(QueueScheduleProcessor &&) = delete;
-
-protected:
-    std::mutex muForQs_;
+    std::mutex mu_;
+    std::map<uint32_t, QueueDataMutexPtr> muForQueue_;
     bool isQsInit_ = false;
     uint32_t qsContactId_ = 0;
 
