@@ -81,7 +81,7 @@ namespace acl {
         rtEschedEventSummary_t eventSum = {0};
         rtEschedEventReply_t ack = {0};
         bqs::QsProcMsgRsp qsRsp = {0};
-        if (isBind && !isQsInit) {
+        if (isBind && !isQsInit_) {
             // send init msg
             bqs::QsBindInit qsInitMsg = {0};
             qsInitMsg.pid = info.hostPid;
@@ -98,7 +98,7 @@ namespace acl {
             ack.buf = reinterpret_cast<char *>(&qsRsp);
             ack.bufLen = sizeof(qsRsp);
             ACL_REQUIRES_CALL_RTS_OK(rtEschedSubmitEventSync(deviceId, &eventSum, &ack), rtEschedSubmitEventSync);
-            isQsInit = true;
+            isQsInit_ = true;
         }
         // send msg
         size_t routeSize = qRouteList->routeList.size() * sizeof(bqs::QueueRoute);
@@ -216,7 +216,6 @@ namespace acl {
         eventSum.msg = reinterpret_cast<char *>(&routeQuery);
 
         auto ret = rtEschedSubmitEventSync(deviceId, &eventSum, &ack);
-        (void)rtFree(devPtr);
         if (ret != RT_ERROR_NONE) {
             (void)rtFree(devPtr);
             ACL_LOG_CALL_ERROR("[Call][Rts]call rts api rtEschedSubmitEventSync failed.");

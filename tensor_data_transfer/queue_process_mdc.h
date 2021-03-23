@@ -47,11 +47,17 @@ private:
 class QueueScheduleProcessorMdc : public QueueScheduleProcessor
 {
 public:
-    virtual aclError acltdtBindQueueRoutes(acltdtQueueRouteList *qRouteList);
+    aclError acltdtBindQueueRoutes(acltdtQueueRouteList *qRouteList);
 
-    virtual aclError acltdtUnbindQueueRoutes(acltdtQueueRouteList *qRouteList);
+    aclError acltdtUnbindQueueRoutes(acltdtQueueRouteList *qRouteList);
 
-    virtual aclError acltdtQueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo,
+    aclError SendBindUnbindMsg(acltdtQueueRouteList *qRouteList, bool isBind);
+
+    aclError GetQueueRouteNum(const acltdtQueueRouteQueryInfo *queryInfo,
+                              int32_t &devId, rtEschedEventSummary_t &event,
+                              rtEschedEventReply_t &ack);
+
+    aclError acltdtQueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo,
                                                         acltdtQueueRouteList *qRouteList);
 
     QueueScheduleProcessorMdc() = default;

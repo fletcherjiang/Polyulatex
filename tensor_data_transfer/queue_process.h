@@ -81,8 +81,9 @@ public:
     QueueScheduleProcessor &&operator=(QueueScheduleProcessor &&) = delete;
 
 protected:
-    std::mutex muForQs;
-    bool isQsInit = false;
+    std::mutex muForQs_;
+    bool isQsInit_ = false;
+    uint32_t qsContactId_ = 0;
 
 private:
 };
