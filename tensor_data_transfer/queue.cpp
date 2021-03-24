@@ -82,23 +82,6 @@ aclError GetRunningEnv()
     return ACL_SUCCESS;
 }
 
-typedef struct testMutes {
-    std::mutex a;
-    std::mutex b;
-} testMutes;
-
-using testMutesPtr = std::shared_ptr<testMutes>;
-
-std::map<uint32_t, testMutesPtr> testM;
-
-void AddMutex()
-{
-    testM[0] = std::shared_ptr<testMutes>(new (std::nothrow)testMutes());
-    std::lock_guard<std::mutex> lock(testM[0]->a);
-    int i = 0;
-    return;
-}
-
 aclError acltdtCreateQueue(const acltdtQueueAttr *attr, uint32_t *qid)
 {
     auto& qManager = acl::QueueManager::GetInstance();

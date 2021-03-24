@@ -55,16 +55,28 @@ public:
 
     virtual aclError acltdtGetBufPrivData(const acltdtBuf *buf, void **privBuf, size_t *size);
 
-    aclError SendBindUnbindMsg(acltdtQueueRouteList *qRouteList, bool isDevice, bool isBind);
+    aclError SendBindUnbindMsg(acltdtQueueRouteList *qRouteList,
+                                               int32_t devieId,
+                                               bool isBind,
+                                               bool isMbuffAlloc,
+                                               rtEschedEventSummary_t &eventSum,
+                                               rtEschedEventReply_t &ack);
+
+    aclError SendConnectQsMsg(int32_t devieId, rtEschedEventSummary_t &eventSum, rtEschedEventReply_t &ack);
     aclError GetDstInfo(int32_t deviceId, bool isDevice, pid_t &dstPid);
 
-    aclError GetQueueRouteNum(const acltdtQueueRouteQueryInfo *queryInfo, bool isDevice,
+    aclError GetQueueRouteNum(const acltdtQueueRouteQueryInfo *queryInfo,
                                                           int32_t deviceId,
                                                           rtEschedEventSummary_t &eventSum,
                                                           rtEschedEventReply_t &ack);
 
-    aclError QueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo, acltdtQueueRouteList *qRouteList, bool isDevice);
-
+    aclError QueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo,
+                                              int32_t deviceId,
+                                              bool isMbufAlloc,
+                                              size_t routeNum,
+                                              rtEschedEventSummary_t &eventSum,
+                                              rtEschedEventReply_t &ack,
+                                              acltdtQueueRouteList *qRouteList);
     QueueProcessor() = default;
     ~QueueProcessor() = default;
 

@@ -105,7 +105,24 @@ namespace acl {
         ACL_REQUIRES_NOT_NULL(qRouteList);
         ACL_LOG_INFO("Start to acltdtBindQueueRoutes, queue route is %zu", qRouteList->routeList.size());
         // TODO需要给QS权限
-        ACL_REQUIRES_OK(SendBindUnbindMsg(qRouteList, true, true));
+        int32_t deviceId = 0;
+        // get dst id
+        pid_t dstPid;
+        ACL_REQUIRES_OK(GetDstInfo(deviceId, true, dstPid));
+        rtEschedEventSummary_t eventSum = {0};
+        rtEschedEventReply_t ack = {0};
+        bqs::QsProcMsgRsp qsRsp = {0};
+        eventSum.pid = dstPid;
+        eventSum.grpId = bqs::BINDQUEUEGRPID;
+        eventSum.eventId = 222222; //qs EVENT_ID
+        eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
+        ack.buf = reinterpret_cast<char *>(&qsRsp);
+        ack.bufLen = sizeof(qsRsp);
+        if (!isQsInit_) {
+            ACL_REQUIRES_OK(SendConnectQsMsg(deviceId, eventSum, ack));
+            isQsInit_ = true;
+        }
+        ACL_REQUIRES_OK(SendBindUnbindMsg(qRouteList, deviceId, true, true, eventSum, ack));
         ACL_LOG_INFO("Successfully to execute acltdtBindQueueRoutes, queue route is %zu", qRouteList->routeList.size());
         return ACL_SUCCESS;
     }
@@ -114,7 +131,20 @@ namespace acl {
     {
         ACL_REQUIRES_NOT_NULL(qRouteList);
         ACL_LOG_INFO("Start to acltdtUnBindQueueRoutes, queue route is %zu", qRouteList->routeList.size());
-        ACL_REQUIRES_OK(SendBindUnbindMsg(qRouteList, true, false));
+        int32_t deviceId = 0;
+        // get dst id
+        pid_t dstPid;
+        ACL_REQUIRES_OK(GetDstInfo(deviceId, true, dstPid));
+        rtEschedEventSummary_t eventSum = {0};
+        rtEschedEventReply_t ack = {0};
+        bqs::QsProcMsgRsp qsRsp = {0};
+        eventSum.pid = dstPid;
+        eventSum.grpId = bqs::BINDQUEUEGRPID;
+        eventSum.eventId = 222222; //drv EVENT_ID
+        eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
+        ack.buf = reinterpret_cast<char *>(&qsRsp);
+        ack.bufLen = sizeof(qsRsp);
+        ACL_REQUIRES_OK(SendBindUnbindMsg(qRouteList, deviceId, false, true, eventSum, ack));
         ACL_LOG_INFO("Successfully to execute acltdtUnBindQueueRoutes, queue route is %zu", qRouteList->routeList.size());
         return ACL_SUCCESS;
     }
@@ -124,8 +154,22 @@ namespace acl {
         ACL_REQUIRES_NOT_NULL(queryInfo);
         ACL_REQUIRES_NOT_NULL(qRouteList);
         ACL_LOG_INFO("Start to acltdtQueryQueueRoutes");
-        ACL_REQUIRES_OK(QueryQueueRoutes(queryInfo, qRouteList, true));
-        ACL_LOG_INFO("Successfully to execute acltdtQueryQueueRoutes, queue route is %zu", qRouteList->routeList.size());
+        int32_t deviceId = 0;
+        // get dst id
+        pid_t dstPid;
+        ACL_REQUIRES_OK(GetDstInfo(deviceId, true, dstPid));
+        rtEschedEventSummary_t eventSum = {0};
+        rtEschedEventReply_t ack = {0};
+        bqs::QsProcMsgRsp qsRsp = {0};
+        eventSum.pid = dstPid;
+        eventSum.grpId = bqs::BINDQUEUEGRPID;
+        eventSum.eventId = 222222; //qs EVENT_ID
+        eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
+        ack.buf = reinterpret_cast<char *>(&qsRsp);
+        ack.bufLen = sizeof(qsRsp);
+        ACL_REQUIRES_OK(GetQueueRouteNum(queryInfo, deviceId, eventSum, ack));
+        size_t routeNum = reinterpret_cast<bqs::QsProcMsgRsp *>(ack.buf)->retValue;
+        ACL_REQUIRES_OK(QueryQueueRoutes(queryInfo, deviceId, true, routeNum, eventSum, ack, qRouteList));
         return ACL_SUCCESS;
     }
 
