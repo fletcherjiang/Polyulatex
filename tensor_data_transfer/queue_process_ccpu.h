@@ -7,15 +7,15 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
-#ifndef QUEUE_PROCESSOR_MDC_H
-#define QUEUE_PROCESSOR_MDC_H
+#ifndef QUEUE_PROCESSOR_CCPU_H
+#define QUEUE_PROCESSOR_CCPU_H
 
 #include <map>
 #include <string>
 #include "queue_process.h"
 
 namespace acl {
-class QueueProcessorMdc : public QueueProcessor
+class QueueProcessorCcpu : public QueueProcessor
 {
 public:
     aclError acltdtCreateQueue(const acltdtQueueAttr *attr, uint32_t *queueId);
@@ -34,23 +34,21 @@ public:
 
     aclError acltdtUnbindQueueRoutes(acltdtQueueRouteList *qRouteList);
 
-    aclError GrantQueue2Cp(int32_t deviceId, uint32_t qid);
-
     aclError acltdtQueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo,
                                                         acltdtQueueRouteList *qRouteList);
 
 
-    QueueProcessorMdc() = default;
-    ~QueueProcessorMdc() = default;
+    QueueProcessorCcpu() = default;
+    ~QueueProcessorCcpu() = default;
 
     // not allow copy constructor and assignment operators
-    QueueProcessorMdc(const QueueProcessorMdc &) = delete;
+    QueueProcessorCcpu(const QueueProcessorCcpu &) = delete;
 
-    QueueProcessorMdc &operator=(const QueueProcessorMdc &) = delete;
+    QueueProcessorCcpu &operator=(const QueueProcessorCcpu &) = delete;
 
-    QueueProcessorMdc(QueueProcessorMdc &&) = delete;
+    QueueProcessorCcpu(QueueProcessorCcpu &&) = delete;
 
-    QueueProcessorMdc &&operator=(QueueProcessorMdc &&) = delete;
+    QueueProcessorCcpu &&operator=(QueueProcessorCcpu &&) = delete;
 
 private:
     /* data */
@@ -59,4 +57,4 @@ private:
 
 
 
-#endif // QUEUE_PROCESS_MDC_H
+#endif // QUEUE_PROCESS_CCPU_H

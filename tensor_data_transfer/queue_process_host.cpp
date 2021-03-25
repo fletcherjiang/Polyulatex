@@ -39,21 +39,40 @@ namespace acl {
 
     aclError QueueProcessorHost::acltdtDestroyQueue(uint32_t qid)
     {
+        std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl);
+        int32_t deviceId = 0;
+        GET_CURRENT_DEVICE_ID(deviceId);
+        // get qs id
+        pid_t qsPid;
+        size_t routeNum = 0;
+        if (GetDstInfo(deviceId, QS_PID, qsPid) == RT_ERROR_NONE) {
+            rtEschedEventSummary_t eventSum = {0};
+            rtEschedEventReply_t ack = {0};
+            bqs::QsProcMsgRsp qsRsp = {0};
+            pid_t cpPid;
+            ACL_REQUIRES_OK(GetDstInfo(deviceId, CP_PID, cpPid));
+            eventSum.pid = cpPid;
+            eventSum.grpId = 0;
+            eventSum.eventId = 222222; //DRV EVENT_ID
+            eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
+            ack.buf = reinterpret_cast<char *>(&qsRsp);
+            ack.bufLen = sizeof(qsRsp);
+            acltdtQueueRouteQueryInfo queryInfo = {bqs::BQS_QUERY_TYPE_SRC_OR_DST, qid, qid};
+            ACL_REQUIRES_OK(GetQueueRouteNum(&queryInfo, deviceId, eventSum, ack));
+            routeNum = reinterpret_cast<bqs::QsProcMsgRsp *>(ack.buf)->retValue;
+        }
+        if (routeNum > 0) {
+            ACL_LOG_ERROR("qid [%u] can not be destroyed, it need to be unbinded first.", qid);
+            return ACL_ERROR_FAILURE;// 需要新增错误码
+        }
+        ACL_REQUIRES_CALL_RTS_OK(rtMemQueueDestroy(deviceId, qid), rtMemQueueDestroy);
         return ACL_SUCCESS;
-    }
-
-    aclError QueueProcessorHost::acltdtEnqueueBuf(uint32_t qid, acltdtBuf *buf, int32_t timeout)
-    {
-        return ACL_ERROR_API_NOT_SUPPORT;
-    }
-
-    aclError QueueProcessorHost::acltdtDequeueBuf(uint32_t qid, acltdtBuf **buf, int32_t timeout)
-    {
-        return ACL_ERROR_API_NOT_SUPPORT;
     }
 
     aclError QueueProcessorHost::acltdtGrantQueue(uint32_t qid, int32_t pid, uint32_t permission, int32_t timeout)
     {
+        ACL_LOG_INFO("start to acltdtGrantQueue, qid is %u, pid is %d, permisiion is %u, timeout is %d",
+                     qid, pid, permission, timeout);
         if (permission & 0x1) {
             ACL_LOG_ERROR("[CHECK][permission]permission manager is not allowed");
             return ACL_ERROR_INVALID_PARAM;
@@ -62,29 +81,40 @@ namespace acl {
         GET_CURRENT_DEVICE_ID(deviceId);
         uint64_t startTime = GetTimestamp();
         uint64_t endTime = 0;
+        pid_t cpPid;
+        rtBindHostpidInfo_t info = {0};
+        info.hostPid = mmGetPid();
+        info.cpType = RT_DEV_PROCESS_CP1;
+        info.chipId = deviceId;
+        do {
+            if (rtQueryDevpid(&info, &cpPid) != RT_ERROR_NONE) {
+                ACL_LOG_WARN("can not acquire cp pid, try again");
+            }
+            // 是否需要sleep？
+            endTime = GetTimestamp();
+        } while ((endTime - startTime >= (timeout * 10000)));
+        ACL_LOG_INFO("get cp pid %d", cpPid);
         rtMemQueueShareAttr_t attr = {0};
         attr.manage = permission & ACL_TDTQUEUE_PERMISSION_MANAGER;
         attr.read = permission & ACL_TDTQUEUE_PERMISSION_READ;
         attr.write = permission & ACL_TDTQUEUE_PERMISSION_WRITE;
-        do {
-            auto ret = rtMemQueueGrant(deviceId, qid, pid, &attr);
-            if (ret == RT_ERROR_NONE) {
-                return ACL_SUCCESS;
-            } else if (ret != 11111) {// 不需要重试
-                return ret;
-            }
-            endTime = GetTimestamp();
-        } while ((endTime - startTime >= (timeout * 10000)));
+        ACL_REQUIRES_CALL_RTS_OK(rtMemQueueGrant(deviceId, qid, pid, &attr), rtMemQueueGrant);
+        ACL_LOG_INFO("successfully execute acltdtGrantQueue, qid is %u, pid is %d, permisiion is %u, timeout is %d",
+                     qid, pid, permission, timeout);
         return ACL_SUCCESS;
     }
 
     aclError QueueProcessorHost::acltdtAttachQueue(uint32_t qid, int32_t timeout, uint32_t *permission)
     {
+        ACL_LOG_INFO("start to acltdtGrantQueue, qid is %u, permisiion is %u, timeout is %d",
+                     qid, *permission, timeout);
         ACL_REQUIRES_NOT_NULL(permission);
         int32_t deviceId = 0;
         GET_CURRENT_DEVICE_ID(deviceId);
         ACL_REQUIRES_CALL_RTS_OK(rtMemQueueAttach(deviceId, qid, timeout), rtMemQueueAttach);
         // TODO查询权限返回
+        ACL_LOG_INFO("successfully execute acltdtGrantQueue, qid is %u, permisiion is %u, timeout is %d",
+                     qid, *permission, timeout);
         return ACL_SUCCESS;
     }
 
@@ -96,7 +126,7 @@ namespace acl {
         GET_CURRENT_DEVICE_ID(deviceId);
         // get dst pid
         pid_t dstPid;
-        ACL_REQUIRES_OK(GetDstInfo(deviceId, false, dstPid));
+        ACL_REQUIRES_OK(GetDstInfo(deviceId, CP_PID, dstPid));
         rtEschedEventSummary_t eventSum = {0};
         rtEschedEventReply_t ack = {0};
         bqs::QsProcMsgRsp qsRsp = {0};
@@ -107,6 +137,7 @@ namespace acl {
         ack.buf = reinterpret_cast<char *>(&qsRsp);
         ack.bufLen = sizeof(qsRsp);
         if (!isQsInit_) {
+            // 需要调用rts接口拉起QS
             ACL_REQUIRES_OK(SendConnectQsMsg(deviceId, eventSum, ack));
             isQsInit_ = true;
         }
@@ -123,7 +154,7 @@ namespace acl {
         GET_CURRENT_DEVICE_ID(deviceId);
         // get dst pid
         pid_t dstPid;
-        ACL_REQUIRES_OK(GetDstInfo(deviceId, false, dstPid));
+        ACL_REQUIRES_OK(GetDstInfo(deviceId, CP_PID, dstPid));
         rtEschedEventSummary_t eventSum = {0};
         rtEschedEventReply_t ack = {0};
         bqs::QsProcMsgRsp qsRsp = {0};
@@ -147,7 +178,7 @@ namespace acl {
         GET_CURRENT_DEVICE_ID(deviceId);
         // get dst id
         pid_t dstPid;
-        ACL_REQUIRES_OK(GetDstInfo(deviceId, true, dstPid));
+        ACL_REQUIRES_OK(GetDstInfo(deviceId, CP_PID, dstPid));
         rtEschedEventSummary_t eventSum = {0};
         rtEschedEventReply_t ack = {0};
         bqs::QsProcMsgRsp qsRsp = {0};

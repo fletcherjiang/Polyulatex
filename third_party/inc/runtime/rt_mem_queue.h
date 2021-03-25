@@ -61,7 +61,7 @@ typedef struct tagMemQueueBuff {
 } rtMemQueueBuff_t;
 
 typedef enum tagMemQueueQueryCmd {
-    RT_MQ_QUERY__QUE_ATTR_OF_CUR_PROC = 0,
+    RT_MQ_QUERY_QUE_ATTR_OF_CUR_PROC = 0,
     RT_MQ_QUERY_QUES_OF_CUR_PROC =1,
     RT_MQ_QUERY_CMD_MAX = 2
 } rtMemQueueQueryCmd_t;
@@ -154,7 +154,7 @@ RTS_API rtError_t rtMemQueueEnQueueBuf(int32_t devId, uint32_t qid, rtMemQueueBu
 RTS_API rtError_t rtMemQueueDeQueueBuf(int32_t devId, uint32_t qid, rtMemQueueBuff_t *outBuf, int32_t timeout) WEAKFUC;
 
 RTS_API rtError_t rtMemQueueQuery(int32_t devId, rtMemQueueQueryCmd_t cmd, void *inBuff, uint32_t inLen,
-                                  void *outBuff, uint32_t *outLen) WEAKFUC;
+                                  void *outBuff, uint32_t outLen) WEAKFUC;
 
 RTS_API rtError_t rtMemQueueGrant(int32_t devId, uint32_t qid, int32_t pid, rtMemQueueShareAttr_t *attr) WEAKFUC;
 
@@ -164,17 +164,25 @@ RTS_API rtError_t rtEschedSubmitEventSync(int32_t devId, rtEschedEventSummary_t 
 
 RTS_API rtError_t rtQueryDevpid(rtBindHostpidInfo_t *info, pid_t *devPid) WEAKFUC;
 
-RTS_API rtError_t rtMBuffInit(rtMemBuffCfg_t *cfg) WEAKFUC;
+RTS_API rtError_t rtMbufInit(rtMemBuffCfg_t *cfg) WEAKFUC;
 
-RTS_API rtError_t rtMBuffAlloc(rtMbufPtr_t *mbuf, uint64_t size) WEAKFUC;
+RTS_API rtError_t rtMbufAlloc(rtMbufPtr_t *mbuf, uint64_t size) WEAKFUC;
 
-RTS_API rtError_t rtMBuffFree(rtMbufPtr_t mbuf) WEAKFUC;
+RTS_API rtError_t rtMbufFree(rtMbufPtr_t mbuf) WEAKFUC;
 
 RTS_API rtError_t rtMbufGetBuffAddr(rtMbufPtr_t mbuf, void **databuf) WEAKFUC;
 
 RTS_API rtError_t rtMbufGetBuffSize(rtMbufPtr_t mbuf, uint64_t *size) WEAKFUC;
 
 RTS_API rtError_t rtMbufGetPrivInfo(rtMbufPtr_t mbuf, void **priv, uint64_t *size) WEAKFUC;
+
+RTS_API rtError_t rtGrpCreate(const char *name) WEAKFUC;
+
+RTS_API rtError_t rtGrpAddProc(const char *name, int pid) WEAKFUC;
+
+RTS_API rtError_t rtGrpAttach(const char *name, int timeout) WEAKFUC;
+
+RTS_API rtError_t rtGrpQuery(const char *name, int timeout) WEAKFUC;
 
 #if defined(__cplusplus) && !defined(COMPILE_OMG_PACKAGE)
 }

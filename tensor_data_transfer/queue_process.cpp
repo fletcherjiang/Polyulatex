@@ -17,36 +17,12 @@
 namespace acl {
     aclError QueueProcessor::acltdtCreateQueue(const acltdtQueueAttr *attr, uint32_t *qid)
     {
-        ACL_LOG_INFO("Start to acltdtCreateQueue");
-        ACL_REQUIRES_NOT_NULL(qid);
-        ACL_REQUIRES_NOT_NULL(attr);
-        int32_t deviceId = 0;
-        rtError_t rtRet = RT_ERROR_NONE;
-        if (1) {
-            rtRet = rtGetDevice(&deviceId);
-            if (rtRet != ACL_SUCCESS) {
-                ACL_LOG_CALL_ERROR("[Get][DeviceId]fail to get deviceId result = %d", rtRet);
-                return rtRet;
-            }
-        }
-        static bool isQueueIint = false;
-        if (!isQueueIint) {
-            ACL_LOG_INFO("need to init queue once");
-            ACL_REQUIRES_CALL_RTS_OK(rtMemQueueInit(deviceId), rtMemQueueInit);
-        }
-        ACL_REQUIRES_CALL_RTS_OK(rtMemQueueCreate(deviceId, attr, qid), rtMemQueueCreate);
-        //TODO ccpu上需要给cp加权限
-        ACL_LOG_INFO("Successfully to execute acltdtCreateQueue, qid is %u", *qid);
+
         return ACL_SUCCESS;
     }
 
     aclError QueueProcessor::acltdtDestroyQueue(uint32_t qid)
     {
-        std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl);
-        int32_t deviceId = 0;
-        GET_CURRENT_DEVICE_ID(deviceId);
-        // TODO 有绑定结果需要报错
-        ACL_REQUIRES_CALL_RTS_OK(rtMemQueueDestroy(deviceId, qid), rtMemQueueDestroy);
         return ACL_SUCCESS;
     }
 
@@ -80,19 +56,43 @@ namespace acl {
         return ACL_SUCCESS;
     }
 
-    aclError QueueProcessor::GetDstInfo(int32_t deviceId, bool isDevice, pid_t &dstPid)
+    aclError QueueProcessor::GetQueuePermission(int32_t deviceId, uint32_t qid, rtMemQueueShareAttr_t &permission)
+    {
+        if (rtMemQueueQuery(deviceId, RT_MQ_QUERY_QUE_ATTR_OF_CUR_PROC,
+            &qid, sizeof(qid), &permission, sizeof(permission)) != RT_ERROR_NONE) {
+                ACL_LOG_INNER_ERROR("get queue permission failed");
+                return ACL_ERROR_FAILURE;
+            }
+        return ACL_SUCCESS;
+    }
+
+    bool QueueProcessor::HasQueuePermission(rtMemQueueShareAttr_t &permission) 
+    {
+        return (permission.manage) || (permission.read) || (permission.write);
+    }
+
+    aclError QueueProcessor::GetDstInfo(int32_t deviceId, PID_QUERY_TYPE type, pid_t &dstPid)
     {
         rtBindHostpidInfo_t info = {0};
         info.hostPid = mmGetPid();
-        info.cpType = isDevice ? : RT_DEV_PROCESS_QS, RT_DEV_PROCESS_CP1;
+        if (type == CP_PID) {
+            info.cpType = RT_DEV_PROCESS_CP1;
+        } else {
+            info.cpType = RT_DEV_PROCESS_QS;
+        }
         info.chipId = deviceId;
         ACL_REQUIRES_CALL_RTS_OK(rtQueryDevpid(&info, &dstPid), rtQueryDevpid);
     }
 
-    aclError AllocBuf(void *devPtr, size_t size, bool isMbuf)
+    aclError AllocBuf(void *devPtr, void *mBuf, size_t size, bool isMbuf)
     {
         if (isMbuf) {
-            ACL_REQUIRES_CALL_RTS_OK(rtMBuffAlloc(&devPtr, size), rtMBuffAlloc);
+            ACL_REQUIRES_CALL_RTS_OK(rtMbufAlloc(&mBuf, size), rtMbufAlloc);
+            if (rtMbufGetBuffAddr(mBuf, &devPtr) != RT_ERROR_NONE) {
+                (void)rtMbufFree(mBuf);
+                ACL_LOG_INNER_ERROR("[Get][mbuf]get mbuf failed.");
+                return ACL_ERROR_BAD_ALLOC;
+            }
         } else {
             uint32_t flags = RT_MEMORY_DEFAULT | RT_MEMORY_POLICY_DEFAULT_PAGE_ONLY;
             ACL_REQUIRES_CALL_RTS_OK(rtMalloc(&devPtr, size, flags), rtMalloc);
@@ -100,10 +100,10 @@ namespace acl {
         return ACL_SUCCESS;
     }
 
-    void FreeBuf(void *devPtr, bool isMbuf)
+    void FreeBuf(void *devPtr, void *mbuf, bool isMbuf)
     {
         if (isMbuf) {
-            ;//(void)rtMBuffFree(devPtr);
+            (void)rtMbufFree(mbuf);
         } else {
             (void)rtFree(devPtr);
         }
@@ -138,7 +138,8 @@ namespace acl {
         // send bind or unbind msg
         size_t routeSize = qRouteList->routeList.size() * sizeof(bqs::QueueRoute);
         void *devPtr = nullptr;
-        ACL_REQUIRES_OK(AllocBuf(devPtr, routeSize, isMbuffAlloc));
+        void *mBuf = nullptr;
+        ACL_REQUIRES_OK(AllocBuf(devPtr, mBuf, routeSize, isMbuffAlloc));
         size_t offset = 0;
         for (size_t i = 0; i < qRouteList->routeList.size(); ++i) {
             bqs::QueueRoute *tmp = reinterpret_cast<bqs::QueueRoute *>(static_cast<uint8_t *>(devPtr) + offset);
@@ -149,7 +150,7 @@ namespace acl {
         if (isMbuffAlloc) {
             // device need to use mbuff
             if (rtMemQueueEnQueue(deviceId, qsContactId_, devPtr) != RT_ERROR_NONE) {
-                FreeBuf(devPtr, isMbuffAlloc);
+                FreeBuf(devPtr, mBuf, isMbuffAlloc);
             }
         }
         bqs::QueueRouteList bqsBindUnbindMsg = {0};
@@ -172,7 +173,7 @@ namespace acl {
         } else {
             ACL_LOG_CALL_ERROR("[Call][Rts]call rts api rtEschedSubmitEventSync failed.");
         }
-        FreeBuf(devPtr, isMbuffAlloc);
+        FreeBuf(devPtr, mBuf, isMbuffAlloc);
         return ret;
     }
 
@@ -209,11 +210,12 @@ namespace acl {
         ACL_LOG_INFO("start to query queue route %zu", routeNum);
         size_t routeSize = routeNum * sizeof(bqs::QueueRoute);
         void *devPtr = nullptr;
-        ACL_REQUIRES_OK(AllocBuf(devPtr, routeSize, isMbufAlloc));
+        void *mBuf = nullptr;
+        ACL_REQUIRES_OK(AllocBuf(devPtr, mBuf, routeSize, isMbufAlloc));
         if (isMbufAlloc) {
             // device need to use mbuff
             if (rtMemQueueEnQueue(deviceId, qsContactId_, devPtr) != RT_ERROR_NONE) {
-                FreeBuf(devPtr, isMbufAlloc);
+                FreeBuf(devPtr, mBuf, isMbufAlloc);
             }
         }
 
@@ -232,7 +234,7 @@ namespace acl {
         eventSum.msgLen = 0;
         eventSum.msg = nullptr;
         if (ret != RT_ERROR_NONE) {
-            FreeBuf(devPtr, isMbufAlloc);
+            FreeBuf(devPtr, mBuf, isMbufAlloc);
             return ret;
         }
         size_t offset = 0;
@@ -242,7 +244,7 @@ namespace acl {
             qRouteList->routeList.push_back(tmpQueueRoute);
             offset += sizeof(bqs::QueueRoute);
         }
-        FreeBuf(devPtr, isMbufAlloc);
+        FreeBuf(devPtr, mBuf, isMbufAlloc);
         ACL_LOG_INFO("Successfully to execute acltdtQueryQueueRoutes, queue route is %zu", qRouteList->routeList.size());
         return ACL_SUCCESS;
     }

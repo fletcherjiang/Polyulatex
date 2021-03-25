@@ -23,6 +23,11 @@ typedef struct QueueDataMutex {
     std::mutex muForDequeue;
 } QueueDataMutex;
 
+enum PID_QUERY_TYPE {
+    CP_PID,
+    QS_PID
+};
+
 using QueueDataMutexPtr = std::shared_ptr<QueueDataMutex>;
 
 class QueueProcessor
@@ -63,8 +68,9 @@ public:
                                                rtEschedEventReply_t &ack);
 
     aclError SendConnectQsMsg(int32_t devieId, rtEschedEventSummary_t &eventSum, rtEschedEventReply_t &ack);
-    aclError GetDstInfo(int32_t deviceId, bool isDevice, pid_t &dstPid);
-
+    aclError GetDstInfo(int32_t deviceId, PID_QUERY_TYPE type, pid_t &dstPid);
+    bool HasQueuePermission(rtMemQueueShareAttr_t &permission);
+    aclError GetQueuePermission(int32_t deviceId, uint32_t qid, rtMemQueueShareAttr_t &permission);
     aclError GetQueueRouteNum(const acltdtQueueRouteQueryInfo *queryInfo,
                                                           int32_t deviceId,
                                                           rtEschedEventSummary_t &eventSum,

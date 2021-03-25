@@ -222,6 +222,7 @@ set(SRC_LIST
     tensor_data_transfer/queue_process.cpp
     tensor_data_transfer/queue_process_host.cpp
     tensor_data_transfer/queue_process_mdc.cpp
+    tensor_data_transfer/queue_process_ccpu.cpp
 )
 
 ############ libascendcl.so ############

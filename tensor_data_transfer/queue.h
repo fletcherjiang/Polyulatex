@@ -51,7 +51,7 @@ struct acltdtQueueRouteList {
 };
 
 struct acltdtQueueRouteQueryInfo {
-    acltdtQueueRouteQueryMode mode;
+    int32_t mode;
     uint32_t srcId;
     uint32_t dstId;
 };

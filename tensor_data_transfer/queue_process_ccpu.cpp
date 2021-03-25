@@ -1,5 +1,5 @@
 /**
-* @file queue_process_mdc.cpp
+* @file queue_process_ccpu.cpp
 *
 * Copyright (C) Huawei Technologies Co., Ltd. 2019-2020. All Rights Reserved.
 *
@@ -7,7 +7,7 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
-#include "queue_process_mdc.h"
+#include "queue_process_ccpu.h"
 #include "log_inner.h"
 #include "runtime/mem.h"
 #include "runtime/rt_mem_queue.h"
@@ -15,22 +15,7 @@
 #include "aicpu/queue_schedule/qs_client.h"
 
 namespace acl {
-
-    aclError QueueProcessorMdc::GrantQueue2Cp(int32_t deviceId, uint32_t qid)
-    {
-        pid_t cpPid;
-        // if cp is found
-        if (GetDstInfo(deviceId, CP_PID, cpPid) == ACL_SUCCESS) {
-            rtMemQueueShareAttr_t permission = {0};
-            ACL_REQUIRES_CALL_RTS_OK(GetQueuePermission(deviceId, qid, permission), GetQueuePermission);
-            if (HasQueuePermission(permission)) {
-                ACL_REQUIRES_CALL_RTS_OK(rtMemQueueGrant(deviceId, qid, cpPid, &permission), rtMemQueueGrant);
-            }
-        }
-        return ACL_SUCCESS;
-    }
-
-    aclError QueueProcessorMdc::acltdtCreateQueue(const acltdtQueueAttr *attr, uint32_t *qid)
+    aclError QueueProcessorCcpu::acltdtCreateQueue(const acltdtQueueAttr *attr, uint32_t *qid)
     {
         ACL_LOG_INFO("Start to acltdtCreateQueue");
         ACL_REQUIRES_NOT_NULL(qid);
@@ -42,20 +27,11 @@ namespace acl {
             ACL_REQUIRES_CALL_RTS_OK(rtMemQueueInit(deviceId), rtMemQueueInit);
         }
         ACL_REQUIRES_CALL_RTS_OK(rtMemQueueCreate(deviceId, attr, qid), rtMemQueueCreate);
-        pid_t cpPid;
-        if (GetDstInfo(deviceId, CP_PID, cpPid) == ACL_SUCCESS) {
-            ACL_LOG_INFO("get cp pid %d", cpPid);
-            rtMemQueueShareAttr_t attr = {0};
-            attr.read = 1;
-            attr.manage = 1;
-            attr.write = 1;
-            ACL_REQUIRES_CALL_RTS_OK(rtMemQueueGrant(deviceId, *qid, cpPid, &attr), rtMemQueueGrant);
-        }
         ACL_LOG_INFO("Successfully to execute acltdtCreateQueue, qid is %u", *qid);
         return ACL_SUCCESS;
     }
 
-    aclError QueueProcessorMdc::acltdtDestroyQueue(uint32_t qid)
+    aclError QueueProcessorCcpu::acltdtDestroyQueue(uint32_t qid)
     {
         std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl);
         int32_t deviceId = 0;
@@ -84,7 +60,7 @@ namespace acl {
         return ACL_SUCCESS;
     }
 
-    aclError QueueProcessorMdc::acltdtEnqueueBuf(uint32_t qid, acltdtBuf *buf, int32_t timeout)
+    aclError QueueProcessorCcpu::acltdtEnqueueBuf(uint32_t qid, acltdtBuf *buf, int32_t timeout)
     {
         ACL_REQUIRES_NOT_NULL(buf);
         int32_t deviceId = 0;
@@ -96,7 +72,7 @@ namespace acl {
         return ACL_SUCCESS;
     }
 
-    aclError QueueProcessorMdc::acltdtDequeueBuf(uint32_t qid, acltdtBuf *buf, int32_t timeout)
+    aclError QueueProcessorCcpu::acltdtDequeueBuf(uint32_t qid, acltdtBuf *buf, int32_t timeout)
     {
         ACL_REQUIRES_NOT_NULL(buf);
         int32_t deviceId = 0;
@@ -108,52 +84,54 @@ namespace acl {
         return ACL_SUCCESS;
     }
 
-    aclError QueueProcessorMdc::acltdtGrantQueue(uint32_t qid, int32_t pid, uint32_t permission, int32_t timeout)
+    aclError QueueProcessorCcpu::acltdtGrantQueue(uint32_t qid, int32_t pid, uint32_t permission, int32_t timeout)
     {
-        ACL_LOG_INFO("start to acltdtGrantQueue, qid is %u, pid is %d, permisiion is %u, timeout is %d",
-                     qid, pid, permission, timeout);
         int32_t deviceId = 0;
+        uint64_t startTime = GetTimestamp();
+        uint64_t endTime = 0;
         rtMemQueueShareAttr_t attr = {0};
         attr.manage = permission & ACL_TDTQUEUE_PERMISSION_MANAGER;
         attr.read = permission & ACL_TDTQUEUE_PERMISSION_READ;
         attr.write = permission & ACL_TDTQUEUE_PERMISSION_WRITE;
-        ACL_REQUIRES_CALL_RTS_OK(rtMemQueueGrant(deviceId, qid, pid, &attr), rtMemQueueGrant);
-        ACL_LOG_INFO("successfully execute acltdtGrantQueue, qid is %u, pid is %d, permisiion is %u, timeout is %d",
-                     qid, pid, permission, timeout);
+        do {
+            auto ret = rtMemQueueGrant(deviceId, qid, pid, &attr);
+            if (ret == RT_ERROR_NONE) {
+                return ACL_SUCCESS;
+            } else if (ret != 11111) {// 不需要重试?
+                return ret;
+            }
+            endTime = GetTimestamp();
+        } while ((endTime - startTime >= (static_cast<uint64_t>(timeout) * 10000)));
         return ACL_SUCCESS;
     }
 
-    aclError QueueProcessorMdc::acltdtAttachQueue(uint32_t qid, int32_t timeout, uint32_t *permission)
+    aclError QueueProcessorCcpu::acltdtAttachQueue(uint32_t qid, int32_t timeout, uint32_t *permission)
     {
-        ACL_LOG_INFO("start to acltdtGrantQueue, qid is %u, permisiion is %u, timeout is %d",
-                     qid, *permission, timeout);
         ACL_REQUIRES_NOT_NULL(permission);
         int32_t deviceId = 0;
         ACL_REQUIRES_CALL_RTS_OK(rtMemQueueAttach(deviceId, qid, timeout), rtMemQueueAttach);
-        (void)GrantQueue2Cp(deviceId, qid);
-        ACL_LOG_INFO("successfully execute acltdtGrantQueue, qid is %u, permisiion is %u, timeout is %d",
-                     qid, *permission, timeout);
+        // 查询queue权限
+        // 查询有cp则授权Q权限
+        // pid_t cpPid;
+        // rtBindHostpidInfo_t info = {0};
+        // info.hostPid = mmGetPid();
+        // info.cpType = RT_DEV_PROCESS_CP1;
+        // info.chipId = deviceId;
+        // if (rtQueryDevpid(&info, &cpPid) == RT_ERROR_NONE) {
+
+        // }
         return ACL_SUCCESS;
     }
 
-    aclError QueueProcessorMdc::acltdtBindQueueRoutes(acltdtQueueRouteList *qRouteList)
+    aclError QueueProcessorCcpu::acltdtBindQueueRoutes(acltdtQueueRouteList *qRouteList)
     {
         ACL_REQUIRES_NOT_NULL(qRouteList);
         ACL_LOG_INFO("Start to acltdtBindQueueRoutes, queue route is %zu", qRouteList->routeList.size());
+        // qs is thread mode, so no need to grant queue to qs
         int32_t deviceId = 0;
         // get dst id
         pid_t dstPid;
         ACL_REQUIRES_OK(GetDstInfo(deviceId, QS_PID, dstPid));
-        for (size_t i = 0; i < qRouteList->routeList.size(); ++i) {
-            rtMemQueueShareAttr_t attrSrc = {0};
-            attrSrc.read = 1;
-            rtMemQueueShareAttr_t attrDst = {0};
-            attrSrc.write = 1;
-            ACL_REQUIRES_CALL_RTS_OK(rtMemQueueGrant(deviceId, qRouteList->routeList[i].srcId, dstPid, &attrSrc),
-                                     rtMemQueueGrant);
-            ACL_REQUIRES_CALL_RTS_OK(rtMemQueueGrant(deviceId, qRouteList->routeList[i].dstId, dstPid, &attrDst),
-                                     rtMemQueueGrant);
-        }
         rtEschedEventSummary_t eventSum = {0};
         rtEschedEventReply_t ack = {0};
         bqs::QsProcMsgRsp qsRsp = {0};
@@ -172,7 +150,7 @@ namespace acl {
         return ACL_SUCCESS;
     }
 
-    aclError QueueProcessorMdc::acltdtUnbindQueueRoutes(acltdtQueueRouteList *qRouteList)
+    aclError QueueProcessorCcpu::acltdtUnbindQueueRoutes(acltdtQueueRouteList *qRouteList)
     {
         ACL_REQUIRES_NOT_NULL(qRouteList);
         ACL_LOG_INFO("Start to acltdtUnBindQueueRoutes, queue route is %zu", qRouteList->routeList.size());
@@ -194,7 +172,7 @@ namespace acl {
         return ACL_SUCCESS;
     }
 
-    aclError QueueProcessorMdc::acltdtQueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo, acltdtQueueRouteList *qRouteList)
+    aclError QueueProcessorCcpu::acltdtQueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo, acltdtQueueRouteList *qRouteList)
     {
         ACL_REQUIRES_NOT_NULL(queryInfo);
         ACL_REQUIRES_NOT_NULL(qRouteList);
@@ -220,6 +198,10 @@ namespace acl {
 
     acltdtBuf* acltdtCreateBuf(size_t size)
     {
+        // if (!HasGroup) {
+        //     creategrp;
+        //     addgrp;
+        // }
         rtMbufPtr_t buf = nullptr;
         rtError_t rtRet = rtMbufAlloc(&buf, size);
         if (rtRet != RT_ERROR_NONE) {
