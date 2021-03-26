@@ -154,7 +154,7 @@ RTS_API rtError_t rtMemQueueEnQueueBuf(int32_t devId, uint32_t qid, rtMemQueueBu
 RTS_API rtError_t rtMemQueueDeQueueBuf(int32_t devId, uint32_t qid, rtMemQueueBuff_t *outBuf, int32_t timeout) WEAKFUC;
 
 RTS_API rtError_t rtMemQueueQuery(int32_t devId, rtMemQueueQueryCmd_t cmd, void *inBuff, uint32_t inLen,
-                                  void *outBuff, uint32_t outLen) WEAKFUC;
+                                  void *outBuff, uint32_t *outLen) WEAKFUC;
 
 RTS_API rtError_t rtMemQueueGrant(int32_t devId, uint32_t qid, int32_t pid, rtMemQueueShareAttr_t *attr) WEAKFUC;
 
