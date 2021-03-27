@@ -60,10 +60,10 @@ namespace acl {
     {
         uint32_t outLen = sizeof(permission);
         if (rtMemQueueQuery(deviceId, RT_MQ_QUERY_QUE_ATTR_OF_CUR_PROC,
-            &qid, sizeof(qid), &permission, &outLen) != RT_ERROR_NONE) {
-                ACL_LOG_INNER_ERROR("get queue permission failed");
-                return ACL_ERROR_FAILURE;
-            }
+                            &qid, sizeof(qid), &permission, &outLen) != RT_ERROR_NONE) {
+            ACL_LOG_INNER_ERROR("get queue permission failed");
+            return ACL_ERROR_FAILURE;
+        }
         return ACL_SUCCESS;
     }
 

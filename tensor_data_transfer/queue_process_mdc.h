@@ -39,6 +39,14 @@ public:
     aclError acltdtQueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo,
                                                         acltdtQueueRouteList *qRouteList);
 
+    acltdtBuf* acltdtCreateBuf(size_t size);
+
+    aclError acltdtDestroyBuf(acltdtBuf *buf);
+
+    aclError acltdtGetBufData(const acltdtBuf *buf, void **dataPtr, size_t *size);
+
+    aclError acltdtGetBufPrivData(const acltdtBuf *buf, void **privBuf, size_t *size);
+
 
     QueueProcessorMdc() = default;
     ~QueueProcessorMdc() = default;

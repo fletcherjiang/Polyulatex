@@ -218,7 +218,7 @@ namespace acl {
         return ACL_SUCCESS;
     }
 
-    acltdtBuf* acltdtCreateBuf(size_t size)
+    acltdtBuf* QueueProcessorMdc::acltdtCreateBuf(size_t size)
     {
         rtMbufPtr_t buf = nullptr;
         rtError_t rtRet = rtMbufAlloc(&buf, size);
@@ -229,7 +229,7 @@ namespace acl {
         return new(std::nothrow) acltdtBuf(buf);
     }
 
-    aclError acltdtDestroyBuf(acltdtBuf *buf)
+    aclError QueueProcessorMdc::acltdtDestroyBuf(acltdtBuf *buf)
     {
         if (buf == nullptr) {
             return ACL_SUCCESS;
@@ -245,7 +245,7 @@ namespace acl {
         return ACL_SUCCESS;
     }
 
-    aclError acltdtGetBufData(const acltdtBuf *buf, void **dataPtr, size_t *size)
+    aclError QueueProcessorMdc::acltdtGetBufData(const acltdtBuf *buf, void **dataPtr, size_t *size)
     {
         ACL_REQUIRES_NOT_NULL(buf);
         ACL_REQUIRES_NOT_NULL(dataPtr);
@@ -255,7 +255,7 @@ namespace acl {
         return ACL_SUCCESS;
     }
 
-    aclError acltdtGetBufPrivData(const acltdtBuf *buf, void **privBuf, size_t *size)
+    aclError QueueProcessorMdc::acltdtGetBufPrivData(const acltdtBuf *buf, void **privBuf, size_t *size)
     {
         ACL_REQUIRES_NOT_NULL(buf);
         ACL_REQUIRES_NOT_NULL(privBuf);

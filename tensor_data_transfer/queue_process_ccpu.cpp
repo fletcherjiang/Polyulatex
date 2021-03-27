@@ -196,7 +196,7 @@ namespace acl {
         return ACL_SUCCESS;
     }
 
-    acltdtBuf* acltdtCreateBuf(size_t size)
+    acltdtBuf* QueueProcessorCcpu::acltdtCreateBuf(size_t size)
     {
         // if (!HasGroup) {
         //     creategrp;
@@ -211,7 +211,7 @@ namespace acl {
         return new(std::nothrow) acltdtBuf(buf);
     }
 
-    aclError acltdtDestroyBuf(acltdtBuf *buf)
+    aclError QueueProcessorCcpu::acltdtDestroyBuf(acltdtBuf *buf)
     {
         if (buf == nullptr) {
             return ACL_SUCCESS;
@@ -227,7 +227,7 @@ namespace acl {
         return ACL_SUCCESS;
     }
 
-    aclError acltdtGetBufData(const acltdtBuf *buf, void **dataPtr, size_t *size)
+    aclError QueueProcessorCcpu::acltdtGetBufData(const acltdtBuf *buf, void **dataPtr, size_t *size)
     {
         ACL_REQUIRES_NOT_NULL(buf);
         ACL_REQUIRES_NOT_NULL(dataPtr);
@@ -237,7 +237,7 @@ namespace acl {
         return ACL_SUCCESS;
     }
 
-    aclError acltdtGetBufPrivData(const acltdtBuf *buf, void **privBuf, size_t *size)
+    aclError QueueProcessorCcpu::acltdtGetBufPrivData(const acltdtBuf *buf, void **privBuf, size_t *size)
     {
         ACL_REQUIRES_NOT_NULL(buf);
         ACL_REQUIRES_NOT_NULL(privBuf);

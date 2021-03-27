@@ -14,8 +14,8 @@
  * limitations under the License.
 */
 
-#ifndef CCE_RUNTIME_MEM_QUEUE_H
-#define CCE_RUNTIME_MEM_QUEUE_H
+#ifndef __CCE_RUNTIME_MEM_QUEUE_H
+#define __CCE_RUNTIME_MEM_QUEUE_H
 #include <sys/types.h>
 #include "base.h"
 
