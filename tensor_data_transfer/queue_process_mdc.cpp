@@ -68,7 +68,7 @@ namespace acl {
             bqs::QsProcMsgRsp qsRsp = {0};
             eventSum.pid = dstPid;
             eventSum.grpId = bqs::BINDQUEUEGRPID;
-            eventSum.eventId = 222222; //qs EVENT_ID
+            eventSum.eventId = 25; //qs EVENT_ID
             eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
             ack.buf = reinterpret_cast<char *>(&qsRsp);
             ack.bufLen = sizeof(qsRsp);
@@ -159,7 +159,7 @@ namespace acl {
         bqs::QsProcMsgRsp qsRsp = {0};
         eventSum.pid = dstPid;
         eventSum.grpId = bqs::BINDQUEUEGRPID;
-        eventSum.eventId = 222222; //qs EVENT_ID
+        eventSum.eventId = 25; //qs EVENT_ID
         eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
         ack.buf = reinterpret_cast<char *>(&qsRsp);
         ack.bufLen = sizeof(qsRsp);
@@ -185,7 +185,7 @@ namespace acl {
         bqs::QsProcMsgRsp qsRsp = {0};
         eventSum.pid = dstPid;
         eventSum.grpId = bqs::BINDQUEUEGRPID;
-        eventSum.eventId = 222222; //drv EVENT_ID
+        eventSum.eventId = 25; //drv EVENT_ID
         eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
         ack.buf = reinterpret_cast<char *>(&qsRsp);
         ack.bufLen = sizeof(qsRsp);
@@ -208,7 +208,7 @@ namespace acl {
         bqs::QsProcMsgRsp qsRsp = {0};
         eventSum.pid = dstPid;
         eventSum.grpId = bqs::BINDQUEUEGRPID;
-        eventSum.eventId = 222222; //qs EVENT_ID
+        eventSum.eventId = 25; //qs EVENT_ID
         eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
         ack.buf = reinterpret_cast<char *>(&qsRsp);
         ack.bufLen = sizeof(qsRsp);
