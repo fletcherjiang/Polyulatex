@@ -258,17 +258,17 @@ if(NOT ENABLE_OPEN_SRC)
     ${TOP_DIR}/inc/driver
     ${TOP_DIR}/abl/msprof/inc
     ${TOP_DIR}/ace/npuruntime/inc
-else()
-    ${BASE_DIR}/third_party/inc/
-    ${BASE_DIR}/third_party/inc/metadef/inc
-    ${BASE_DIR}/third_party/inc/graphengine/inc
-    ${BASE_DIR}/third_party/inc/graphengine/inc/framework
-    ${BASE_DIR}/third_party/inc/metadef/inc/external
-    ${BASE_DIR}/third_party/inc/graphengine/inc/external
-    ${BASE_DIR}/third_party/inc/toolchain/ide/ide-daemon/external
-    ${BASE_DIR}/third_party/inc/driver
-    ${BASE_DIR}/third_party/inc/aicpu
-endif()
+
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/aicpu>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/metadef/inc>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/graphengine/inc>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/graphengine/inc/framework>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/metadef/inc/external>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/graphengine/inc/external>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/toolchain/ide/ide-daemon/external>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/driver>
+
     ${BASE_DIR}/inc/external
     ${BASE_DIR}/inc
     ${BASE_DIR}
