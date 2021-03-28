@@ -19,7 +19,6 @@
 
 // 最后需要排查rprofling统计，大小阶段，错误日志上报
 namespace {
-    RunEnv RUN_ENV = ENV_UNKNOWN;
     aclError CopyParam(const void *src, size_t srcLen, void *dst, size_t dstLen, size_t *realCopySize = nullptr)
     {
         ACL_REQUIRES_NOT_NULL(src);
@@ -53,10 +52,10 @@ uint64_t GetTimestamp()
     return total_use_time;
 }
 
-aclError GetRunningEnv()
+aclError GetRunningEnv(RunEnv &runEnv)
 {
     // get acl run mode
-    if (RUN_ENV != ENV_UNKNOWN) {
+    if (runEnv != ENV_UNKNOWN) {
         return ACL_SUCCESS;
     }
     aclrtRunMode aclRunMode;
@@ -66,14 +65,14 @@ aclError GetRunningEnv()
         return getRunModeRet;
     }
     if (aclRunMode == ACL_HOST) {
-        RUN_ENV = ENV_HOST;
+        runEnv = ENV_HOST;
     } else if (aclRunMode == ACL_DEVICE) {
         // get env config
         const char *sharePoolPreConfig = std::getenv("SHAREGROUP_PRECONFIG");
         if (sharePoolPreConfig == nullptr) {
-            RUN_ENV = ENV_DEVICE_DEFAULT;
+            runEnv = ENV_DEVICE_DEFAULT;
         } else {
-            RUN_ENV = ENV_DEVICE_MDC;
+            runEnv = ENV_DEVICE_MDC;
         }
     } else {
         ACL_LOG_INNER_ERROR("[Get][RunMode]get run mode failed, result = %d.", getRunModeRet);
