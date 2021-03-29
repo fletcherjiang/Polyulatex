@@ -257,6 +257,8 @@ if(NOT ENABLE_OPEN_SRC)
     ${TOP_DIR}/abl/adump/external
     ${TOP_DIR}/inc/driver
     ${TOP_DIR}/abl/msprof/inc
+    ${TOP_DIR}/abl/mmpa/inc
+    ${TOP_DIR}/abl/slog/inc
     ${TOP_DIR}/ace/npuruntime/inc
 
     $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/>
