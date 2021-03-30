@@ -83,6 +83,7 @@ namespace acl {
         }
         info.chipId = deviceId;
         ACL_REQUIRES_CALL_RTS_OK(rtQueryDevpid(&info, &dstPid), rtQueryDevpid);
+        ACL_LOG_INFO("get dst pid %d success, type is %d", dstPid, type);
     }
 
     aclError AllocBuf(void *devPtr, void *mBuf, size_t size, bool isMbuf)

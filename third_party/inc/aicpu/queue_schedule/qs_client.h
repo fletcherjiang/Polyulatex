@@ -29,7 +29,7 @@ enum QueueSubEventType {
     ACL_QUERY_QUEUE_NUM
 };
 
-enum BQSQueryType {
+enum QsQueryType {
     BQS_QUERY_TYPE_SRC,
     BQS_QUERY_TYPE_DST,
     BQS_QUERY_TYPE_SRC_AND_DST,

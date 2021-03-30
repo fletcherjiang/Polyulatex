@@ -277,7 +277,7 @@ typedef struct acltdtQueueRoute acltdtQueueRoute;
 
 #define ACL_TDTQUEUE_PERMISSION_MANAGER 1
 #define ACL_TDTQUEUE_PERMISSION_READ 2
-#define ACL_TDTQUEUE_PERMISSION_WRITE 2
+#define ACL_TDTQUEUE_PERMISSION_WRITE 4
 
 
 enum acltdtQueueAttrType {
