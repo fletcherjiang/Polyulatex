@@ -37,7 +37,7 @@ public:
 
     virtual aclError acltdtDestroyQueue(uint32_t queueId);
 
-    virtual aclError acltdtEnqueueBuf(uint32_t queueId, acltdtBuf *buf, int32_t timeout);
+    virtual aclError acltdtEnqueueBuf(uint32_t queueId, acltdtBuf buf, int32_t timeout);
 
     virtual aclError acltdtDequeueBuf(uint32_t queueId, acltdtBuf *buf, int32_t timeout);
 
@@ -52,13 +52,13 @@ public:
     virtual aclError acltdtQueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo,
                                                         acltdtQueueRouteList *qRouteList);
 
-    virtual acltdtBuf* acltdtCreateBuf(size_t size);
+    virtual aclError acltdtAllocBuf(size_t size, acltdtBuf *buf);
 
-    virtual aclError acltdtDestroyBuf(acltdtBuf *buf);
+    virtual aclError acltdtFreeBuf(acltdtBuf buf);
 
-    virtual aclError acltdtGetBufData(const acltdtBuf *buf, void **dataPtr, size_t *size);
+    virtual aclError acltdtGetBufData(const acltdtBuf buf, void **dataPtr, size_t *size);
 
-    virtual aclError acltdtGetBufPrivData(const acltdtBuf *buf, void **privBuf, size_t *size);
+    virtual aclError acltdtGetBufPrivData(const acltdtBuf buf, void **privBuf, size_t *size);
 
     aclError SendBindUnbindMsg(acltdtQueueRouteList *qRouteList,
                                                int32_t devieId,

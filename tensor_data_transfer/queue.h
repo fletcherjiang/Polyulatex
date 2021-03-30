@@ -37,15 +37,6 @@ enum RunEnv {
     ENV_DEVICE_MDC = 2,
 };
 
-struct acltdtBuf {
-    acltdtBuf(rtMbufPtr_t buf) 
-    {
-        mbuf = buf;
-    }
-    ~acltdtBuf() = default;
-    rtMbufPtr_t mbuf;
-};
-
 struct acltdtQueueRouteList {
     std::vector<acltdtQueueRoute> routeList;
 };

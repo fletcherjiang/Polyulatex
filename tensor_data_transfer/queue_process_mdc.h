@@ -22,7 +22,7 @@ public:
 
     aclError acltdtDestroyQueue(uint32_t queueId);
 
-    aclError acltdtEnqueueBuf(uint32_t queueId, acltdtBuf *buf, int32_t timeout);
+    aclError acltdtEnqueueBuf(uint32_t queueId, acltdtBuf buf, int32_t timeout);
 
     aclError acltdtDequeueBuf(uint32_t queueId, acltdtBuf *buf, int32_t timeout);
 
@@ -39,13 +39,13 @@ public:
     aclError acltdtQueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo,
                                                         acltdtQueueRouteList *qRouteList);
 
-    acltdtBuf* acltdtCreateBuf(size_t size);
+    aclError acltdtAllocBuf(size_t size, acltdtBuf *buf);
 
-    aclError acltdtDestroyBuf(acltdtBuf *buf);
+    aclError acltdtFreeBuf(acltdtBuf buf);
 
-    aclError acltdtGetBufData(const acltdtBuf *buf, void **dataPtr, size_t *size);
+    aclError acltdtGetBufData(const acltdtBuf buf, void **dataPtr, size_t *size);
 
-    aclError acltdtGetBufPrivData(const acltdtBuf *buf, void **privBuf, size_t *size);
+    aclError acltdtGetBufPrivData(const acltdtBuf buf, void **privBuf, size_t *size);
 
 
     QueueProcessorMdc() = default;

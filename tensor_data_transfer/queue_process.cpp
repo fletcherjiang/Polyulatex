@@ -26,7 +26,7 @@ namespace acl {
         return ACL_SUCCESS;
     }
 
-    aclError QueueProcessor::acltdtEnqueueBuf(uint32_t qid, acltdtBuf *buf, int32_t timeout)
+    aclError QueueProcessor::acltdtEnqueueBuf(uint32_t qid, acltdtBuf buf, int32_t timeout)
     {
         ACL_LOG_ERROR("[Unsupport][Feature]acltdtEnqueueBuf is not supported in this version. Please check.");
         const char *argList[] = {"feature", "reason"};
@@ -266,27 +266,27 @@ namespace acl {
         return ACL_SUCCESS;
     }
 
-    acltdtBuf* acltdtCreateBuf(size_t size)
+    aclError acltdtAllocBuf(size_t size, acltdtBuf *buf)
     {
-        ACL_LOG_ERROR("[Unsupport][Feature]acltdtCreateBuf is not supported in this version. Please check.");
+        ACL_LOG_ERROR("[Unsupport][Feature]acltdtAllocBuf is not supported in this version. Please check.");
         const char *argList[] = {"feature", "reason"};
-        const char *argVal[] = {"acltdtCreateBuf", "please check"};
-        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
-            argList, argVal, 2);
-        return nullptr;
-    }
-
-    aclError acltdtDestroyBuf(acltdtBuf *buf)
-    {
-        ACL_LOG_ERROR("[Unsupport][Feature]acltdtDestroyBuf is not supported in this version. Please check.");
-        const char *argList[] = {"feature", "reason"};
-        const char *argVal[] = {"acltdtDestroyBuf", "please check"};
+        const char *argVal[] = {"acltdtAllocBuf", "please check"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
             argList, argVal, 2);
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
 
-    aclError acltdtGetBufData(const acltdtBuf *buf, void **dataPtr, size_t *size)
+    aclError acltdtFreeBuf(acltdtBuf buf)
+    {
+        ACL_LOG_ERROR("[Unsupport][Feature]acltdtFreeBuf is not supported in this version. Please check.");
+        const char *argList[] = {"feature", "reason"};
+        const char *argVal[] = {"acltdtFreeBuf", "please check"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
+            argList, argVal, 2);
+        return ACL_ERROR_FEATURE_UNSUPPORTED;
+    }
+
+    aclError acltdtGetBufData(const acltdtBuf buf, void **dataPtr, size_t *size)
     {
         ACL_LOG_ERROR("[Unsupport][Feature]acltdtGetBufData is not supported in this version. Please check.");
         const char *argList[] = {"feature", "reason"};
@@ -296,7 +296,7 @@ namespace acl {
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
 
-    aclError acltdtGetBufPrivData(const acltdtBuf *buf, void **privBuf, size_t *size)
+    aclError acltdtGetBufPrivData(const acltdtBuf buf, void **privBuf, size_t *size)
     {
         ACL_LOG_ERROR("[Unsupport][Feature]acltdtGetBufPrivData is not supported in this version. Please check.");
         const char *argList[] = {"feature", "reason"};

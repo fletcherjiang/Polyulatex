@@ -72,6 +72,7 @@ aclError GetRunningEnv(RunEnv &runEnv)
         if (sharePoolPreConfig == nullptr) {
             runEnv = ENV_DEVICE_DEFAULT;
         } else {
+            ACL_LOG_INFO("This is share group preconfig");
             runEnv = ENV_DEVICE_MDC;
         }
     } else {
@@ -105,7 +106,7 @@ aclError acltdtDestroyQueue(uint32_t qid)
     return ACL_SUCCESS;
 }
 
-aclError acltdtEnqueueBuf(uint32_t qid, acltdtBuf *buf, int32_t timeout)
+aclError acltdtEnqueueBuf(uint32_t qid, acltdtBuf buf, int32_t timeout)
 {
     auto& qManager = acl::QueueManager::GetInstance();
     auto processor = qManager.GetQueueProcessor();
@@ -149,7 +150,7 @@ aclError acltdtAttachQueue(uint32_t qid, int32_t timeout, uint32_t *permission)
         ACL_LOG_INNER_ERROR("[Check][Queueprocessor] queue processor is nullptr");
         return ACL_ERROR_FAILURE;
     }
-    ACL_REQUIRES_OK(processor->acltdtAttachQueue(qid, timeout, permission));
+    ACL_REQUIRES_OK(processor->acltdtAttachQueue(qid, timeout * 1000, permission));
     return ACL_SUCCESS;
 }
 
@@ -189,18 +190,7 @@ aclError acltdtQueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo, aclt
     return ACL_SUCCESS;
 }
 
-acltdtBuf* acltdtCreateBuf(size_t size)
-{
-    auto& qManager = acl::QueueManager::GetInstance();
-    auto processor = qManager.GetQueueProcessor();
-    if (processor == nullptr) {
-        ACL_LOG_INNER_ERROR("[Check][QueueScheduleprocessor] queue schedule processor is nullptr");
-        return nullptr;
-    }
-    return processor->acltdtCreateBuf(size);
-}
-
-aclError acltdtDestroyBuf(acltdtBuf *buf)
+aclError acltdtAllocBuf(size_t size, acltdtBuf *buf)
 {
     auto& qManager = acl::QueueManager::GetInstance();
     auto processor = qManager.GetQueueProcessor();
@@ -208,11 +198,22 @@ aclError acltdtDestroyBuf(acltdtBuf *buf)
         ACL_LOG_INNER_ERROR("[Check][QueueScheduleprocessor] queue schedule processor is nullptr");
         return ACL_ERROR_FAILURE;
     }
-    ACL_REQUIRES_OK(processor->acltdtDestroyBuf(buf));
+    return processor->acltdtAllocBuf(size, buf);
+}
+
+aclError acltdtFreeBuf(acltdtBuf buf)
+{
+    auto& qManager = acl::QueueManager::GetInstance();
+    auto processor = qManager.GetQueueProcessor();
+    if (processor == nullptr) {
+        ACL_LOG_INNER_ERROR("[Check][QueueScheduleprocessor] queue schedule processor is nullptr");
+        return ACL_ERROR_FAILURE;
+    }
+    ACL_REQUIRES_OK(processor->acltdtFreeBuf(buf));
     return ACL_SUCCESS;
 }
 
-aclError acltdtGetBufData(const acltdtBuf *buf, void **dataPtr, size_t *size)
+aclError acltdtGetBufData(const acltdtBuf buf, void **dataPtr, size_t *size)
 {
     auto& qManager = acl::QueueManager::GetInstance();
     auto processor = qManager.GetQueueProcessor();
@@ -224,7 +225,7 @@ aclError acltdtGetBufData(const acltdtBuf *buf, void **dataPtr, size_t *size)
     return ACL_SUCCESS;
 }
 
-aclError acltdtGetBufPrivData(const acltdtBuf *buf, void **privBuf, size_t *size)
+aclError acltdtGetBufPrivData(const acltdtBuf buf, void **privBuf, size_t *size)
 {
     auto& qManager = acl::QueueManager::GetInstance();
     auto processor = qManager.GetQueueProcessor();

@@ -270,7 +270,7 @@ ACL_FUNC_VISIBILITY aclError acltdtReceiveTensor(const acltdtChannelHandle *hand
                                                  int32_t timeout);
 
 typedef struct tagMemQueueAttr acltdtQueueAttr;
-typedef struct acltdtBuf acltdtBuf;
+typedef void *acltdtBuf;
 typedef struct acltdtQueueRouteList acltdtQueueRouteList;
 typedef struct acltdtQueueRouteQueryInfo acltdtQueueRouteQueryInfo;
 typedef struct acltdtQueueRoute acltdtQueueRoute;
@@ -307,7 +307,7 @@ ACL_FUNC_VISIBILITY aclError acltdtCreateQueue(const acltdtQueueAttr *attr, uint
 
 ACL_FUNC_VISIBILITY aclError acltdtDestroyQueue(uint32_t qid);
 
-ACL_FUNC_VISIBILITY aclError acltdtEnqueueBuf(uint32_t qid, acltdtBuf *buf, int32_t timeout);
+ACL_FUNC_VISIBILITY aclError acltdtEnqueueBuf(uint32_t qid, acltdtBuf buf, int32_t timeout);
 
 ACL_FUNC_VISIBILITY aclError acltdtDequeueBuf(uint32_t qid, acltdtBuf *buf, int32_t timeout);
 
@@ -322,13 +322,13 @@ ACL_FUNC_VISIBILITY aclError acltdtUnbindQueueRoutes(acltdtQueueRouteList *qRout
 ACL_FUNC_VISIBILITY aclError acltdtQueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo,
                                                     acltdtQueueRouteList *qRouteList);
 
-ACL_FUNC_VISIBILITY acltdtBuf* acltdtCreateBuf(size_t size);
+ACL_FUNC_VISIBILITY aclError acltdtAllocBuf(size_t size, acltdtBuf *buf);
 
-ACL_FUNC_VISIBILITY aclError acltdtDestroyBuf(acltdtBuf *buf);
+ACL_FUNC_VISIBILITY aclError acltdtFreeBuf(acltdtBuf buf);
 
-ACL_FUNC_VISIBILITY aclError acltdtGetBufData(const acltdtBuf *buf, void **dataPtr, size_t *size);
+ACL_FUNC_VISIBILITY aclError acltdtGetBufData(const acltdtBuf buf, void **dataPtr, size_t *size);
 
-ACL_FUNC_VISIBILITY aclError acltdtGetBufPrivData(const acltdtBuf *buf, void **privBuf, size_t *size);
+ACL_FUNC_VISIBILITY aclError acltdtGetBufPrivData(const acltdtBuf buf, void **privBuf, size_t *size);
 
 ACL_FUNC_VISIBILITY acltdtQueueAttr *acltdtCreateQueueAttr();
 

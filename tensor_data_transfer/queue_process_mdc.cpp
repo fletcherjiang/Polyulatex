@@ -63,6 +63,7 @@ namespace acl {
         pid_t dstPid;
         size_t routeNum = 0;
         if (GetDstInfo(deviceId, QS_PID, dstPid) == ACL_SUCCESS) {
+            ACL_LOG_INFO("find qs pid %d", dstPid);
             rtEschedEventSummary_t eventSum = {0};
             rtEschedEventReply_t ack = {0};
             bqs::QsProcMsgRsp qsRsp = {0};
@@ -84,11 +85,11 @@ namespace acl {
         return ACL_SUCCESS;
     }
 
-    aclError QueueProcessorMdc::acltdtEnqueueBuf(uint32_t qid, acltdtBuf *buf, int32_t timeout)
+    aclError QueueProcessorMdc::acltdtEnqueueBuf(uint32_t qid, acltdtBuf buf, int32_t timeout)
     {
         ACL_REQUIRES_NOT_NULL(buf);
         int32_t deviceId = 0;
-        rtError_t rtRet = rtMemQueueEnQueue(deviceId, qid, buf->mbuf);
+        rtError_t rtRet = rtMemQueueEnQueue(deviceId, qid, buf);
         if (rtRet != RT_ERROR_NONE) {
             ACL_LOG_CALL_ERROR("[Enqueue][Queue]fail to enqueue result = %d", rtRet);
             return rtRet;
@@ -100,7 +101,7 @@ namespace acl {
     {
         ACL_REQUIRES_NOT_NULL(buf);
         int32_t deviceId = 0;
-        rtError_t rtRet = rtMemQueueDeQueue(deviceId, qid, &buf->mbuf);
+        rtError_t rtRet = rtMemQueueDeQueue(deviceId, qid, buf);
         if (rtRet != RT_ERROR_NONE) {
             ACL_LOG_CALL_ERROR("[Dequeue][Queue]fail to enqueue result = %d", rtRet);
             return rtRet;
@@ -218,49 +219,47 @@ namespace acl {
         return ACL_SUCCESS;
     }
 
-    acltdtBuf* QueueProcessorMdc::acltdtCreateBuf(size_t size)
+    aclError QueueProcessorMdc::acltdtAllocBuf(size_t size, acltdtBuf *buf)
     {
-        rtMbufPtr_t buf = nullptr;
-        rtError_t rtRet = rtMbufAlloc(&buf, size);
+        rtError_t rtRet = rtMbufAlloc(buf, size);
         if (rtRet != RT_ERROR_NONE) {
             ACL_LOG_CALL_ERROR("[Alloc][mbuf]fail to alloc mbuf result = %d", rtRet);
-            return nullptr;
+            return rtRet;
         }
-        return new(std::nothrow) acltdtBuf(buf);
+        return ACL_SUCCESS;
     }
 
-    aclError QueueProcessorMdc::acltdtDestroyBuf(acltdtBuf *buf)
+    aclError QueueProcessorMdc::acltdtFreeBuf(acltdtBuf buf)
     {
         if (buf == nullptr) {
             return ACL_SUCCESS;
         }
-        ACL_REQUIRES_NOT_NULL(buf->mbuf);
-        rtError_t rtRet = rtMbufFree(buf->mbuf);
+        ACL_REQUIRES_NOT_NULL(buf);
+        rtError_t rtRet = rtMbufFree(buf);
         if (rtRet != RT_ERROR_NONE) {
             ACL_LOG_CALL_ERROR("[Free][mbuf]fail to alloc mbuf result = %d", rtRet);
             return rtRet;
         }
-        buf->mbuf = nullptr;
-        ACL_DELETE_AND_SET_NULL(buf);
+        buf = nullptr;
         return ACL_SUCCESS;
     }
 
-    aclError QueueProcessorMdc::acltdtGetBufData(const acltdtBuf *buf, void **dataPtr, size_t *size)
+    aclError QueueProcessorMdc::acltdtGetBufData(const acltdtBuf buf, void **dataPtr, size_t *size)
     {
         ACL_REQUIRES_NOT_NULL(buf);
         ACL_REQUIRES_NOT_NULL(dataPtr);
         ACL_REQUIRES_NOT_NULL(size);
-        ACL_REQUIRES_CALL_RTS_OK(rtMbufGetBuffAddr(buf->mbuf, dataPtr), rtMbufGetBuffAddr);
-        ACL_REQUIRES_CALL_RTS_OK(rtMbufGetBuffSize(buf->mbuf, size), rtMbufGetBuffSize);
+        ACL_REQUIRES_CALL_RTS_OK(rtMbufGetBuffAddr(buf, dataPtr), rtMbufGetBuffAddr);
+        ACL_REQUIRES_CALL_RTS_OK(rtMbufGetBuffSize(buf, size), rtMbufGetBuffSize);
         return ACL_SUCCESS;
     }
 
-    aclError QueueProcessorMdc::acltdtGetBufPrivData(const acltdtBuf *buf, void **privBuf, size_t *size)
+    aclError QueueProcessorMdc::acltdtGetBufPrivData(const acltdtBuf buf, void **privBuf, size_t *size)
     {
         ACL_REQUIRES_NOT_NULL(buf);
         ACL_REQUIRES_NOT_NULL(privBuf);
         ACL_REQUIRES_NOT_NULL(size);
-        ACL_REQUIRES_CALL_RTS_OK(rtMbufGetPrivInfo(buf->mbuf, privBuf, size), rtMbufGetPrivInfo);
+        ACL_REQUIRES_CALL_RTS_OK(rtMbufGetPrivInfo(buf, privBuf, size), rtMbufGetPrivInfo);
         return ACL_SUCCESS;
     }
 
