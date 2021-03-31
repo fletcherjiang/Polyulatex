@@ -117,7 +117,7 @@ namespace acl {
         // info.hostPid = mmGetPid();
         // info.cpType = RT_DEV_PROCESS_CP1;
         // info.chipId = deviceId;
-        // if (rtQueryDevpid(&info, &cpPid) == RT_ERROR_NONE) {
+        // if (rtQueryDevPid(&info, &cpPid) == RT_ERROR_NONE) {
 
         // }
         return ACL_SUCCESS;

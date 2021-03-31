@@ -87,7 +87,7 @@ namespace acl {
         info.cpType = RT_DEV_PROCESS_CP1;
         info.chipId = deviceId;
         do {
-            if (rtQueryDevpid(&info, &cpPid) != RT_ERROR_NONE) {
+            if (rtQueryDevPid(&info, &cpPid) != RT_ERROR_NONE) {
                 ACL_LOG_WARN("can not acquire cp pid, try again");
             }
             // 是否需要sleep？

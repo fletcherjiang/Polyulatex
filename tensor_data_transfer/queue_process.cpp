@@ -82,7 +82,7 @@ namespace acl {
             info.cpType = RT_DEV_PROCESS_QS;
         }
         info.chipId = deviceId;
-        ACL_REQUIRES_CALL_RTS_OK(rtQueryDevpid(&info, &dstPid), rtQueryDevpid);
+        ACL_REQUIRES_CALL_RTS_OK(rtQueryDevPid(&info, &dstPid), rtQueryDevPid);
         ACL_LOG_INFO("get dst pid %d success, type is %d", dstPid, type);
     }
 

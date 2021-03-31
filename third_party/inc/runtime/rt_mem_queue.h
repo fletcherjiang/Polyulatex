@@ -162,7 +162,7 @@ RTS_API rtError_t rtMemQueueAttach(int32_t devId, uint32_t qid, int32_t timeout)
 
 RTS_API rtError_t rtEschedSubmitEventSync(int32_t devId, rtEschedEventSummary_t *event, rtEschedEventReply_t *ack) WEAKFUC;
 
-RTS_API rtError_t rtQueryDevpid(rtBindHostpidInfo_t *info, pid_t *devPid) WEAKFUC;
+RTS_API rtError_t rtQueryDevPid(rtBindHostpidInfo_t *info, pid_t *devPid) WEAKFUC;
 
 RTS_API rtError_t rtMbufInit(rtMemBuffCfg_t *cfg) WEAKFUC;
 
