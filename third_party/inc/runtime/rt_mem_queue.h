@@ -176,13 +176,48 @@ RTS_API rtError_t rtMbufGetBuffSize(rtMbufPtr_t mbuf, uint64_t *size) WEAKFUC;
 
 RTS_API rtError_t rtMbufGetPrivInfo(rtMbufPtr_t mbuf, void **priv, uint64_t *size) WEAKFUC;
 
-RTS_API rtError_t rtGrpCreate(const char *name) WEAKFUC;
+typedef struct {
+    uint64_t maxMemSize;
+} rtMemGrpConfig_t;
 
-RTS_API rtError_t rtGrpAddProc(const char *name, int pid) WEAKFUC;
+typedef struct {
+    int32_t admin:1;
+    int32_t read:1;
+    int32_t write:1;
+    int32_t alloc:1;
+    int32_t rsv:28;
+} rtMemGrpShareAttr_t;
 
-RTS_API rtError_t rtGrpAttach(const char *name, int timeout) WEAKFUC;
+#define RT_MEM_GRP_QUERY_GROUPS_OF_PROCESS 1
 
-RTS_API rtError_t rtGrpQuery(const char *name, int timeout) WEAKFUC;
+typedef struct {
+    int pid;
+} rtMemGrpQueryByProc_t;
+
+typedef union {
+    rtMemGrpQueryByProc_t grpQueryByProc;
+} rtMemGrpQueryInput_t;
+
+#define RT_MEM_GRP_NAME_LEN 32
+
+typedef struct {
+    char groupName[RT_MEM_GRP_NAME_LEN];
+    rtMemGrpShareAttr_t attr;
+} rtMemGrpOfProc_t;
+
+typedef struct {
+    rtMemGrpOfProc_t *groupOfProc;
+    size_t maxNum;
+    size_t resultNum;
+} rtMemGrpQueryOutput_t;
+
+RTS_API rtError_t rtMemGrpCreate(const char *name, const rtMemGrpConfig_t *cfg) WEAKFUC;
+
+RTS_API rtError_t rtMemGrpAddProc(const char *name, int32_t pid, const rtMemGrpShareAttr_t *attr) WEAKFUC;
+
+RTS_API rtError_t rtMemGrpAttach(const char *name, int32_t timeout) WEAKFUC;
+
+RTS_API rtError_t rtMemGrpQuery(int32_t cmd, const rtMemGrpQueryInput_t *input, rtMemGrpQueryOutput_t *output) WEAKFUC;
 
 #if defined(__cplusplus) && !defined(COMPILE_OMG_PACKAGE)
 }
