@@ -206,7 +206,7 @@ typedef struct {
 } rtMemGrpOfProc_t;
 
 typedef struct {
-    rtMemGrpOfProc_t *groupOfProc;
+    rtMemGrpOfProc_t *groupsOfProc;
     size_t maxNum;
     size_t resultNum;
 } rtMemGrpQueryOutput_t;
