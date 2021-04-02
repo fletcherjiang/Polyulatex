@@ -44,7 +44,7 @@ namespace acl {
             bqs::QsProcMsgRsp qsRsp = {0};
             eventSum.pid = dstPid;
             eventSum.grpId = bqs::BINDQUEUEGRPID;
-            eventSum.eventId = 222222; //qs EVENT_ID
+            eventSum.eventId = 25; //qs EVENT_ID
             eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
             ack.buf = reinterpret_cast<char *>(&qsRsp);
             ack.bufLen = sizeof(qsRsp);
@@ -86,22 +86,17 @@ namespace acl {
 
     aclError QueueProcessorCcpu::acltdtGrantQueue(uint32_t qid, int32_t pid, uint32_t permission, int32_t timeout)
     {
+        ACL_LOG_INFO("start to acltdtGrantQueue, qid is %u, pid is %d, permisiion is %u, timeout is %d",
+                     qid, pid, permission, timeout);
         int32_t deviceId = 0;
-        uint64_t startTime = GetTimestamp();
-        uint64_t endTime = 0;
+        // 需要校验主从进程
         rtMemQueueShareAttr_t attr = {0};
         attr.manage = permission & ACL_TDTQUEUE_PERMISSION_MANAGER;
         attr.read = permission & ACL_TDTQUEUE_PERMISSION_READ;
         attr.write = permission & ACL_TDTQUEUE_PERMISSION_WRITE;
-        do {
-            auto ret = rtMemQueueGrant(deviceId, qid, pid, &attr);
-            if (ret == RT_ERROR_NONE) {
-                return ACL_SUCCESS;
-            } else if (ret != 11111) {// 不需要重试?
-                return ret;
-            }
-            endTime = GetTimestamp();
-        } while ((endTime - startTime >= (static_cast<uint64_t>(timeout) * 10000)));
+        ACL_REQUIRES_CALL_RTS_OK(rtMemQueueGrant(deviceId, qid, pid, &attr), rtMemQueueGrant);
+        ACL_LOG_INFO("successfully execute acltdtGrantQueue, qid is %u, pid is %d, permisiion is %u, timeout is %d",
+                     qid, pid, permission, timeout);
         return ACL_SUCCESS;
     }
 
@@ -110,16 +105,7 @@ namespace acl {
         ACL_REQUIRES_NOT_NULL(permission);
         int32_t deviceId = 0;
         ACL_REQUIRES_CALL_RTS_OK(rtMemQueueAttach(deviceId, qid, timeout), rtMemQueueAttach);
-        // 查询queue权限
-        // 查询有cp则授权Q权限
-        // pid_t cpPid;
-        // rtBindHostpidInfo_t info = {0};
-        // info.hostPid = mmGetPid();
-        // info.cpType = RT_DEV_PROCESS_CP1;
-        // info.chipId = deviceId;
-        // if (rtQueryDevPid(&info, &cpPid) == RT_ERROR_NONE) {
-
-        // }
+        // 涉及主从权限
         return ACL_SUCCESS;
     }
 
@@ -137,7 +123,7 @@ namespace acl {
         bqs::QsProcMsgRsp qsRsp = {0};
         eventSum.pid = dstPid;
         eventSum.grpId = bqs::BINDQUEUEGRPID;
-        eventSum.eventId = 222222; //qs EVENT_ID
+        eventSum.eventId = 25; //qs EVENT_ID
         eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
         ack.buf = reinterpret_cast<char *>(&qsRsp);
         ack.bufLen = sizeof(qsRsp);
@@ -163,7 +149,7 @@ namespace acl {
         bqs::QsProcMsgRsp qsRsp = {0};
         eventSum.pid = dstPid;
         eventSum.grpId = bqs::BINDQUEUEGRPID;
-        eventSum.eventId = 222222; //drv EVENT_ID
+        eventSum.eventId = 25; //drv EVENT_ID
         eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
         ack.buf = reinterpret_cast<char *>(&qsRsp);
         ack.bufLen = sizeof(qsRsp);
@@ -186,7 +172,7 @@ namespace acl {
         bqs::QsProcMsgRsp qsRsp = {0};
         eventSum.pid = dstPid;
         eventSum.grpId = bqs::BINDQUEUEGRPID;
-        eventSum.eventId = 222222; //qs EVENT_ID
+        eventSum.eventId = 25; //qs EVENT_ID
         eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
         ack.buf = reinterpret_cast<char *>(&qsRsp);
         ack.bufLen = sizeof(qsRsp);
@@ -196,12 +182,40 @@ namespace acl {
         return ACL_SUCCESS;
     }
 
+    aclError QueueProcessorCcpu::QueryGroup(int32_t pid, size_t &grpNum, std::string &grpName) 
+    {
+        rtMemGrpQueryInput_t input = {0};
+        input.grpQueryByProc.pid = pid;
+        rtMemGrpQueryOutput_t output = {0};
+        rtMemGrpOfProc_t outputInfo = {0};
+        output.groupsOfProc = &outputInfo;
+        output.maxNum = 1;
+        int32_t cmd = RT_MEM_GRP_QUERY_GROUPS_OF_PROCESS;
+        ACL_REQUIRES_CALL_RTS_OK(rtMemGrpQuery(cmd, &input, &output), rtMemGrpQuery);
+        grpNum = output.resultNum;
+        grpName = std::string(output.groupsOfProc->groupName);
+        ACL_LOG_INFO("This proc [%d] has [%zu] group, name is %s", input.grpQueryByProc.pid, grpNum, grpName.c_str());
+        return ACL_SUCCESS;
+    }
+
+    aclError QueueProcessorCcpu::CreateGroupIfNoGroup()
+    {
+        size_t grpNum = 0;
+        std::string grpName;
+        int32_t pid = mmGetPid();
+        ACL_REQUIRES_OK(QueryGroup(pid, grpNum, grpName));
+        if (grpNum == 0) {
+            ACL_LOG_INFO("need to create group");
+            rtMemGrpConfig_t grpConfig = {0};
+            grpName_ = "acltdt" + std::to_string(pid);
+            ACL_REQUIRES_CALL_RTS_OK(rtMemGrpCreate(grpName_.c_str(), &grpConfig), rtMemGrpCreate);
+        }
+        return ACL_SUCCESS;
+    }
+
     aclError  QueueProcessorCcpu::acltdtAllocBuf(size_t size, acltdtBuf *buf)
     {
-        // if (!HasGroup) {
-        //     creategrp;
-        //     addgrp;
-        // }
+        ACL_REQUIRES_OK(CreateGroupIfNoGroup());
         rtError_t rtRet = rtMbufAlloc(buf, size);
         if (rtRet != RT_ERROR_NONE) {
             ACL_LOG_CALL_ERROR("[Alloc][mbuf]fail to alloc mbuf result = %d", rtRet);

@@ -37,6 +37,10 @@ public:
     aclError acltdtQueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo,
                                                         acltdtQueueRouteList *qRouteList);
 
+    aclError QueryGroup(int32_t pid, size_t &grpNum, std::string &grpName);
+
+    aclError CreateGroupIfNoGroup();
+
     aclError acltdtAllocBuf(size_t size, acltdtBuf *buf);
 
     aclError acltdtFreeBuf(acltdtBuf buf);
@@ -58,7 +62,7 @@ public:
     QueueProcessorCcpu &&operator=(QueueProcessorCcpu &&) = delete;
 
 private:
-    /* data */
+    std::string grpName_;
 };
 }
 
