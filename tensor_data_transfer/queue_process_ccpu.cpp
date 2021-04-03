@@ -89,7 +89,58 @@ namespace acl {
         ACL_LOG_INFO("start to acltdtGrantQueue, qid is %u, pid is %d, permisiion is %u, timeout is %d",
                      qid, pid, permission, timeout);
         int32_t deviceId = 0;
-        // 需要校验主从进程
+        // 需要校验主从进程?
+        // if (procStatus_ == PROCESS_SLAVE) {
+        //     ACL_LOG_ERROR("This process is slave process, can not grant.");
+        //     return ACL_ERROR_FAILURE;// 是否增加错误码
+        // }
+        // check self group
+        size_t selfGrpNum = 0;
+        std::string selfGrpName;
+        int32_t selfPid = mmGetPid();
+        if (grpName_.empty()) {
+            ACL_LOG_INFO("self create grp name is empty, need to query");
+            ACL_REQUIRES_OK(QueryGroup(selfPid, selfGrpNum, selfGrpName));
+        }
+        ACL_LOG_INFO("query self pid %d success, num is %zu, grp name is %s", selfPid, selfGrpNum, selfGrpName.c_str());
+        // check dst group status
+        size_t dstGrpNum = 0;
+        std::string dstGrpName;
+        int32_t dstPid = pid;
+        ACL_REQUIRES_OK(QueryGroup(dstPid, dstGrpNum, dstGrpName));
+        ACL_LOG_INFO("query dst pid %d success, num is %zu, grp name is %s", dstPid, dstGrpNum, dstGrpName.c_str());
+        if (selfGrpNum == 0) {
+            if (dstGrpNum > 0) {
+                ACL_LOG_INNER_ERROR("Dst pid [%d] already has a group %s", pid, dstGrpName.c_str());
+                return ACL_ERROR_FAILURE;
+            } else {
+                ACL_LOG_INFO("need to create group");
+                rtMemGrpConfig_t grpConfig = {0};
+                grpName_ = "acltdt" + std::to_string(pid);
+                ACL_REQUIRES_CALL_RTS_OK(rtMemGrpCreate(grpName_.c_str(), &grpConfig), rtMemGrpCreate);
+                rtMemGrpShareAttr_t attr = {0};
+                attr.admin = 1;
+                attr.read = 1;
+                attr.write = 1;
+                attr.alloc =1;
+                ACL_REQUIRES_CALL_RTS_OK(rtMemGrpAddProc(grpName_.c_str(), pid, &attr), rtMemGrpAddProc);
+            }
+        } else {
+            if (dstGrpNum == 0) {
+                rtMemGrpShareAttr_t attr = {0};
+                attr.admin = 1;
+                attr.read = 1;
+                attr.write = 1;
+                attr.alloc =1;
+                ACL_REQUIRES_CALL_RTS_OK(rtMemGrpAddProc(selfGrpName.c_str(), pid, &attr), rtMemGrpAddProc);
+            } else {
+                if (dstGrpName != selfGrpName) {
+                    ACL_LOG_INNER_ERROR("Dst pid [%d] already has a group %s, is not same as self group name %s",
+                                        pid, dstGrpName.c_str(), selfGrpName.c_str());
+                    return ACL_ERROR_FAILURE;
+                }
+            }
+        }
         rtMemQueueShareAttr_t attr = {0};
         attr.manage = permission & ACL_TDTQUEUE_PERMISSION_MANAGER;
         attr.read = permission & ACL_TDTQUEUE_PERMISSION_READ;
@@ -104,8 +155,21 @@ namespace acl {
     {
         ACL_REQUIRES_NOT_NULL(permission);
         int32_t deviceId = 0;
-        ACL_REQUIRES_CALL_RTS_OK(rtMemQueueAttach(deviceId, qid, timeout), rtMemQueueAttach);
-        // 涉及主从权限
+
+        if (!grpName_.empty()) {
+            ACL_LOG_INNER_ERROR("This process has already create group, master process can not be attached");
+            return ACL_ERROR_FAILURE;
+        }
+        ACL_REQUIRES_CALL_RTS_OK(rtMemQueueAttach(deviceId, qid, timeout * 1000), rtMemQueueAttach);
+        ACL_LOG_INFO("start to query qid %u permisiion", qid);
+        rtMemQueueShareAttr_t attr = {0};
+        ACL_REQUIRES_CALL_RTS_OK(GetQueuePermission(deviceId, qid, attr), GetQueuePermission);
+        uint32_t tmp = 0;
+        tmp = attr.manage ? (tmp | ACL_TDTQUEUE_PERMISSION_MANAGER) : tmp;
+        tmp = attr.read ? (tmp | ACL_TDTQUEUE_PERMISSION_READ) : tmp;
+        tmp = attr.write ? (tmp | ACL_TDTQUEUE_PERMISSION_WRITE) : tmp;
+        *permission = tmp;
+        ACL_LOG_INFO("successfully execute to get queue %u permission %u", qid, *permission);
         return ACL_SUCCESS;
     }
 
@@ -128,6 +192,7 @@ namespace acl {
         ack.buf = reinterpret_cast<char *>(&qsRsp);
         ack.bufLen = sizeof(qsRsp);
         if (!isQsInit_) {
+            // 调用接口拉起QS
             ACL_REQUIRES_OK(SendConnectQsMsg(deviceId, eventSum, ack));
             isQsInit_ = true;
         }
@@ -216,6 +281,7 @@ namespace acl {
     aclError  QueueProcessorCcpu::acltdtAllocBuf(size_t size, acltdtBuf *buf)
     {
         ACL_REQUIRES_OK(CreateGroupIfNoGroup());
+        // 需要初始化buff？
         rtError_t rtRet = rtMbufAlloc(buf, size);
         if (rtRet != RT_ERROR_NONE) {
             ACL_LOG_CALL_ERROR("[Alloc][mbuf]fail to alloc mbuf result = %d", rtRet);

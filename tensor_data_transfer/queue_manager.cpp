@@ -14,6 +14,7 @@
 #include "queue_process.h"
 #include "queue_process_host.h"
 #include "queue_process_mdc.h"
+#include "queue_process_ccpu.h"
 
 namespace acl {
     QueueManager& QueueManager::GetInstance()
@@ -37,7 +38,7 @@ namespace acl {
                     queueProcessProc_ = std::shared_ptr<QueueProcessorMdc>(new (std::nothrow)QueueProcessorMdc());
                     break;
                 case ENV_DEVICE_DEFAULT:
-                    // TDOD
+                    queueProcessProc_ = std::shared_ptr<QueueProcessorCcpu>(new (std::nothrow)QueueProcessorCcpu());
                     break;
                 default:
                     ACL_LOG_INNER_ERROR("[Check][Runenv]check runenv failed.");

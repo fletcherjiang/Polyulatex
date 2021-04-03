@@ -15,7 +15,7 @@
 #include <vector>
 
 #include "acl/acl_base.h"
-#include "acl/acl_tdt.h"
+#include "acl/acl_tdt_queue.h"
 #include "acl/acl_rt.h"
 #include "runtime/rt_mem_queue.h"
 

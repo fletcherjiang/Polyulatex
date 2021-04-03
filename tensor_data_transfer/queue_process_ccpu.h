@@ -15,6 +15,14 @@
 #include "queue_process.h"
 
 namespace acl {
+
+enum PROCESS_STATUS
+{
+    PROCESS_UNKNOWN,
+    PROCESS_MASTER,
+    PROCESS_SLAVE,
+};
+
 class QueueProcessorCcpu : public QueueProcessor
 {
 public:
@@ -63,6 +71,7 @@ public:
 
 private:
     std::string grpName_;
+    PROCESS_STATUS procStatus_ = PROCESS_UNKNOWN;
 };
 }
 

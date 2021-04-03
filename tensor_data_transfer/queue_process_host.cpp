@@ -112,7 +112,15 @@ namespace acl {
         int32_t deviceId = 0;
         GET_CURRENT_DEVICE_ID(deviceId);
         ACL_REQUIRES_CALL_RTS_OK(rtMemQueueAttach(deviceId, qid, timeout), rtMemQueueAttach);
-        // TODO查询权限返回
+        ACL_LOG_INFO("start to query qid %u permisiion", qid);
+        rtMemQueueShareAttr_t attr = {0};
+        ACL_REQUIRES_CALL_RTS_OK(GetQueuePermission(deviceId, qid, attr), GetQueuePermission);
+        uint32_t tmp = 0;
+        tmp = attr.manage ? (tmp | ACL_TDTQUEUE_PERMISSION_MANAGER) : tmp;
+        tmp = attr.read ? (tmp | ACL_TDTQUEUE_PERMISSION_READ) : tmp;
+        tmp = attr.write ? (tmp | ACL_TDTQUEUE_PERMISSION_WRITE) : tmp;
+        *permission = tmp;
+        ACL_LOG_INFO("successfully execute to get queue %u permission %u", qid, *permission);
         ACL_LOG_INFO("successfully execute acltdtGrantQueue, qid is %u, permisiion is %u, timeout is %d",
                      qid, *permission, timeout);
         return ACL_SUCCESS;
