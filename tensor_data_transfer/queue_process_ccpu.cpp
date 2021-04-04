@@ -258,7 +258,9 @@ namespace acl {
         int32_t cmd = RT_MEM_GRP_QUERY_GROUPS_OF_PROCESS;
         ACL_REQUIRES_CALL_RTS_OK(rtMemGrpQuery(cmd, &input, &output), rtMemGrpQuery);
         grpNum = output.resultNum;
-        grpName = std::string(output.groupsOfProc->groupName);
+        if (grpNum > 0) {
+            grpName = std::string(output.groupsOfProc->groupName);
+        }
         ACL_LOG_INFO("This proc [%d] has [%zu] group, name is %s", input.grpQueryByProc.pid, grpNum, grpName.c_str());
         return ACL_SUCCESS;
     }
@@ -281,7 +283,10 @@ namespace acl {
     aclError  QueueProcessorCcpu::acltdtAllocBuf(size_t size, acltdtBuf *buf)
     {
         ACL_REQUIRES_OK(CreateGroupIfNoGroup());
-        // 需要初始化buff？
+        if (isMbufInit_) {
+            ACL_REQUIRES_CALL_RTS_OK(rtMbufInit(nullptr), rtMbufInit);
+            isMbufInit_ = true;
+        }
         rtError_t rtRet = rtMbufAlloc(buf, size);
         if (rtRet != RT_ERROR_NONE) {
             ACL_LOG_CALL_ERROR("[Alloc][mbuf]fail to alloc mbuf result = %d", rtRet);

@@ -72,6 +72,7 @@ public:
 private:
     std::string grpName_;
     PROCESS_STATUS procStatus_ = PROCESS_UNKNOWN;
+    bool isMbufInit_ = false;
 };
 }
 
