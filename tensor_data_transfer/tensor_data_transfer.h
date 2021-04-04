@@ -76,7 +76,33 @@ struct acltdtChannelHandle {
     std::string name;
     std::string recvName;
     uint32_t devId;
+    uint32_t qid;
+    bool isTdtProcess = true;
 };
+
+acltdtChannelHandle *acltdtCreateChannelWithDepth(uint32_t deviceId, const char *name, uint32_t maxDepth);
+
+aclError acltdtSendTensorV2(const acltdtChannelHandle *handle, const acltdtDataset *dataset, int32_t timeout);
+
+aclError acltdtReceiveTensorV2(const acltdtChannelHandle *handle, acltdtDataset *dataset, int32_t timeout);
+
+struct ItemInfo {
+    int32_t version;
+    int32_t dataType;
+    uint32_t curCnt;
+    uint32_t cnt;
+    int32_t tensorType;
+    uint32_t dimNum;
+    char reserved[32];
+    uint64_t dataLen;
+};
+
+struct aclTdtDataItemInfo {
+    ItemInfo ctrlInfo;
+    std::vector<int64_t> dims;
+    std::shared_ptr<void> dataPtr;
+};
+
 
 #endif //ACL_TENSOR_DATA_TRANSFER_H
 

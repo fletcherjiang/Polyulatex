@@ -266,7 +266,7 @@ namespace acl {
         return ACL_SUCCESS;
     }
 
-    aclError acltdtAllocBuf(size_t size, acltdtBuf *buf)
+    aclError QueueProcessor::acltdtAllocBuf(size_t size, acltdtBuf *buf)
     {
         ACL_LOG_ERROR("[Unsupport][Feature]acltdtAllocBuf is not supported in this version. Please check.");
         const char *argList[] = {"feature", "reason"};
@@ -276,7 +276,7 @@ namespace acl {
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
 
-    aclError acltdtFreeBuf(acltdtBuf buf)
+    aclError QueueProcessor::acltdtFreeBuf(acltdtBuf buf)
     {
         ACL_LOG_ERROR("[Unsupport][Feature]acltdtFreeBuf is not supported in this version. Please check.");
         const char *argList[] = {"feature", "reason"};
@@ -286,7 +286,7 @@ namespace acl {
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
 
-    aclError acltdtGetBufData(const acltdtBuf buf, void **dataPtr, size_t *size)
+    aclError QueueProcessor::acltdtGetBufData(const acltdtBuf buf, void **dataPtr, size_t *size)
     {
         ACL_LOG_ERROR("[Unsupport][Feature]acltdtGetBufData is not supported in this version. Please check.");
         const char *argList[] = {"feature", "reason"};
@@ -296,7 +296,7 @@ namespace acl {
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
 
-    aclError acltdtGetBufPrivData(const acltdtBuf buf, void **privBuf, size_t *size)
+    aclError QueueProcessor::acltdtGetBufPrivData(const acltdtBuf buf, void **privBuf, size_t *size)
     {
         ACL_LOG_ERROR("[Unsupport][Feature]acltdtGetBufPrivData is not supported in this version. Please check.");
         const char *argList[] = {"feature", "reason"};
