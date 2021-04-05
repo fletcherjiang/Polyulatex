@@ -225,18 +225,6 @@ aclError acltdtGetBufData(const acltdtBuf buf, void **dataPtr, size_t *size)
     return ACL_SUCCESS;
 }
 
-aclError acltdtGetBufPrivData(const acltdtBuf buf, void **privBuf, size_t *size)
-{
-    auto& qManager = acl::QueueManager::GetInstance();
-    auto processor = qManager.GetQueueProcessor();
-    if (processor == nullptr) {
-        ACL_LOG_INNER_ERROR("[Check][QueueScheduleprocessor] queue schedule processor is nullptr");
-        return ACL_ERROR_FAILURE;
-    }
-    ACL_REQUIRES_OK(processor->acltdtGetBufPrivData(buf, privBuf, size));
-    return ACL_SUCCESS;
-}
-
 acltdtQueueAttr* acltdtCreateQueueAttr()
 {
     acltdtQueueAttr *attr = new(std::nothrow) acltdtQueueAttr();
@@ -319,28 +307,24 @@ aclError acltdtDestroyQueueRoute(const acltdtQueueRoute *route)
     return ACL_SUCCESS;
 }
 
-aclError acltdtGetqidFromQueueRoute(const acltdtQueueRoute *route,
-                                    acltdtQueueRouteKind routeKind,
-                                    uint32_t *qid)
+aclError acltdtGetQueueRouteParam(const acltdtQueueRoute *route,
+                                  acltdtQueueRouteParamType type,
+                                  size_t len,
+                                  size_t *paramRetSize,
+                                  void *param)
 {
     ACL_REQUIRES_NOT_NULL(route);
-    ACL_REQUIRES_NOT_NULL(qid);
-    switch (routeKind) {
-        case ACL_QUEUE_SRC_ID: 
-            *qid = route->srcId;
-            break;
-        case ACL_QUEUE_DST_ID: 
-            *qid = route->dstId;
-            break;
+    ACL_REQUIRES_NOT_NULL(param);
+    ACL_REQUIRES_NOT_NULL(paramRetSize);
+    ACL_LOG_INFO("get route type %d, len is %zu", type, len);
+    switch (type) {
+        case ACL_TDT_QUEUE_ROUTE_SRC_UINT32:
+                return CopyParam(static_cast<const void *>(&route->srcId), sizeof(uint32_t), param, len, paramRetSize);
+        case ACL_TDT_QUEUE_ROUTE_DST_UINT32:
+            return CopyParam(static_cast<const void *>(&route->dstId), sizeof(uint32_t), param, len, paramRetSize);
+        case ACL_TDT_QUEUE_ROUTE_STATUS_INT32:
+            return CopyParam(static_cast<const void *>(&route->status), sizeof(int32_t), param, len, paramRetSize);
     }
-    return ACL_SUCCESS;
-}
-
-aclError acltdtGetQueueRouteStatus(const acltdtQueueRoute *route, int32_t *routeStatus)
-{
-    ACL_REQUIRES_NOT_NULL(route);
-    ACL_REQUIRES_NOT_NULL(routeStatus);
-    *routeStatus = route->status;
     return ACL_SUCCESS;
 }
 

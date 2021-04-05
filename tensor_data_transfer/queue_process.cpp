@@ -295,14 +295,4 @@ namespace acl {
             argList, argVal, 2);
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
-
-    aclError QueueProcessor::acltdtGetBufPrivData(const acltdtBuf buf, void **privBuf, size_t *size)
-    {
-        ACL_LOG_ERROR("[Unsupport][Feature]acltdtGetBufPrivData is not supported in this version. Please check.");
-        const char *argList[] = {"feature", "reason"};
-        const char *argVal[] = {"acltdtGetBufPrivData", "please check"};
-        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
-            argList, argVal, 2);
-        return ACL_ERROR_FEATURE_UNSUPPORTED;
-    }
 }

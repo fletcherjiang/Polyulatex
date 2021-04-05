@@ -55,8 +55,6 @@ public:
 
     aclError acltdtGetBufData(const acltdtBuf buf, void **dataPtr, size_t *size);
 
-    aclError acltdtGetBufPrivData(const acltdtBuf buf, void **privBuf, size_t *size);
-
     QueueProcessorCcpu() = default;
     ~QueueProcessorCcpu() = default;
 

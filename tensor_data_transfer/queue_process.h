@@ -58,8 +58,6 @@ public:
 
     virtual aclError acltdtGetBufData(const acltdtBuf buf, void **dataPtr, size_t *size);
 
-    virtual aclError acltdtGetBufPrivData(const acltdtBuf buf, void **privBuf, size_t *size);
-
     aclError SendBindUnbindMsg(acltdtQueueRouteList *qRouteList,
                                                int32_t devieId,
                                                bool isBind,

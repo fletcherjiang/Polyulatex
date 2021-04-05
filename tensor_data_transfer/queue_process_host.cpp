@@ -95,9 +95,9 @@ namespace acl {
         } while ((endTime - startTime >= (timeout * 10000)));
         ACL_LOG_INFO("get cp pid %d", cpPid);
         rtMemQueueShareAttr_t attr = {0};
-        attr.manage = permission & ACL_TDTQUEUE_PERMISSION_MANAGER;
-        attr.read = permission & ACL_TDTQUEUE_PERMISSION_READ;
-        attr.write = permission & ACL_TDTQUEUE_PERMISSION_WRITE;
+        attr.manage = permission & ACL_TDT_QUEUE_PERMISSION_MANAGE;
+        attr.read = permission & ACL_TDT_QUEUE_PERMISSION_DEQUEUE;
+        attr.write = permission & ACL_TDT_QUEUE_PERMISSION_ENQUEUE;
         ACL_REQUIRES_CALL_RTS_OK(rtMemQueueGrant(deviceId, qid, pid, &attr), rtMemQueueGrant);
         ACL_LOG_INFO("successfully execute acltdtGrantQueue, qid is %u, pid is %d, permisiion is %u, timeout is %d",
                      qid, pid, permission, timeout);
@@ -116,9 +116,9 @@ namespace acl {
         rtMemQueueShareAttr_t attr = {0};
         ACL_REQUIRES_CALL_RTS_OK(GetQueuePermission(deviceId, qid, attr), GetQueuePermission);
         uint32_t tmp = 0;
-        tmp = attr.manage ? (tmp | ACL_TDTQUEUE_PERMISSION_MANAGER) : tmp;
-        tmp = attr.read ? (tmp | ACL_TDTQUEUE_PERMISSION_READ) : tmp;
-        tmp = attr.write ? (tmp | ACL_TDTQUEUE_PERMISSION_WRITE) : tmp;
+        tmp = attr.manage ? (tmp | ACL_TDT_QUEUE_PERMISSION_MANAGE) : tmp;
+        tmp = attr.read ? (tmp | ACL_TDT_QUEUE_PERMISSION_DEQUEUE) : tmp;
+        tmp = attr.write ? (tmp | ACL_TDT_QUEUE_PERMISSION_ENQUEUE) : tmp;
         *permission = tmp;
         ACL_LOG_INFO("successfully execute to get queue %u permission %u", qid, *permission);
         ACL_LOG_INFO("successfully execute acltdtGrantQueue, qid is %u, permisiion is %u, timeout is %d",

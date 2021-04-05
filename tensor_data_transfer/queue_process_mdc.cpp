@@ -115,9 +115,9 @@ namespace acl {
                      qid, pid, permission, timeout);
         int32_t deviceId = 0;
         rtMemQueueShareAttr_t attr = {0};
-        attr.manage = permission & ACL_TDTQUEUE_PERMISSION_MANAGER;
-        attr.read = permission & ACL_TDTQUEUE_PERMISSION_READ;
-        attr.write = permission & ACL_TDTQUEUE_PERMISSION_WRITE;
+        attr.manage = permission & ACL_TDT_QUEUE_PERMISSION_MANAGE;
+        attr.read = permission & ACL_TDT_QUEUE_PERMISSION_DEQUEUE;
+        attr.write = permission & ACL_TDT_QUEUE_PERMISSION_ENQUEUE;
         ACL_REQUIRES_CALL_RTS_OK(rtMemQueueGrant(deviceId, qid, pid, &attr), rtMemQueueGrant);
         ACL_LOG_INFO("successfully execute acltdtGrantQueue, qid is %u, pid is %d, permisiion is %u, timeout is %d",
                      qid, pid, permission, timeout);
@@ -253,14 +253,4 @@ namespace acl {
         ACL_REQUIRES_CALL_RTS_OK(rtMbufGetBuffSize(buf, size), rtMbufGetBuffSize);
         return ACL_SUCCESS;
     }
-
-    aclError QueueProcessorMdc::acltdtGetBufPrivData(const acltdtBuf buf, void **privBuf, size_t *size)
-    {
-        ACL_REQUIRES_NOT_NULL(buf);
-        ACL_REQUIRES_NOT_NULL(privBuf);
-        ACL_REQUIRES_NOT_NULL(size);
-        ACL_REQUIRES_CALL_RTS_OK(rtMbufGetPrivInfo(buf, privBuf, size), rtMbufGetPrivInfo);
-        return ACL_SUCCESS;
-    }
-
 }
