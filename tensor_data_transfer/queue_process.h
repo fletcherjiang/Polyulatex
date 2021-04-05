@@ -37,9 +37,9 @@ public:
 
     virtual aclError acltdtDestroyQueue(uint32_t queueId);
 
-    virtual aclError acltdtEnqueueBuf(uint32_t queueId, acltdtBuf buf, int32_t timeout);
+    virtual aclError acltdtEnqueue(uint32_t queueId, acltdtBuf buf, int32_t timeout);
 
-    virtual aclError acltdtDequeueBuf(uint32_t queueId, acltdtBuf *buf, int32_t timeout);
+    virtual aclError acltdtDequeue(uint32_t queueId, acltdtBuf *buf, int32_t timeout);
 
     virtual aclError acltdtGrantQueue(uint32_t queueId, int32_t pid, uint32_t flag, int32_t timeout);
 
@@ -81,6 +81,10 @@ public:
                                               rtEschedEventSummary_t &eventSum,
                                               rtEschedEventReply_t &ack,
                                               acltdtQueueRouteList *qRouteList);
+
+    QueueDataMutexPtr GetMutexForData(uint32_t qid);
+    void DeleteMutexForData(uint32_t qid);
+
     QueueProcessor() = default;
     ~QueueProcessor() = default;
 
@@ -94,8 +98,8 @@ public:
     QueueProcessor &&operator=(QueueProcessor &&) = delete;
 
 protected:
-    std::recursive_mutex muForQueueCtrl;
-    std::mutex mu_;
+    std::recursive_mutex muForQueueCtrl_;
+    std::mutex muForQueueMap_;
     std::map<uint32_t, QueueDataMutexPtr> muForQueue_;
     bool isQsInit_ = false;
     uint32_t qsContactId_ = 0;

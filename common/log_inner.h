@@ -51,6 +51,8 @@ const char *const ACL_STAGE_DVPP = "DVPP";
 const char *const ACL_STAGE_TDT = "TDT";
 const char *const ACL_STAGE_INIT = "INIT";
 const char *const ACL_STAGE_FINAL = "FINAL";
+const char *const ACL_STAGE_QUEUE = "QUEUE";
+const char *const ACL_STAGE_MBUF = "MBUF";
 // second stage
 const char *const ACL_STAGE_DEFAULT = "DEFAULT";
 
@@ -322,7 +324,7 @@ inline bool IsInfoLogEnabled()
 #define ACL_CHECK_MALLOC_RESULT(val) \
     do { \
         if ((val) == nullptr) { \
-            ACL_LOG_ERROR("[Check][Malloc]Allocate memory for [%s] failed.", #val); \
+            ACL_LOG_INNER_ERROR("[Check][Malloc]Allocate memory for [%s] failed.", #val); \
             return ACL_ERROR_BAD_ALLOC; } \
         } \
     while (false)

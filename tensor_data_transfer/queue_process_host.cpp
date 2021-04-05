@@ -39,7 +39,7 @@ namespace acl {
 
     aclError QueueProcessorHost::acltdtDestroyQueue(uint32_t qid)
     {
-        std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl);
+        std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
         int32_t deviceId = 0;
         GET_CURRENT_DEVICE_ID(deviceId);
         // get qs id

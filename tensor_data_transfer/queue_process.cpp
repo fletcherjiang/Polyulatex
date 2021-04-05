@@ -26,21 +26,21 @@ namespace acl {
         return ACL_SUCCESS;
     }
 
-    aclError QueueProcessor::acltdtEnqueueBuf(uint32_t qid, acltdtBuf buf, int32_t timeout)
+    aclError QueueProcessor::acltdtEnqueue(uint32_t qid, acltdtBuf buf, int32_t timeout)
     {
-        ACL_LOG_ERROR("[Unsupport][Feature]acltdtEnqueueBuf is not supported in this version. Please check.");
+        ACL_LOG_ERROR("[Unsupport][Feature]acltdtEnqueue is not supported in this version. Please check.");
         const char *argList[] = {"feature", "reason"};
-        const char *argVal[] = {"acltdtEnqueueBuf", "please check"};
+        const char *argVal[] = {"acltdtEnqueue", "please check"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
             argList, argVal, 2);
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
 
-    aclError QueueProcessor::acltdtDequeueBuf(uint32_t qid, acltdtBuf *buf, int32_t timeout)
+    aclError QueueProcessor::acltdtDequeue(uint32_t qid, acltdtBuf *buf, int32_t timeout)
     {
-        ACL_LOG_ERROR("[Unsupport][Feature]acltdtEnqueueBuf is not supported in this version. Please check.");
+        ACL_LOG_ERROR("[Unsupport][Feature]acltdtEnqueue is not supported in this version. Please check.");
         const char *argList[] = {"feature", "reason"};
-        const char *argVal[] = {"acltdtEnqueueBuf", "please check"};
+        const char *argVal[] = {"acltdtEnqueue", "please check"};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
             argList, argVal, 2);
         return ACL_ERROR_FEATURE_UNSUPPORTED;
@@ -294,5 +294,28 @@ namespace acl {
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
             argList, argVal, 2);
         return ACL_ERROR_FEATURE_UNSUPPORTED;
+    }
+
+    QueueDataMutexPtr QueueProcessor::GetMutexForData(uint32_t qid)
+    {
+        std::lock_guard<std::mutex> lock(muForQueueMap_);
+        auto it = muForQueue_.find(qid);
+        if (it != muForQueue_.end()) {
+            return it->second;
+        } else {
+            QueueDataMutexPtr p = std::shared_ptr<QueueDataMutex>(new (std::nothrow)(QueueDataMutex));
+            muForQueue_[qid] = p;
+            return p;
+        }
+    }
+
+    void QueueProcessor::DeleteMutexForData(uint32_t qid)
+    {
+        std::lock_guard<std::mutex> lock(muForQueueMap_);
+        auto it = muForQueue_.find(qid);
+        if (it != muForQueue_.end()) {
+            muForQueue_.erase(it);
+        }
+        return;
     }
 }

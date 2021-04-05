@@ -30,9 +30,9 @@ public:
 
     aclError acltdtDestroyQueue(uint32_t queueId);
 
-    aclError acltdtEnqueueBuf(uint32_t queueId, acltdtBuf buf, int32_t timeout);
+    aclError acltdtEnqueue(uint32_t queueId, acltdtBuf buf, int32_t timeout);
 
-    aclError acltdtDequeueBuf(uint32_t queueId, acltdtBuf *buf, int32_t timeout);
+    aclError acltdtDequeue(uint32_t queueId, acltdtBuf *buf, int32_t timeout);
 
     aclError acltdtGrantQueue(uint32_t queueId, int32_t pid, uint32_t flag, int32_t timeout);
 

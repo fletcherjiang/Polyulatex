@@ -33,7 +33,7 @@ namespace acl {
 
     aclError QueueProcessorCcpu::acltdtDestroyQueue(uint32_t qid)
     {
-        std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl);
+        std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
         int32_t deviceId = 0;
         // get qs id
         pid_t dstPid;
@@ -60,10 +60,13 @@ namespace acl {
         return ACL_SUCCESS;
     }
 
-    aclError QueueProcessorCcpu::acltdtEnqueueBuf(uint32_t qid, acltdtBuf buf, int32_t timeout)
+    aclError QueueProcessorCcpu::acltdtEnqueue(uint32_t qid, acltdtBuf buf, int32_t timeout)
     {
         ACL_REQUIRES_NOT_NULL(buf);
         int32_t deviceId = 0;
+        QueueDataMutexPtr muPtr = GetMutexForData(qid);
+        ACL_CHECK_MALLOC_RESULT(muPtr);
+        std::lock_guard<std::mutex> lock(muPtr->muForEnqueue);
         rtError_t rtRet = rtMemQueueEnQueue(deviceId, qid, buf);
         if (rtRet != RT_ERROR_NONE) {
             ACL_LOG_CALL_ERROR("[Enqueue][Queue]fail to enqueue result = %d", rtRet);
@@ -72,10 +75,13 @@ namespace acl {
         return ACL_SUCCESS;
     }
 
-    aclError QueueProcessorCcpu::acltdtDequeueBuf(uint32_t qid, acltdtBuf *buf, int32_t timeout)
+    aclError QueueProcessorCcpu::acltdtDequeue(uint32_t qid, acltdtBuf *buf, int32_t timeout)
     {
         ACL_REQUIRES_NOT_NULL(buf);
         int32_t deviceId = 0;
+        QueueDataMutexPtr muPtr = GetMutexForData(qid);
+        ACL_CHECK_MALLOC_RESULT(muPtr);
+        std::lock_guard<std::mutex> lock(muPtr->muForDequeue);
         rtError_t rtRet = rtMemQueueDeQueue(deviceId, qid, buf);
         if (rtRet != RT_ERROR_NONE) {
             ACL_LOG_CALL_ERROR("[Dequeue][Queue]fail to enqueue result = %d", rtRet);
