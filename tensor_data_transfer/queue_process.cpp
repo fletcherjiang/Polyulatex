@@ -15,17 +15,6 @@
 #include "aicpu/queue_schedule/qs_client.h"
 
 namespace acl {
-    aclError QueueProcessor::acltdtCreateQueue(const acltdtQueueAttr *attr, uint32_t *qid)
-    {
-
-        return ACL_SUCCESS;
-    }
-
-    aclError QueueProcessor::acltdtDestroyQueue(uint32_t qid)
-    {
-        return ACL_SUCCESS;
-    }
-
     aclError QueueProcessor::acltdtEnqueue(uint32_t qid, acltdtBuf buf, int32_t timeout)
     {
         ACL_LOG_ERROR("[Unsupport][Feature]acltdtEnqueue is not supported in this version. Please check.");
@@ -46,13 +35,116 @@ namespace acl {
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
 
-    aclError QueueProcessor::acltdtGrantQueue(uint32_t qid, int32_t pid, uint32_t flag, int32_t)
+    aclError QueueProcessor::acltdtDestroyQueueOndevice(uint32_t qid)
     {
+        ACL_LOG_INFO("Start to destroy queue %u", qid);
+        int32_t deviceId = 0;
+        // get qs id
+        pid_t dstPid;
+        size_t routeNum = 0;
+        std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
+        if (GetDstInfo(deviceId, QS_PID, dstPid) == ACL_SUCCESS) {
+            ACL_LOG_INFO("find qs pid %d", dstPid);
+            rtEschedEventSummary_t eventSum = {0};
+            rtEschedEventReply_t ack = {0};
+            bqs::QsProcMsgRsp qsRsp = {0};
+            eventSum.pid = dstPid;
+            eventSum.grpId = bqs::BINDQUEUEGRPID;
+            eventSum.eventId = 25; //qs EVENT_ID
+            eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
+            ack.buf = reinterpret_cast<char *>(&qsRsp);
+            ack.bufLen = sizeof(qsRsp);
+            acltdtQueueRouteQueryInfo queryInfo = {bqs::BQS_QUERY_TYPE_SRC_OR_DST, qid, qid};
+            ACL_REQUIRES_OK(GetQueueRouteNum(&queryInfo, deviceId, eventSum, ack));
+            routeNum = reinterpret_cast<bqs::QsProcMsgRsp *>(ack.buf)->retValue;
+        }
+        if (routeNum > 0) {
+            ACL_LOG_ERROR("qid [%u] can not be destroyed, it need to be unbinded first.", qid);
+            return ACL_ERROR_FAILURE;// 需要新增错误码
+        }
+        ACL_REQUIRES_CALL_RTS_OK(rtMemQueueDestroy(deviceId, qid), rtMemQueueDestroy);
+        ACL_LOG_INFO("successfully to execute destroy queue %u", qid);
         return ACL_SUCCESS;
     }
 
-    aclError QueueProcessor::acltdtAttachQueue(uint32_t qid, int32_t timeout, uint32_t *flag)
+    aclError QueueProcessor::acltdtEnqueueOnDevice(uint32_t qid, acltdtBuf buf, int32_t timeout)
     {
+        ACL_REQUIRES_NOT_NULL(buf);
+        QueueDataMutexPtr muPtr = GetMutexForData(qid);
+        ACL_CHECK_MALLOC_RESULT(muPtr);
+        uint64_t startTime = GetTimestamp();
+        uint64_t endTime = 0;
+        do {
+            std::lock_guard<std::mutex> lock(muPtr->muForEnqueue);
+            int32_t deviceId = 0;
+            rtError_t rtRet = rtMemQueueEnQueue(deviceId, qid, buf);
+            if (rtRet == RT_ERROR_NONE) {
+                return ACL_SUCCESS;
+            } else if (rtRet != 5555555) { // 队列满的错误码
+                ACL_LOG_CALL_ERROR("[Enqueue][Queue]fail to enqueue result = %d", rtRet);
+                return rtRet;
+            }
+            // 是否需要sleep？
+            endTime = GetTimestamp();
+        } while ((endTime - startTime >= (timeout * 10000)));
+        return ACL_ERROR_FAILURE; // 是否需要超时错误码？
+    }
+
+    aclError QueueProcessor::acltdtDequeueOnDevice(uint32_t qid, acltdtBuf *buf, int32_t timeout)
+    {
+        ACL_REQUIRES_NOT_NULL(buf);
+        QueueDataMutexPtr muPtr = GetMutexForData(qid);
+        ACL_CHECK_MALLOC_RESULT(muPtr);
+        uint64_t startTime = GetTimestamp();
+        uint64_t endTime = 0;
+        do {
+            std::lock_guard<std::mutex> lock(muPtr->muForEnqueue);
+            int32_t deviceId = 0;
+            rtError_t rtRet = rtMemQueueDeQueue(deviceId, qid, buf);
+            if (rtRet == RT_ERROR_NONE) {
+                return ACL_SUCCESS;
+            } else if (rtRet != 5555555) { // 队列空的错误码
+                ACL_LOG_CALL_ERROR("[Dequeue][Queue]fail to dequeue result = %d", rtRet);
+                return rtRet;
+            }
+            // 是否需要sleep？
+            endTime = GetTimestamp();
+        } while ((endTime - startTime >= (timeout * 10000)));
+        return ACL_ERROR_FAILURE; // 超时错误码？
+    }
+
+    aclError QueueProcessor::acltdtAllocBufOnDevice(size_t size, acltdtBuf *buf)
+    {
+        rtError_t rtRet = rtMbufAlloc(buf, size);
+        if (rtRet != RT_ERROR_NONE) {
+            ACL_LOG_CALL_ERROR("[Alloc][mbuf]fail to alloc mbuf result = %d", rtRet);
+            return rtRet;
+        }
+        return ACL_SUCCESS;
+    }
+
+    aclError QueueProcessor::acltdtFreeBufOnDevice(acltdtBuf buf)
+    {
+        if (buf == nullptr) {
+            return ACL_SUCCESS;
+        }
+        ACL_REQUIRES_NOT_NULL(buf);
+        rtError_t rtRet = rtMbufFree(buf);
+        if (rtRet != RT_ERROR_NONE) {
+            ACL_LOG_CALL_ERROR("[Free][mbuf]fail to alloc mbuf result = %d", rtRet);
+            return rtRet;
+        }
+        buf = nullptr;
+        return ACL_SUCCESS;
+    }
+
+    aclError QueueProcessor::acltdtGetBufDataOnDevice(const acltdtBuf buf, void **dataPtr, size_t *size)
+    {
+        ACL_REQUIRES_NOT_NULL(buf);
+        ACL_REQUIRES_NOT_NULL(dataPtr);
+        ACL_REQUIRES_NOT_NULL(size);
+        ACL_REQUIRES_CALL_RTS_OK(rtMbufGetBuffAddr(buf, dataPtr), rtMbufGetBuffAddr);
+        ACL_REQUIRES_CALL_RTS_OK(rtMbufGetBuffSize(buf, size), rtMbufGetBuffSize);
         return ACL_SUCCESS;
     }
 
@@ -67,11 +159,6 @@ namespace acl {
         return ACL_SUCCESS;
     }
 
-    bool QueueProcessor::HasQueuePermission(rtMemQueueShareAttr_t &permission) 
-    {
-        return (permission.manage) || (permission.read) || (permission.write);
-    }
-
     aclError QueueProcessor::GetDstInfo(int32_t deviceId, PID_QUERY_TYPE type, pid_t &dstPid)
     {
         rtBindHostpidInfo_t info = {0};
@@ -82,6 +169,7 @@ namespace acl {
             info.cpType = RT_DEV_PROCESS_QS;
         }
         info.chipId = deviceId;
+        ACL_LOG_INFO("start to get dst pid, deviceId is %d, type is %d", deviceId, type);
         ACL_REQUIRES_CALL_RTS_OK(rtQueryDevPid(&info, &dstPid), rtQueryDevPid);
         ACL_LOG_INFO("get dst pid %d success, type is %d", dstPid, type);
     }
@@ -106,8 +194,10 @@ namespace acl {
     {
         if (isMbuf) {
             (void)rtMbufFree(mbuf);
+            mbuf = nullptr;
         } else {
             (void)rtFree(devPtr);
+            devPtr = nullptr;
         }
     }
 
@@ -253,17 +343,32 @@ namespace acl {
 
     aclError QueueProcessor::acltdtBindQueueRoutes(acltdtQueueRouteList *qRouteList)
     {
-        return ACL_SUCCESS;
+        ACL_LOG_ERROR("[Unsupport][Feature]acltdtBindQueueRoutes is not supported in this version. Please check.");
+        const char *argList[] = {"feature", "reason"};
+        const char *argVal[] = {"acltdtBindQueueRoutes", "please check"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
+            argList, argVal, 2);
+        return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
 
     aclError QueueProcessor::acltdtUnbindQueueRoutes(acltdtQueueRouteList *qRouteList)
     {
-        return ACL_SUCCESS;
+        ACL_LOG_ERROR("[Unsupport][Feature]acltdtUnbindQueueRoutes is not supported in this version. Please check.");
+        const char *argList[] = {"feature", "reason"};
+        const char *argVal[] = {"acltdtUnbindQueueRoutes", "please check"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
+            argList, argVal, 2);
+        return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
 
     aclError QueueProcessor::acltdtQueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo, acltdtQueueRouteList *qRouteList)
     {
-        return ACL_SUCCESS;
+        ACL_LOG_ERROR("[Unsupport][Feature]acltdtQueryQueueRoutes is not supported in this version. Please check.");
+        const char *argList[] = {"feature", "reason"};
+        const char *argVal[] = {"acltdtQueryQueueRoutes", "please check"};
+        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
+            argList, argVal, 2);
+        return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
 
     aclError QueueProcessor::acltdtAllocBuf(size_t size, acltdtBuf *buf)

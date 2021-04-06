@@ -33,7 +33,7 @@
 enum RunEnv {
     ENV_UNKNOWN = -1,
     ENV_HOST = 0,
-    ENV_DEVICE_DEFAULT = 1,
+    ENV_DEVICE_CCPU = 1,
     ENV_DEVICE_MDC = 2,
 };
 

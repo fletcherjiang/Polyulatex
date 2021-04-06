@@ -28,6 +28,7 @@ namespace acl {
             return rtRet;
         }
         static bool isQueueIint = false;
+        std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
         if (!isQueueIint) {
             ACL_LOG_INFO("need to init queue once");
             ACL_REQUIRES_CALL_RTS_OK(rtMemQueueInit(deviceId), rtMemQueueInit);
@@ -39,12 +40,12 @@ namespace acl {
 
     aclError QueueProcessorHost::acltdtDestroyQueue(uint32_t qid)
     {
-        std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
         int32_t deviceId = 0;
         GET_CURRENT_DEVICE_ID(deviceId);
         // get qs id
         pid_t qsPid;
         size_t routeNum = 0;
+        std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
         if (GetDstInfo(deviceId, QS_PID, qsPid) == RT_ERROR_NONE) {
             rtEschedEventSummary_t eventSum = {0};
             rtEschedEventReply_t ack = {0};
@@ -98,6 +99,7 @@ namespace acl {
         attr.manage = permission & ACL_TDT_QUEUE_PERMISSION_MANAGE;
         attr.read = permission & ACL_TDT_QUEUE_PERMISSION_DEQUEUE;
         attr.write = permission & ACL_TDT_QUEUE_PERMISSION_ENQUEUE;
+        std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
         ACL_REQUIRES_CALL_RTS_OK(rtMemQueueGrant(deviceId, qid, pid, &attr), rtMemQueueGrant);
         ACL_LOG_INFO("successfully execute acltdtGrantQueue, qid is %u, pid is %d, permisiion is %u, timeout is %d",
                      qid, pid, permission, timeout);
@@ -111,6 +113,7 @@ namespace acl {
         ACL_REQUIRES_NOT_NULL(permission);
         int32_t deviceId = 0;
         GET_CURRENT_DEVICE_ID(deviceId);
+        std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
         ACL_REQUIRES_CALL_RTS_OK(rtMemQueueAttach(deviceId, qid, timeout), rtMemQueueAttach);
         ACL_LOG_INFO("start to query qid %u permisiion", qid);
         rtMemQueueShareAttr_t attr = {0};
@@ -144,6 +147,7 @@ namespace acl {
         eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
         ack.buf = reinterpret_cast<char *>(&qsRsp);
         ack.bufLen = sizeof(qsRsp);
+        std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
         if (!isQsInit_) {
             // 需要调用rts接口拉起QS
             ACL_REQUIRES_OK(SendConnectQsMsg(deviceId, eventSum, ack));
@@ -172,6 +176,7 @@ namespace acl {
         eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
         ack.buf = reinterpret_cast<char *>(&qsRsp);
         ack.bufLen = sizeof(qsRsp);
+        std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
         ACL_REQUIRES_OK(SendBindUnbindMsg(qRouteList, deviceId, false, false, eventSum, ack));
         ACL_LOG_INFO("Successfully to execute acltdtUnBindQueueRoutes, queue route is %zu", qRouteList->routeList.size());
         return ACL_SUCCESS;
@@ -196,6 +201,7 @@ namespace acl {
         eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
         ack.buf = reinterpret_cast<char *>(&qsRsp);
         ack.bufLen = sizeof(qsRsp);
+        std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
         ACL_REQUIRES_OK(GetQueueRouteNum(queryInfo, deviceId, eventSum, ack));
         size_t routeNum = reinterpret_cast<bqs::QsProcMsgRsp *>(ack.buf)->retValue;
         ACL_REQUIRES_OK(QueryQueueRoutes(queryInfo, deviceId, false, routeNum, eventSum, ack, qRouteList));

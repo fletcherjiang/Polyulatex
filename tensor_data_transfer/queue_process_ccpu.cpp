@@ -22,6 +22,7 @@ namespace acl {
         ACL_REQUIRES_NOT_NULL(attr);
         int32_t deviceId = 0;
         static bool isQueueIint = false;
+        std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
         if (!isQueueIint) {
             ACL_LOG_INFO("need to init queue once");
             ACL_REQUIRES_CALL_RTS_OK(rtMemQueueInit(deviceId), rtMemQueueInit);
@@ -33,61 +34,17 @@ namespace acl {
 
     aclError QueueProcessorCcpu::acltdtDestroyQueue(uint32_t qid)
     {
-        std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
-        int32_t deviceId = 0;
-        // get qs id
-        pid_t dstPid;
-        size_t routeNum = 0;
-        if (GetDstInfo(deviceId, QS_PID, dstPid) == ACL_SUCCESS) {
-            rtEschedEventSummary_t eventSum = {0};
-            rtEschedEventReply_t ack = {0};
-            bqs::QsProcMsgRsp qsRsp = {0};
-            eventSum.pid = dstPid;
-            eventSum.grpId = bqs::BINDQUEUEGRPID;
-            eventSum.eventId = 25; //qs EVENT_ID
-            eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
-            ack.buf = reinterpret_cast<char *>(&qsRsp);
-            ack.bufLen = sizeof(qsRsp);
-            acltdtQueueRouteQueryInfo queryInfo = {bqs::BQS_QUERY_TYPE_SRC_OR_DST, qid, qid};
-            ACL_REQUIRES_OK(GetQueueRouteNum(&queryInfo, deviceId, eventSum, ack));
-            routeNum = reinterpret_cast<bqs::QsProcMsgRsp *>(ack.buf)->retValue;
-        }
-        if (routeNum > 0) {
-            ACL_LOG_ERROR("qid [%u] can not be destroyed, it need to be unbinded first.", qid);
-            return ACL_ERROR_FAILURE;// 需要新增错误码
-        }
-        ACL_REQUIRES_CALL_RTS_OK(rtMemQueueDestroy(deviceId, qid), rtMemQueueDestroy);
-        return ACL_SUCCESS;
+        return acltdtDestroyQueueOndevice(qid);
     }
 
     aclError QueueProcessorCcpu::acltdtEnqueue(uint32_t qid, acltdtBuf buf, int32_t timeout)
     {
-        ACL_REQUIRES_NOT_NULL(buf);
-        int32_t deviceId = 0;
-        QueueDataMutexPtr muPtr = GetMutexForData(qid);
-        ACL_CHECK_MALLOC_RESULT(muPtr);
-        std::lock_guard<std::mutex> lock(muPtr->muForEnqueue);
-        rtError_t rtRet = rtMemQueueEnQueue(deviceId, qid, buf);
-        if (rtRet != RT_ERROR_NONE) {
-            ACL_LOG_CALL_ERROR("[Enqueue][Queue]fail to enqueue result = %d", rtRet);
-            return rtRet;
-        }
-        return ACL_SUCCESS;
+        return acltdtEnqueueOnDevice(qid, buf, timeout);
     }
 
     aclError QueueProcessorCcpu::acltdtDequeue(uint32_t qid, acltdtBuf *buf, int32_t timeout)
     {
-        ACL_REQUIRES_NOT_NULL(buf);
-        int32_t deviceId = 0;
-        QueueDataMutexPtr muPtr = GetMutexForData(qid);
-        ACL_CHECK_MALLOC_RESULT(muPtr);
-        std::lock_guard<std::mutex> lock(muPtr->muForDequeue);
-        rtError_t rtRet = rtMemQueueDeQueue(deviceId, qid, buf);
-        if (rtRet != RT_ERROR_NONE) {
-            ACL_LOG_CALL_ERROR("[Dequeue][Queue]fail to enqueue result = %d", rtRet);
-            return rtRet;
-        }
-        return ACL_SUCCESS;
+        return acltdtDequeueOnDevice(qid, buf, timeout);
     }
 
     aclError QueueProcessorCcpu::acltdtGrantQueue(uint32_t qid, int32_t pid, uint32_t permission, int32_t timeout)
@@ -151,6 +108,7 @@ namespace acl {
         attr.manage = permission & ACL_TDT_QUEUE_PERMISSION_MANAGE;
         attr.read = permission & ACL_TDT_QUEUE_PERMISSION_DEQUEUE;
         attr.write = permission & ACL_TDT_QUEUE_PERMISSION_ENQUEUE;
+        std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
         ACL_REQUIRES_CALL_RTS_OK(rtMemQueueGrant(deviceId, qid, pid, &attr), rtMemQueueGrant);
         ACL_LOG_INFO("successfully execute acltdtGrantQueue, qid is %u, pid is %d, permisiion is %u, timeout is %d",
                      qid, pid, permission, timeout);
@@ -166,6 +124,7 @@ namespace acl {
             ACL_LOG_INNER_ERROR("This process has already create group, master process can not be attached");
             return ACL_ERROR_FAILURE;
         }
+        std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
         ACL_REQUIRES_CALL_RTS_OK(rtMemQueueAttach(deviceId, qid, timeout * 1000), rtMemQueueAttach);
         ACL_LOG_INFO("start to query qid %u permisiion", qid);
         rtMemQueueShareAttr_t attr = {0};
@@ -197,6 +156,7 @@ namespace acl {
         eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
         ack.buf = reinterpret_cast<char *>(&qsRsp);
         ack.bufLen = sizeof(qsRsp);
+        std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
         if (!isQsInit_) {
             // 调用接口拉起QS
             ACL_REQUIRES_OK(SendConnectQsMsg(deviceId, eventSum, ack));
@@ -224,6 +184,7 @@ namespace acl {
         eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
         ack.buf = reinterpret_cast<char *>(&qsRsp);
         ack.bufLen = sizeof(qsRsp);
+        std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
         ACL_REQUIRES_OK(SendBindUnbindMsg(qRouteList, deviceId, false, true, eventSum, ack));
         ACL_LOG_INFO("Successfully to execute acltdtUnBindQueueRoutes, queue route is %zu", qRouteList->routeList.size());
         return ACL_SUCCESS;
@@ -247,6 +208,7 @@ namespace acl {
         eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
         ack.buf = reinterpret_cast<char *>(&qsRsp);
         ack.bufLen = sizeof(qsRsp);
+        std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
         ACL_REQUIRES_OK(GetQueueRouteNum(queryInfo, deviceId, eventSum, ack));
         size_t routeNum = reinterpret_cast<bqs::QsProcMsgRsp *>(ack.buf)->retValue;
         ACL_REQUIRES_OK(QueryQueueRoutes(queryInfo, deviceId, true, routeNum, eventSum, ack, qRouteList));
@@ -286,43 +248,23 @@ namespace acl {
         return ACL_SUCCESS;
     }
 
-    aclError  QueueProcessorCcpu::acltdtAllocBuf(size_t size, acltdtBuf *buf)
+    aclError QueueProcessorCcpu::acltdtAllocBuf(size_t size, acltdtBuf *buf)
     {
         ACL_REQUIRES_OK(CreateGroupIfNoGroup());
         if (isMbufInit_) {
             ACL_REQUIRES_CALL_RTS_OK(rtMbufInit(nullptr), rtMbufInit);
             isMbufInit_ = true;
         }
-        rtError_t rtRet = rtMbufAlloc(buf, size);
-        if (rtRet != RT_ERROR_NONE) {
-            ACL_LOG_CALL_ERROR("[Alloc][mbuf]fail to alloc mbuf result = %d", rtRet);
-            return rtRet;
-        }
-        return ACL_SUCCESS;
+        return acltdtAllocBufOnDevice(size, buf);
     }
 
     aclError QueueProcessorCcpu::acltdtFreeBuf(acltdtBuf buf)
     {
-        if (buf == nullptr) {
-            return ACL_SUCCESS;
-        }
-        ACL_REQUIRES_NOT_NULL(buf);
-        rtError_t rtRet = rtMbufFree(buf);
-        if (rtRet != RT_ERROR_NONE) {
-            ACL_LOG_CALL_ERROR("[Free][mbuf]fail to alloc mbuf result = %d", rtRet);
-            return rtRet;
-        }
-        buf = nullptr;
-        return ACL_SUCCESS;
+        return acltdtFreeBufOnDevice(buf);
     }
 
     aclError QueueProcessorCcpu::acltdtGetBufData(const acltdtBuf buf, void **dataPtr, size_t *size)
     {
-        ACL_REQUIRES_NOT_NULL(buf);
-        ACL_REQUIRES_NOT_NULL(dataPtr);
-        ACL_REQUIRES_NOT_NULL(size);
-        ACL_REQUIRES_CALL_RTS_OK(rtMbufGetBuffAddr(buf, dataPtr), rtMbufGetBuffAddr);
-        ACL_REQUIRES_CALL_RTS_OK(rtMbufGetBuffSize(buf, size), rtMbufGetBuffSize);
-        return ACL_SUCCESS;
+        return acltdtGetBufDataOnDevice(buf, dataPtr, size);
     }
 }

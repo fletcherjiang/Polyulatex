@@ -33,17 +33,17 @@ using QueueDataMutexPtr = std::shared_ptr<QueueDataMutex>;
 class QueueProcessor
 {
 public:
-    virtual aclError acltdtCreateQueue(const acltdtQueueAttr *attr, uint32_t *queueId);
+    virtual aclError acltdtCreateQueue(const acltdtQueueAttr *attr, uint32_t *queueId) = 0;
 
-    virtual aclError acltdtDestroyQueue(uint32_t queueId);
+    virtual aclError acltdtDestroyQueue(uint32_t queueId) = 0;
 
     virtual aclError acltdtEnqueue(uint32_t queueId, acltdtBuf buf, int32_t timeout);
 
     virtual aclError acltdtDequeue(uint32_t queueId, acltdtBuf *buf, int32_t timeout);
 
-    virtual aclError acltdtGrantQueue(uint32_t queueId, int32_t pid, uint32_t flag, int32_t timeout);
+    virtual aclError acltdtGrantQueue(uint32_t queueId, int32_t pid, uint32_t flag, int32_t timeout) = 0;
 
-    virtual aclError acltdtAttachQueue(uint32_t queueId, int32_t timeout, uint32_t *flag);
+    virtual aclError acltdtAttachQueue(uint32_t queueId, int32_t timeout, uint32_t *flag) = 0;
 
     virtual aclError acltdtBindQueueRoutes(acltdtQueueRouteList *qRouteList);
 
@@ -58,6 +58,18 @@ public:
 
     virtual aclError acltdtGetBufData(const acltdtBuf buf, void **dataPtr, size_t *size);
 
+    aclError acltdtDestroyQueueOndevice(uint32_t qid);
+
+    aclError acltdtEnqueueOnDevice(uint32_t queueId, acltdtBuf buf, int32_t timeout);
+
+    aclError acltdtDequeueOnDevice(uint32_t queueId, acltdtBuf *buf, int32_t timeout);
+
+    aclError acltdtAllocBufOnDevice(size_t size, acltdtBuf *buf);
+
+    aclError acltdtFreeBufOnDevice(acltdtBuf buf);
+
+    aclError acltdtGetBufDataOnDevice(const acltdtBuf buf, void **dataPtr, size_t *size);
+
     aclError SendBindUnbindMsg(acltdtQueueRouteList *qRouteList,
                                                int32_t devieId,
                                                bool isBind,
@@ -67,7 +79,6 @@ public:
 
     aclError SendConnectQsMsg(int32_t devieId, rtEschedEventSummary_t &eventSum, rtEschedEventReply_t &ack);
     aclError GetDstInfo(int32_t deviceId, PID_QUERY_TYPE type, pid_t &dstPid);
-    bool HasQueuePermission(rtMemQueueShareAttr_t &permission);
     aclError GetQueuePermission(int32_t deviceId, uint32_t qid, rtMemQueueShareAttr_t &permission);
     aclError GetQueueRouteNum(const acltdtQueueRouteQueryInfo *queryInfo,
                                                           int32_t deviceId,
@@ -104,7 +115,6 @@ protected:
     bool isQsInit_ = false;
     uint32_t qsContactId_ = 0;
 
-private:
 };
 
 }

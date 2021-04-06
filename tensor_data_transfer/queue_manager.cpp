@@ -37,7 +37,7 @@ namespace acl {
                 case ENV_DEVICE_MDC:
                     queueProcessProc_ = std::shared_ptr<QueueProcessorMdc>(new (std::nothrow)QueueProcessorMdc());
                     break;
-                case ENV_DEVICE_DEFAULT:
+                case ENV_DEVICE_CCPU:
                     queueProcessProc_ = std::shared_ptr<QueueProcessorCcpu>(new (std::nothrow)QueueProcessorCcpu());
                     break;
                 default:

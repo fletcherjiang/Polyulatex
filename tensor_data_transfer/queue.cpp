@@ -19,7 +19,6 @@
 #include "runtime/dev.h"
 #include "aicpu/queue_schedule/qs_client.h"
 
-// 最后需要排查rprofling统计，大小阶段，错误日志上报
 namespace {
     aclError CopyParam(const void *src, size_t srcLen, void *dst, size_t dstLen, size_t *realCopySize = nullptr)
     {
@@ -63,7 +62,7 @@ aclError GetRunningEnv(RunEnv &runEnv)
     aclrtRunMode aclRunMode;
     aclError getRunModeRet = aclrtGetRunMode(&aclRunMode);
     if (getRunModeRet != ACL_SUCCESS) {
-        ACL_LOG_INNER_ERROR("[Get][RunMode]get run mode failed, result = %d.", getRunModeRet);
+        ACL_LOG_CALL_ERROR("[Get][RunMode]get run mode failed, result = %d.", getRunModeRet);
         return getRunModeRet;
     }
     if (aclRunMode == ACL_HOST) {
@@ -72,7 +71,8 @@ aclError GetRunningEnv(RunEnv &runEnv)
         // get env config
         const char *sharePoolPreConfig = std::getenv("SHAREGROUP_PRECONFIG");
         if (sharePoolPreConfig == nullptr) {
-            runEnv = ENV_DEVICE_DEFAULT;
+            ACL_LOG_INFO("This is not share group preconfig");
+            runEnv = ENV_DEVICE_CCPU;
         } else {
             ACL_LOG_INFO("This is share group preconfig");
             runEnv = ENV_DEVICE_MDC;
@@ -87,6 +87,7 @@ aclError GetRunningEnv(RunEnv &runEnv)
 aclError acltdtCreateQueue(const acltdtQueueAttr *attr, uint32_t *qid)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_QUEUE, acl::ACL_STAGE_DEFAULT);
+    ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ID);
     auto& qManager = acl::QueueManager::GetInstance();
     auto processor = qManager.GetQueueProcessor();
     if (processor == nullptr) {
@@ -94,12 +95,14 @@ aclError acltdtCreateQueue(const acltdtQueueAttr *attr, uint32_t *qid)
         return ACL_ERROR_FAILURE;
     }
     ACL_REQUIRES_OK(processor->acltdtCreateQueue(attr, qid));
+    ACL_ADD_APPLY_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ID);
     return ACL_SUCCESS;
 }
 
 aclError acltdtDestroyQueue(uint32_t qid)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_QUEUE, acl::ACL_STAGE_DEFAULT);
+    ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ID);
     auto& qManager = acl::QueueManager::GetInstance();
     auto processor = qManager.GetQueueProcessor();
     if (processor == nullptr) {
@@ -107,12 +110,14 @@ aclError acltdtDestroyQueue(uint32_t qid)
         return ACL_ERROR_FAILURE;
     }
     ACL_REQUIRES_OK(processor->acltdtDestroyQueue(qid));
+    ACL_ADD_RELEASE_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ID);
     return ACL_SUCCESS;
 }
 
 aclError acltdtEnqueue(uint32_t qid, acltdtBuf buf, int32_t timeout)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_QUEUE, acl::ACL_STAGE_DEFAULT);
+    ACL_PROFILING_REG(MSPROF_ACL_API_TYPE_OTHERS);
     auto& qManager = acl::QueueManager::GetInstance();
     auto processor = qManager.GetQueueProcessor();
     if (processor == nullptr) {
@@ -126,6 +131,7 @@ aclError acltdtEnqueue(uint32_t qid, acltdtBuf buf, int32_t timeout)
 aclError acltdtDequeue(uint32_t qid, acltdtBuf *buf, int32_t timeout)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_QUEUE, acl::ACL_STAGE_DEFAULT);
+    ACL_PROFILING_REG(MSPROF_ACL_API_TYPE_OTHERS);
     auto& qManager = acl::QueueManager::GetInstance();
     auto processor = qManager.GetQueueProcessor();
     if (processor == nullptr) {
@@ -204,18 +210,21 @@ aclError acltdtQueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo, aclt
 aclError acltdtAllocBuf(size_t size, acltdtBuf *buf)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_MBUF, acl::ACL_STAGE_DEFAULT);
+    ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_MBUF);
     auto& qManager = acl::QueueManager::GetInstance();
     auto processor = qManager.GetQueueProcessor();
     if (processor == nullptr) {
         ACL_LOG_INNER_ERROR("[Check][QueueScheduleprocessor] queue schedule processor is nullptr");
         return ACL_ERROR_FAILURE;
     }
+    ACL_ADD_APPLY_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_MBUF);
     return processor->acltdtAllocBuf(size, buf);
 }
 
 aclError acltdtFreeBuf(acltdtBuf buf)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_MBUF, acl::ACL_STAGE_DEFAULT);
+    ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_MBUF);
     auto& qManager = acl::QueueManager::GetInstance();
     auto processor = qManager.GetQueueProcessor();
     if (processor == nullptr) {
@@ -223,6 +232,7 @@ aclError acltdtFreeBuf(acltdtBuf buf)
         return ACL_ERROR_FAILURE;
     }
     ACL_REQUIRES_OK(processor->acltdtFreeBuf(buf));
+    ACL_ADD_RELEASE_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_MBUF);
     return ACL_SUCCESS;
 }
 
@@ -242,6 +252,7 @@ aclError acltdtGetBufData(const acltdtBuf buf, void **dataPtr, size_t *size)
 acltdtQueueAttr* acltdtCreateQueueAttr()
 {
     ACL_STAGES_REG(acl::ACL_STAGE_QUEUE, acl::ACL_STAGE_DEFAULT);
+    ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ATTR);
     acltdtQueueAttr *attr = new(std::nothrow) acltdtQueueAttr();
     if (attr == nullptr) {
         ACL_LOG_ERROR("[Check][Malloc]Allocate memory for acltdtQueueAttr.");
@@ -251,20 +262,23 @@ acltdtQueueAttr* acltdtCreateQueueAttr()
     attr->flowCtrlFlag = false;
     attr->flowCtrlDropTime = 0;
     attr->overWriteFlag = false;
+    ACL_ADD_APPLY_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ATTR);
     return attr;
 }
 
 aclError acltdtDestroyQueueAttr(const acltdtQueueAttr *attr)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_QUEUE, acl::ACL_STAGE_DEFAULT);
+    ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ATTR);
     ACL_DELETE_AND_SET_NULL(attr);
+    ACL_ADD_RELEASE_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ATTR);
     return ACL_SUCCESS;
 }
 
 aclError acltdtSetQueueAttr(acltdtQueueAttr *attr,
-                                                acltdtQueueAttrType type,
-                                                size_t len,
-                                                const void *value)
+                            acltdtQueueAttrType type,
+                            size_t len,
+                            const void *value)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_QUEUE, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL(attr);
@@ -272,9 +286,13 @@ aclError acltdtSetQueueAttr(acltdtQueueAttr *attr,
     switch (type) {
         case ACL_QUEUE_NAME_PTR:
             {
-                // 需要测试下
                 char *tmp = nullptr;
                 ACL_REQUIRES_OK(CopyParam(value, len, static_cast<void *>(&tmp), sizeof(size_t)));
+                if (strlen(tmp) + 1 > RT_MQ_MAX_NAME_LEN) {
+                    ACL_LOG_ERROR("queue name len [%zu] can not be larger than %u",
+                                  strlen(tmp) + 1, RT_MQ_MAX_NAME_LEN);
+                    return ACL_ERROR_INVALID_PARAM;
+                }
                 return CopyParam(tmp, strlen(tmp) + 1, static_cast<void *>(attr->name), RT_MQ_MAX_NAME_LEN);
             }
         case ACL_QUEUE_DEPTH_UINT32:
@@ -296,7 +314,6 @@ aclError acltdtGetQueueAttr(const acltdtQueueAttr *attr,
     switch (type) {
         case ACL_QUEUE_NAME_PTR:
             {
-                // 需要测试下
                 const char *tmp = &attr->name[0];
                 return CopyParam(static_cast<const void *>(&tmp), sizeof(size_t), value, len, paramRetSize);
             }
@@ -309,6 +326,7 @@ aclError acltdtGetQueueAttr(const acltdtQueueAttr *attr,
 acltdtQueueRoute* acltdtCreateQueueRoute(uint32_t srcQid, uint32_t dstQid)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_QUEUE, acl::ACL_STAGE_DEFAULT);
+    ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ROUTE);
     acltdtQueueRoute *route = new(std::nothrow) acltdtQueueRoute();
     if (route == nullptr) {
         ACL_LOG_ERROR("new acltdtQueueRoute failed");
@@ -317,13 +335,16 @@ acltdtQueueRoute* acltdtCreateQueueRoute(uint32_t srcQid, uint32_t dstQid)
     route->srcId = srcQid;
     route->dstId = dstQid;
     route->status = 0;
+    ACL_ADD_APPLY_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ROUTE);
     return route;
 }
 
 aclError acltdtDestroyQueueRoute(const acltdtQueueRoute *route)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_QUEUE, acl::ACL_STAGE_DEFAULT);
+    ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ROUTE);
     ACL_DELETE_AND_SET_NULL(route);
+    ACL_ADD_RELEASE_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ROUTE);
     return ACL_SUCCESS;
 }
 
@@ -352,13 +373,17 @@ aclError acltdtGetQueueRouteParam(const acltdtQueueRoute *route,
 acltdtQueueRouteList* acltdtCreateQueueRouteList()
 {
     ACL_STAGES_REG(acl::ACL_STAGE_QUEUE, acl::ACL_STAGE_DEFAULT);
+    ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ROUTE_LIST);
+    ACL_ADD_APPLY_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ROUTE_LIST);
     return new(std::nothrow) acltdtQueueRouteList();
 }
 
 aclError acltdtDestroyQueueRouteList(const acltdtQueueRouteList *routeList)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_QUEUE, acl::ACL_STAGE_DEFAULT);
+    ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ROUTE_LIST);
     ACL_DELETE_AND_SET_NULL(routeList);
+    ACL_ADD_RELEASE_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ROUTE_LIST);
     return ACL_SUCCESS;
 }
 
@@ -380,7 +405,6 @@ aclError acltdtGetQueueRoute(const acltdtQueueRouteList *routeList,
     ACL_REQUIRES_NOT_NULL(route);
     if (index >= routeList->routeList.size()) {
         ACL_LOG_ERROR("[Check][index] index [%zu] can not be larger than [%zu]", index, routeList->routeList.size());
-        // 上报
         return ACL_ERROR_INVALID_PARAM;
     }
     *route = routeList->routeList[index];
@@ -389,14 +413,18 @@ aclError acltdtGetQueueRoute(const acltdtQueueRouteList *routeList,
 
  acltdtQueueRouteQueryInfo* acltdtCreateQueueRouteQueryInfo()
  {
-     ACL_STAGES_REG(acl::ACL_STAGE_QUEUE, acl::ACL_STAGE_DEFAULT);
+    ACL_STAGES_REG(acl::ACL_STAGE_QUEUE, acl::ACL_STAGE_DEFAULT);
+    ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ROUTE_QUERY);
+    ACL_ADD_APPLY_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ROUTE_QUERY);
     return new(std::nothrow) acltdtQueueRouteQueryInfo();
  }
 
 aclError acltdtDestroyQueueRouteQueryInfo(const acltdtQueueRouteQueryInfo *param)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_QUEUE, acl::ACL_STAGE_DEFAULT);
+    ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ROUTE_QUERY);
     ACL_DELETE_AND_SET_NULL(param);
+    ACL_ADD_RELEASE_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ROUTE_QUERY);
     return ACL_SUCCESS;
 }
 
