@@ -29,16 +29,16 @@ namespace acl {
     int32_t i = 0;
 }
 
-class UTEST_queue : public testing::Test
+class UTEST_QUEUE : public testing::Test
 {
     public:
-        UTEST_queue(){}
+        UTEST_QUEUE(){}
     protected:
         virtual void SetUp() {}
         virtual void TearDown() {}
 };
 
-TEST_F(UTEST_queue, acltdtCreateQueueAttr_acltdtDestroyQueueAttr)
+TEST_F(UTEST_QUEUE, acltdtCreateQueueAttr_acltdtDestroyQueueAttr)
 {
     acltdtQueueAttr* attr = acltdtCreateQueueAttr();
     EXPECT_NE(attr, nullptr);
@@ -52,7 +52,7 @@ TEST_F(UTEST_queue, acltdtCreateQueueAttr_acltdtDestroyQueueAttr)
     EXPECT_EQ(ret, ACL_SUCCESS);
 }
 
-TEST_F(UTEST_queue, acltdtSetQueueAttr)
+TEST_F(UTEST_QUEUE, acltdtSetQueueAttr)
 {
     size_t len = sizeof(size_t);
     const char* name = "123456789";
@@ -89,7 +89,7 @@ TEST_F(UTEST_queue, acltdtSetQueueAttr)
     EXPECT_EQ(depth, attr.depth);
 }
 
-TEST_F(UTEST_queue, acltdtGetQueueAttr)
+TEST_F(UTEST_QUEUE, acltdtGetQueueAttr)
 {
     size_t len = sizeof(size_t);
     const char* name = nullptr;
@@ -120,7 +120,7 @@ TEST_F(UTEST_queue, acltdtGetQueueAttr)
     EXPECT_EQ(retSize, len);
 }
 
-TEST_F(UTEST_queue, QueueRoute_create_destroy)
+TEST_F(UTEST_QUEUE, QueueRoute_create_destroy)
 {
     acltdtQueueRoute *route =  acltdtCreateQueueRoute(1, 2);
     EXPECT_NE(route, nullptr);
@@ -131,7 +131,7 @@ TEST_F(UTEST_queue, QueueRoute_create_destroy)
     EXPECT_EQ(ret, ACL_SUCCESS);
 }
 
-TEST_F(UTEST_queue, acltdtGetQueueRouteParam)
+TEST_F(UTEST_QUEUE, acltdtGetQueueRouteParam)
 {
     size_t len = sizeof(size_t);
     uint32_t src = 9999;
@@ -165,7 +165,7 @@ TEST_F(UTEST_queue, acltdtGetQueueRouteParam)
     EXPECT_EQ(status, 1);
 }
 
-TEST_F(UTEST_queue, QueueRouteList_create_destroy)
+TEST_F(UTEST_QUEUE, QueueRouteList_create_destroy)
 {
     acltdtQueueRouteList *routeList =  acltdtCreateQueueRouteList();
     EXPECT_NE(routeList, nullptr);
@@ -174,7 +174,7 @@ TEST_F(UTEST_queue, QueueRouteList_create_destroy)
     EXPECT_EQ(ret, ACL_SUCCESS);
 }
 
-TEST_F(UTEST_queue, acltdtAddQueueRoute)
+TEST_F(UTEST_QUEUE, acltdtAddQueueRoute)
 {
     acltdtQueueRouteList routeList;
     acltdtQueueRoute route = {0};
@@ -195,7 +195,7 @@ TEST_F(UTEST_queue, acltdtAddQueueRoute)
     EXPECT_EQ(routeList.routeList.size(), 2);
 }
 
-TEST_F(UTEST_queue, acltdtGetQueueRoute)
+TEST_F(UTEST_QUEUE, acltdtGetQueueRoute)
 {
     acltdtQueueRouteList routeList;
     acltdtQueueRoute route = {0};
@@ -215,7 +215,46 @@ TEST_F(UTEST_queue, acltdtGetQueueRoute)
     EXPECT_EQ(route.status, 0);
 }
 
-TEST_F(UTEST_queue, QueryQueueRoute_create_destroy)
+TEST_F(UTEST_QUEUE, CheckQueueRouteQueryInfo)
+{
+    acltdtQueueRouteQueryInfo queryInfo = {0};
+    queryInfo.srcId = 0;
+    queryInfo.dstId = 1;
+    queryInfo.isConfigMode = false;
+    auto ret = CheckQueueRouteQueryInfo(&queryInfo);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    queryInfo.mode = ACL_TDT_QUEUE_ROUTE_QUERY_SRC;
+    queryInfo.isConfigMode = true;
+    ret = CheckQueueRouteQueryInfo(&queryInfo);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    queryInfo.isConfigSrc = false;
+    ret = CheckQueueRouteQueryInfo(&queryInfo);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+    queryInfo.isConfigSrc = true;
+    ret = CheckQueueRouteQueryInfo(&queryInfo);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+
+    queryInfo.mode = ACL_TDT_QUEUE_ROUTE_QUERY_DST;
+    queryInfo.isConfigDst = false;
+    ret = CheckQueueRouteQueryInfo(&queryInfo);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+    queryInfo.isConfigDst = true;
+    ret = CheckQueueRouteQueryInfo(&queryInfo);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    
+    queryInfo.mode = ACL_TDT_QUEUE_ROUTE_QUERY_SRC_AND_DST;
+    queryInfo.isConfigDst = false;
+    ret = CheckQueueRouteQueryInfo(&queryInfo);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+    queryInfo.isConfigDst = true;
+    queryInfo.isConfigSrc = true;
+    ret = CheckQueueRouteQueryInfo(&queryInfo);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_QUEUE, QueryQueueRoute_create_destroy)
 {
     acltdtQueueRouteQueryInfo *info = acltdtCreateQueueRouteQueryInfo();
     EXPECT_NE(info, nullptr);
@@ -226,7 +265,7 @@ TEST_F(UTEST_queue, QueryQueueRoute_create_destroy)
     EXPECT_EQ(ret, ACL_SUCCESS);
 }
 
-TEST_F(UTEST_queue, acltdtSetQueueRouteQueryInfo)
+TEST_F(UTEST_QUEUE, acltdtSetQueueRouteQueryInfo)
 {
     size_t len = sizeof(uint32_t);
     uint32_t src = 999;
@@ -258,11 +297,350 @@ TEST_F(UTEST_queue, acltdtSetQueueRouteQueryInfo)
     EXPECT_EQ(ret, ACL_SUCCESS);
 }
 
+// host chip default 
+TEST_F(UTEST_QUEUE, acltdtAllocBuf_host)
+{
+     acltdtBuf buf = nullptr;
+     size_t size = 100;
+     EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtGetRunMode(_))
+        .WillOnce(Return((RT_ERROR_NONE)));
+    auto ret = acltdtAllocBuf(size, &buf);
+    EXPECT_EQ(ret, ACL_ERROR_FEATURE_UNSUPPORTED);
+}
 
-TEST_F(UTEST_queue, acltdtCreateQueue)
+TEST_F(UTEST_QUEUE, acltdtFreeBuf_host)
+{
+    acltdtBuf buf = nullptr;
+    auto ret = acltdtFreeBuf(buf);
+    EXPECT_EQ(ret, ACL_ERROR_FEATURE_UNSUPPORTED);
+}
+
+TEST_F(UTEST_QUEUE, acltdtGetBufData_host)
+{
+    acltdtBuf buf = nullptr;
+    void *dataPtr = nullptr;
+    size_t size = 0;
+    auto ret = acltdtGetBufData(buf, &dataPtr, &size);
+    EXPECT_EQ(ret, ACL_ERROR_FEATURE_UNSUPPORTED);
+}
+
+TEST_F(UTEST_QUEUE, acltdtEnqueue_host)
+{
+    acltdtBuf buf = nullptr;
+    uint32_t qid = 0;
+    int32_t timeout = 3000;
+    auto ret = acltdtEnqueue(qid, buf, timeout);
+    EXPECT_EQ(ret, ACL_ERROR_FEATURE_UNSUPPORTED);
+}
+
+TEST_F(UTEST_QUEUE, acltdtDequeue_host)
+{
+    acltdtBuf buf = nullptr;
+    uint32_t qid = 0;
+    int32_t timeout = 3000;
+    auto ret = acltdtDequeue(qid, &buf, timeout);
+    EXPECT_EQ(ret, ACL_ERROR_FEATURE_UNSUPPORTED);
+}
+
+TEST_F(UTEST_QUEUE, acltdtCreateQueue_host)
 {
     uint32_t qid = 0;
-    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtGetRunMode(_))
-         .WillOnce(Return((RT_ERROR_NONE)));
-    auto ret = acltdtCreateQueue(nullptr, &qid);
+    acltdtQueueAttr attr;
+    auto ret = acltdtCreateQueue(&attr, nullptr);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+    ret = acltdtCreateQueue(nullptr, &qid);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+    ret = acltdtCreateQueue(&attr, &qid);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_QUEUE, acltdtDestroyQueue_host)
+{
+    uint32_t qid = 0;
+    auto ret = acltdtDestroyQueue(qid);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_QUEUE, acltdtGrantQueue_host)
+{
+    uint32_t qid = 0;
+    int32_t pid = 888;
+    uint32_t permission = 2;
+    int32_t timeout = 0;
+    auto ret = acltdtGrantQueue(qid, pid, permission, timeout);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_QUEUE, acltdtAttachQueue_host)
+{
+    uint32_t qid = 0;
+    uint32_t permission = 1;
+    int32_t timeout = 0;
+    auto ret = acltdtAttachQueue(qid, timeout, &permission);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_QUEUE, acltdtBindQueueRoutes_host)
+{
+    acltdtQueueRouteList qRouteList;
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtMalloc(_, _, _))
+        .WillRepeatedly(Return((RT_ERROR_NONE)));
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtFree(_))
+        .WillRepeatedly(Return((RT_ERROR_NONE)));
+    auto ret = acltdtBindQueueRoutes(&qRouteList);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_QUEUE, acltdtUnbindQueueRoutes_host)
+{
+    acltdtQueueRouteList qRouteList;
+    auto ret = acltdtUnbindQueueRoutes(&qRouteList);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_QUEUE, acltdtQueryQueueRoutes_host)
+{
+    acltdtQueueRouteList qRouteList;
+    acltdtQueueRouteQueryInfo queryInfo;
+    auto ret = acltdtQueryQueueRoutes(&queryInfo, &qRouteList);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+    queryInfo.mode = ACL_TDT_QUEUE_ROUTE_QUERY_SRC_AND_DST;
+    queryInfo.srcId = 0;
+    queryInfo.dstId = 1;
+    queryInfo.isConfigDst = true;
+    queryInfo.isConfigMode = true;
+    queryInfo.isConfigSrc = true;
+    ret = acltdtQueryQueueRoutes(&queryInfo, &qRouteList);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+
+// mdc chip
+TEST_F(UTEST_QUEUE, acltdtAllocBuf_mdc)
+{
+    acltdtBuf buf = nullptr;
+    size_t size = 100;
+    QueueProcessorMdc queueProcess;
+    auto ret = queueProcess.acltdtAllocBuf(size, &buf);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_QUEUE, acltdtFreeBuf_mdc)
+{
+    QueueProcessorMdc queueProcess;
+    acltdtBuf buf = nullptr;
+    auto ret = queueProcess.acltdtFreeBuf(buf);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_QUEUE, acltdtGetBufData_mdc)
+{
+    acltdtBuf buf = nullptr;
+    void *dataPtr = nullptr;
+    size_t size = 0;
+    QueueProcessorMdc queueProcess;
+    auto ret = queueProcess.acltdtGetBufData(buf, &dataPtr, &size);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+}
+
+TEST_F(UTEST_QUEUE, acltdtEnqueue_mdc)
+{
+    QueueProcessorMdc queueProcess;
+    acltdtBuf buf = nullptr;
+    uint32_t qid = 0;
+    int32_t timeout = 3000;
+    auto ret = queueProcess.acltdtEnqueue(qid, buf, timeout);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+}
+
+TEST_F(UTEST_QUEUE, acltdtDequeue_mdc)
+{
+    QueueProcessorMdc queueProcess;
+    acltdtBuf buf = nullptr;
+    uint32_t qid = 0;
+    int32_t timeout = 3000;
+    auto ret = queueProcess.acltdtDequeue(qid, &buf, timeout);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_QUEUE, acltdtCreateQueue_mdc)
+{
+    QueueProcessorMdc queueProcess;
+    uint32_t qid = 0;
+    acltdtQueueAttr attr;
+    auto ret = queueProcess.acltdtCreateQueue(&attr, nullptr);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+    ret = queueProcess.acltdtCreateQueue(nullptr, &qid);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+    ret = queueProcess.acltdtCreateQueue(&attr, &qid);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_QUEUE, acltdtDestroyQueue_mdc)
+{
+    QueueProcessorMdc queueProcess;
+    uint32_t qid = 0;
+    auto ret = queueProcess.acltdtDestroyQueue(qid);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_QUEUE, acltdtGrantQueue_mdc)
+{
+    QueueProcessorMdc queueProcess;
+    uint32_t qid = 0;
+    int32_t pid = 888;
+    uint32_t permission = 2;
+    int32_t timeout = 0;
+    auto ret = queueProcess.acltdtGrantQueue(qid, pid, permission, timeout);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_QUEUE, acltdtAttachQueue_mdc)
+{
+    QueueProcessorMdc queueProcess;
+    uint32_t qid = 0;
+    uint32_t permission = 1;
+    int32_t timeout = 0;
+    auto ret = queueProcess.acltdtAttachQueue(qid, timeout, &permission);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_QUEUE, acltdtBindQueueRoutes_mdc)
+{
+    QueueProcessorMdc queueProcess;
+    acltdtQueueRouteList qRouteList;
+    auto ret = queueProcess.acltdtBindQueueRoutes(&qRouteList);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_QUEUE, acltdtUnbindQueueRoutes_mdc)
+{
+    QueueProcessorMdc queueProcess;
+    acltdtQueueRouteList qRouteList;
+    auto ret = queueProcess.acltdtUnbindQueueRoutes(&qRouteList);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_QUEUE, acltdtQueryQueueRoutes_mdc)
+{
+    QueueProcessorMdc queueProcess;
+    acltdtQueueRouteList qRouteList;
+    acltdtQueueRouteQueryInfo queryInfo;
+    auto ret = queueProcess.acltdtQueryQueueRoutes(&queryInfo, &qRouteList);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+// ccpu chip
+TEST_F(UTEST_QUEUE, acltdtAllocBuf_ccpu)
+{
+    acltdtBuf buf = nullptr;
+    size_t size = 100;
+    QueueProcessorCcpu queueProcess;
+    auto ret = queueProcess.acltdtAllocBuf(size, &buf);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_QUEUE, acltdtFreeBuf_ccpu)
+{
+    QueueProcessorCcpu queueProcess;
+    acltdtBuf buf = nullptr;
+    auto ret = queueProcess.acltdtFreeBuf(buf);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_QUEUE, acltdtGetBufData_ccpu)
+{
+    acltdtBuf buf = nullptr;
+    void *dataPtr = nullptr;
+    size_t size = 0;
+    QueueProcessorCcpu queueProcess;
+    auto ret = queueProcess.acltdtGetBufData(buf, &dataPtr, &size);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+}
+
+TEST_F(UTEST_QUEUE, acltdtEnqueue_ccpu)
+{
+    QueueProcessorCcpu queueProcess;
+    acltdtBuf buf = nullptr;
+    uint32_t qid = 0;
+    int32_t timeout = 3000;
+    auto ret = queueProcess.acltdtEnqueue(qid, buf, timeout);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+}
+
+TEST_F(UTEST_QUEUE, acltdtDequeue_ccpu)
+{
+    QueueProcessorCcpu queueProcess;
+    acltdtBuf buf = nullptr;
+    uint32_t qid = 0;
+    int32_t timeout = 3000;
+    auto ret = queueProcess.acltdtDequeue(qid, &buf, timeout);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_QUEUE, acltdtCreateQueue_ccpu)
+{
+    QueueProcessorCcpu queueProcess;
+    uint32_t qid = 0;
+    acltdtQueueAttr attr;
+    auto ret = queueProcess.acltdtCreateQueue(&attr, nullptr);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+    ret = queueProcess.acltdtCreateQueue(nullptr, &qid);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+    ret = queueProcess.acltdtCreateQueue(&attr, &qid);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_QUEUE, acltdtDestroyQueue_ccpu)
+{
+    QueueProcessorCcpu queueProcess;
+    uint32_t qid = 0;
+    auto ret = queueProcess.acltdtDestroyQueue(qid);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_QUEUE, acltdtGrantQueue_ccpu)
+{
+    QueueProcessorCcpu queueProcess;
+    uint32_t qid = 0;
+    int32_t pid = 888;
+    uint32_t permission = 2;
+    int32_t timeout = 0;
+    auto ret = queueProcess.acltdtGrantQueue(qid, pid, permission, timeout);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_QUEUE, acltdtAttachQueue_ccpu)
+{
+    QueueProcessorCcpu queueProcess;
+    uint32_t qid = 0;
+    uint32_t permission = 1;
+    int32_t timeout = 0;
+    auto ret = queueProcess.acltdtAttachQueue(qid, timeout, &permission);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_QUEUE, acltdtBindQueueRoutes_ccpu)
+{
+    QueueProcessorCcpu queueProcess;
+    acltdtQueueRouteList qRouteList;
+    auto ret = queueProcess.acltdtBindQueueRoutes(&qRouteList);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_QUEUE, acltdtUnbindQueueRoutes_ccpu)
+{
+    QueueProcessorCcpu queueProcess;
+    acltdtQueueRouteList qRouteList;
+    auto ret = queueProcess.acltdtUnbindQueueRoutes(&qRouteList);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+}
+
+TEST_F(UTEST_QUEUE, acltdtQueryQueueRoutes_ccpu)
+{
+    QueueProcessorCcpu queueProcess;
+    acltdtQueueRouteList qRouteList;
+    acltdtQueueRouteQueryInfo queryInfo;
+    auto ret = queueProcess.acltdtQueryQueueRoutes(&queryInfo, &qRouteList);
+    EXPECT_EQ(ret, ACL_SUCCESS);
 }

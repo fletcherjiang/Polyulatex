@@ -547,10 +547,6 @@ size_t acltdtGetDatasetSize(const acltdtDataset *dataset)
 
 acltdtChannelHandle *acltdtCreateChannel(uint32_t deviceId, const char *name)
 {
-    // if (rtMemQueueInit(deviceId) != ACL_ERROR_RT_FEATURE_NOT_SUPPORT) {
-    //     uint32_t maxDepth = 3;
-    //     return acltdtCreateChannelWithDepth(deviceId, name, maxDepth);
-    // }
     ACL_STAGES_REG(acl::ACL_STAGE_CREATE, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_RET_NULL(name);
     auto ret = tdt::TdtHostInit(deviceId);
@@ -649,9 +645,9 @@ aclError acltdtDestroyChannel(acltdtChannelHandle *handle)
         handle->devId, handle->name.c_str());
     if (!handle->isTdtProcess) {
         ACL_REQUIRES_OK(acltdtDestroyQueue(handle->qid));
-        ACL_DELETE_AND_SET_NULL(handle);
         ACL_LOG_INFO("acltdtDestroyChannel success, device is %u, name is %s",
             handle->devId, handle->name.c_str());
+        ACL_DELETE_AND_SET_NULL(handle);
         return ACL_SUCCESS;
     }
     std::unique_lock<std::mutex> lk(aclChannleMutex);
@@ -800,12 +796,6 @@ static aclError UnpackageRecvDataInfo(uint8_t *outputHostAddr, size_t size, std:
         }
         aclTdtDataItemInfo item;
         ItemInfo *tmp = reinterpret_cast<ItemInfo *>(outputHostAddr + offset);
-        // item.ctrlInfo.dataType = tmp->dataType;
-        // item.ctrlInfo.curCnt = tmp->curCnt;
-        // item.ctrlInfo.cnt = tmp->cnt;
-        // item.ctrlInfo.tensorType = tmp->tensorType;
-        // item.ctrlInfo.dimNum = tmp->dimNum;
-        // item.ctrlInfo.dataLen = tmp->dataLen;
         item.ctrlInfo = *tmp;
         ACL_LOG_INFO("Unpack data, dataType %d, curCnt %u, cnt %u, tensorType %d, dimNum %u, dataLen %lu",
                      tmp->dataType, tmp->curCnt, tmp->cnt, tmp->tensorType, tmp->dimNum, tmp->dataLen);

@@ -63,6 +63,7 @@ namespace acl {
             return ACL_ERROR_FAILURE;// 需要新增错误码
         }
         ACL_REQUIRES_CALL_RTS_OK(rtMemQueueDestroy(deviceId, qid), rtMemQueueDestroy);
+        DeleteMutexForData(qid);
         ACL_LOG_INFO("successfully to execute destroy queue %u", qid);
         return ACL_SUCCESS;
     }
@@ -74,19 +75,21 @@ namespace acl {
         ACL_CHECK_MALLOC_RESULT(muPtr);
         uint64_t startTime = GetTimestamp();
         uint64_t endTime = 0;
+        bool continueFlag = (timeout < 0) ? true : false;
         do {
             std::lock_guard<std::mutex> lock(muPtr->muForEnqueue);
             int32_t deviceId = 0;
             rtError_t rtRet = rtMemQueueEnQueue(deviceId, qid, buf);
             if (rtRet == RT_ERROR_NONE) {
                 return ACL_SUCCESS;
-            } else if (rtRet != 5555555) { // 队列满的错误码
+            } else if (rtRet != ACL_ERROR_RT_QUEUE_FULL) { // 队列满的错误码
                 ACL_LOG_CALL_ERROR("[Enqueue][Queue]fail to enqueue result = %d", rtRet);
                 return rtRet;
             }
-            // 是否需要sleep？
+            // 是否需要sleep?
             endTime = GetTimestamp();
-        } while ((endTime - startTime >= (timeout * 10000)));
+            continueFlag = !continueFlag && ((endTime - startTime) <= (static_cast<uint64_t>(timeout) * 10000));
+        } while (continueFlag);
         return ACL_ERROR_FAILURE; // 是否需要超时错误码？
     }
 
@@ -97,19 +100,21 @@ namespace acl {
         ACL_CHECK_MALLOC_RESULT(muPtr);
         uint64_t startTime = GetTimestamp();
         uint64_t endTime = 0;
+        bool continueFlag = (timeout < 0) ? true : false;
         do {
             std::lock_guard<std::mutex> lock(muPtr->muForEnqueue);
             int32_t deviceId = 0;
             rtError_t rtRet = rtMemQueueDeQueue(deviceId, qid, buf);
             if (rtRet == RT_ERROR_NONE) {
                 return ACL_SUCCESS;
-            } else if (rtRet != 5555555) { // 队列空的错误码
+            } else if (rtRet != ACL_ERROR_RT_QUEUE_EMPTY) { // 队列空的错误码
                 ACL_LOG_CALL_ERROR("[Dequeue][Queue]fail to dequeue result = %d", rtRet);
                 return rtRet;
             }
             // 是否需要sleep？
             endTime = GetTimestamp();
-        } while ((endTime - startTime >= (timeout * 10000)));
+            continueFlag = !continueFlag && ((endTime - startTime) <= (static_cast<uint64_t>(timeout) * 10000));
+        } while (continueFlag);
         return ACL_ERROR_FAILURE; // 超时错误码？
     }
 
@@ -172,6 +177,7 @@ namespace acl {
         ACL_LOG_INFO("start to get dst pid, deviceId is %d, type is %d", deviceId, type);
         ACL_REQUIRES_CALL_RTS_OK(rtQueryDevPid(&info, &dstPid), rtQueryDevPid);
         ACL_LOG_INFO("get dst pid %d success, type is %d", dstPid, type);
+        return ACL_SUCCESS;
     }
 
     aclError AllocBuf(void *devPtr, void *mBuf, size_t size, bool isMbuf)

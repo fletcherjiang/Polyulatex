@@ -90,10 +90,7 @@ aclError acltdtCreateQueue(const acltdtQueueAttr *attr, uint32_t *qid)
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ID);
     auto& qManager = acl::QueueManager::GetInstance();
     auto processor = qManager.GetQueueProcessor();
-    if (processor == nullptr) {
-        ACL_LOG_INNER_ERROR("[Check][Queueprocessor] queue processor is nullptr");
-        return ACL_ERROR_FAILURE;
-    }
+    ACL_REQUIRES_NOT_NULL_WITH_INNER_REPORT(processor);
     ACL_REQUIRES_OK(processor->acltdtCreateQueue(attr, qid));
     ACL_ADD_APPLY_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ID);
     return ACL_SUCCESS;
@@ -105,10 +102,7 @@ aclError acltdtDestroyQueue(uint32_t qid)
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ID);
     auto& qManager = acl::QueueManager::GetInstance();
     auto processor = qManager.GetQueueProcessor();
-    if (processor == nullptr) {
-        ACL_LOG_INNER_ERROR("[Check][Queueprocessor] queue processor is nullptr");
-        return ACL_ERROR_FAILURE;
-    }
+    ACL_REQUIRES_NOT_NULL_WITH_INNER_REPORT(processor);
     ACL_REQUIRES_OK(processor->acltdtDestroyQueue(qid));
     ACL_ADD_RELEASE_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ID);
     return ACL_SUCCESS;
@@ -120,10 +114,7 @@ aclError acltdtEnqueue(uint32_t qid, acltdtBuf buf, int32_t timeout)
     ACL_PROFILING_REG(MSPROF_ACL_API_TYPE_OTHERS);
     auto& qManager = acl::QueueManager::GetInstance();
     auto processor = qManager.GetQueueProcessor();
-    if (processor == nullptr) {
-        ACL_LOG_INNER_ERROR("[Check][Queueprocessor] queue processor is nullptr");
-        return ACL_ERROR_FAILURE;
-    }
+    ACL_REQUIRES_NOT_NULL_WITH_INNER_REPORT(processor);
     ACL_REQUIRES_OK(processor->acltdtEnqueue(qid, buf, timeout));
     return ACL_SUCCESS;
 }
@@ -134,10 +125,7 @@ aclError acltdtDequeue(uint32_t qid, acltdtBuf *buf, int32_t timeout)
     ACL_PROFILING_REG(MSPROF_ACL_API_TYPE_OTHERS);
     auto& qManager = acl::QueueManager::GetInstance();
     auto processor = qManager.GetQueueProcessor();
-    if (processor == nullptr) {
-        ACL_LOG_INNER_ERROR("[Check][Queueprocessor] queue processor is nullptr");
-        return ACL_ERROR_FAILURE;
-    }
+    ACL_REQUIRES_NOT_NULL_WITH_INNER_REPORT(processor);
     ACL_REQUIRES_OK(processor->acltdtDequeue(qid, buf, timeout));
     return ACL_SUCCESS;
 }
@@ -147,10 +135,7 @@ aclError acltdtGrantQueue(uint32_t qid, int32_t pid, uint32_t permission, int32_
     ACL_STAGES_REG(acl::ACL_STAGE_QUEUE, acl::ACL_STAGE_DEFAULT);
     auto& qManager = acl::QueueManager::GetInstance();
     auto processor = qManager.GetQueueProcessor();
-    if (processor == nullptr) {
-        ACL_LOG_INNER_ERROR("[Check][Queueprocessor] queue processor is nullptr");
-        return ACL_ERROR_FAILURE;
-    }
+    ACL_REQUIRES_NOT_NULL_WITH_INNER_REPORT(processor);
     ACL_REQUIRES_OK(processor->acltdtGrantQueue(qid, pid, permission, timeout));
     return ACL_SUCCESS;
 }
@@ -160,10 +145,7 @@ aclError acltdtAttachQueue(uint32_t qid, int32_t timeout, uint32_t *permission)
     ACL_STAGES_REG(acl::ACL_STAGE_QUEUE, acl::ACL_STAGE_DEFAULT);
     auto& qManager = acl::QueueManager::GetInstance();
     auto processor = qManager.GetQueueProcessor();
-    if (processor == nullptr) {
-        ACL_LOG_INNER_ERROR("[Check][Queueprocessor] queue processor is nullptr");
-        return ACL_ERROR_FAILURE;
-    }
+    ACL_REQUIRES_NOT_NULL_WITH_INNER_REPORT(processor);
     ACL_REQUIRES_OK(processor->acltdtAttachQueue(qid, timeout * 1000, permission));
     return ACL_SUCCESS;
 }
@@ -173,10 +155,7 @@ aclError acltdtBindQueueRoutes(acltdtQueueRouteList *qRouteList)
     ACL_STAGES_REG(acl::ACL_STAGE_QUEUE, acl::ACL_STAGE_DEFAULT);
     auto& qManager = acl::QueueManager::GetInstance();
     auto processor = qManager.GetQueueProcessor();
-    if (processor == nullptr) {
-        ACL_LOG_INNER_ERROR("[Check][QueueScheduleprocessor] queue schedule processor is nullptr");
-        return ACL_ERROR_FAILURE;
-    }
+    ACL_REQUIRES_NOT_NULL_WITH_INNER_REPORT(processor);
     ACL_REQUIRES_OK(processor->acltdtBindQueueRoutes(qRouteList));
     return ACL_SUCCESS;
 }
@@ -186,10 +165,7 @@ aclError acltdtUnbindQueueRoutes(acltdtQueueRouteList *qRouteList)
     ACL_STAGES_REG(acl::ACL_STAGE_QUEUE, acl::ACL_STAGE_DEFAULT);
     auto& qManager = acl::QueueManager::GetInstance();
     auto processor = qManager.GetQueueProcessor();
-    if (processor == nullptr) {
-        ACL_LOG_INNER_ERROR("[Check][QueueScheduleprocessor] queue schedule processor is nullptr");
-        return ACL_ERROR_FAILURE;
-    }
+    ACL_REQUIRES_NOT_NULL_WITH_INNER_REPORT(processor);
     ACL_REQUIRES_OK(processor->acltdtUnbindQueueRoutes(qRouteList));
     return ACL_SUCCESS;
 }
@@ -207,6 +183,7 @@ aclError CheckQueueRouteQueryInfo(const acltdtQueueRouteQueryInfo *queryInfo)
                 ACL_LOG_ERROR("src qid must be set in acltdtQueueRouteQueryInfo, please ues acltdtSetQueueRouteQueryInfo");
                 return ACL_ERROR_INVALID_PARAM;
             }
+            break;
         }
         case ACL_TDT_QUEUE_ROUTE_QUERY_DST :
         {
@@ -214,6 +191,7 @@ aclError CheckQueueRouteQueryInfo(const acltdtQueueRouteQueryInfo *queryInfo)
                 ACL_LOG_ERROR("dst qid must be set in acltdtQueueRouteQueryInfo, please ues acltdtSetQueueRouteQueryInfo");
                 return ACL_ERROR_INVALID_PARAM;
             }
+            break;
         }
         case ACL_TDT_QUEUE_ROUTE_QUERY_SRC_AND_DST :
         {
@@ -221,6 +199,7 @@ aclError CheckQueueRouteQueryInfo(const acltdtQueueRouteQueryInfo *queryInfo)
                 ACL_LOG_ERROR("src and dst qid must be set in acltdtQueueRouteQueryInfo, please ues acltdtSetQueueRouteQueryInfo");
                 return ACL_ERROR_INVALID_PARAM;
             }
+            break;
         }
     }
     return ACL_SUCCESS;
@@ -229,14 +208,12 @@ aclError CheckQueueRouteQueryInfo(const acltdtQueueRouteQueryInfo *queryInfo)
 aclError acltdtQueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo, acltdtQueueRouteList *qRouteList)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_QUEUE, acl::ACL_STAGE_DEFAULT);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(qRouteList);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(queryInfo);
     ACL_REQUIRES_OK(CheckQueueRouteQueryInfo(queryInfo));
     auto& qManager = acl::QueueManager::GetInstance();
     auto processor = qManager.GetQueueProcessor();
-    if (processor == nullptr) {
-        ACL_LOG_INNER_ERROR("[Check][QueueScheduleprocessor] queue schedule processor is nullptr");
-        return ACL_ERROR_FAILURE;
-    }
+    ACL_REQUIRES_NOT_NULL_WITH_INNER_REPORT(processor);
     ACL_REQUIRES_OK(processor->acltdtQueryQueueRoutes(queryInfo, qRouteList));
     return ACL_SUCCESS;
 }
@@ -247,10 +224,7 @@ aclError acltdtAllocBuf(size_t size, acltdtBuf *buf)
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_MBUF);
     auto& qManager = acl::QueueManager::GetInstance();
     auto processor = qManager.GetQueueProcessor();
-    if (processor == nullptr) {
-        ACL_LOG_INNER_ERROR("[Check][QueueScheduleprocessor] queue schedule processor is nullptr");
-        return ACL_ERROR_FAILURE;
-    }
+    ACL_REQUIRES_NOT_NULL_WITH_INNER_REPORT(processor);
     ACL_ADD_APPLY_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_MBUF);
     return processor->acltdtAllocBuf(size, buf);
 }
@@ -261,10 +235,7 @@ aclError acltdtFreeBuf(acltdtBuf buf)
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_MBUF);
     auto& qManager = acl::QueueManager::GetInstance();
     auto processor = qManager.GetQueueProcessor();
-    if (processor == nullptr) {
-        ACL_LOG_INNER_ERROR("[Check][QueueScheduleprocessor] queue schedule processor is nullptr");
-        return ACL_ERROR_FAILURE;
-    }
+    ACL_REQUIRES_NOT_NULL_WITH_INNER_REPORT(processor);
     ACL_REQUIRES_OK(processor->acltdtFreeBuf(buf));
     ACL_ADD_RELEASE_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_MBUF);
     return ACL_SUCCESS;
@@ -275,10 +246,7 @@ aclError acltdtGetBufData(const acltdtBuf buf, void **dataPtr, size_t *size)
     ACL_STAGES_REG(acl::ACL_STAGE_MBUF, acl::ACL_STAGE_DEFAULT);
     auto& qManager = acl::QueueManager::GetInstance();
     auto processor = qManager.GetQueueProcessor();
-    if (processor == nullptr) {
-        ACL_LOG_INNER_ERROR("[Check][QueueScheduleprocessor] queue schedule processor is nullptr");
-        return ACL_ERROR_FAILURE;
-    }
+    ACL_REQUIRES_NOT_NULL_WITH_INNER_REPORT(processor);
     ACL_REQUIRES_OK(processor->acltdtGetBufData(buf, dataPtr, size));
     return ACL_SUCCESS;
 }

@@ -67,6 +67,7 @@ namespace acl {
             return ACL_ERROR_FAILURE;// 需要新增错误码
         }
         ACL_REQUIRES_CALL_RTS_OK(rtMemQueueDestroy(deviceId, qid), rtMemQueueDestroy);
+        DeleteMutexForData(qid);
         return ACL_SUCCESS;
     }
 
@@ -87,14 +88,19 @@ namespace acl {
         info.hostPid = mmGetPid();
         info.cpType = RT_DEV_PROCESS_CP1;
         info.chipId = deviceId;
+        bool continueFlag = (timeout < 0) ? true : false;
         do {
             if (rtQueryDevPid(&info, &cpPid) != RT_ERROR_NONE) {
                 ACL_LOG_WARN("can not acquire cp pid, try again");
+            } else {
+                ACL_LOG_INFO("get cp pid %d", cpPid);
+                break;
             }
             // 是否需要sleep？
             endTime = GetTimestamp();
-        } while ((endTime - startTime >= (timeout * 10000)));
-        ACL_LOG_INFO("get cp pid %d", cpPid);
+            continueFlag = !continueFlag && ((endTime - startTime) <= (static_cast<uint64_t>(timeout) * 10000));
+        } while (continueFlag);
+        
         rtMemQueueShareAttr_t attr = {0};
         attr.manage = permission & ACL_TDT_QUEUE_PERMISSION_MANAGE;
         attr.read = permission & ACL_TDT_QUEUE_PERMISSION_DEQUEUE;

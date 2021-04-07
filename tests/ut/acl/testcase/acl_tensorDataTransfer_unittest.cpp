@@ -456,3 +456,25 @@ TEST_F(UTEST_tensor_data_transfer, acltdtGetDimsFromItemTest)
     acltdtDataItem *dataItem = (acltdtDataItem *)0x11;
     acltdtGetDimsFromItem(dataItem, dims, dimNum);
 }
+
+TEST_F(UTEST_tensor_data_transfer, acltdtSendTensorV2)
+{
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtGetRunMode(_))
+        .WillOnce(Return((RT_ERROR_NONE)));
+    acltdtChannelHandle *handle = acltdtCreateChannelWithDepth(0, "test", 3);
+    acltdtDataset *dataset = acltdtCreateDataset();
+    int32_t timeout = 300;
+    auto ret = acltdtSendTensorV2(handle, dataset, timeout);
+    acltdtDestroyChannel(handle);
+    acltdtDestroyDataset(dataset);
+}
+
+TEST_F(UTEST_tensor_data_transfer, acltdtReceiveTensorV2)
+{
+    acltdtChannelHandle *handle = acltdtCreateChannelWithDepth(0, "test", 3);
+    acltdtDataset *dataset = acltdtCreateDataset();
+    int32_t timeout = 300;
+    auto ret = acltdtReceiveTensorV2(handle, dataset, timeout);
+    acltdtDestroyChannel(handle);
+    acltdtDestroyDataset(dataset);
+}
