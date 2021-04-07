@@ -45,6 +45,9 @@ struct acltdtQueueRouteQueryInfo {
     int32_t mode;
     uint32_t srcId;
     uint32_t dstId;
+    bool isConfigMode;
+    bool isConfigSrc;
+    bool isConfigDst;
 };
 
 struct acltdtQueueRoute {
@@ -53,6 +56,7 @@ struct acltdtQueueRoute {
     int32_t status;
 };
 
+aclError CheckQueueRouteQueryInfo(const acltdtQueueRouteQueryInfo *queryInfo);
 aclError GetRunningEnv(RunEnv &runEnv);
 uint64_t GetTimestamp();
 

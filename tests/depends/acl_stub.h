@@ -29,6 +29,7 @@
 #include "runtime/kernel.h"
 #include "runtime/base.h"
 #include "runtime/config.h"
+#include "runtime/rt_mem_queue.h"
 
 #include "adx_datadump_server.h"
 #include "mmpa/mmpa_api.h"
@@ -203,6 +204,54 @@ public:
     virtual rtError_t rtGetDeviceCapability(int32_t device, int32_t moduleType, int32_t featureType, int32_t *value);
     virtual rtError_t rtSetOpWaitTimeOut(uint32_t timeout);
     virtual rtError_t rtSetOpExecuteTimeOut(uint32_t timeout);
+
+    virtual rtError_t rtMemQueueCreate(int32_t devId, const rtMemQueueAttr_t *queAttr, uint32_t *qid);
+
+    virtual rtError_t rtMemQueueDestroy(int32_t devId, uint32_t qid);
+
+    virtual rtError_t rtMemQueueInit(int32_t devId);
+
+    virtual rtError_t rtMemQueueEnQueue(int32_t devId, uint32_t qid, void *mbuf);
+
+    virtual rtError_t rtMemQueueDeQueue(int32_t devId, uint32_t qid, void **mbuf);
+
+    virtual rtError_t rtMemQueuePeek(int32_t devId, uint32_t qid, size_t *bufLen, int32_t timeout);
+
+    virtual rtError_t rtMemQueueEnQueueBuf(int32_t devId, uint32_t qid, rtMemQueueBuff_t *inBuf, int32_t timeout);
+
+    virtual rtError_t rtMemQueueDeQueueBuf(int32_t devId, uint32_t qid, rtMemQueueBuff_t *outBuf, int32_t timeout);
+
+    virtual rtError_t rtMemQueueQuery(int32_t devId, rtMemQueueQueryCmd_t cmd, void *inBuff, uint32_t inLen,
+                                    void *outBuff, uint32_t *outLen);
+
+    virtual rtError_t rtMemQueueGrant(int32_t devId, uint32_t qid, int32_t pid, rtMemQueueShareAttr_t *attr);
+
+    virtual rtError_t rtMemQueueAttach(int32_t devId, uint32_t qid, int32_t timeout);
+
+    virtual rtError_t rtEschedSubmitEventSync(int32_t devId, rtEschedEventSummary_t *event, rtEschedEventReply_t *ack);
+
+    virtual rtError_t rtQueryDevPid(rtBindHostpidInfo_t *info, pid_t *devPid);
+
+    virtual rtError_t rtMbufInit(rtMemBuffCfg_t *cfg);
+
+    virtual rtError_t rtMbufAlloc(rtMbufPtr_t *mbuf, uint64_t size);
+
+    virtual rtError_t rtMbufFree(rtMbufPtr_t mbuf);
+
+    virtual rtError_t rtMbufGetBuffAddr(rtMbufPtr_t mbuf, void **databuf);
+
+    virtual rtError_t rtMbufGetBuffSize(rtMbufPtr_t mbuf, uint64_t *size);
+
+    virtual rtError_t rtMbufGetPrivInfo(rtMbufPtr_t mbuf, void **priv, uint64_t *size);
+
+    virtual rtError_t rtMemGrpCreate(const char *name, const rtMemGrpConfig_t *cfg);
+
+    virtual rtError_t rtMemGrpAddProc(const char *name, int32_t pid, const rtMemGrpShareAttr_t *attr);
+
+    virtual rtError_t rtMemGrpAttach(const char *name, int32_t timeout);
+
+    virtual rtError_t rtMemGrpQuery(int32_t cmd, const rtMemGrpQueryInput_t *input, rtMemGrpQueryOutput_t *output);
+
 
     // tdt function
     virtual int32_t TdtHostInit(uint32_t deviceId);
@@ -395,10 +444,35 @@ public:
     MOCK_METHOD1(rtSetOpWaitTimeOut, rtError_t(uint32_t timeout));
     MOCK_METHOD1(rtSetOpExecuteTimeOut, rtError_t(uint32_t timeout));
 
+    MOCK_METHOD3(rtMemQueueCreate, rtError_t(int32_t devId, const rtMemQueueAttr_t *queAttr, uint32_t *qid));
+    MOCK_METHOD2(rtMemQueueDestroy, rtError_t(int32_t devId, uint32_t qid));
+    MOCK_METHOD1(rtMemQueueInit, rtError_t(int32_t devId));
+    MOCK_METHOD3(rtMemQueueEnQueue, rtError_t(int32_t devId, uint32_t qid, void *mbuf));
+    MOCK_METHOD3(rtMemQueueDeQueue, rtError_t(int32_t devId, uint32_t qid, void **mbuf));
+    MOCK_METHOD4(rtMemQueuePeek, rtError_t(int32_t devId, uint32_t qid, size_t *bufLen, int32_t timeout));
+    MOCK_METHOD4(rtMemQueueEnQueueBuf, rtError_t(int32_t devId, uint32_t qid, rtMemQueueBuff_t *inBuf, int32_t timeout));
+    MOCK_METHOD4(rtMemQueueDeQueueBuf, rtError_t(int32_t devId, uint32_t qid, rtMemQueueBuff_t *outBuf, int32_t timeout));
+    MOCK_METHOD6(rtMemQueueQuery, rtError_t(int32_t devId, rtMemQueueQueryCmd_t cmd, void *inBuff, uint32_t inLen,
+                                    void *outBuff, uint32_t *outLen));
+
+    MOCK_METHOD4(rtMemQueueGrant, rtError_t(int32_t devId, uint32_t qid, int32_t pid, rtMemQueueShareAttr_t *attr));
+    MOCK_METHOD3(rtMemQueueAttach, rtError_t(int32_t devId, uint32_t qid, int32_t timeout));
+    MOCK_METHOD3(rtEschedSubmitEventSync, rtError_t(int32_t devId, rtEschedEventSummary_t *event, rtEschedEventReply_t *ack));
+    MOCK_METHOD2(rtQueryDevPid, rtError_t(rtBindHostpidInfo_t *info, pid_t *devPid));
+    MOCK_METHOD1(rtMbufInit, rtError_t(rtMemBuffCfg_t *cfg));
+    MOCK_METHOD2(rtMbufAlloc, rtError_t(rtMbufPtr_t *mbuf, uint64_t size));
+    MOCK_METHOD1(rtMbufFree, rtError_t(rtMbufPtr_t mbuf));
+    MOCK_METHOD2(rtMbufGetBuffAddr, rtError_t(rtMbufPtr_t mbuf, void **databuf));
+    MOCK_METHOD2(rtMbufGetBuffSize, rtError_t(rtMbufPtr_t mbuf, uint64_t *size));
+    MOCK_METHOD3(rtMbufGetPrivInfo, rtError_t(rtMbufPtr_t mbuf, void **priv, uint64_t *size));
+    MOCK_METHOD2(rtMemGrpCreate, rtError_t(const char *name, const rtMemGrpConfig_t *cfg));
+    MOCK_METHOD3(rtMemGrpAddProc, rtError_t(const char *name, int32_t pid, const rtMemGrpShareAttr_t *attr));
+    MOCK_METHOD2(rtMemGrpAttach, rtError_t(const char *name, int32_t timeout));
+    MOCK_METHOD3(rtMemGrpQuery, rtError_t(int32_t cmd, const rtMemGrpQueryInput_t *input, rtMemGrpQueryOutput_t *output));
+
     //prof function stub
     MOCK_METHOD0(MsprofFinalize, int32_t());
     MOCK_METHOD3(MsprofInit, int32_t(uint32_t aclDataType, void *data, uint32_t dataLen));
-
 
     // adx function stub
     MOCK_METHOD0(AdxDataDumpServerInit, int());
