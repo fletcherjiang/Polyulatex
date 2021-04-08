@@ -38,8 +38,6 @@ namespace {
         {"double",   ACL_DOUBLE},
         {"string",   ACL_STRING}
     };
-    int32_t g_test_acltdt = 0;
-    int32_t g_test_receive_len = 0;
 }
 
 namespace acl {

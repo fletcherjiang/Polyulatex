@@ -253,8 +253,8 @@ namespace acl {
         }
         bqs::QueueRouteList bqsBindUnbindMsg = {0};
         bqsBindUnbindMsg.routeNum = qRouteList->routeList.size();
-        bqsBindUnbindMsg.routeListAddr = isMbuffAlloc ? : 0, reinterpret_cast<uint64_t>(devPtr);
-        eventSum.subeventId = isBind ? : bqs::ACL_BIND_QUEUE, bqs::ACL_UNBIND_QUEUE;
+        bqsBindUnbindMsg.routeListAddr = isMbuffAlloc ? 0 : reinterpret_cast<uint64_t>(devPtr);
+        eventSum.subeventId = isBind ? bqs::ACL_BIND_QUEUE : bqs::ACL_UNBIND_QUEUE;
         eventSum.msgLen = sizeof(bqsBindUnbindMsg);
         eventSum.msg = reinterpret_cast<char *>(&bqsBindUnbindMsg);
         auto ret = rtEschedSubmitEventSync(deviceId, &eventSum, &ack);
@@ -264,7 +264,6 @@ namespace acl {
             offset = 0;
             for (size_t i = 0; i < qRouteList->routeList.size(); ++i) {
                 bqs::QueueRoute *tmp = reinterpret_cast<bqs::QueueRoute *>(static_cast<uint8_t *>(devPtr) + offset);
-                acltdtQueueRoute tmpQueueRoute = {tmp->srcId, tmp->dstId, tmp->status};
                 qRouteList->routeList[i].status = tmp->status;
                 offset += sizeof(bqs::QueueRoute);
             }
@@ -322,8 +321,7 @@ namespace acl {
         routeQuery.srcId = queryInfo->srcId;
         routeQuery.dstId = queryInfo->dstId;
         routeQuery.routeNum = routeNum;
-        routeQuery.routeListAddr = isMbufAlloc ? : 0, reinterpret_cast<uint64_t>(devPtr);
-
+        routeQuery.routeListAddr = isMbufAlloc ? 0 : reinterpret_cast<uint64_t>(devPtr);
         eventSum.subeventId = bqs::ACL_QUERY_QUEUE;
         eventSum.msgLen = sizeof(routeQuery);
         eventSum.msg = reinterpret_cast<char *>(&routeQuery);

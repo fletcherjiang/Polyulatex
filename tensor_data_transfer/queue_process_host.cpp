@@ -32,6 +32,7 @@ namespace acl {
         if (!isQueueIint) {
             ACL_LOG_INFO("need to init queue once");
             ACL_REQUIRES_CALL_RTS_OK(rtMemQueueInit(deviceId), rtMemQueueInit);
+            isQueueIint = true;
         }
         ACL_REQUIRES_CALL_RTS_OK(rtMemQueueCreate(deviceId, attr, qid), rtMemQueueCreate);
         ACL_LOG_INFO("Successfully to execute acltdtCreateQueue, qid is %u", *qid);

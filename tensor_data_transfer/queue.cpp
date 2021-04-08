@@ -210,6 +210,10 @@ aclError acltdtQueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo, aclt
     ACL_STAGES_REG(acl::ACL_STAGE_QUEUE, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(qRouteList);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(queryInfo);
+    if (!qRouteList->routeList.empty()) {
+        ACL_LOG_INFO("routelist is not empty, need to clear.");
+        qRouteList->routeList.clear();
+    }
     ACL_REQUIRES_OK(CheckQueueRouteQueryInfo(queryInfo));
     auto& qManager = acl::QueueManager::GetInstance();
     auto processor = qManager.GetQueueProcessor();
