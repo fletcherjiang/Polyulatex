@@ -345,36 +345,6 @@ namespace acl {
         return ACL_SUCCESS;
     }
 
-    aclError QueueProcessor::acltdtBindQueueRoutes(acltdtQueueRouteList *qRouteList)
-    {
-        ACL_LOG_ERROR("[Unsupport][Feature]acltdtBindQueueRoutes is not supported in this version. Please check.");
-        const char *argList[] = {"feature", "reason"};
-        const char *argVal[] = {"acltdtBindQueueRoutes", "please check"};
-        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
-            argList, argVal, 2);
-        return ACL_ERROR_FEATURE_UNSUPPORTED;
-    }
-
-    aclError QueueProcessor::acltdtUnbindQueueRoutes(acltdtQueueRouteList *qRouteList)
-    {
-        ACL_LOG_ERROR("[Unsupport][Feature]acltdtUnbindQueueRoutes is not supported in this version. Please check.");
-        const char *argList[] = {"feature", "reason"};
-        const char *argVal[] = {"acltdtUnbindQueueRoutes", "please check"};
-        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
-            argList, argVal, 2);
-        return ACL_ERROR_FEATURE_UNSUPPORTED;
-    }
-
-    aclError QueueProcessor::acltdtQueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo, acltdtQueueRouteList *qRouteList)
-    {
-        ACL_LOG_ERROR("[Unsupport][Feature]acltdtQueryQueueRoutes is not supported in this version. Please check.");
-        const char *argList[] = {"feature", "reason"};
-        const char *argVal[] = {"acltdtQueryQueueRoutes", "please check"};
-        acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,
-            argList, argVal, 2);
-        return ACL_ERROR_FEATURE_UNSUPPORTED;
-    }
-
     aclError QueueProcessor::acltdtAllocBuf(size_t size, acltdtBuf *buf)
     {
         ACL_LOG_ERROR("[Unsupport][Feature]acltdtAllocBuf is not supported in this version. Please check.");

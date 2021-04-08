@@ -137,6 +137,8 @@ typedef struct {
 
 typedef void *rtMbufPtr_t;
 
+RTS_API rtError_t rtMemQueueInitQS(int32_t devId) WEAKFUC;
+
 RTS_API rtError_t rtMemQueueCreate(int32_t devId, const rtMemQueueAttr_t *queAttr, uint32_t *qid) WEAKFUC;
 
 RTS_API rtError_t rtMemQueueDestroy(int32_t devId, uint32_t qid) WEAKFUC;

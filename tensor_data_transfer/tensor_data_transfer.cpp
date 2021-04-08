@@ -359,6 +359,100 @@ namespace acl {
         }
         dimsStr += "]";
     }
+
+    aclError TensorDataitemSerialize(std::vector<aclTdtDataItemInfo> &itemVec, std::vector<rtMemQueueBuffInfo> &qBufVec)
+    {
+        uint32_t currentCnt = 0;
+        for (size_t i = 0; i < itemVec.size(); ++i) {
+            itemVec[i].ctrlInfo.curCnt = currentCnt;
+            itemVec[i].ctrlInfo.cnt = itemVec.size();
+            size_t ctrlSize = sizeof(ItemInfo) + itemVec[i].dims.size() * sizeof(int64_t);
+            
+            std::shared_ptr<uint8_t> ctrlSharedPtr(new uint8_t[ctrlSize], [] (uint8_t *p) {delete p;});
+            ACL_CHECK_MALLOC_RESULT(ctrlSharedPtr);
+            void *ctrlPtr = ctrlSharedPtr.get();
+            ACL_LOG_INFO("TensorDataitemSerialize ctrlSize is %zu, i is %zu, shape size is %zu",
+                        ctrlSize, i, itemVec[i].dims.size());
+            auto ret = memcpy_s(ctrlPtr, ctrlSize, &itemVec[i].ctrlInfo, sizeof(ItemInfo));
+            if (ret != EN_OK) {
+                ACL_LOG_INNER_ERROR("[Call][MemCpy]call memcpy failed, result=%d, srcLen=%zu, dstLen=%zu",
+                    ret, sizeof(ItemInfo), ctrlSize);
+            }
+            size_t offset = sizeof(ItemInfo);
+            for (size_t j = 0; j < itemVec[i].dims.size(); ++j) {
+                ACL_LOG_INFO("before memcpy offset is %zu, remain size is %zu, j is %zu", offset, ctrlSize - offset, j);
+                ret = memcpy_s(reinterpret_cast<uint8_t *>(ctrlPtr) + offset,
+                            ctrlSize - offset, &itemVec[i].dims[j], sizeof(int64_t));
+                if (ret != EN_OK) {
+                    ACL_LOG_INNER_ERROR("[Call][MemCpy]call memcpy failed, result=%d, srcLen=%zu, dstLen=%zu",
+                                        ret, sizeof(int64_t), ctrlSize - offset);
+                }
+                offset += sizeof(int64_t);
+                ACL_LOG_INFO("after memcpy offset is %zu, remain size is %zu, j is %zu", offset, ctrlSize - offset, j);
+            }
+            rtMemQueueBuffInfo qItem = {ctrlPtr, ctrlSize};
+            qBufVec.push_back(qItem);
+            if (itemVec[i].ctrlInfo.dataLen != 0) {
+                rtMemQueueBuffInfo tmpQItem = {itemVec[i].dataPtr.get(), itemVec[i].ctrlInfo.dataLen};
+                qBufVec.push_back(tmpQItem);
+            } else {
+                ACL_LOG_INFO("no need to insert data buf");
+            }
+            ++currentCnt;
+        }
+        return ACL_SUCCESS;
+    }
+
+    aclError UnpackageRecvDataInfo(uint8_t *outputHostAddr, size_t size, std::vector<aclTdtDataItemInfo> &itemVec)
+    {
+        ItemInfo *head = reinterpret_cast<ItemInfo *>(outputHostAddr);
+        uint32_t cnt = head->cnt;
+        ACL_LOG_INFO("get tensor cnt is %u", cnt);
+        size_t offset =0;
+        for (uint32_t i = 0; i < cnt; ++i) {
+            if (offset + sizeof(ItemInfo) > size) {
+                ACL_LOG_ERROR("offset is %zu, size is %zu", offset , size);
+                return ACL_ERROR_FAILURE;
+            }
+            aclTdtDataItemInfo item;
+            ItemInfo *tmp = reinterpret_cast<ItemInfo *>(outputHostAddr + offset);
+            item.ctrlInfo = *tmp;
+            ACL_LOG_INFO("Unpack data, dataType %d, curCnt %u, cnt %u, tensorType %d, dimNum %u, dataLen %lu",
+                        tmp->dataType, tmp->curCnt, tmp->cnt, tmp->tensorType, tmp->dimNum, tmp->dataLen);
+            offset += sizeof(ItemInfo);
+
+            for (uint32_t j = 0; j < tmp->dimNum; ++j) {
+                if (offset + sizeof(int64_t) > size) {
+                    ACL_LOG_ERROR("offset is %zu, size is %zu", offset , size);
+                    return ACL_ERROR_FAILURE;
+                }
+                int64_t dimTmp = *(reinterpret_cast<int64_t *>(outputHostAddr + offset));
+                item.dims.push_back(dimTmp);
+                ACL_LOG_INFO("current dims[%u] is %ld", j, dimTmp);
+                offset += sizeof(int64_t);
+            }
+            if (offset + tmp->dataLen > size) {
+                ACL_LOG_ERROR("offset is %zu, data len is %lu, size is %zu", offset, tmp->dataLen, size);
+                return ACL_ERROR_FAILURE;
+            }
+            if (tmp->dataLen > 0) {
+                std::shared_ptr<uint8_t> data(new uint8_t[tmp->dataLen], [] (uint8_t *p) {delete p;});
+                auto ret = memcpy_s(data.get(), tmp->dataLen, outputHostAddr + offset, tmp->dataLen);
+                if (ret != EN_OK) {
+                    ACL_LOG_INNER_ERROR("[Call][MemCpy]call memcpy failed, result=%d, srcLen=%lu, dstLen=%lu",
+                        ret, tmp->dataLen, tmp->dataLen);
+                    return ACL_ERROR_FAILURE;
+                }
+                offset += tmp->dataLen;
+                item.dataPtr = data;
+            } else {
+                ACL_LOG_INFO("data length is 0");
+            }
+            ACL_LOG_INFO("after %u tensor, offset is %zu", i + 1, offset);
+            itemVec.push_back(item);
+        }
+        return ACL_SUCCESS;
+    }
 } // namespace acl
 
 acltdtTensorType acltdtGetTensorTypeFromItem(const acltdtDataItem *dataItem)
@@ -661,50 +755,6 @@ aclError acltdtDestroyChannel(acltdtChannelHandle *handle)
     return ACL_SUCCESS;
 }
 
-static aclError TensorDataitemSerialize(std::vector<aclTdtDataItemInfo> &itemVec,
-                                        std::vector<rtMemQueueBuffInfo> &qBufVec)
-{
-    uint32_t currentCnt = 0;
-    for (size_t i = 0; i < itemVec.size(); ++i) {
-        itemVec[i].ctrlInfo.curCnt = currentCnt;
-        itemVec[i].ctrlInfo.cnt = itemVec.size();
-        size_t ctrlSize = sizeof(ItemInfo) + itemVec[i].dims.size() * sizeof(int64_t);
-        
-        std::shared_ptr<uint8_t> ctrlSharedPtr(new uint8_t[ctrlSize], [] (uint8_t *p) {delete p;});
-        ACL_CHECK_MALLOC_RESULT(ctrlSharedPtr);
-        void *ctrlPtr = ctrlSharedPtr.get();
-        ACL_LOG_INFO("TensorDataitemSerialize ctrlSize is %zu, i is %zu, shape size is %zu",
-                     ctrlSize, i, itemVec[i].dims.size());
-        auto ret = memcpy_s(ctrlPtr, ctrlSize, &itemVec[i].ctrlInfo, sizeof(ItemInfo));
-        if (ret != EN_OK) {
-            ACL_LOG_INNER_ERROR("[Call][MemCpy]call memcpy failed, result=%d, srcLen=%zu, dstLen=%zu",
-                ret, sizeof(ItemInfo), ctrlSize);
-        }
-        size_t offset = sizeof(ItemInfo);
-        for (size_t j = 0; j < itemVec[i].dims.size(); ++j) {
-            ACL_LOG_INFO("before memcpy offset is %zu, remain size is %zu, j is %zu", offset, ctrlSize - offset, j);
-            ret = memcpy_s(reinterpret_cast<uint8_t *>(ctrlPtr) + offset,
-                           ctrlSize - offset, &itemVec[i].dims[j], sizeof(int64_t));
-            if (ret != EN_OK) {
-                ACL_LOG_INNER_ERROR("[Call][MemCpy]call memcpy failed, result=%d, srcLen=%zu, dstLen=%zu",
-                                    ret, sizeof(int64_t), ctrlSize - offset);
-            }
-            offset += sizeof(int64_t);
-            ACL_LOG_INFO("after memcpy offset is %zu, remain size is %zu, j is %zu", offset, ctrlSize - offset, j);
-        }
-        rtMemQueueBuffInfo qItem = {ctrlPtr, ctrlSize};
-        qBufVec.push_back(qItem);
-        if (itemVec[i].ctrlInfo.dataLen != 0) {
-            rtMemQueueBuffInfo tmpQItem = {itemVec[i].dataPtr.get(), itemVec[i].ctrlInfo.dataLen};
-            qBufVec.push_back(tmpQItem);
-        } else {
-            ACL_LOG_INFO("no need to insert data buf");
-        }
-        ++currentCnt;
-    }
-    return ACL_SUCCESS;
-}
-
 aclError acltdtSendTensorV2(const acltdtChannelHandle *handle, const acltdtDataset *dataset, int32_t timeout)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_TDT, acl::ACL_STAGE_DEFAULT);
@@ -722,7 +772,7 @@ aclError acltdtSendTensorV2(const acltdtChannelHandle *handle, const acltdtDatas
     }
 
     std::vector<rtMemQueueBuffInfo> queueBufInfoVec;
-    ret = TensorDataitemSerialize(itemVec, queueBufInfoVec);
+    ret = acl::TensorDataitemSerialize(itemVec, queueBufInfoVec);
     if (ret != ACL_SUCCESS) {
         ACL_LOG_INNER_ERROR("[Serialize][Dataset]failed to TensorDataitemSerialize, device is %u, name is %s",
             handle->devId, handle->name.c_str());
@@ -781,57 +831,6 @@ aclError acltdtSendTensor(const acltdtChannelHandle *handle, const acltdtDataset
     return ACL_SUCCESS;
 }
 
-static aclError UnpackageRecvDataInfo(uint8_t *outputHostAddr, size_t size, std::vector<aclTdtDataItemInfo> &itemVec)
-{
-    ItemInfo *head = reinterpret_cast<ItemInfo *>(outputHostAddr);
-    uint32_t cnt = head->cnt;
-    ACL_LOG_INFO("get tensor cnt is %u", cnt);
-    size_t offset =0;
-    for (uint32_t i = 0; i < cnt; ++i) {
-        if (offset + sizeof(ItemInfo) > size) {
-            ACL_LOG_ERROR("offset is %zu, size is %zu", offset , size);
-            return ACL_ERROR_FAILURE;
-        }
-        aclTdtDataItemInfo item;
-        ItemInfo *tmp = reinterpret_cast<ItemInfo *>(outputHostAddr + offset);
-        item.ctrlInfo = *tmp;
-        ACL_LOG_INFO("Unpack data, dataType %d, curCnt %u, cnt %u, tensorType %d, dimNum %u, dataLen %lu",
-                     tmp->dataType, tmp->curCnt, tmp->cnt, tmp->tensorType, tmp->dimNum, tmp->dataLen);
-        offset += sizeof(ItemInfo);
-
-        for (uint32_t j = 0; j < tmp->dimNum; ++j) {
-            if (offset + sizeof(int64_t) > size) {
-                ACL_LOG_ERROR("offset is %zu, size is %zu", offset , size);
-                return ACL_ERROR_FAILURE;
-            }
-            int64_t dimTmp = *(reinterpret_cast<int64_t *>(outputHostAddr + offset));
-            item.dims.push_back(dimTmp);
-            ACL_LOG_INFO("current dims[%u] is %ld", j, dimTmp);
-            offset += sizeof(int64_t);
-        }
-        if (offset + tmp->dataLen > size) {
-            ACL_LOG_ERROR("offset is %zu, data len is %lu, size is %zu", offset, tmp->dataLen, size);
-            return ACL_ERROR_FAILURE;
-        }
-        if (tmp->dataLen > 0) {
-            std::shared_ptr<uint8_t> data(new uint8_t[tmp->dataLen], [] (uint8_t *p) {delete p;});
-            auto ret = memcpy_s(data.get(), tmp->dataLen, outputHostAddr + offset, tmp->dataLen);
-            if (ret != EN_OK) {
-                ACL_LOG_INNER_ERROR("[Call][MemCpy]call memcpy failed, result=%d, srcLen=%lu, dstLen=%lu",
-                    ret, tmp->dataLen, tmp->dataLen);
-                return ACL_ERROR_FAILURE;
-            }
-            offset += tmp->dataLen;
-            item.dataPtr = data;
-        } else {
-            ACL_LOG_INFO("data length is 0");
-        }
-        ACL_LOG_INFO("after %u tensor, offset is %zu", i + 1, offset);
-        itemVec.push_back(item);
-    }
-    return ACL_SUCCESS;
-}
-
 aclError acltdtReceiveTensorV2(const acltdtChannelHandle *handle, acltdtDataset *dataset, int32_t timeout)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_TDT, acl::ACL_STAGE_DEFAULT);
@@ -872,7 +871,7 @@ aclError acltdtReceiveTensorV2(const acltdtChannelHandle *handle, acltdtDataset 
     }
 
     std::vector<aclTdtDataItemInfo> itemVec;
-    ret = UnpackageRecvDataInfo(outHostAddr, bufLen, itemVec);
+    ret = acl::UnpackageRecvDataInfo(outHostAddr, bufLen, itemVec);
     if (ret != ACL_SUCCESS) {
         ACL_LOG_ERROR("failed to UnpackageRecvDataInfo, device is %u, name is %s",
                       handle->devId, handle->name.c_str());

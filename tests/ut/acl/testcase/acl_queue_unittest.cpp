@@ -420,27 +420,21 @@ TEST_F(UTEST_QUEUE, acltdtAllocBuf_mdc)
 {
     acltdtBuf buf = nullptr;
     size_t size = 100;
-    QueueProcessorMdc queueProcess;
-    auto ret = queueProcess.acltdtAllocBuf(size, &buf);
-    EXPECT_EQ(ret, ACL_SUCCESS);
-}
-
-TEST_F(UTEST_QUEUE, acltdtFreeBuf_mdc)
-{
-    QueueProcessorMdc queueProcess;
-    acltdtBuf buf = nullptr;
-    auto ret = queueProcess.acltdtFreeBuf(buf);
-    EXPECT_EQ(ret, ACL_SUCCESS);
-}
-
-TEST_F(UTEST_QUEUE, acltdtGetBufData_mdc)
-{
-    acltdtBuf buf = nullptr;
     void *dataPtr = nullptr;
-    size_t size = 0;
     QueueProcessorMdc queueProcess;
     auto ret = queueProcess.acltdtGetBufData(buf, &dataPtr, &size);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    ret = queueProcess.acltdtAllocBuf(size, &buf);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    EXPECT_NE(buf, nullptr);
+
+    ret = queueProcess.acltdtGetBufData(buf, &dataPtr, &size);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    EXPECT_NE(dataPtr, nullptr);
+
+    ret = queueProcess.acltdtFreeBuf(buf);
+    EXPECT_EQ(ret, ACL_SUCCESS);
 }
 
 TEST_F(UTEST_QUEUE, acltdtEnqueue_mdc)
@@ -448,9 +442,28 @@ TEST_F(UTEST_QUEUE, acltdtEnqueue_mdc)
     QueueProcessorMdc queueProcess;
     acltdtBuf buf = nullptr;
     uint32_t qid = 0;
-    int32_t timeout = 3000;
+    int32_t timeout = 30;
     auto ret = queueProcess.acltdtEnqueue(qid, buf, timeout);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
+
+    size_t size = 10;
+    ret = queueProcess.acltdtAllocBuf(size, &buf);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    EXPECT_NE(buf, nullptr);
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtMemQueueEnQueue(_, _, _))
+        .WillOnce(Return((ACL_ERROR_RT_PARAM_INVALID)))
+        .WillOnce(Return((RT_ERROR_NONE)))
+        .WillRepeatedly(Return((ACL_ERROR_RT_QUEUE_FULL)));
+    ret = queueProcess.acltdtEnqueue(qid, buf, timeout);
+    EXPECT_EQ(ret, ACL_ERROR_RT_PARAM_INVALID);
+    ret = queueProcess.acltdtEnqueue(qid, buf, timeout);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    ret = queueProcess.acltdtEnqueue(qid, buf, timeout);
+    EXPECT_EQ(ret, ACL_ERROR_FAILURE);
+
+    ret = queueProcess.acltdtFreeBuf(buf);
+    EXPECT_EQ(ret, ACL_SUCCESS);
 }
 
 TEST_F(UTEST_QUEUE, acltdtDequeue_mdc)
@@ -458,9 +471,17 @@ TEST_F(UTEST_QUEUE, acltdtDequeue_mdc)
     QueueProcessorMdc queueProcess;
     acltdtBuf buf = nullptr;
     uint32_t qid = 0;
-    int32_t timeout = 3000;
+    int32_t timeout = 30;
     auto ret = queueProcess.acltdtDequeue(qid, &buf, timeout);
     EXPECT_EQ(ret, ACL_SUCCESS);
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtMemQueueDeQueue(_, _, _))
+        .WillOnce(Return((ACL_ERROR_RT_PARAM_INVALID)))
+        .WillRepeatedly(Return((ACL_ERROR_RT_QUEUE_EMPTY)));
+    ret = queueProcess.acltdtDequeue(qid, &buf, timeout);
+    EXPECT_EQ(ret, ACL_ERROR_RT_PARAM_INVALID);
+    ret = queueProcess.acltdtDequeue(qid, &buf, timeout);
+    EXPECT_EQ(ret, ACL_ERROR_FAILURE);
 }
 
 TEST_F(UTEST_QUEUE, acltdtCreateQueue_mdc)
@@ -573,9 +594,15 @@ TEST_F(UTEST_QUEUE, acltdtDequeue_ccpu)
     QueueProcessorCcpu queueProcess;
     acltdtBuf buf = nullptr;
     uint32_t qid = 0;
-    int32_t timeout = 3000;
+    int32_t timeout = 30;
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtMemQueueDeQueue(_, _, _))
+        .WillOnce(Return((ACL_ERROR_RT_PARAM_INVALID)))
+        .WillRepeatedly(Return((ACL_ERROR_RT_QUEUE_EMPTY)));
     auto ret = queueProcess.acltdtDequeue(qid, &buf, timeout);
-    EXPECT_EQ(ret, ACL_SUCCESS);
+    EXPECT_EQ(ret, ACL_ERROR_RT_PARAM_INVALID);
+    ret = queueProcess.acltdtDequeue(qid, &buf, timeout);
+    EXPECT_EQ(ret, ACL_ERROR_FAILURE);
 }
 
 TEST_F(UTEST_QUEUE, acltdtCreateQueue_ccpu)

@@ -444,6 +444,11 @@ rtError_t aclStub::rtSetOpExecuteTimeOut(uint32_t timeout)
     return RT_ERROR_NONE;
 }
 
+rtError_t aclStub::rtMemQueueInitQS(int32_t devId)
+{
+    return RT_ERROR_NONE;
+}
+
 rtError_t aclStub::rtMemQueueCreate(int32_t devId, const rtMemQueueAttr_t *queAttr, uint32_t *qid)
 {
     return RT_ERROR_NONE;
@@ -971,6 +976,11 @@ rtError_t rtSetOpExecuteTimeOut(uint32_t timeout)
     return MockFunctionTest::aclStubInstance().rtSetOpExecuteTimeOut(timeout);
 }
 
+rtError_t rtMemQueueInitQS(int32_t devId)
+{
+    return MockFunctionTest::aclStubInstance().rtMemQueueInitQS(devId);
+}
+
 rtError_t rtMemQueueCreate(int32_t devId, const rtMemQueueAttr_t *queAttr, uint32_t *qid)
 {
     return MockFunctionTest::aclStubInstance().rtMemQueueCreate(devId, queAttr, qid);
@@ -1045,26 +1055,31 @@ rtError_t rtMbufInit(rtMemBuffCfg_t *cfg)
 
 rtError_t rtMbufAlloc(rtMbufPtr_t *mbuf, uint64_t size)
 {
+    *mbuf = malloc(size);
     return MockFunctionTest::aclStubInstance().rtMbufAlloc(mbuf, size);
 }
 
 rtError_t rtMbufFree(rtMbufPtr_t mbuf)
 {
+    free(mbuf);
     return MockFunctionTest::aclStubInstance().rtMbufFree(mbuf);
 }
 
 rtError_t rtMbufGetBuffAddr(rtMbufPtr_t mbuf, void **databuf)
 {
+    *databuf = mbuf;
     return MockFunctionTest::aclStubInstance().rtMbufGetBuffAddr(mbuf, databuf);
 }
 
 rtError_t rtMbufGetBuffSize(rtMbufPtr_t mbuf, uint64_t *size)
 {
+    *size = 0;
     return MockFunctionTest::aclStubInstance().rtMbufGetBuffSize(mbuf, size);
 }
 
 rtError_t rtMbufGetPrivInfo(rtMbufPtr_t mbuf, void **priv, uint64_t *size)
 {
+    *priv = mbuf;
     return MockFunctionTest::aclStubInstance().rtMbufGetPrivInfo(mbuf, priv, size);
 }
 

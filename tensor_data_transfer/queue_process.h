@@ -45,12 +45,12 @@ public:
 
     virtual aclError acltdtAttachQueue(uint32_t queueId, int32_t timeout, uint32_t *flag) = 0;
 
-    virtual aclError acltdtBindQueueRoutes(acltdtQueueRouteList *qRouteList);
+    virtual aclError acltdtBindQueueRoutes(acltdtQueueRouteList *qRouteList) = 0;
 
-    virtual aclError acltdtUnbindQueueRoutes(acltdtQueueRouteList *qRouteList);
+    virtual aclError acltdtUnbindQueueRoutes(acltdtQueueRouteList *qRouteList) = 0;
 
     virtual aclError acltdtQueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo,
-                                                        acltdtQueueRouteList *qRouteList);
+                                            acltdtQueueRouteList *qRouteList) = 0;
 
     virtual aclError acltdtAllocBuf(size_t size, acltdtBuf *buf);
 

@@ -205,6 +205,7 @@ public:
     virtual rtError_t rtSetOpWaitTimeOut(uint32_t timeout);
     virtual rtError_t rtSetOpExecuteTimeOut(uint32_t timeout);
 
+    virtual rtError_t rtMemQueueInitQS(int32_t devId);
     virtual rtError_t rtMemQueueCreate(int32_t devId, const rtMemQueueAttr_t *queAttr, uint32_t *qid);
 
     virtual rtError_t rtMemQueueDestroy(int32_t devId, uint32_t qid);
@@ -444,6 +445,7 @@ public:
     MOCK_METHOD1(rtSetOpWaitTimeOut, rtError_t(uint32_t timeout));
     MOCK_METHOD1(rtSetOpExecuteTimeOut, rtError_t(uint32_t timeout));
 
+    MOCK_METHOD1(rtMemQueueInitQS, rtError_t(int32_t devId));
     MOCK_METHOD3(rtMemQueueCreate, rtError_t(int32_t devId, const rtMemQueueAttr_t *queAttr, uint32_t *qid));
     MOCK_METHOD2(rtMemQueueDestroy, rtError_t(int32_t devId, uint32_t qid));
     MOCK_METHOD1(rtMemQueueInit, rtError_t(int32_t devId));
