@@ -476,6 +476,7 @@ rtError_t aclStub::rtMemQueueDeQueue(int32_t devId, uint32_t qid, void **mbuf)
 
 rtError_t aclStub::rtMemQueuePeek(int32_t devId, uint32_t qid, size_t *bufLen, int32_t timeout)
 {
+    *bufLen = 100;
     return RT_ERROR_NONE;
 }
 
