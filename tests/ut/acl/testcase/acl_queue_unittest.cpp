@@ -300,10 +300,8 @@ TEST_F(UTEST_QUEUE, acltdtSetQueueRouteQueryInfo)
 // host chip default 
 TEST_F(UTEST_QUEUE, acltdtAllocBuf_host)
 {
-     acltdtBuf buf = nullptr;
-     size_t size = 100;
-     EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtGetRunMode(_))
-        .WillOnce(Return((RT_ERROR_NONE)));
+    acltdtBuf buf = nullptr;
+    size_t size = 100;
     auto ret = acltdtAllocBuf(size, &buf);
     EXPECT_EQ(ret, ACL_ERROR_FEATURE_UNSUPPORTED);
 }
