@@ -217,12 +217,6 @@ set(SRC_LIST
     single_op/executor/op_task.cpp
     single_op/executor/resource_manager.cpp
     single_op/executor/stream_executor.cpp
-    tensor_data_transfer/queue.cpp
-    tensor_data_transfer/queue_manager.cpp
-    tensor_data_transfer/queue_process.cpp
-    tensor_data_transfer/queue_process_host.cpp
-    tensor_data_transfer/queue_process_mdc.cpp
-    tensor_data_transfer/queue_process_ccpu.cpp
 )
 
 ############ libascendcl.so ############
@@ -573,6 +567,7 @@ add_custom_target(
              ${CMAKE_CURRENT_BINARY_DIR}/op_compiler_stub.cpp
              ${CMAKE_CURRENT_BINARY_DIR}/retr_stub.cpp
              ${CMAKE_CURRENT_BINARY_DIR}/tdt_channel_stub.cpp
+             ${CMAKE_CURRENT_BINARY_DIR}/tdt_queue_stub.cpp
 )
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/acl_stub.cpp
@@ -581,7 +576,8 @@ add_custom_command(
            ${CMAKE_CURRENT_BINARY_DIR}/op_compiler_stub.cpp
            ${CMAKE_CURRENT_BINARY_DIR}/retr_stub.cpp
            ${CMAKE_CURRENT_BINARY_DIR}/tdt_channel_stub.cpp
-    COMMAND echo "Generating stub files:acl_stub.cpp, dvpp_stub.cpp, cblas_stub.cpp, op_compiler_stub.cpp, retr_stub.cpp, tdt_channel_stub.cpp."
+           ${CMAKE_CURRENT_BINARY_DIR}/tdt_queue_stub.cpp
+    COMMAND echo "Generating stub files:acl_stub.cpp, dvpp_stub.cpp, cblas_stub.cpp, op_compiler_stub.cpp, retr_stub.cpp, tdt_channel_stub.cpp, tdt_queue_stub.cpp."
             && ${HI_PYTHON} ${BASE_DIR}/stub/gen_stubapi.py ${BASE_DIR}/inc/external/acl
             ${CMAKE_CURRENT_BINARY_DIR}/acl_stub.cpp
             ${CMAKE_CURRENT_BINARY_DIR}/dvpp_stub.cpp
@@ -589,6 +585,7 @@ add_custom_command(
             ${CMAKE_CURRENT_BINARY_DIR}/op_compiler_stub.cpp
             ${CMAKE_CURRENT_BINARY_DIR}/retr_stub.cpp
             ${CMAKE_CURRENT_BINARY_DIR}/tdt_channel_stub.cpp
+            ${CMAKE_CURRENT_BINARY_DIR}/tdt_queue_stub.cpp
             &&  echo "Generating stub files end."
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     DEPENDS stub/gen_stubapi.py ${BASE_DIR}/inc/external/acl
@@ -728,6 +725,28 @@ set_target_properties(stub_acl_tdt_channel
 )
 
 target_link_libraries(stub_acl_tdt_channel PRIVATE
+    $<BUILD_INTERFACE:intf_pub>
+    $<$<NOT:$<STREQUAL:${TARGET_SYSTEM_NAME},Android>>:-lrt>
+    -ldl
+)
+##################################################################################################################
+
+############ stub/libacl_tdt_queue.so ############
+add_library(stub_acl_tdt_queue SHARED
+    ${CMAKE_CURRENT_BINARY_DIR}/tdt_queue_stub.cpp
+)
+target_include_directories(stub_acl_tdt_queue PRIVATE
+    ${BASE_DIR}/inc/external
+    ${BASE_DIR}/inc
+    ${BASE_DIR}
+)
+set_target_properties(stub_acl_tdt_queue
+    PROPERTIES
+    OUTPUT_NAME acl_tdt_queue
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/stub
+)
+
+target_link_libraries(stub_acl_tdt_queue PRIVATE
     $<BUILD_INTERFACE:intf_pub>
     $<$<NOT:$<STREQUAL:${TARGET_SYSTEM_NAME},Android>>:-lrt>
     -ldl
@@ -944,6 +963,70 @@ set_target_properties(acl_retr PROPERTIES
 )
 endif()
 
+############ libacl_tdt_queue.so ############
+add_library(acl_tdt_queue SHARED
+    tensor_data_transfer/queue.cpp
+    tensor_data_transfer/queue_manager.cpp
+    tensor_data_transfer/queue_process.cpp
+    tensor_data_transfer/queue_process_host.cpp
+    tensor_data_transfer/queue_process_mdc.cpp
+    tensor_data_transfer/queue_process_ccpu.cpp
+)
+
+target_include_directories(acl_tdt_queue PRIVATE
+    ####yellow zone####
+    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/inc>
+    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/inc/driver>
+    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/ace/npuruntime/inc>
+    ####blue zone####
+    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/>
+    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/driver>
+
+    ${BASE_DIR}/inc/external
+    ${BASE_DIR}/inc
+    ${BASE_DIR}
+    ${BASE_DIR}/common
+)
+
+target_compile_options(acl_tdt_queue PRIVATE
+    $<$<STREQUAL:${TARGET_SYSTEM_NAME},Linux>:-fvisibility=hidden -O2 -Werror -fno-common>
+    -ftrapv
+    $<$<STREQUAL:${TARGET_SYSTEM_NAME},Windows>:/utf-8>
+    $<$<AND:$<STREQUAL:${TARGET_SYSTEM_NAME},Windows>,$<STREQUAL:${CMAKE_CONFIGURATION_TYPES},Debug>>:/MTd>
+    $<$<AND:$<STREQUAL:${TARGET_SYSTEM_NAME},Windows>,$<STREQUAL:${CMAKE_CONFIGURATION_TYPES},Release>>:/MT>
+)
+
+target_compile_definitions(acl_tdt_queue PRIVATE
+    _FORTIFY_SOURCE=2
+    OS_TYPE=0
+    FUNC_VISIBILITY
+)
+
+target_link_options(acl_tdt_queue PRIVATE
+    -rdynamic
+    -Wl,-Bsymbolic
+    -Wl,--exclude-libs,ALL
+)
+
+target_link_libraries(acl_tdt_queue PRIVATE
+    $<BUILD_INTERFACE:intf_pub>
+    -Wl,--no-as-needed
+    ascendcl
+    static_mmpa
+    alog
+    runtime
+    c_sec
+    -Wl,--as-needed
+    -ldl
+)
+
+if(${TARGET_SYSTEM_NAME} STREQUAL "Windows")
+set_target_properties(acl_tdt_queue PROPERTIES
+    WINDOWS_EXPORT_ALL_SYMBOLS TRUE
+    OUTPUT_NAME libacl_tdt_queue
+)
+endif()
+
 if(NOT (ENABLE_OPEN_SRC AND ((PRODUCT STREQUAL "flr2") OR (PRODUCT STREQUAL "flr3"))))
 ############ libacl_op_compiler.so ############
 add_library(acl_op_compiler SHARED
@@ -1071,6 +1154,7 @@ target_link_libraries(acl_tdt_channel PRIVATE
     static_mmpa
     -Wl,--no-as-needed
     ascendcl
+    acl_tdt_queue
     c_sec
     slog
     datatransfer
@@ -1085,17 +1169,17 @@ set(INSTALL_BASE_DIR "")
 set(INSTALL_LIBRARY_DIR lib)
 
 if(${TARGET_SYSTEM_NAME} STREQUAL "Windows")
-install(TARGETS  ascendcl acl_dvpp acl_cblas acl_retr acl_op_compiler acl_tdt_channel ascendcl_static OPTIONAL
+install(TARGETS  ascendcl acl_dvpp acl_cblas acl_retr acl_op_compiler acl_tdt_channel acl_tdt_queue ascendcl_static OPTIONAL
     LIBRARY DESTINATION ${INSTALL_LIBRARY_DIR}
 )
 install(FILES $<TARGET_PDB_FILE:ascendcl acl_dvpp acl_cblas acl_retr> DESTINATION ${INSTALL_LIBRARY_DIR} OPTIONAL)
 elseif(NOT ENABLE_OPEN_SRC)
-install(TARGETS  ascendcl acl_dvpp acl_cblas acl_retr acl_op_compiler acl_tdt_channel ascendcl_static OPTIONAL
+install(TARGETS  ascendcl acl_dvpp acl_cblas acl_retr acl_op_compiler acl_tdt_channel acl_tdt_queue ascendcl_static OPTIONAL
     LIBRARY DESTINATION ${INSTALL_LIBRARY_DIR}
     ARCHIVE DESTINATION ${INSTALL_LIBRARY_DIR}
 )
 else()
-install(TARGETS  ascendcl acl_dvpp acl_cblas acl_retr OPTIONAL
+install(TARGETS  ascendcl acl_dvpp acl_cblas acl_retr acl_tdt_queue OPTIONAL
     LIBRARY DESTINATION ${INSTALL_LIBRARY_DIR}
     ARCHIVE DESTINATION ${INSTALL_LIBRARY_DIR}
 )
@@ -1107,7 +1191,7 @@ install(TARGETS  acl_op_compiler acl_tdt_channel OPTIONAL
 endif()
 endif()
 
-install(TARGETS stub_ascendcl stub_acl_dvpp stub_acl_cblas stub_acl_retr stub_acl_op_compiler stub_acl_tdt_channel OPTIONAL
+install(TARGETS stub_ascendcl stub_acl_dvpp stub_acl_cblas stub_acl_retr stub_acl_op_compiler stub_acl_tdt_channel stub_acl_tdt_queue OPTIONAL
     LIBRARY DESTINATION ${INSTALL_LIBRARY_DIR}/stub
 )
 
@@ -1120,6 +1204,7 @@ endif()
 add_dependencies(stub_ascendcl stub_src)
 add_dependencies(stub_acl_op_compiler stub_src)
 add_dependencies(stub_acl_tdt_channel stub_src)
+add_dependencies(stub_acl_tdt_queue stub_src)
 add_dependencies(stub_acl_retr stub_src)
 add_dependencies(stub_acl_cblas stub_src)
 add_dependencies(stub_acl_dvpp stub_src)
