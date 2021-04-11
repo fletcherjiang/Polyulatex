@@ -68,7 +68,7 @@ def collect_header_files(path):
                 file_path = os.path.join(root, file)
                 file_path = file_path.replace('\\', '/')
                 acl_headers.append(file_path)
-    return acl_headers, dvpp_headers, cblas_headers, op_compiler_headers, retr_headers, tdt_channel_headers tdt_queue_headers
+    return acl_headers, dvpp_headers, cblas_headers, op_compiler_headers, retr_headers, tdt_channel_headers, tdt_queue_headers
 
 def collect_functions(file_path):
     signatures = []
