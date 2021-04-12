@@ -122,7 +122,7 @@ def generate_stub_file(inc_dir):
     tdt_channel_content = generate_function(tdt_channel_header_files, inc_dir)
     tdt_queue_content = generate_function(tdt_queue_header_files, inc_dir)
     print("retr_content has been generate")
-    return acl_content, dvpp_content, cblas_content, op_compiler_content, retr_content, tdt_channel_content tdt_queue_content
+    return acl_content, dvpp_content, cblas_content, op_compiler_content, retr_content, tdt_channel_content, tdt_queue_content
 
 def generate_function(header_files, inc_dir):
     includes = []
@@ -157,7 +157,7 @@ def generate_function(header_files, inc_dir):
     print('total functions number is {}'.format(total))
     return content
 
-def gen_code(inc_dir, acl_stub_path, dvpp_stub_path, cblas_stub_path, op_compiler_stub_path, retr_stub_path, tdt_channel_stub_path tdt_queue_stub_path):
+def gen_code(inc_dir, acl_stub_path, dvpp_stub_path, cblas_stub_path, op_compiler_stub_path, retr_stub_path, tdt_channel_stub_path, tdt_queue_stub_path):
     if not inc_dir.endswith('/'):
         inc_dir += '/'
     acl_content, dvpp_content, cblas_content, op_compiler_content, retr_content, tdt_channel_content, tdt_queue_content = generate_stub_file(inc_dir)
