@@ -174,7 +174,7 @@ def gen_code(inc_dir, acl_stub_path, dvpp_stub_path, cblas_stub_path, op_compile
         f.writelines(retr_content)
     with open(tdt_channel_stub_path, mode='w') as f:
         f.writelines(tdt_channel_content)
-    with open(tdt_channel_stub_path, mode='w') as f:
+    with open(tdt_queue_stub_path, mode='w') as f:
         f.writelines(tdt_queue_content)
 
 if __name__ == '__main__':
