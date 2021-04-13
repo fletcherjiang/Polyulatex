@@ -63,7 +63,7 @@ def collect_header_files(path):
             elif file.find("acl_tdt_queue.h") >=0:
                 file_path = os.path.join(root, file)
                 file_path = file_path.replace('\\', '/')
-                tdt_channel_headers.append(file_path)
+                tdt_queue_headers.append(file_path)
             else:
                 file_path = os.path.join(root, file)
                 file_path = file_path.replace('\\', '/')
