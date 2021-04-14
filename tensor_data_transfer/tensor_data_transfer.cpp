@@ -679,16 +679,11 @@ acltdtChannelHandle *acltdtCreateChannelWithDepth(uint32_t deviceId, const char 
     }
     handle->qid = maxDepth;
     handle->isTdtProcess = false;
-    std::string realName = handle->recvName.empty() ? handle->name :handle->recvName;
-    if (!handle->recvName.empty() && (realName.length() + 1 > RT_MQ_MAX_NAME_LEN)) {
-        ACL_LOG_ERROR("name [%s] length %d can not be larger than %d", name, realName.c_str(), RT_MQ_MAX_NAME_LEN);
-        return nullptr;
-    }
     acltdtQueueAttr attr;
-    auto ret = memcpy_s(attr.name, RT_MQ_MAX_NAME_LEN, realName.c_str(), strlen(name) + 1);
+    auto ret = memcpy_s(attr.name, RT_MQ_MAX_NAME_LEN, name, strlen(name) + 1);
     if (ret != EN_OK) {
         ACL_LOG_INNER_ERROR("[Call][MemCpy]call memcpy failed, result=%d, srcLen=%zu, dstLen=%zu",
-                ret, realName.length() + 1, RT_MQ_MAX_NAME_LEN);
+                ret, strlen(name) + 1, RT_MQ_MAX_NAME_LEN);
         ACL_DELETE_AND_SET_NULL(handle);
         return nullptr;
     }
@@ -701,7 +696,7 @@ acltdtChannelHandle *acltdtCreateChannelWithDepth(uint32_t deviceId, const char 
         return nullptr;
     }
     ACL_LOG_INFO("acltdtCreateChannelWithDepth devId is %u, name is %s, real name is %s, qid is %u",
-                 deviceId, handle->name.c_str(), realName.c_str(), handle->qid);
+                 deviceId, handle->name.c_str(), name, handle->qid);
     return handle;
 }
 
@@ -837,17 +832,6 @@ aclError acltdtReceiveTensorV2(const acltdtChannelHandle *handle, acltdtDataset 
     ACL_LOG_INFO("start to execute acltdtReceiveTensor, device is %u, name is %s",
         handle->devId, handle->name.c_str());
     ACL_REQUIRES_NOT_NULL(handle);
-
-    if (handle->recvName.empty()) {
-        ACL_LOG_ERROR("[Check][Recvname]it is not a receive channel, failed to receive, device is %u, name is %s",
-            handle->devId, handle->name.c_str());
-        std::string errMsg = acl::AclErrorLogManager::FormatStr("failed to receive, device is %u, name is %s",
-            handle->devId, handle->name.c_str());
-        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
-            std::vector<std::string>({"param", "value", "reason"}),
-            std::vector<std::string>({"receive channel", "", errMsg}));
-        return ACL_ERROR_INVALID_PARAM;
-    }
 
     size_t bufLen = 0;
     auto ret = rtMemQueuePeek(handle->devId, handle->qid, &bufLen, timeout);
