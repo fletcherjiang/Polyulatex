@@ -118,6 +118,7 @@ namespace acl {
         ACL_LOG_INFO("Start to acltdtBindQueueRoutes, queue route is %zu", qRouteList->routeList.size());
         int32_t deviceId = 0;
         // get dst id
+        ACL_REQUIRES_OK(InitQueueSchedule(deviceId));
         pid_t dstPid;
         ACL_REQUIRES_OK(GetDstInfo(deviceId, QS_PID, dstPid));
         std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);

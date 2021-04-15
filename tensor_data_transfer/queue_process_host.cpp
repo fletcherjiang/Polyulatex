@@ -142,6 +142,7 @@ namespace acl {
         ACL_LOG_INFO("Start to acltdtBindQueueRoutes, queue route is %zu", qRouteList->routeList.size());
         int32_t deviceId = 0;
         GET_CURRENT_DEVICE_ID(deviceId);
+        ACL_REQUIRES_OK(InitQueueSchedule(deviceId));
         // get dst pid
         pid_t dstPid;
         ACL_REQUIRES_OK(GetDstInfo(deviceId, CP_PID, dstPid));

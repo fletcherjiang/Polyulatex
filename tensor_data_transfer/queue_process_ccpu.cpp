@@ -145,6 +145,7 @@ namespace acl {
         ACL_LOG_INFO("Start to acltdtBindQueueRoutes, queue route is %zu", qRouteList->routeList.size());
         // qs is thread mode, so no need to grant queue to qs
         int32_t deviceId = 0;
+        ACL_REQUIRES_OK(InitQueueSchedule(deviceId));
         // get dst id
         pid_t dstPid;
         ACL_REQUIRES_OK(GetDstInfo(deviceId, QS_PID, dstPid));

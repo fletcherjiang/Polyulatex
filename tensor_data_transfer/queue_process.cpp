@@ -164,6 +164,17 @@ namespace acl {
         return ACL_SUCCESS;
     }
 
+    aclError QueueProcessor::InitQueueSchedule(int32_t devId)
+    {
+        static bool isInitQs = false;
+        if (!isInitQs) {
+            ACL_LOG_INFO("need to init queue schedule");
+            ACL_REQUIRES_CALL_RTS_OK(rtMemQueueInitQS(devId), rtMemQueueInitQS);
+            isInitQs = true;
+        }
+        return ACL_SUCCESS;
+    }
+
     aclError QueueProcessor::GetDstInfo(int32_t deviceId, PID_QUERY_TYPE type, pid_t &dstPid)
     {
         rtBindHostpidInfo_t info = {0};

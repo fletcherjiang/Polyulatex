@@ -58,6 +58,8 @@ public:
 
     virtual aclError acltdtGetBufData(const acltdtBuf buf, void **dataPtr, size_t *size);
 
+    aclError InitQueueSchedule(int32_t devId);
+
     aclError acltdtDestroyQueueOndevice(uint32_t qid);
 
     aclError acltdtEnqueueOnDevice(uint32_t queueId, acltdtBuf buf, int32_t timeout);
