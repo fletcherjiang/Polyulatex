@@ -492,6 +492,7 @@ if(NOT ENABLE_OPEN_SRC)
     ${TOP_DIR}/abl/adump/external
     ${TOP_DIR}/inc/driver
     ${TOP_DIR}/abl/msprof/inc
+    ${TOP_DIR}/ace/npuruntime/inc
 else()
     ${BASE_DIR}/third_party/inc
     ${BASE_DIR}/third_party/inc/tdt
@@ -785,6 +786,7 @@ if(NOT ENABLE_OPEN_SRC)
     ${TOP_DIR}/inc/mmpa
     ${TOP_DIR}/metadef/inc
     ${TOP_DIR}/metadef/inc/external
+    ${TOP_DIR}/ace/npuruntime/inc
 else()
     ${BASE_DIR}/third_party/inc/
     ${BASE_DIR}/third_party/inc/mmpa
@@ -850,6 +852,7 @@ target_include_directories(acl_cblas PRIVATE
     ${BASE_DIR}/type
     ${BASE_DIR}/inc
     ${BASE_DIR}/inc/external
+    ${TOP_DIR}/ace/npuruntime/inc
 if(NOT ENABLE_OPEN_SRC)
     ${TOP_DIR}/inc
     ${TOP_DIR}/metadef/inc
@@ -918,6 +921,7 @@ if(NOT ENABLE_OPEN_SRC)
     ${TOP_DIR}/inc
     ${TOP_DIR}/metadef/inc
     ${TOP_DIR}/metadef/inc/external
+    ${TOP_DIR}/ace/npuruntime/inc
 else()
     ${BASE_DIR}/third_party/inc/
     ${BASE_DIR}/third_party/inc/metadef/inc
@@ -1046,6 +1050,7 @@ if(NOT ENABLE_OPEN_SRC)
     ${TOP_DIR}/graphengine/inc/framework
     ${TOP_DIR}/metadef/inc/external
     ${TOP_DIR}/graphengine/inc/external
+    ${TOP_DIR}/ace/npuruntime/inc
 else()
     ${BASE_DIR}/third_party/inc/
     ${BASE_DIR}/third_party/inc/metadef/inc
