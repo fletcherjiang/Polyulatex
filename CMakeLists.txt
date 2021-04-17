@@ -845,6 +845,12 @@ add_library(acl_cblas SHARED
 )
 
 target_include_directories(acl_cblas PRIVATE
+    ${BASE_DIR}
+    ${BASE_DIR}/inc/ops
+    ${BASE_DIR}/common
+    ${BASE_DIR}/type
+    ${BASE_DIR}/inc
+    ${BASE_DIR}/inc/external
     ####yellow zone####
     $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/inc>
     $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/metadef/inc>
@@ -906,6 +912,8 @@ add_library(acl_retr SHARED
 )
 
 target_include_directories(acl_retr PRIVATE
+    ${BASE_DIR}
+    ${BASE_DIR}/inc/external
     ####yellow zone####
     $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/inc>
     $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/metadef/inc>
@@ -1027,6 +1035,9 @@ add_library(acl_op_compiler SHARED
 )
 
 target_include_directories(acl_op_compiler PRIVATE
+    ${BASE_DIR}
+    ${BASE_DIR}/common
+    ${BASE_DIR}/inc/external
     ####yellow zone####
     $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/inc>
     $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/metadef/inc>
