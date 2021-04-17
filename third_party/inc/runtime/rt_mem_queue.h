@@ -12,10 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+*/
 
-
-#ifndef __CCE_RUNTIME_MEM_QUEUE_H
-#define __CCE_RUNTIME_MEM_QUEUE_H
+#ifndef CCE_RUNTIME_MEM_QUEUE_H
+#define CCE_RUNTIME_MEM_QUEUE_H
 #include <sys/types.h>
 #include "base.h"
 
@@ -225,4 +225,3 @@ RTS_API rtError_t rtMemGrpQuery(int32_t cmd, const rtMemGrpQueryInput_t *input, 
 }
 #endif
 #endif // CCE_RUNTIME_MEM_QUEUE_H
-*/

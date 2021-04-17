@@ -242,23 +242,23 @@ endif()
 target_include_directories(ascendcl PRIVATE
 if(NOT ENABLE_OPEN_SRC)
     ####yellow zone####
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/inc>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/metadef/inc>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/graphengine/inc>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/graphengine/inc/framework>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/metadef/inc/external>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/graphengine/inc/external>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/abl/adump/external>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/inc/driver>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/inc>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/metadef/inc>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/graphengine/inc>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/graphengine/inc/framework>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/metadef/inc/external>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/graphengine/inc/external>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/abl/adump/external>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/inc/driver>
     ####blue zone####
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/metadef/inc>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/graphengine/inc>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/graphengine/inc/framework>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/metadef/inc/external>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/graphengine/inc/external>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/toolchain/ide/ide-daemon/external>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/driver>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/metadef/inc>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/graphengine/inc>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/graphengine/inc/framework>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/metadef/inc/external>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/graphengine/inc/external>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/toolchain/ide/ide-daemon/external>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/driver>
 
     ${BASE_DIR}/inc/external
     ${BASE_DIR}/inc
@@ -288,10 +288,6 @@ target_link_options(ascendcl PRIVATE
 target_link_directories(ascendcl PRIVATE
     $<$<STREQUAL:${TARGET_SYSTEM_NAME},Android>:${TOP_DIR}/prebuilts/clang/linux-x86/aarch64/android-ndk-r21/sysroot/usr/lib/aarch64-linux-android/29>
     $<$<STREQUAL:${TARGET_SYSTEM_NAME},Android>:${TOP_DIR}/build/prebuilts/clang/linux-x86/aarch64/android-ndk-r21/sysroot/usr/lib/aarch64-linux-android/29>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:$<BUILD_INTERFACE:slog_headers>>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:$<BUILD_INTERFACE:msprof_headers>>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:$<BUILD_INTERFACE:mmpa_headers>>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:$<BUILD_INTERFACE:runtime_headers>>
 )
 
 set(linklibs ascend_hal_stub)
@@ -339,6 +335,10 @@ endif()
 if(${TARGET_SYSTEM_NAME} STREQUAL "Windows")
 target_link_libraries(ascendcl PRIVATE
     $<BUILD_INTERFACE:intf_pub>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:$<BUILD_INTERFACE:slog_headers>>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:$<BUILD_INTERFACE:msprof_headers>>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:$<BUILD_INTERFACE:mmpa_headers>>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:$<BUILD_INTERFACE:runtime_headers>>
     -Wl,--whole-archive
     ge_executor
     -Wl,--no-whole-archive
@@ -363,6 +363,10 @@ target_link_libraries(ascendcl PRIVATE
 else()
 target_link_libraries(ascendcl PRIVATE
     $<BUILD_INTERFACE:intf_pub>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:$<BUILD_INTERFACE:slog_headers>>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:$<BUILD_INTERFACE:msprof_headers>>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:$<BUILD_INTERFACE:mmpa_headers>>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:$<BUILD_INTERFACE:runtime_headers>>
     -Wl,--whole-archive
     -Wl,--no-whole-archive
     adump_server
@@ -480,27 +484,27 @@ endif()
 
 target_include_directories(fwk_ascendcl PRIVATE
  ####yellow zone####
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/inc>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/inc/tdt>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/metadef/inc>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/graphengine/inc>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/graphengine/inc/framework>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/metadef/inc/external>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/graphengine/inc/external>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/toolchain/ide/ide-daemon/external>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/abl/adump/external>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/inc/driver>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/abl/msprof/inc>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/inc>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/inc/tdt>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/metadef/inc>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/graphengine/inc>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/graphengine/inc/framework>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/metadef/inc/external>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/graphengine/inc/external>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/toolchain/ide/ide-daemon/external>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/abl/adump/external>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/inc/driver>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/abl/msprof/inc>
     ####blue zone####
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/tdt>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/metadef/inc>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/graphengine/inc>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/graphengine/inc/framework>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/metadef/inc/external>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/graphengine/inc/external>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/toolchain/ide/ide-daemon/external>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/driver>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/tdt>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/metadef/inc>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/graphengine/inc>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/graphengine/inc/framework>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/metadef/inc/external>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/graphengine/inc/external>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/toolchain/ide/ide-daemon/external>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/driver>
     ${BASE_DIR}/inc/external
     ${BASE_DIR}/inc
     ${BASE_DIR}
@@ -525,14 +529,14 @@ target_link_options(fwk_ascendcl PRIVATE
 target_link_directories(fwk_ascendcl PRIVATE
     $<$<STREQUAL:${TARGET_SYSTEM_NAME},Android>:${TOP_DIR}/prebuilts/clang/linux-x86/aarch64/android-ndk-r21/sysroot/usr/lib/aarch64-linux-android/29>
     $<$<STREQUAL:${TARGET_SYSTEM_NAME},Android>:${TOP_DIR}/build/prebuilts/clang/linux-x86/aarch64/android-ndk-r21/sysroot/usr/lib/aarch64-linux-android/29>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:$<BUILD_INTERFACE:slog_headers>>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:$<BUILD_INTERFACE:msprof_headers>>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:$<BUILD_INTERFACE:mmpa_headers>>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:$<BUILD_INTERFACE:runtime_headers>>
 )
 
 target_link_libraries(fwk_ascendcl PRIVATE
     $<BUILD_INTERFACE:intf_pub>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:$<BUILD_INTERFACE:slog_headers>>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:$<BUILD_INTERFACE:msprof_headers>>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:$<BUILD_INTERFACE:mmpa_headers>>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:$<BUILD_INTERFACE:runtime_headers>>
     adump_server
     static_mmpa
     -Wl,--no-as-needed
@@ -783,15 +787,15 @@ endif()
 
 target_include_directories(acl_dvpp PRIVATE
 ####yellow zone####
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/inc>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/inc/mmpa>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/metadef/inc>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/metadef/inc/external>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/inc>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/inc/mmpa>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/metadef/inc>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/metadef/inc/external>
     ####blue zone####
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/mmpa>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/metadef/inc>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/metadef/inc/external>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/mmpa>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/metadef/inc>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/metadef/inc/external>
     ${BASE_DIR}/inc/external
     ${BASE_DIR}/inc
     ${BASE_DIR}
@@ -818,7 +822,7 @@ target_link_options(acl_dvpp PRIVATE
 
 target_link_libraries(acl_dvpp PRIVATE
     $<BUILD_INTERFACE:intf_pub>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:$<BUILD_INTERFACE:mmpa_headers>>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:$<BUILD_INTERFACE:mmpa_headers>>
     $<$<NOT:$<STREQUAL:${PRODUCT},npuf10>>:static_turbojpeg>
     static_mmpa
     -Wl,--no-as-needed
@@ -852,15 +856,15 @@ target_include_directories(acl_cblas PRIVATE
     ${BASE_DIR}/inc
     ${BASE_DIR}/inc/external
     ####yellow zone####
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/inc>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/metadef/inc>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/graphengine/inc/framework>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/metadef/inc/external>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/inc>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/metadef/inc>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/graphengine/inc/framework>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/metadef/inc/external>
     ####blue zone####
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/metadef/inc>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/graphengine/inc/framework>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/metadef/inc/external>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/metadef/inc>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/graphengine/inc/framework>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/metadef/inc/external>
 )
 
 target_compile_options(acl_cblas PRIVATE
@@ -915,13 +919,13 @@ target_include_directories(acl_retr PRIVATE
     ${BASE_DIR}
     ${BASE_DIR}/inc/external
     ####yellow zone####
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/inc>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/metadef/inc>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/metadef/inc/external>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/inc>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/metadef/inc>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/metadef/inc/external>
     ####blue zone####
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/metadef/inc>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/metadef/inc/external>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/metadef/inc>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/metadef/inc/external>
 )
 
 target_compile_options(acl_retr PRIVATE
@@ -974,12 +978,12 @@ add_library(acl_tdt_queue SHARED
 
 target_include_directories(acl_tdt_queue PRIVATE
     ####yellow zone####
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/inc>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/inc/driver>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/ace/npuruntime/inc>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/inc>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/inc/driver>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/ace/npuruntime/inc>
     ####blue zone####
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/driver>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/driver>
 
     ${BASE_DIR}/inc/external
     ${BASE_DIR}/inc
@@ -1039,19 +1043,19 @@ target_include_directories(acl_op_compiler PRIVATE
     ${BASE_DIR}/common
     ${BASE_DIR}/inc/external
     ####yellow zone####
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/inc>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/metadef/inc>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/graphengine/inc>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/graphengine/inc/framework>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/metadef/inc/external>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/graphengine/inc/external>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/inc>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/metadef/inc>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/graphengine/inc>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/graphengine/inc/framework>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/metadef/inc/external>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/graphengine/inc/external>
     ####blue zone####
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/metadef/inc>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/graphengine/inc>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/graphengine/inc/framework>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/metadef/inc/external>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/graphengine/inc/external>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/metadef/inc>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/graphengine/inc>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/graphengine/inc/framework>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/metadef/inc/external>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/graphengine/inc/external>
 )
 
 target_compile_options(acl_op_compiler PRIVATE
@@ -1100,25 +1104,25 @@ add_library(acl_tdt_channel SHARED
 
 target_include_directories(acl_tdt_channel PRIVATE
     ####yellow zone####
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/inc>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/inc/tdt>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/metadef/inc>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/graphengine/inc>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/graphengine/inc/framework>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/metadef/inc/external>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/graphengine/inc/external>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/abl/adump/external>
-    $<$<NOT:$<BOOL:ENABLE_OPEN_SRC>>:${TOP_DIR}/inc/driver>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/inc>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/inc/tdt>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/metadef/inc>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/graphengine/inc>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/graphengine/inc/framework>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/metadef/inc/external>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/graphengine/inc/external>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/abl/adump/external>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/inc/driver>
     ####blue zone####
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/tdt>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/metadef/inc>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/graphengine/inc>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/graphengine/inc/framework>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/metadef/inc/external>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/graphengine/inc/external>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/toolchain/ide/ide-daemon/external>
-    $<$<BOOL:ENABLE_OPEN_SRC>:${BASE_DIR}/third_party/inc/driver>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/tdt>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/metadef/inc>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/graphengine/inc>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/graphengine/inc/framework>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/metadef/inc/external>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/graphengine/inc/external>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/toolchain/ide/ide-daemon/external>
+    $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/driver>
 
     ${BASE_DIR}/inc/external
     ${BASE_DIR}/inc
