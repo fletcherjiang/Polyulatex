@@ -1124,7 +1124,7 @@ add_library(acl_tdt_channel SHARED
 target_include_directories(acl_tdt_channel PRIVATE
     ####yellow zone####
     $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/inc>
-    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/inc/tdt>
+    $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/ace/npuruntime/inc/tdt>
     $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/metadef/inc>
     $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/graphengine/inc>
     $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/graphengine/inc/framework>
