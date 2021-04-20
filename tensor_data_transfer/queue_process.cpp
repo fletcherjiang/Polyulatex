@@ -40,7 +40,7 @@ namespace acl {
         ACL_LOG_INFO("Start to destroy queue %u", qid);
         int32_t deviceId = 0;
         // get qs id
-        pid_t dstPid;
+        int32_t dstPid;
         size_t routeNum = 0;
         std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
         if (GetDstInfo(deviceId, QS_PID, dstPid) == ACL_SUCCESS) {
@@ -175,7 +175,7 @@ namespace acl {
         return ACL_SUCCESS;
     }
 
-    aclError QueueProcessor::GetDstInfo(int32_t deviceId, PID_QUERY_TYPE type, pid_t &dstPid)
+    aclError QueueProcessor::GetDstInfo(int32_t deviceId, PID_QUERY_TYPE type, int32_t &dstPid)
     {
         rtBindHostpidInfo_t info = {0};
         info.hostPid = mmGetPid();

@@ -107,7 +107,7 @@ typedef struct tagEschedEventReply {
 #define RT_DEV_PROCESS_SIGN_LENGTH 49
 
 typedef struct tagBindHostpidInfo {
-    pid_t hostPid;
+    int32_t hostPid;
     uint32_t vfid;
     uint32_t chipId;
     int32_t mode;
@@ -164,7 +164,7 @@ RTS_API rtError_t rtMemQueueAttach(int32_t devId, uint32_t qid, int32_t timeout)
 
 RTS_API rtError_t rtEschedSubmitEventSync(int32_t devId, rtEschedEventSummary_t *event, rtEschedEventReply_t *ack) WEAKFUC;
 
-RTS_API rtError_t rtQueryDevPid(rtBindHostpidInfo_t *info, pid_t *devPid) WEAKFUC;
+RTS_API rtError_t rtQueryDevPid(rtBindHostpidInfo_t *info, int32_t *devPid) WEAKFUC;
 
 RTS_API rtError_t rtMbufInit(rtMemBuffCfg_t *cfg) WEAKFUC;
 

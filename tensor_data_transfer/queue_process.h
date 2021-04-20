@@ -80,7 +80,7 @@ public:
                                                rtEschedEventReply_t &ack);
 
     aclError SendConnectQsMsg(int32_t devieId, rtEschedEventSummary_t &eventSum, rtEschedEventReply_t &ack);
-    aclError GetDstInfo(int32_t deviceId, PID_QUERY_TYPE type, pid_t &dstPid);
+    aclError GetDstInfo(int32_t deviceId, PID_QUERY_TYPE type, int32_t &dstPid);
     aclError GetQueuePermission(int32_t deviceId, uint32_t qid, rtMemQueueShareAttr_t &permission);
     aclError GetQueueRouteNum(const acltdtQueueRouteQueryInfo *queryInfo,
                                                           int32_t deviceId,

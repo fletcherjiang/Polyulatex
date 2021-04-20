@@ -44,14 +44,14 @@ namespace acl {
         int32_t deviceId = 0;
         GET_CURRENT_DEVICE_ID(deviceId);
         // get qs id
-        pid_t qsPid;
+        int32_t qsPid;
         size_t routeNum = 0;
         std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
         if (GetDstInfo(deviceId, QS_PID, qsPid) == RT_ERROR_NONE) {
             rtEschedEventSummary_t eventSum = {0};
             rtEschedEventReply_t ack = {0};
             bqs::QsProcMsgRsp qsRsp = {0};
-            pid_t cpPid;
+            int32_t cpPid;
             ACL_REQUIRES_OK(GetDstInfo(deviceId, CP_PID, cpPid));
             eventSum.pid = cpPid;
             eventSum.grpId = 0;
@@ -84,7 +84,7 @@ namespace acl {
         GET_CURRENT_DEVICE_ID(deviceId);
         uint64_t startTime = GetTimestamp();
         uint64_t endTime = 0;
-        pid_t cpPid;
+        int32_t cpPid;
         rtBindHostpidInfo_t info = {0};
         info.hostPid = mmGetPid();
         info.cpType = RT_DEV_PROCESS_CP1;
@@ -144,7 +144,7 @@ namespace acl {
         GET_CURRENT_DEVICE_ID(deviceId);
         ACL_REQUIRES_OK(InitQueueSchedule(deviceId));
         // get dst pid
-        pid_t dstPid;
+        int32_t dstPid;
         ACL_REQUIRES_OK(GetDstInfo(deviceId, CP_PID, dstPid));
         rtEschedEventSummary_t eventSum = {0};
         rtEschedEventReply_t ack = {0};
@@ -173,7 +173,7 @@ namespace acl {
          int32_t deviceId = 0;
         GET_CURRENT_DEVICE_ID(deviceId);
         // get dst pid
-        pid_t dstPid;
+        int32_t dstPid;
         ACL_REQUIRES_OK(GetDstInfo(deviceId, CP_PID, dstPid));
         rtEschedEventSummary_t eventSum = {0};
         rtEschedEventReply_t ack = {0};
@@ -198,7 +198,7 @@ namespace acl {
         int32_t deviceId = 0;
         GET_CURRENT_DEVICE_ID(deviceId);
         // get dst id
-        pid_t dstPid;
+        int32_t dstPid;
         ACL_REQUIRES_OK(GetDstInfo(deviceId, CP_PID, dstPid));
         rtEschedEventSummary_t eventSum = {0};
         rtEschedEventReply_t ack = {0};

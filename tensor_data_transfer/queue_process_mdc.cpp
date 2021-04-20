@@ -18,7 +18,7 @@ namespace acl {
 
     aclError QueueProcessorMdc::GrantQueue2Cp(int32_t deviceId, uint32_t qid)
     {
-        pid_t cpPid;
+        int32_t cpPid;
         // if cp is found
         if (GetDstInfo(deviceId, CP_PID, cpPid) == ACL_SUCCESS) {
             rtMemQueueShareAttr_t permission = {0};
@@ -47,7 +47,7 @@ namespace acl {
             isQueueIint = true;
         }
         ACL_REQUIRES_CALL_RTS_OK(rtMemQueueCreate(deviceId, attr, qid), rtMemQueueCreate);
-        pid_t cpPid;
+        int32_t cpPid;
         if (GetDstInfo(deviceId, CP_PID, cpPid) == ACL_SUCCESS) {
             ACL_LOG_INFO("get cp pid %d", cpPid);
             rtMemQueueShareAttr_t attr = {0};
@@ -119,7 +119,7 @@ namespace acl {
         int32_t deviceId = 0;
         // get dst id
         ACL_REQUIRES_OK(InitQueueSchedule(deviceId));
-        pid_t dstPid;
+        int32_t dstPid;
         ACL_REQUIRES_OK(GetDstInfo(deviceId, QS_PID, dstPid));
         std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
         for (size_t i = 0; i < qRouteList->routeList.size(); ++i) {
@@ -156,7 +156,7 @@ namespace acl {
         ACL_LOG_INFO("Start to acltdtUnBindQueueRoutes, queue route is %zu", qRouteList->routeList.size());
         int32_t deviceId = 0;
         // get dst id
-        pid_t dstPid;
+        int32_t dstPid;
         ACL_REQUIRES_OK(GetDstInfo(deviceId, QS_PID, dstPid));
         rtEschedEventSummary_t eventSum = {0};
         rtEschedEventReply_t ack = {0};
@@ -180,7 +180,7 @@ namespace acl {
         ACL_LOG_INFO("Start to acltdtQueryQueueRoutes");
         int32_t deviceId = 0;
         // get dst id
-        pid_t dstPid;
+        int32_t dstPid;
         ACL_REQUIRES_OK(GetDstInfo(deviceId, QS_PID, dstPid));
         rtEschedEventSummary_t eventSum = {0};
         rtEschedEventReply_t ack = {0};
