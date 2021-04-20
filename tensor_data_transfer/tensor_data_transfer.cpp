@@ -777,7 +777,7 @@ aclError acltdtSendTensorV2(const acltdtChannelHandle *handle, const acltdtDatas
     rtMemQueueBuff_t queueBuf = {0};
     queueBuf.buffCount = queueBufInfoVec.size();
     queueBuf.buffInfo = queueBufInfoVec.data();
-    ret = rtMemQueueEnQueueBuf(handle->devId, handle->qid, &queueBuf, timeout);
+    ret = rtMemQueueEnQueueBuff(handle->devId, handle->qid, &queueBuf, timeout);
     if (ret != RT_ERROR_NONE) {
         ACL_LOG_INNER_ERROR("Faile to execute acltdtSendTensor, device is %u, name is %s",
             handle->devId, handle->name.c_str());
@@ -848,7 +848,7 @@ aclError acltdtReceiveTensorV2(const acltdtChannelHandle *handle, acltdtDataset 
     rtMemQueueBuffInfo queueBufInfo = {outHostAddr, bufLen};
     queueBuf.buffCount = 1;
     queueBuf.buffInfo = &queueBufInfo;
-    ret = rtMemQueueDeQueueBuf(handle->devId, handle->qid, &queueBuf, 0);
+    ret = rtMemQueueDeQueueBuff(handle->devId, handle->qid, &queueBuf, 0);
     if (ret != RT_ERROR_NONE) {
         ACL_LOG_ERROR("failed to rtMemQueueDeQueueBuf, device is %u, name is %s", handle->devId, handle->name.c_str());
         return ret;
