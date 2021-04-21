@@ -205,8 +205,8 @@ namespace acl {
         ack.buf = reinterpret_cast<char *>(&qsRsp);
         ack.bufLen = sizeof(qsRsp);
         std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
-        ACL_REQUIRES_OK(GetQueueRouteNum(queryInfo, deviceId, eventSum, ack));
-        size_t routeNum = reinterpret_cast<bqs::QsProcMsgRsp *>(ack.buf)->retValue;
+        size_t routeNum = 0;
+        ACL_REQUIRES_OK(GetQueueRouteNum(queryInfo, deviceId, eventSum, ack, routeNum));
         ACL_REQUIRES_OK(QueryQueueRoutes(queryInfo, deviceId, true, routeNum, eventSum, ack, qRouteList));
         return ACL_SUCCESS;
     }

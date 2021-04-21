@@ -83,9 +83,10 @@ public:
     aclError GetDstInfo(int32_t deviceId, PID_QUERY_TYPE type, int32_t &dstPid);
     aclError GetQueuePermission(int32_t deviceId, uint32_t qid, rtMemQueueShareAttr_t &permission);
     aclError GetQueueRouteNum(const acltdtQueueRouteQueryInfo *queryInfo,
-                                                          int32_t deviceId,
-                                                          rtEschedEventSummary_t &eventSum,
-                                                          rtEschedEventReply_t &ack);
+                              int32_t deviceId,
+                              rtEschedEventSummary_t &eventSum,
+                              rtEschedEventReply_t &ack,
+                              size_t &routeNum);
 
     aclError QueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo,
                                               int32_t deviceId,

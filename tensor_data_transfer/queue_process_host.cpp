@@ -60,8 +60,7 @@ namespace acl {
             ack.buf = reinterpret_cast<char *>(&qsRsp);
             ack.bufLen = sizeof(qsRsp);
             acltdtQueueRouteQueryInfo queryInfo = {bqs::BQS_QUERY_TYPE_SRC_OR_DST, qid, qid, true, true, true};
-            ACL_REQUIRES_OK(GetQueueRouteNum(&queryInfo, deviceId, eventSum, ack));
-            routeNum = reinterpret_cast<bqs::QsProcMsgRsp *>(ack.buf)->retValue;
+            ACL_REQUIRES_OK(GetQueueRouteNum(&queryInfo, deviceId, eventSum, ack, routeNum));
         }
         if (routeNum > 0) {
             ACL_LOG_ERROR("qid [%u] can not be destroyed, it need to be unbinded first.", qid);
@@ -208,8 +207,8 @@ namespace acl {
         ack.buf = reinterpret_cast<char *>(&qsRsp);
         ack.bufLen = sizeof(qsRsp);
         std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
-        ACL_REQUIRES_OK(GetQueueRouteNum(queryInfo, deviceId, eventSum, ack));
-        size_t routeNum = reinterpret_cast<bqs::QsProcMsgRsp *>(ack.buf)->retValue;
+        size_t routeNum = 0;
+        ACL_REQUIRES_OK(GetQueueRouteNum(queryInfo, deviceId, eventSum, ack, routeNum));
         ACL_REQUIRES_OK(QueryQueueRoutes(queryInfo, deviceId, false, routeNum, eventSum, ack, qRouteList));
         return ACL_SUCCESS;
     }

@@ -55,8 +55,8 @@ namespace acl {
             ack.buf = reinterpret_cast<char *>(&qsRsp);
             ack.bufLen = sizeof(qsRsp);
             acltdtQueueRouteQueryInfo queryInfo = {bqs::BQS_QUERY_TYPE_SRC_OR_DST, qid, qid, true, true, true};
-            ACL_REQUIRES_OK(GetQueueRouteNum(&queryInfo, deviceId, eventSum, ack));
-            routeNum = reinterpret_cast<bqs::QsProcMsgRsp *>(ack.buf)->retValue;
+            ACL_REQUIRES_OK(GetQueueRouteNum(&queryInfo, deviceId, eventSum, ack, routeNum));
+            bqs::QsProcMsgRsp *rsp = reinterpret_cast<bqs::QsProcMsgRsp *>(ack.buf);
         }
         if (routeNum > 0) {
             ACL_LOG_ERROR("qid [%u] can not be destroyed, it need to be unbinded first.", qid);
@@ -225,7 +225,12 @@ namespace acl {
         eventSum.msgLen = sizeof(qsInitMsg);
         eventSum.msg = reinterpret_cast<char *>(&qsInitMsg);
         ACL_REQUIRES_CALL_RTS_OK(rtEschedSubmitEventSync(deviceId, &eventSum, &ack), rtEschedSubmitEventSync);
-        qsContactId_ = reinterpret_cast<bqs::QsProcMsgRsp *>(ack.buf)->retValue;
+        bqs::QsProcMsgRsp *rsp = reinterpret_cast<bqs::QsProcMsgRsp *>(ack.buf);
+        if (rsp->retCode != 0) {
+            ACL_LOG_INNER_ERROR("send connet qs failed,  ret code id %d", rsp->retCode);
+            return ACL_ERROR_FAILURE;
+        }
+        qsContactId_ = rsp->retValue;
         eventSum.msgLen = 0;
         eventSum.msg = nullptr;
         ACL_LOG_INFO("successfully execute to SendConnectQsMsg");
@@ -268,6 +273,12 @@ namespace acl {
         eventSum.msgLen = 0;
         eventSum.msg = nullptr;
         if (ret == RT_ERROR_NONE) {
+            bqs::QsProcMsgRsp *rsp = reinterpret_cast<bqs::QsProcMsgRsp *>(ack.buf);
+            if (rsp->retCode != 0) {
+                ACL_LOG_INNER_ERROR("send connet qs failed,  ret code id %d", rsp->retCode);
+                FreeBuf(devPtr, mBuf, isMbuffAlloc);
+                return ACL_ERROR_FAILURE;
+            }
             offset = 0;
             for (size_t i = 0; i < qRouteList->routeList.size(); ++i) {
                 bqs::QueueRoute *tmp = reinterpret_cast<bqs::QueueRoute *>(static_cast<uint8_t *>(devPtr) + offset);
@@ -282,9 +293,10 @@ namespace acl {
     }
 
     aclError QueueProcessor::GetQueueRouteNum(const acltdtQueueRouteQueryInfo *queryInfo,
-                                                          int32_t deviceId,
-                                                          rtEschedEventSummary_t &eventSum,
-                                                          rtEschedEventReply_t &ack)
+                                              int32_t deviceId,
+                                              rtEschedEventSummary_t &eventSum,
+                                              rtEschedEventReply_t &ack,
+                                              size_t &routeNum)
     {
         ACL_LOG_INFO("start to get queue route num");
         bqs::QueueRouteQuery routeQuery= {0};
@@ -297,9 +309,15 @@ namespace acl {
         eventSum.msgLen = sizeof(routeQuery);
         eventSum.msg = reinterpret_cast<char *>(&routeQuery);
         ACL_REQUIRES_CALL_RTS_OK(rtEschedSubmitEventSync(deviceId, &eventSum, &ack), rtEschedSubmitEventSync);
+        bqs::QsProcMsgRsp *rsp = reinterpret_cast<bqs::QsProcMsgRsp *>(ack.buf);
+        if (rsp->retCode != 0) {
+            ACL_LOG_INNER_ERROR("get queue route num failed,  ret code id %d", rsp->retCode);
+            return ACL_ERROR_FAILURE;
+        }
+        routeNum = rsp->retValue;
         eventSum.msgLen = 0;
         eventSum.msg = nullptr;
-        ACL_LOG_INFO("sucessfully to get queue route num.");
+        ACL_LOG_INFO("sucessfully to get queue route num %zu.", routeNum);
         return ACL_SUCCESS;
     }
 
@@ -339,6 +357,12 @@ namespace acl {
         if (ret != RT_ERROR_NONE) {
             FreeBuf(devPtr, mBuf, isMbufAlloc);
             return ret;
+        }
+        bqs::QsProcMsgRsp *rsp = reinterpret_cast<bqs::QsProcMsgRsp *>(ack.buf);
+        if (rsp->retCode != 0) {
+            ACL_LOG_INNER_ERROR("query queue route failed,  ret code id %d", rsp->retCode);
+            FreeBuf(devPtr, mBuf, isMbufAlloc);
+            return ACL_ERROR_FAILURE;
         }
         size_t offset = 0;
         for (size_t i = 0; i < routeNum; ++i) {

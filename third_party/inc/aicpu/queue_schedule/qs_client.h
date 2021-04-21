@@ -77,6 +77,7 @@ struct QueueRouteQuery
 
 struct QsProcMsgRsp
 {
+    uint32_t eventId;
     int32_t retCode;
     uint32_t retValue; // qid, queryNum
     char rsv[32];
