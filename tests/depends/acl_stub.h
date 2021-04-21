@@ -218,9 +218,9 @@ public:
 
     virtual rtError_t rtMemQueuePeek(int32_t devId, uint32_t qid, size_t *bufLen, int32_t timeout);
 
-    virtual rtError_t rtMemQueueEnQueueBuf(int32_t devId, uint32_t qid, rtMemQueueBuff_t *inBuf, int32_t timeout);
+    virtual rtError_t rtMemQueueEnQueueBuff(int32_t devId, uint32_t qid, rtMemQueueBuff_t *inBuf, int32_t timeout);
 
-    virtual rtError_t rtMemQueueDeQueueBuf(int32_t devId, uint32_t qid, rtMemQueueBuff_t *outBuf, int32_t timeout);
+    virtual rtError_t rtMemQueueDeQueueBuff(int32_t devId, uint32_t qid, rtMemQueueBuff_t *outBuf, int32_t timeout);
 
     virtual rtError_t rtMemQueueQuery(int32_t devId, rtMemQueueQueryCmd_t cmd, void *inBuff, uint32_t inLen,
                                     void *outBuff, uint32_t *outLen);
@@ -452,8 +452,8 @@ public:
     MOCK_METHOD3(rtMemQueueEnQueue, rtError_t(int32_t devId, uint32_t qid, void *mbuf));
     MOCK_METHOD3(rtMemQueueDeQueue, rtError_t(int32_t devId, uint32_t qid, void **mbuf));
     MOCK_METHOD4(rtMemQueuePeek, rtError_t(int32_t devId, uint32_t qid, size_t *bufLen, int32_t timeout));
-    MOCK_METHOD4(rtMemQueueEnQueueBuf, rtError_t(int32_t devId, uint32_t qid, rtMemQueueBuff_t *inBuf, int32_t timeout));
-    MOCK_METHOD4(rtMemQueueDeQueueBuf, rtError_t(int32_t devId, uint32_t qid, rtMemQueueBuff_t *outBuf, int32_t timeout));
+    MOCK_METHOD4(rtMemQueueEnQueueBuff, rtError_t(int32_t devId, uint32_t qid, rtMemQueueBuff_t *inBuf, int32_t timeout));
+    MOCK_METHOD4(rtMemQueueDeQueueBuff, rtError_t(int32_t devId, uint32_t qid, rtMemQueueBuff_t *outBuf, int32_t timeout));
     MOCK_METHOD6(rtMemQueueQuery, rtError_t(int32_t devId, rtMemQueueQueryCmd_t cmd, void *inBuff, uint32_t inLen,
                                     void *outBuff, uint32_t *outLen));
 

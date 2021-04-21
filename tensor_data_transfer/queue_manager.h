@@ -55,4 +55,4 @@ private:
 
 }
 
-#endif //QUEUE_MANAGER_H
+#endif // QUEUE_MANAGER_H

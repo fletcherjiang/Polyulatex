@@ -83,6 +83,8 @@ typedef enum tagMemQueueQueryCmd {
 #define RT_MQ_DST_ENGINE_CCPU_HOST 3
 #define RT_MQ_DST_ENGINE_DCPU_DEVICE 4
 
+#define RT_MQ_SCHED_EVENT_QS_MSG 25
+
 typedef struct tagEschedEventSummary {
     int32_t pid;
     uint32_t grpId;

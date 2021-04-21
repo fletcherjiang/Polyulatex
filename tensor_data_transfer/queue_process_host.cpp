@@ -55,7 +55,7 @@ namespace acl {
             ACL_REQUIRES_OK(GetDstInfo(deviceId, CP_PID, cpPid));
             eventSum.pid = cpPid;
             eventSum.grpId = 0;
-            eventSum.eventId = 25; //DRV EVENT_ID
+            eventSum.eventId = RT_MQ_SCHED_EVENT_QS_MSG; //DRV EVENT_ID
             eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
             ack.buf = reinterpret_cast<char *>(&qsRsp);
             ack.bufLen = sizeof(qsRsp);
@@ -65,7 +65,7 @@ namespace acl {
         }
         if (routeNum > 0) {
             ACL_LOG_ERROR("qid [%u] can not be destroyed, it need to be unbinded first.", qid);
-            return ACL_ERROR_FAILURE;// 需要新增错误码
+            return ACL_ERROR_FAILURE;
         }
         ACL_REQUIRES_CALL_RTS_OK(rtMemQueueDestroy(deviceId, qid), rtMemQueueDestroy);
         DeleteMutexForData(qid);
@@ -97,7 +97,6 @@ namespace acl {
                 ACL_LOG_INFO("get cp pid %d", cpPid);
                 break;
             }
-            // 是否需要sleep？
             endTime = GetTimestamp();
             continueFlag = !continueFlag && ((endTime - startTime) <= (static_cast<uint64_t>(timeout) * 10000));
         } while (continueFlag);
@@ -151,13 +150,12 @@ namespace acl {
         bqs::QsProcMsgRsp qsRsp = {0};
         eventSum.pid = dstPid;
         eventSum.grpId = 0;
-        eventSum.eventId = 25; //drv EVENT_ID
+        eventSum.eventId = RT_MQ_SCHED_EVENT_QS_MSG; //drv EVENT_ID
         eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
         ack.buf = reinterpret_cast<char *>(&qsRsp);
         ack.bufLen = sizeof(qsRsp);
         std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
         if (!isQsInit_) {
-            // 需要调用rts接口拉起QS
             ACL_REQUIRES_OK(SendConnectQsMsg(deviceId, eventSum, ack));
             isQsInit_ = true;
         }
@@ -180,7 +178,7 @@ namespace acl {
         bqs::QsProcMsgRsp qsRsp = {0};
         eventSum.pid = dstPid;
         eventSum.grpId = 0;
-        eventSum.eventId = 25; //drv EVENT_ID
+        eventSum.eventId = RT_MQ_SCHED_EVENT_QS_MSG; //drv EVENT_ID
         eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
         ack.buf = reinterpret_cast<char *>(&qsRsp);
         ack.bufLen = sizeof(qsRsp);
@@ -205,7 +203,7 @@ namespace acl {
         bqs::QsProcMsgRsp qsRsp = {0};
         eventSum.pid = dstPid;
         eventSum.grpId = 0;
-        eventSum.eventId = 25; //DRV EVENT_ID
+        eventSum.eventId = RT_MQ_SCHED_EVENT_QS_MSG; //DRV EVENT_ID
         eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
         ack.buf = reinterpret_cast<char *>(&qsRsp);
         ack.bufLen = sizeof(qsRsp);

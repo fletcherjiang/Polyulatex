@@ -53,11 +53,6 @@ namespace acl {
         ACL_LOG_INFO("start to acltdtGrantQueue, qid is %u, pid is %d, permisiion is %u, timeout is %d",
                      qid, pid, permission, timeout);
         int32_t deviceId = 0;
-        // 需要校验主从进程?
-        // if (procStatus_ == PROCESS_SLAVE) {
-        //     ACL_LOG_ERROR("This process is slave process, can not grant.");
-        //     return ACL_ERROR_FAILURE;// 是否增加错误码
-        // }
         // check self group
         size_t selfGrpNum = 0;
         std::string selfGrpName;
@@ -154,13 +149,12 @@ namespace acl {
         bqs::QsProcMsgRsp qsRsp = {0};
         eventSum.pid = dstPid;
         eventSum.grpId = bqs::BINDQUEUEGRPID;
-        eventSum.eventId = 25; //qs EVENT_ID
+        eventSum.eventId = RT_MQ_SCHED_EVENT_QS_MSG; //qs EVENT_ID
         eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
         ack.buf = reinterpret_cast<char *>(&qsRsp);
         ack.bufLen = sizeof(qsRsp);
         std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
         if (!isQsInit_) {
-            // 调用接口拉起QS
             ACL_REQUIRES_OK(SendConnectQsMsg(deviceId, eventSum, ack));
             isQsInit_ = true;
         }
@@ -182,7 +176,7 @@ namespace acl {
         bqs::QsProcMsgRsp qsRsp = {0};
         eventSum.pid = dstPid;
         eventSum.grpId = bqs::BINDQUEUEGRPID;
-        eventSum.eventId = 25; //drv EVENT_ID
+        eventSum.eventId = RT_MQ_SCHED_EVENT_QS_MSG; //drv EVENT_ID
         eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
         ack.buf = reinterpret_cast<char *>(&qsRsp);
         ack.bufLen = sizeof(qsRsp);
@@ -206,7 +200,7 @@ namespace acl {
         bqs::QsProcMsgRsp qsRsp = {0};
         eventSum.pid = dstPid;
         eventSum.grpId = bqs::BINDQUEUEGRPID;
-        eventSum.eventId = 25; //qs EVENT_ID
+        eventSum.eventId = RT_MQ_SCHED_EVENT_QS_MSG; //qs EVENT_ID
         eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
         ack.buf = reinterpret_cast<char *>(&qsRsp);
         ack.bufLen = sizeof(qsRsp);

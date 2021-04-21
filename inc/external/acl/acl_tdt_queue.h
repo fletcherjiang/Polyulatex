@@ -28,8 +28,8 @@ typedef struct acltdtQueueRouteQueryInfo acltdtQueueRouteQueryInfo;
 typedef struct acltdtQueueRoute acltdtQueueRoute;
 
 enum acltdtQueueAttrType {
-    ACL_QUEUE_NAME_PTR = 0,
-    ACL_QUEUE_DEPTH_UINT32
+    ACL_TDT_QUEUE_NAME_PTR = 0,
+    ACL_TDT_QUEUE_DEPTH_UINT32
 };
 
 enum acltdtQueueRouteParamType {
@@ -45,9 +45,9 @@ enum acltdtQueueRouteQueryMode {
 };
 
 enum acltdtQueueRouteQueryInfoParamType {
-    ACL_QUEUE_ROUTE_QUERY_MODE_ENUM = 0,
-    ACL_QUEUE_ROUTE_QUERY_SRC_ID_UINT32,
-    ACL_QUEUE_ROUTE_QUERY_DST_ID_UINT32
+    ACL_TDT_QUEUE_ROUTE_QUERY_MODE_ENUM = 0,
+    ACL_TDT_QUEUE_ROUTE_QUERY_SRC_ID_UINT32,
+    ACL_TDT_QUEUE_ROUTE_QUERY_DST_ID_UINT32
 };
 
 /**

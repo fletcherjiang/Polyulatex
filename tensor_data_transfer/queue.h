@@ -60,4 +60,4 @@ aclError CheckQueueRouteQueryInfo(const acltdtQueueRouteQueryInfo *queryInfo);
 aclError GetRunningEnv(RunEnv &runEnv);
 uint64_t GetTimestamp();
 
-#endif //QUEUE_H
+#endif // ACL_QUEUE_H

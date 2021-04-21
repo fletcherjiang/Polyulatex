@@ -505,7 +505,6 @@ TEST_F(UTEST_tensor_data_transfer, acltdtSendTensorV2)
     EXPECT_EQ(ret, ACL_SUCCESS);
     acltdtDestroyChannel(handle);
     acltdtDestroyDataset(dataset);
-
 }
 
 TEST_F(UTEST_tensor_data_transfer, acltdtReceiveTensorV2)

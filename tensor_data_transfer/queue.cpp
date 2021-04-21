@@ -289,7 +289,7 @@ aclError acltdtSetQueueAttr(acltdtQueueAttr *attr,
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attr);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(value);
     switch (type) {
-        case ACL_QUEUE_NAME_PTR:
+        case ACL_TDT_QUEUE_NAME_PTR:
             {
                 char *tmp = nullptr;
                 ACL_REQUIRES_OK(CopyParam(value, len, static_cast<void *>(&tmp), sizeof(size_t)));
@@ -300,7 +300,7 @@ aclError acltdtSetQueueAttr(acltdtQueueAttr *attr,
                 }
                 return CopyParam(tmp, strlen(tmp) + 1, static_cast<void *>(attr->name), RT_MQ_MAX_NAME_LEN);
             }
-        case ACL_QUEUE_DEPTH_UINT32:
+        case ACL_TDT_QUEUE_DEPTH_UINT32:
             return CopyParam(value, len, static_cast<void *>(&attr->depth), sizeof(uint32_t));
     }
     return ACL_SUCCESS;
@@ -318,12 +318,12 @@ aclError acltdtGetQueueAttr(const acltdtQueueAttr *attr,
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(paramRetSize);
     ACL_LOG_INFO("start to get queue attr, type is %d, len is %zu", type, len);
     switch (type) {
-        case ACL_QUEUE_NAME_PTR:
+        case ACL_TDT_QUEUE_NAME_PTR:
             {
                 const char *tmp = &attr->name[0];
                 return CopyParam(static_cast<const void *>(&tmp), sizeof(size_t), value, len, paramRetSize);
             }
-        case ACL_QUEUE_DEPTH_UINT32:
+        case ACL_TDT_QUEUE_DEPTH_UINT32:
             return CopyParam(static_cast<const void *>(&attr->depth), sizeof(uint32_t), value, len, paramRetSize);
     }
     return ACL_SUCCESS;
@@ -445,7 +445,7 @@ aclError acltdtSetQueueRouteQueryInfo(acltdtQueueRouteQueryInfo *param,
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(param);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(value);
     switch (type) {
-        case ACL_QUEUE_ROUTE_QUERY_MODE_ENUM:
+        case ACL_TDT_QUEUE_ROUTE_QUERY_MODE_ENUM:
             {
                 auto ret = CopyParam(value, len, static_cast<void *>(&param->mode), sizeof(acltdtQueueRouteQueryMode));
                 if (ret == ACL_SUCCESS) {
@@ -453,7 +453,7 @@ aclError acltdtSetQueueRouteQueryInfo(acltdtQueueRouteQueryInfo *param,
                 }
                 return ret;
             }
-        case ACL_QUEUE_ROUTE_QUERY_SRC_ID_UINT32:
+        case ACL_TDT_QUEUE_ROUTE_QUERY_SRC_ID_UINT32:
             {
                 auto ret = CopyParam(value, len, static_cast<void *>(&param->srcId), sizeof(uint32_t));
                 if (ret == ACL_SUCCESS) {
@@ -461,7 +461,7 @@ aclError acltdtSetQueueRouteQueryInfo(acltdtQueueRouteQueryInfo *param,
                 }
                 return ret;
             }
-        case ACL_QUEUE_ROUTE_QUERY_DST_ID_UINT32:
+        case ACL_TDT_QUEUE_ROUTE_QUERY_DST_ID_UINT32:
         {
             auto ret = CopyParam(value, len, static_cast<void *>(&param->dstId), sizeof(uint32_t));
             if (ret == ACL_SUCCESS) {

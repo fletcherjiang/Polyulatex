@@ -480,13 +480,13 @@ rtError_t aclStub::rtMemQueuePeek(int32_t devId, uint32_t qid, size_t *bufLen, i
     return RT_ERROR_NONE;
 }
 
-rtError_t aclStub::rtMemQueueEnQueueBuf(int32_t devId, uint32_t qid, rtMemQueueBuff_t *inBuf, int32_t timeout)
+rtError_t aclStub::rtMemQueueEnQueueBuff(int32_t devId, uint32_t qid, rtMemQueueBuff_t *inBuf, int32_t timeout)
 
 {
     return RT_ERROR_NONE;
 }
 
-rtError_t aclStub::rtMemQueueDeQueueBuf(int32_t devId, uint32_t qid, rtMemQueueBuff_t *outBuf, int32_t timeout)
+rtError_t aclStub::rtMemQueueDeQueueBuff(int32_t devId, uint32_t qid, rtMemQueueBuff_t *outBuf, int32_t timeout)
 {
     return RT_ERROR_NONE;
 }
@@ -1012,15 +1012,15 @@ rtError_t rtMemQueuePeek(int32_t devId, uint32_t qid, size_t *bufLen, int32_t ti
     return MockFunctionTest::aclStubInstance().rtMemQueuePeek(devId, qid, bufLen, timeout);
 }
 
-rtError_t rtMemQueueEnQueueBuf(int32_t devId, uint32_t qid, rtMemQueueBuff_t *inBuf, int32_t timeout)
+rtError_t rtMemQueueEnQueueBuff(int32_t devId, uint32_t qid, rtMemQueueBuff_t *inBuf, int32_t timeout)
 
 {
-    return MockFunctionTest::aclStubInstance().rtMemQueueEnQueueBuf(devId, qid, inBuf, timeout);
+    return MockFunctionTest::aclStubInstance().rtMemQueueEnQueueBuff(devId, qid, inBuf, timeout);
 }
 
-rtError_t rtMemQueueDeQueueBuf(int32_t devId, uint32_t qid, rtMemQueueBuff_t *outBuf, int32_t timeout)
+rtError_t rtMemQueueDeQueueBuff(int32_t devId, uint32_t qid, rtMemQueueBuff_t *outBuf, int32_t timeout)
 {
-    return MockFunctionTest::aclStubInstance().rtMemQueueDeQueueBuf(devId, qid,outBuf, timeout);
+    return MockFunctionTest::aclStubInstance().rtMemQueueDeQueueBuff(devId, qid,outBuf, timeout);
 }
 
 rtError_t rtMemQueueQuery(int32_t devId, rtMemQueueQueryCmd_t cmd, void *inBuff, uint32_t inLen,

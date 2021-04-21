@@ -56,13 +56,13 @@ TEST_F(UTEST_QUEUE, acltdtSetQueueAttr)
 {
     size_t len = sizeof(size_t);
     const char* name = "123456789";
-    auto ret = acltdtSetQueueAttr(nullptr, ACL_QUEUE_NAME_PTR, len, &name);
+    auto ret = acltdtSetQueueAttr(nullptr, ACL_TDT_QUEUE_NAME_PTR, len, &name);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
     acltdtQueueAttr attr = {0};
-    ret = acltdtSetQueueAttr(&attr, ACL_QUEUE_NAME_PTR, len, nullptr);
+    ret = acltdtSetQueueAttr(&attr, ACL_TDT_QUEUE_NAME_PTR, len, nullptr);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
-    ret = acltdtSetQueueAttr(&attr, ACL_QUEUE_NAME_PTR, len, &name);
+    ret = acltdtSetQueueAttr(&attr, ACL_TDT_QUEUE_NAME_PTR, len, &name);
     std::string oriName(name);
     std::string tmpName(attr.name);
     EXPECT_EQ(ret, ACL_SUCCESS);
@@ -70,7 +70,7 @@ TEST_F(UTEST_QUEUE, acltdtSetQueueAttr)
 
     char nameVec[] = "222";
     char *nameVecPtr = &nameVec[0];
-    ret = acltdtSetQueueAttr(&attr, ACL_QUEUE_NAME_PTR, len, &nameVecPtr);
+    ret = acltdtSetQueueAttr(&attr, ACL_TDT_QUEUE_NAME_PTR, len, &nameVecPtr);
     oriName = std::string(nameVec);
     tmpName = std::string(attr.name);
     EXPECT_EQ(ret, ACL_SUCCESS);
@@ -79,12 +79,12 @@ TEST_F(UTEST_QUEUE, acltdtSetQueueAttr)
     // 129 bytes
     const char* nameFake = "66666666666666666666669666668888866666666666666666666668888888888888888844444444444444444444444444444444488888888888888888888888";
     
-    ret = acltdtSetQueueAttr(&attr, ACL_QUEUE_NAME_PTR, len, &nameFake);
+    ret = acltdtSetQueueAttr(&attr, ACL_TDT_QUEUE_NAME_PTR, len, &nameFake);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     len = sizeof(uint32_t);
     uint32_t depth = 3;
-    ret = acltdtSetQueueAttr(&attr, ACL_QUEUE_DEPTH_UINT32, len, &depth);
+    ret = acltdtSetQueueAttr(&attr, ACL_TDT_QUEUE_DEPTH_UINT32, len, &depth);
     EXPECT_EQ(ret, ACL_SUCCESS);
     EXPECT_EQ(depth, attr.depth);
 }
@@ -94,19 +94,19 @@ TEST_F(UTEST_QUEUE, acltdtGetQueueAttr)
     size_t len = sizeof(size_t);
     const char* name = nullptr;
     size_t retSize = 0;
-    auto ret = acltdtGetQueueAttr(nullptr, ACL_QUEUE_NAME_PTR, len, &retSize, &name);
+    auto ret = acltdtGetQueueAttr(nullptr, ACL_TDT_QUEUE_NAME_PTR, len, &retSize, &name);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
     acltdtQueueAttr attr = {0};
-    ret = acltdtGetQueueAttr(&attr, ACL_QUEUE_NAME_PTR, len, nullptr, &name);
+    ret = acltdtGetQueueAttr(&attr, ACL_TDT_QUEUE_NAME_PTR, len, nullptr, &name);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
-    ret = acltdtGetQueueAttr(&attr, ACL_QUEUE_NAME_PTR, len, &retSize, nullptr);
+    ret = acltdtGetQueueAttr(&attr, ACL_TDT_QUEUE_NAME_PTR, len, &retSize, nullptr);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     const char *preName = "1234";
     memcpy_s(attr.name, 128, preName, strlen(preName) + 1);
     string copyName = string(attr.name);
     EXPECT_EQ(copyName, "1234");
-    ret = acltdtGetQueueAttr(&attr, ACL_QUEUE_NAME_PTR, len, &retSize, &name);
+    ret = acltdtGetQueueAttr(&attr, ACL_TDT_QUEUE_NAME_PTR, len, &retSize, &name);
     EXPECT_EQ(ret, ACL_SUCCESS);
     EXPECT_EQ(string(name), copyName);
     EXPECT_EQ(retSize, len);
@@ -114,7 +114,7 @@ TEST_F(UTEST_QUEUE, acltdtGetQueueAttr)
     attr.depth = 5;
     uint32_t depth = 9999;
     len = sizeof(uint32_t);
-    ret = acltdtGetQueueAttr(&attr, ACL_QUEUE_DEPTH_UINT32, len, &retSize, &depth);
+    ret = acltdtGetQueueAttr(&attr, ACL_TDT_QUEUE_DEPTH_UINT32, len, &retSize, &depth);
     EXPECT_EQ(ret, ACL_SUCCESS);
     EXPECT_EQ(depth, 5);
     EXPECT_EQ(retSize, len);
@@ -269,26 +269,26 @@ TEST_F(UTEST_QUEUE, acltdtSetQueueRouteQueryInfo)
 {
     size_t len = sizeof(uint32_t);
     uint32_t src = 999;
-    auto ret = acltdtSetQueueRouteQueryInfo(nullptr, ACL_QUEUE_ROUTE_QUERY_SRC_ID_UINT32, len, &src);
+    auto ret = acltdtSetQueueRouteQueryInfo(nullptr, ACL_TDT_QUEUE_ROUTE_QUERY_SRC_ID_UINT32, len, &src);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
     acltdtQueueRouteQueryInfo *info = acltdtCreateQueueRouteQueryInfo();
     EXPECT_NE(info, nullptr);
-    ret = acltdtSetQueueRouteQueryInfo(info, ACL_QUEUE_ROUTE_QUERY_SRC_ID_UINT32, len, nullptr);
+    ret = acltdtSetQueueRouteQueryInfo(info, ACL_TDT_QUEUE_ROUTE_QUERY_SRC_ID_UINT32, len, nullptr);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
-    ret = acltdtSetQueueRouteQueryInfo(info, ACL_QUEUE_ROUTE_QUERY_SRC_ID_UINT32, len, &src);
+    ret = acltdtSetQueueRouteQueryInfo(info, ACL_TDT_QUEUE_ROUTE_QUERY_SRC_ID_UINT32, len, &src);
     EXPECT_EQ(ret, ACL_SUCCESS);
     EXPECT_EQ(info->srcId, 999);
     EXPECT_EQ(info->isConfigSrc, true);
 
     uint32_t dst = 888;
-    ret = acltdtSetQueueRouteQueryInfo(info, ACL_QUEUE_ROUTE_QUERY_DST_ID_UINT32, len, &dst);
+    ret = acltdtSetQueueRouteQueryInfo(info, ACL_TDT_QUEUE_ROUTE_QUERY_DST_ID_UINT32, len, &dst);
     EXPECT_EQ(ret, ACL_SUCCESS);
     EXPECT_EQ(info->dstId, 888);
     EXPECT_EQ(info->isConfigDst, true);
 
     acltdtQueueRouteQueryMode mode = ACL_TDT_QUEUE_ROUTE_QUERY_DST;
-    ret = acltdtSetQueueRouteQueryInfo(info, ACL_QUEUE_ROUTE_QUERY_MODE_ENUM, sizeof(mode), &mode);
+    ret = acltdtSetQueueRouteQueryInfo(info, ACL_TDT_QUEUE_ROUTE_QUERY_MODE_ENUM, sizeof(mode), &mode);
     EXPECT_EQ(ret, ACL_SUCCESS);
     EXPECT_EQ(info->mode, ACL_TDT_QUEUE_ROUTE_QUERY_DST);
     EXPECT_EQ(info->isConfigMode, true);

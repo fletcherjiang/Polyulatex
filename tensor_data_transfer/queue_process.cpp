@@ -50,7 +50,7 @@ namespace acl {
             bqs::QsProcMsgRsp qsRsp = {0};
             eventSum.pid = dstPid;
             eventSum.grpId = bqs::BINDQUEUEGRPID;
-            eventSum.eventId = 25; //qs EVENT_ID
+            eventSum.eventId = RT_MQ_SCHED_EVENT_QS_MSG; // qs EVENT_ID
             eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
             ack.buf = reinterpret_cast<char *>(&qsRsp);
             ack.bufLen = sizeof(qsRsp);
@@ -60,7 +60,7 @@ namespace acl {
         }
         if (routeNum > 0) {
             ACL_LOG_ERROR("qid [%u] can not be destroyed, it need to be unbinded first.", qid);
-            return ACL_ERROR_FAILURE;// 需要新增错误码
+            return ACL_ERROR_FAILURE;
         }
         ACL_REQUIRES_CALL_RTS_OK(rtMemQueueDestroy(deviceId, qid), rtMemQueueDestroy);
         DeleteMutexForData(qid);
@@ -82,15 +82,14 @@ namespace acl {
             rtError_t rtRet = rtMemQueueEnQueue(deviceId, qid, buf);
             if (rtRet == RT_ERROR_NONE) {
                 return ACL_SUCCESS;
-            } else if (rtRet != ACL_ERROR_RT_QUEUE_FULL) { // 队列满的错误码
+            } else if (rtRet != ACL_ERROR_RT_QUEUE_FULL) {
                 ACL_LOG_CALL_ERROR("[Enqueue][Queue]fail to enqueue result = %d", rtRet);
                 return rtRet;
             }
-            // 是否需要sleep?
             endTime = GetTimestamp();
             continueFlag = !continueFlag && ((endTime - startTime) <= (static_cast<uint64_t>(timeout) * 10000));
         } while (continueFlag);
-        return ACL_ERROR_FAILURE; // 是否需要超时错误码？
+        return ACL_ERROR_FAILURE;
     }
 
     aclError QueueProcessor::acltdtDequeueOnDevice(uint32_t qid, acltdtBuf *buf, int32_t timeout)
@@ -107,15 +106,14 @@ namespace acl {
             rtError_t rtRet = rtMemQueueDeQueue(deviceId, qid, buf);
             if (rtRet == RT_ERROR_NONE) {
                 return ACL_SUCCESS;
-            } else if (rtRet != ACL_ERROR_RT_QUEUE_EMPTY) { // 队列空的错误码
+            } else if (rtRet != ACL_ERROR_RT_QUEUE_EMPTY) {
                 ACL_LOG_CALL_ERROR("[Dequeue][Queue]fail to dequeue result = %d", rtRet);
                 return rtRet;
             }
-            // 是否需要sleep？
             endTime = GetTimestamp();
             continueFlag = !continueFlag && ((endTime - startTime) <= (static_cast<uint64_t>(timeout) * 10000));
         } while (continueFlag);
-        return ACL_ERROR_FAILURE; // 超时错误码？
+        return ACL_ERROR_FAILURE;
     }
 
     aclError QueueProcessor::acltdtAllocBufOnDevice(size_t size, acltdtBuf *buf)
@@ -211,10 +209,8 @@ namespace acl {
     {
         if (isMbuf) {
             (void)rtMbufFree(mbuf);
-            mbuf = nullptr;
         } else {
             (void)rtFree(devPtr);
-            devPtr = nullptr;
         }
     }
 
