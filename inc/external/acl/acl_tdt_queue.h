@@ -27,28 +27,28 @@ typedef struct acltdtQueueRouteList acltdtQueueRouteList;
 typedef struct acltdtQueueRouteQueryInfo acltdtQueueRouteQueryInfo;
 typedef struct acltdtQueueRoute acltdtQueueRoute;
 
-enum acltdtQueueAttrType {
+typedef enum {
     ACL_TDT_QUEUE_NAME_PTR = 0,
     ACL_TDT_QUEUE_DEPTH_UINT32
-};
+} acltdtQueueAttrType;
 
-enum acltdtQueueRouteParamType {
+typedef enum {
     ACL_TDT_QUEUE_ROUTE_SRC_UINT32 = 0,
     ACL_TDT_QUEUE_ROUTE_DST_UINT32,
     ACL_TDT_QUEUE_ROUTE_STATUS_INT32
-};
+} acltdtQueueRouteParamType;
 
-enum acltdtQueueRouteQueryMode {
+typedef enum {
     ACL_TDT_QUEUE_ROUTE_QUERY_SRC = 0,
     ACL_TDT_QUEUE_ROUTE_QUERY_DST,
     ACL_TDT_QUEUE_ROUTE_QUERY_SRC_AND_DST
-};
+} acltdtQueueRouteQueryMode;
 
-enum acltdtQueueRouteQueryInfoParamType {
+typedef enum {
     ACL_TDT_QUEUE_ROUTE_QUERY_MODE_ENUM = 0,
     ACL_TDT_QUEUE_ROUTE_QUERY_SRC_ID_UINT32,
     ACL_TDT_QUEUE_ROUTE_QUERY_DST_ID_UINT32
-};
+} acltdtQueueRouteQueryInfoParamType;
 
 /**
  * @ingroup AscendCL
@@ -77,7 +77,7 @@ ACL_FUNC_VISIBILITY aclError acltdtDestroyQueue(uint32_t qid);
  * @ingroup AscendCL
  * @brief enqueue function
  *
- * @param qid [IN] qid 
+ * @param qid [IN] qid
  * @param buf [IN] acltdtBuf
  * @param timeout [IN] timeout
  *
@@ -90,7 +90,7 @@ ACL_FUNC_VISIBILITY aclError acltdtEnqueue(uint32_t qid, acltdtBuf buf, int32_t 
  * @ingroup AscendCL
  * @brief dequeue function
  *
- * @param qid [IN] qid 
+ * @param qid [IN] qid
  * @param buf [OUT] pointer to the acltdtBuf
  * @param timeout [IN] timeout
  *
@@ -103,7 +103,7 @@ ACL_FUNC_VISIBILITY aclError acltdtDequeue(uint32_t qid, acltdtBuf *buf, int32_t
  * @ingroup AscendCL
  * @brief grant queue to other process
  *
- * @param qid [IN] qid 
+ * @param qid [IN] qid
  * @param pid [IN] pid of dst process
  * @param permission [IN] permission of queue
  * @param timeout [IN] timeout
@@ -117,7 +117,7 @@ ACL_FUNC_VISIBILITY aclError acltdtGrantQueue(uint32_t qid, int32_t pid, uint32_
  * @ingroup AscendCL
  * @brief attach queue in current process
  *
- * @param qid [IN] qid 
+ * @param qid [IN] qid
  * @param timeout [IN] timeout
  * @param permission [OUT] permission of queue
  *
@@ -151,7 +151,7 @@ ACL_FUNC_VISIBILITY aclError acltdtUnbindQueueRoutes(acltdtQueueRouteList *qRout
 /**
  * @ingroup AscendCL
  * @brief query queue routes according to query mode
- * 
+ *
  * @param queryInfo [IN] pointer to the queue route query info
  * @param qRouteList [IN|OUT] pointer to the route list
  *
@@ -164,7 +164,7 @@ ACL_FUNC_VISIBILITY aclError acltdtQueryQueueRoutes(const acltdtQueueRouteQueryI
 /**
  * @ingroup AscendCL
  * @brief alloc acltdtBuf
- * 
+ *
  * @param size [IN] alloc buf size
  * @param buf [OUT] pointer to the acltdtBuf
  *
@@ -176,7 +176,7 @@ ACL_FUNC_VISIBILITY aclError acltdtAllocBuf(size_t size, acltdtBuf *buf);
 /**
  * @ingroup AscendCL
  * @brief free acltdtBuf
- * 
+ *
  * @param buf [IN] pointer to the acltdtBuf
  *
  * @retval ACL_SUCCESS  The function is successfully executed.
@@ -187,7 +187,7 @@ ACL_FUNC_VISIBILITY aclError acltdtFreeBuf(acltdtBuf buf);
 /**
  * @ingroup AscendCL
  * @brief get data buf address
- * 
+ *
  * @param buf [IN] acltdtBuf
  * @param dataPtr [OUT] pointer to the data ptr
  * @param size [OUT] pointer to the size
@@ -260,7 +260,7 @@ ACL_FUNC_VISIBILITY aclError acltdtGetQueueAttr(const acltdtQueueAttr *attr,
  *
  * @param srcId [IN]   src id of queue route
  * @param dstId [IN]   dst id of queue route
- * 
+ *
  * @retval null for failed
  * @retval OtherValues success
  */
@@ -300,7 +300,7 @@ ACL_FUNC_VISIBILITY aclError acltdtGetQueueRouteParam(const acltdtQueueRoute *ro
 /**
  * @ingroup AscendCL
  * @brief Create the queue route list
- * 
+ *
  * @retval null for failed
  * @retval OtherValues success
  */
@@ -350,7 +350,7 @@ ACL_FUNC_VISIBILITY aclError acltdtGetQueueRoute(const acltdtQueueRouteList *rou
 /**
  * @ingroup AscendCL
  * @brief Create the queue route query info
- * 
+ *
  * @retval null for failed
  * @retval OtherValues success
  */

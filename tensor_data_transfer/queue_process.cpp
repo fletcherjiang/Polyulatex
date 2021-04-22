@@ -56,7 +56,6 @@ namespace acl {
             ack.bufLen = sizeof(qsRsp);
             acltdtQueueRouteQueryInfo queryInfo = {bqs::BQS_QUERY_TYPE_SRC_OR_DST, qid, qid, true, true, true};
             ACL_REQUIRES_OK(GetQueueRouteNum(&queryInfo, deviceId, eventSum, ack, routeNum));
-            bqs::QsProcMsgRsp *rsp = reinterpret_cast<bqs::QsProcMsgRsp *>(ack.buf);
         }
         if (routeNum > 0) {
             ACL_LOG_ERROR("qid [%u] can not be destroyed, it need to be unbinded first.", qid);
