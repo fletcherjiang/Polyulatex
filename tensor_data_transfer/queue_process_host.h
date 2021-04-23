@@ -49,9 +49,6 @@ public:
     QueueProcessorHost(QueueProcessorHost &&) = delete;
 
     QueueProcessorHost &&operator=(QueueProcessorHost &&) = delete;
-
-private:
-    /* data */
 };
 
 }

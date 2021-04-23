@@ -56,9 +56,6 @@ public:
     QueueProcessorMdc(QueueProcessorMdc &&) = delete;
 
     QueueProcessorMdc &&operator=(QueueProcessorMdc &&) = delete;
-
-private:
-    /* data */
 };
 }
 

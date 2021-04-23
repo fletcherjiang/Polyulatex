@@ -313,7 +313,6 @@ namespace acl {
             if (aclType == ACL_TENSOR_DATA_TENSOR) {
                 std::vector<int64_t> dims = itemVec[i].dims;
                 aclDataType dataType = static_cast<aclDataType>(itemVec[i].ctrlInfo.tensorType);
-                
                 acltdtDataItem *item = new(std::nothrow) acltdtDataItem(aclType,
                     &dims[0], dims.size(), "",
                     dataType, "",
@@ -645,10 +644,6 @@ acltdtChannelHandle *acltdtCreateChannel(uint32_t deviceId, const char *name)
         return nullptr;
     }
     acltdtChannelHandle *handle = new(std::nothrow) acltdtChannelHandle(deviceId, name);
-    if (handle == nullptr) {
-        ACL_LOG_INNER_ERROR("acltdtChannelHandle is nullptr");
-        return nullptr;
-    }
     if (handle != nullptr) {
         if (!handle->recvName.empty()) {
             (void)tdt::TdtHostPreparePopData();

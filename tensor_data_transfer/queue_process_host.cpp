@@ -99,7 +99,6 @@ namespace acl {
             endTime = GetTimestamp();
             continueFlag = !continueFlag && ((endTime - startTime) <= (static_cast<uint64_t>(timeout) * 10000));
         } while (continueFlag);
-        
         rtMemQueueShareAttr_t attr = {0};
         attr.manage = permission & ACL_TDT_QUEUE_PERMISSION_MANAGE;
         attr.read = permission & ACL_TDT_QUEUE_PERMISSION_DEQUEUE;
