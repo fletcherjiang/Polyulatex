@@ -1180,6 +1180,7 @@ target_link_libraries(acl_tdt_channel PRIVATE
     -Wl,--no-as-needed
     ascendcl
     acl_tdt_queue
+    runtime
     c_sec
     slog
     datatransfer

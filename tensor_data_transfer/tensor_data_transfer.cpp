@@ -310,7 +310,6 @@ namespace acl {
                     itemVec[i].ctrlInfo.dataType);
                 break;
             }
-
             if (aclType == ACL_TENSOR_DATA_TENSOR) {
                 std::vector<int64_t> dims = itemVec[i].dims;
                 aclDataType dataType = static_cast<aclDataType>(itemVec[i].ctrlInfo.tensorType);
@@ -367,7 +366,6 @@ namespace acl {
             itemVec[i].ctrlInfo.curCnt = currentCnt;
             itemVec[i].ctrlInfo.cnt = itemVec.size();
             size_t ctrlSize = sizeof(ItemInfo) + itemVec[i].dims.size() * sizeof(int64_t);
-            
             std::shared_ptr<uint8_t> ctrlSharedPtr(new uint8_t[ctrlSize], [] (uint8_t *p) {delete p;});
             ACL_CHECK_MALLOC_RESULT(ctrlSharedPtr);
             void *ctrlPtr = ctrlSharedPtr.get();
