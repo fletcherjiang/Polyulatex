@@ -59,7 +59,7 @@ typedef enum {
  *
  * @retval ACL_SUCCESS  The function is successfully executed.
  * @retval OtherValues Failure
- * 
+ *
  * @see acltdtDestroyQueue
  */
 ACL_FUNC_VISIBILITY aclError acltdtCreateQueue(const acltdtQueueAttr *attr, uint32_t *qid);
@@ -72,7 +72,7 @@ ACL_FUNC_VISIBILITY aclError acltdtCreateQueue(const acltdtQueueAttr *attr, uint
  *
  * @retval ACL_SUCCESS  The function is successfully executed.
  * @retval OtherValues Failure
- * 
+ *
  * @see acltdtCreateQueue
  */
 ACL_FUNC_VISIBILITY aclError acltdtDestroyQueue(uint32_t qid);
@@ -87,7 +87,7 @@ ACL_FUNC_VISIBILITY aclError acltdtDestroyQueue(uint32_t qid);
  *
  * @retval ACL_SUCCESS  The function is successfully executed.
  * @retval OtherValues Failure
- * 
+ *
  * @see acltdtDequeue
  */
 ACL_FUNC_VISIBILITY aclError acltdtEnqueue(uint32_t qid, acltdtBuf buf, int32_t timeout);
@@ -102,7 +102,7 @@ ACL_FUNC_VISIBILITY aclError acltdtEnqueue(uint32_t qid, acltdtBuf buf, int32_t 
  *
  * @retval ACL_SUCCESS  The function is successfully executed.
  * @retval OtherValues Failure
- * 
+ *
  * @see acltdtEnqueue
  */
 ACL_FUNC_VISIBILITY aclError acltdtDequeue(uint32_t qid, acltdtBuf *buf, int32_t timeout);
@@ -113,12 +113,12 @@ ACL_FUNC_VISIBILITY aclError acltdtDequeue(uint32_t qid, acltdtBuf *buf, int32_t
  *
  * @param qid [IN] qid
  * @param pid [IN] pid of dst process
- * @param permission [IN] permission of queue, 
+ * @param permission [IN] permission of queue
  * @param timeout [IN] timeout
  *
  * @retval ACL_SUCCESS  The function is successfully executed.
  * @retval OtherValues Failure
- * 
+ *
  * @see ACL_TDT_QUEUE_PERMISSION_MANAGE | ACL_TDT_QUEUE_PERMISSION_DEQUEUE | ACL_TDT_QUEUE_PERMISSION_ENQUEUE
  */
 ACL_FUNC_VISIBILITY aclError acltdtGrantQueue(uint32_t qid, int32_t pid, uint32_t permission, int32_t timeout);
@@ -133,7 +133,7 @@ ACL_FUNC_VISIBILITY aclError acltdtGrantQueue(uint32_t qid, int32_t pid, uint32_
  *
  * @retval ACL_SUCCESS  The function is successfully executed.
  * @retval OtherValues Failure
- * 
+ *
  * @see acltdtGrantQueue
  */
 ACL_FUNC_VISIBILITY aclError acltdtAttachQueue(uint32_t qid, int32_t timeout, uint32_t *permission);
@@ -182,7 +182,7 @@ ACL_FUNC_VISIBILITY aclError acltdtQueryQueueRoutes(const acltdtQueueRouteQueryI
  *
  * @retval ACL_SUCCESS  The function is successfully executed.
  * @retval OtherValues Failure
- * 
+ *
  * @see acltdtFreeBuf
  */
 ACL_FUNC_VISIBILITY aclError acltdtAllocBuf(size_t size, acltdtBuf *buf);
@@ -195,7 +195,7 @@ ACL_FUNC_VISIBILITY aclError acltdtAllocBuf(size_t size, acltdtBuf *buf);
  *
  * @retval ACL_SUCCESS  The function is successfully executed.
  * @retval OtherValues Failure
- * 
+ *
  * @see acltdtAllocBuf
  */
 ACL_FUNC_VISIBILITY aclError acltdtFreeBuf(acltdtBuf buf);
@@ -210,7 +210,7 @@ ACL_FUNC_VISIBILITY aclError acltdtFreeBuf(acltdtBuf buf);
  *
  * @retval ACL_SUCCESS  The function is successfully executed.
  * @retval OtherValues Failure
- * 
+ *
  * @see acltdtAllocBuf
  */
 ACL_FUNC_VISIBILITY aclError acltdtGetBufData(const acltdtBuf buf, void **dataPtr, size_t *size);
@@ -221,7 +221,7 @@ ACL_FUNC_VISIBILITY aclError acltdtGetBufData(const acltdtBuf buf, void **dataPt
  *
  * @retval null for failed
  * @retval OtherValues success
- * 
+ *
  * @see acltdtDestroyQueueAttr
  */
 ACL_FUNC_VISIBILITY acltdtQueueAttr *acltdtCreateQueueAttr();
@@ -249,7 +249,7 @@ ACL_FUNC_VISIBILITY aclError acltdtDestroyQueueAttr(const acltdtQueueAttr *attr)
  * @param param [IN]        pointer to parameter value
  *
  * @retval ACL_SUCCESS for success, other for failure
- * 
+ *
  * @see acltdtCreateQueueAttr
  */
 ACL_FUNC_VISIBILITY aclError acltdtSetQueueAttr(acltdtQueueAttr *attr,
@@ -269,7 +269,7 @@ ACL_FUNC_VISIBILITY aclError acltdtSetQueueAttr(acltdtQueueAttr *attr,
  * @param param [OUT]        pointer to parameter value
  *
  * @retval ACL_SUCCESS for success, other for failure
- * 
+ *
  * @see acltdtCreateQueueAttr
  */
 ACL_FUNC_VISIBILITY aclError acltdtGetQueueAttr(const acltdtQueueAttr *attr,
@@ -287,7 +287,7 @@ ACL_FUNC_VISIBILITY aclError acltdtGetQueueAttr(const acltdtQueueAttr *attr,
  *
  * @retval null for failed
  * @retval OtherValues success
- * 
+ *
  * @see acltdtDestroyQueueRoute
  */
 ACL_FUNC_VISIBILITY acltdtQueueRoute* acltdtCreateQueueRoute(uint32_t srcId, uint32_t dstId);
