@@ -28,6 +28,8 @@ enum PID_QUERY_TYPE {
     QS_PID
 };
 
+constexpr int32_t BQS_QUERY_TYPE_SRC_OR_DST = 3;
+
 using QueueDataMutexPtr = std::shared_ptr<QueueDataMutex>;
 
 class QueueProcessor

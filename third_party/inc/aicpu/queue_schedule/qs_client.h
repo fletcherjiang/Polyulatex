@@ -29,13 +29,6 @@ enum QueueSubEventType {
     ACL_QUERY_QUEUE_NUM
 };
 
-enum QsQueryType {
-    BQS_QUERY_TYPE_SRC,
-    BQS_QUERY_TYPE_DST,
-    BQS_QUERY_TYPE_SRC_AND_DST,
-    BQS_QUERY_TYPE_SRC_OR_DST,
-};
-
 enum EventGroupId {
     ENQUEUEGRPID = 0,
     F2NFGRPID,

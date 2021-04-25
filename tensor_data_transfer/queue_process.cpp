@@ -54,7 +54,7 @@ namespace acl {
             eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
             ack.buf = reinterpret_cast<char *>(&qsRsp);
             ack.bufLen = sizeof(qsRsp);
-            acltdtQueueRouteQueryInfo queryInfo = {bqs::BQS_QUERY_TYPE_SRC_OR_DST, qid, qid, true, true, true};
+            acltdtQueueRouteQueryInfo queryInfo = {BQS_QUERY_TYPE_SRC_OR_DST, qid, qid, true, true, true};
             ACL_REQUIRES_OK(GetQueueRouteNum(&queryInfo, deviceId, eventSum, ack, routeNum));
         }
         if (routeNum > 0) {
