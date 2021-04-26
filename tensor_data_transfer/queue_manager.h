@@ -34,6 +34,8 @@ public:
      */
     QueueProcessorPtr GetQueueProcessor();
 
+    static aclError GetRunningEnv(RunEnv &runEnv);
+
     QueueManager() = default;
 
     ~QueueManager() = default;
@@ -50,7 +52,7 @@ public:
 private:
     // queue processor
     QueueProcessorPtr queueProcessProc_ = nullptr;
-    RunEnv env_ = ENV_UNKNOWN;
+    RunEnv env_ = ACL_ACL_ENV_UNKNOWN;
 };
 
 }

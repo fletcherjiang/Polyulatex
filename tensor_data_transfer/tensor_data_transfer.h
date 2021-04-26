@@ -64,6 +64,7 @@ struct acltdtChannelHandle {
     {
         devId = deviceId;
         isTdtProcess = true;
+        qid = 0;
         if (channelName != nullptr) {
             name = channelName;
             size_t prefixLen = sizeof("TF_RECEIVE_") - 1;
@@ -78,7 +79,7 @@ struct acltdtChannelHandle {
     std::string recvName;
     uint32_t devId;
     uint32_t qid;
-    bool isTdtProcess = true;
+    bool isTdtProcess;
 };
 
 acltdtChannelHandle *acltdtCreateChannelWithDepth(uint32_t deviceId, const char *name, uint32_t maxDepth);

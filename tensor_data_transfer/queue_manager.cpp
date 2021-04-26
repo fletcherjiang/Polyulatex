@@ -24,6 +24,37 @@ namespace acl {
         return instance;
     }
 
+    aclError QueueManager::GetRunningEnv(RunEnv &runEnv)
+    {
+        // get acl run mode
+        if (runEnv != ACL_ACL_ENV_UNKNOWN) {
+            return ACL_SUCCESS;
+        }
+        aclrtRunMode aclRunMode;
+        aclError getRunModeRet = aclrtGetRunMode(&aclRunMode);
+        if (getRunModeRet != ACL_SUCCESS) {
+            ACL_LOG_CALL_ERROR("[Get][RunMode]get run mode failed, result = %d.", getRunModeRet);
+            return getRunModeRet;
+        }
+        if (aclRunMode == ACL_HOST) {
+            runEnv = ACL_ENV_HOST;
+        } else if (aclRunMode == ACL_DEVICE) {
+            // get env config
+            const char *sharePoolPreConfig = std::getenv("SHAREGROUP_PRECONFIG");
+            if (sharePoolPreConfig == nullptr) {
+                ACL_LOG_INFO("This is not share group preconfig");
+                runEnv = ACL_ENV_DEVICE_CCPU;
+            } else {
+                ACL_LOG_INFO("This is share group preconfig");
+                runEnv = ACL_ENV_DEVICE_MDC;
+            }
+        } else {
+            ACL_LOG_INNER_ERROR("[Get][RunMode]get run mode failed, result = %d.", getRunModeRet);
+            return ACL_ERROR_FAILURE;
+        }
+        return ACL_SUCCESS;
+    }
+
     QueueProcessorPtr QueueManager::GetQueueProcessor()
     {
         if (queueProcessProc_ != nullptr) {
@@ -31,13 +62,13 @@ namespace acl {
         }
         try {
             switch(env_) {
-                case ENV_HOST:
+                case ACL_ENV_HOST:
                     queueProcessProc_ = std::shared_ptr<QueueProcessorHost>(new (std::nothrow)QueueProcessorHost());
                     break;
-                case ENV_DEVICE_MDC:
+                case ACL_ENV_DEVICE_MDC:
                     queueProcessProc_ = std::shared_ptr<QueueProcessorMdc>(new (std::nothrow)QueueProcessorMdc());
                     break;
-                case ENV_DEVICE_CCPU:
+                case ACL_ENV_DEVICE_CCPU:
                     queueProcessProc_ = std::shared_ptr<QueueProcessorCcpu>(new (std::nothrow)QueueProcessorCcpu());
                     break;
                 default:

@@ -44,14 +44,14 @@ namespace acl {
         int32_t deviceId = 0;
         GET_CURRENT_DEVICE_ID(deviceId);
         // get qs id
-        int32_t qsPid;
+        int32_t qsPid = 0;
         size_t routeNum = 0;
         std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
         if (GetDstInfo(deviceId, QS_PID, qsPid) == RT_ERROR_NONE) {
             rtEschedEventSummary_t eventSum = {0};
             rtEschedEventReply_t ack = {0};
             bqs::QsProcMsgRsp qsRsp = {0};
-            int32_t cpPid;
+            int32_t cpPid = 0;
             ACL_REQUIRES_OK(GetDstInfo(deviceId, CP_PID, cpPid));
             eventSum.pid = cpPid;
             eventSum.grpId = 0;
@@ -96,6 +96,7 @@ namespace acl {
                 ACL_LOG_INFO("get cp pid %d", cpPid);
                 break;
             }
+            mmSleep(1); // sleep 1ms
             endTime = GetTimestamp();
             continueFlag = !continueFlag && ((endTime - startTime) <= (static_cast<uint64_t>(timeout) * 10000));
         } while (continueFlag);
@@ -141,7 +142,7 @@ namespace acl {
         GET_CURRENT_DEVICE_ID(deviceId);
         ACL_REQUIRES_OK(InitQueueSchedule(deviceId));
         // get dst pid
-        int32_t dstPid;
+        int32_t dstPid = 0;
         ACL_REQUIRES_OK(GetDstInfo(deviceId, CP_PID, dstPid));
         rtEschedEventSummary_t eventSum = {0};
         rtEschedEventReply_t ack = {0};
@@ -169,7 +170,7 @@ namespace acl {
          int32_t deviceId = 0;
         GET_CURRENT_DEVICE_ID(deviceId);
         // get dst pid
-        int32_t dstPid;
+        int32_t dstPid = 0;
         ACL_REQUIRES_OK(GetDstInfo(deviceId, CP_PID, dstPid));
         rtEschedEventSummary_t eventSum = {0};
         rtEschedEventReply_t ack = {0};
@@ -194,7 +195,7 @@ namespace acl {
         int32_t deviceId = 0;
         GET_CURRENT_DEVICE_ID(deviceId);
         // get dst id
-        int32_t dstPid;
+        int32_t dstPid = 0;
         ACL_REQUIRES_OK(GetDstInfo(deviceId, CP_PID, dstPid));
         rtEschedEventSummary_t eventSum = {0};
         rtEschedEventReply_t ack = {0};

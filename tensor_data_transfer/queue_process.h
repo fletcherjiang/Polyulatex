@@ -101,8 +101,10 @@ public:
     QueueDataMutexPtr GetMutexForData(uint32_t qid);
     void DeleteMutexForData(uint32_t qid);
 
+    uint64_t GetTimestamp();
+
     QueueProcessor() = default;
-    ~QueueProcessor() = default;
+    virtual ~QueueProcessor() = default;
 
     // not allow copy constructor and assignment operators
     QueueProcessor(const QueueProcessor &) = delete;

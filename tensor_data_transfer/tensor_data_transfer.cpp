@@ -670,7 +670,6 @@ acltdtChannelHandle *acltdtCreateChannelWithDepth(uint32_t deviceId, const char 
         ACL_LOG_INNER_ERROR("acltdtChannelHandle is nullptr");
         return nullptr;
     }
-    handle->qid = maxDepth;
     handle->isTdtProcess = false;
     acltdtQueueAttr attr;
     auto ret = memcpy_s(attr.name, RT_MQ_MAX_NAME_LEN, name, strlen(name) + 1);
@@ -686,6 +685,7 @@ acltdtChannelHandle *acltdtCreateChannelWithDepth(uint32_t deviceId, const char 
     attr.flowCtrlDropTime = 0;
     attr.overWriteFlag = false;
     if (acltdtCreateQueue(&attr, &handle->qid) != ACL_SUCCESS) {
+        ACL_DELETE_AND_SET_NULL(handle);
         return nullptr;
     }
     ACL_LOG_INFO("acltdtCreateChannelWithDepth devId is %u, name is %s, real name is %s, qid is %u",
@@ -833,6 +833,10 @@ aclError acltdtReceiveTensorV2(const acltdtChannelHandle *handle, acltdtDataset 
         return ret;
     }
     ACL_LOG_INFO("peek queue [%u] success, bufLen is %zu", handle->qid, bufLen);
+    if (bufLen == 0) {
+        ACL_LOG_INNER_ERROR("[Check][bufLen]peek queue len can not be zero");
+        return ACL_ERROR_FAILURE;
+    }
     std::shared_ptr<uint8_t> outHostSharedAddr(new uint8_t[bufLen], [] (uint8_t *p) {delete p;});
     ACL_CHECK_MALLOC_RESULT(outHostSharedAddr);
     uint8_t *outHostAddr = outHostSharedAddr.get();

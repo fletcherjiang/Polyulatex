@@ -381,6 +381,8 @@ TEST_F(UTEST_QUEUE, acltdtAttachQueue_host)
 TEST_F(UTEST_QUEUE, acltdtBindQueueRoutes_host)
 {
     acltdtQueueRouteList qRouteList;
+    acltdtQueueRoute route = {0};
+    qRouteList.routeList.push_back(route);
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtMalloc(_, _, _))
         .WillRepeatedly(Return((RT_ERROR_NONE)));
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtFree(_))
@@ -392,6 +394,8 @@ TEST_F(UTEST_QUEUE, acltdtBindQueueRoutes_host)
 TEST_F(UTEST_QUEUE, acltdtUnbindQueueRoutes_host)
 {
     acltdtQueueRouteList qRouteList;
+    acltdtQueueRoute route = {0};
+    qRouteList.routeList.push_back(route);
     auto ret = acltdtUnbindQueueRoutes(&qRouteList);
     EXPECT_EQ(ret, ACL_SUCCESS);
 }
@@ -400,6 +404,8 @@ TEST_F(UTEST_QUEUE, acltdtQueryQueueRoutes_host)
 {
     acltdtQueueRouteList qRouteList;
     acltdtQueueRouteQueryInfo queryInfo;
+    acltdtQueueRoute route = {0};
+    qRouteList.routeList.push_back(route);
     auto ret = acltdtQueryQueueRoutes(&queryInfo, &qRouteList);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
     queryInfo.mode = ACL_TDT_QUEUE_ROUTE_QUERY_SRC_AND_DST;
@@ -528,6 +534,10 @@ TEST_F(UTEST_QUEUE, acltdtBindQueueRoutes_mdc)
 {
     QueueProcessorMdc queueProcess;
     acltdtQueueRouteList qRouteList;
+    acltdtQueueRoute route = {0};
+    qRouteList.routeList.push_back(route);
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtMemQueueEnQueue(_, _, _))
+        .WillRepeatedly(Return((RT_ERROR_NONE)));
     auto ret = queueProcess.acltdtBindQueueRoutes(&qRouteList);
     EXPECT_EQ(ret, ACL_SUCCESS);
 }
@@ -536,6 +546,8 @@ TEST_F(UTEST_QUEUE, acltdtUnbindQueueRoutes_mdc)
 {
     QueueProcessorMdc queueProcess;
     acltdtQueueRouteList qRouteList;
+    acltdtQueueRoute route = {0};
+    qRouteList.routeList.push_back(route);
     auto ret = queueProcess.acltdtUnbindQueueRoutes(&qRouteList);
     EXPECT_EQ(ret, ACL_SUCCESS);
 }

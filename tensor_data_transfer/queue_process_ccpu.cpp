@@ -142,7 +142,7 @@ namespace acl {
         int32_t deviceId = 0;
         ACL_REQUIRES_OK(InitQueueSchedule(deviceId));
         // get dst id
-        int32_t dstPid;
+        int32_t dstPid = 0;
         ACL_REQUIRES_OK(GetDstInfo(deviceId, QS_PID, dstPid));
         rtEschedEventSummary_t eventSum = {0};
         rtEschedEventReply_t ack = {0};
@@ -169,7 +169,7 @@ namespace acl {
         ACL_LOG_INFO("Start to acltdtUnBindQueueRoutes, queue route is %zu", qRouteList->routeList.size());
         int32_t deviceId = 0;
         // get dst id
-        int32_t dstPid;
+        int32_t dstPid = 0;
         ACL_REQUIRES_OK(GetDstInfo(deviceId, QS_PID, dstPid));
         rtEschedEventSummary_t eventSum = {0};
         rtEschedEventReply_t ack = {0};
@@ -193,7 +193,7 @@ namespace acl {
         ACL_LOG_INFO("Start to acltdtQueryQueueRoutes");
         int32_t deviceId = 0;
         // get dst id
-        int32_t dstPid;
+        int32_t dstPid = 0;
         ACL_REQUIRES_OK(GetDstInfo(deviceId, QS_PID, dstPid));
         rtEschedEventSummary_t eventSum = {0};
         rtEschedEventReply_t ack = {0};

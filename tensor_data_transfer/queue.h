@@ -31,10 +31,10 @@
 
 
 enum RunEnv {
-    ENV_UNKNOWN = -1,
-    ENV_HOST = 0,
-    ENV_DEVICE_CCPU = 1,
-    ENV_DEVICE_MDC = 2,
+    ACL_ACL_ENV_UNKNOWN = -1,
+    ACL_ENV_HOST = 0,
+    ACL_ENV_DEVICE_CCPU = 1,
+    ACL_ENV_DEVICE_MDC = 2,
 };
 
 struct acltdtQueueRouteList {
@@ -57,7 +57,4 @@ struct acltdtQueueRoute {
 };
 
 aclError CheckQueueRouteQueryInfo(const acltdtQueueRouteQueryInfo *queryInfo);
-aclError GetRunningEnv(RunEnv &runEnv);
-uint64_t GetTimestamp();
-
 #endif // ACL_QUEUE_H
