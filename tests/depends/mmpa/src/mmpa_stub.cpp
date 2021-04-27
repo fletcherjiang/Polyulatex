@@ -127,6 +127,12 @@ INT32 mmGetTimeOfDay(mmTimeval *timeVal, mmTimezone *timeZone)
     return ret;
 }
 
+INT32 mmSleep(UINT32 milliSecond)
+{
+    usleep(milliSecond);
+    return 0;
+}
+
 mmSize mmGetPageSize()
 {
     return 2;
