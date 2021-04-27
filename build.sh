@@ -178,7 +178,7 @@ generate_package()
 
   cd "${OUTPUT_PATH}"
 
-  COMMON_LIB=("libacl_cblas.so" "libacl_dvpp.so")
+  COMMON_LIB=("libacl_cblas.so" "libacl_dvpp.so" "libacl_tdt_queue.so")
 
   for lib in "${COMMON_LIB[@]}";
   do
@@ -203,7 +203,7 @@ generate_package()
   find ${OUTPUT_PATH}/${ACL_LIB_PATH}/stub -maxdepth 1 -name "libacl_op_compiler.so" -exec cp -f {} ${OUTPUT_PATH}/${FWK_LIB64_PATH}/stub \;
   find ${OUTPUT_PATH}/${ACL_LIB_PATH}/stub -maxdepth 1 -name "libacl_tdt_channel.so" -exec cp -f {} ${OUTPUT_PATH}/${FWK_LIB64_PATH}/stub \;
 
-  COMMON_INC=("acl_base.h" "acl.h" "acl_mdl.h" "acl_op.h" "acl_prof.h" "acl_rt.h")
+  COMMON_INC=("acl_base.h" "acl.h" "acl_mdl.h" "acl_op.h" "acl_prof.h" "acl_rt.h" "acl_tdt_queue.h")
   for inc in "${COMMON_INC[@]}";
   do
     find ${BASEPATH}/${ACL_EXTERNAL_PATH} -maxdepth 1 -name "$inc" -exec cp -f {} ${OUTPUT_PATH}/${ACL_INC_PATH} \;
@@ -217,7 +217,7 @@ generate_package()
     find ${BASEPATH}/${ACL_EXTERNAL_PATH}/error_codes -maxdepth 1 -name "$inc" -exec cp -f {} ${OUTPUT_PATH}/${FWK_INC_PATH}/error_codes \;
   done
 
-  COMMON_INC=("acl_cblas.h" "acl_dvpp.h")
+  COMMON_INC=("acl_cblas.h" "acl_dvpp.h" "acl_tdt_queue.h")
   for inc in "${COMMON_INC[@]}";
   do
     find ${BASEPATH}/${ACL_EXTERNAL_PATH}/ops -maxdepth 1 -name "$inc" -exec cp -f {} ${OUTPUT_PATH}/${ACL_INC_PATH}/ops \;
@@ -272,7 +272,7 @@ generate_package_for_cann()
 
   cd "${OUTPUT_PATH}"
 
-  COMMON_LIB=("libacl_cblas.so" "libacl_dvpp.so")
+  COMMON_LIB=("libacl_cblas.so" "libacl_dvpp.so" "libacl_tdt_queue.so")
 
   for lib in "${COMMON_LIB[@]}";
   do
@@ -311,7 +311,7 @@ generate_package_for_cann()
     find ${BASEPATH}/${ACL_EXTERNAL_PATH}/error_codes -maxdepth 1 -name "$inc" -exec cp -f {} ${OUTPUT_PATH}/${COMPILER_INC_PATH}/error_codes \;
   done
 
-  COMMON_INC=("acl_cblas.h" "acl_dvpp.h")
+  COMMON_INC=("acl_cblas.h" "acl_dvpp.h" "acl_tdt_queue.h")
   for inc in "${COMMON_INC[@]}";
   do
     find ${BASEPATH}/${ACL_EXTERNAL_PATH}/ops -maxdepth 1 -name "$inc" -exec cp -f {} ${OUTPUT_PATH}/${RUNTIME_INC_PATH}/ops \;

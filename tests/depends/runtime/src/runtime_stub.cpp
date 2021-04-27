@@ -22,6 +22,7 @@
 #include "runtime/config.h"
 #include "runtime/kernel.h"
 #include "runtime/base.h"
+#include "runtime/rt_mem_queue.h"
 #include "rt_error_codes.h"
 
 #include <stdlib.h>
@@ -443,6 +444,129 @@ rtError_t aclStub::rtSetOpExecuteTimeOut(uint32_t timeout)
     return RT_ERROR_NONE;
 }
 
+rtError_t aclStub::rtMemQueueInitQS(int32_t devId)
+{
+    return RT_ERROR_NONE;
+}
+
+rtError_t aclStub::rtMemQueueCreate(int32_t devId, const rtMemQueueAttr_t *queAttr, uint32_t *qid)
+{
+    return RT_ERROR_NONE;
+}
+
+rtError_t aclStub::rtMemQueueDestroy(int32_t devId, uint32_t qid)
+{
+    return RT_ERROR_NONE;
+}
+
+rtError_t aclStub::rtMemQueueInit(int32_t devId)
+{
+    return RT_ERROR_NONE;
+}
+
+rtError_t aclStub::rtMemQueueEnQueue(int32_t devId, uint32_t qid, void *mbuf)
+{
+    return RT_ERROR_NONE;
+}
+
+rtError_t aclStub::rtMemQueueDeQueue(int32_t devId, uint32_t qid, void **mbuf)
+{
+    return RT_ERROR_NONE;
+}
+
+rtError_t aclStub::rtMemQueuePeek(int32_t devId, uint32_t qid, size_t *bufLen, int32_t timeout)
+{
+    *bufLen = 100;
+    return RT_ERROR_NONE;
+}
+
+rtError_t aclStub::rtMemQueueEnQueueBuff(int32_t devId, uint32_t qid, rtMemQueueBuff_t *inBuf, int32_t timeout)
+
+{
+    return RT_ERROR_NONE;
+}
+
+rtError_t aclStub::rtMemQueueDeQueueBuff(int32_t devId, uint32_t qid, rtMemQueueBuff_t *outBuf, int32_t timeout)
+{
+    return RT_ERROR_NONE;
+}
+
+rtError_t aclStub::rtMemQueueQuery(int32_t devId, rtMemQueueQueryCmd_t cmd, void *inBuff, uint32_t inLen,
+                                  void *outBuff, uint32_t *outLen)
+{
+    return RT_ERROR_NONE;
+}
+
+rtError_t aclStub::rtMemQueueGrant(int32_t devId, uint32_t qid, int32_t pid, rtMemQueueShareAttr_t *attr)
+{
+    return RT_ERROR_NONE;
+}
+
+rtError_t aclStub::rtMemQueueAttach(int32_t devId, uint32_t qid, int32_t timeout)
+{
+    return RT_ERROR_NONE;
+}
+
+rtError_t aclStub::rtEschedSubmitEventSync(int32_t devId, rtEschedEventSummary_t *event, rtEschedEventReply_t *ack)
+{
+    return RT_ERROR_NONE;
+}
+
+rtError_t aclStub::rtQueryDevPid(rtBindHostpidInfo_t *info, pid_t *devPid)
+{
+    return RT_ERROR_NONE;
+}
+
+rtError_t aclStub::rtMbufInit(rtMemBuffCfg_t *cfg)
+{
+    return RT_ERROR_NONE;
+}
+
+rtError_t aclStub::rtMbufAlloc(rtMbufPtr_t *mbuf, uint64_t size)
+{
+    return RT_ERROR_NONE;
+}
+
+rtError_t aclStub::rtMbufFree(rtMbufPtr_t mbuf)
+{
+    return RT_ERROR_NONE;
+}
+
+rtError_t aclStub::rtMbufGetBuffAddr(rtMbufPtr_t mbuf, void **databuf)
+{
+    return RT_ERROR_NONE;
+}
+
+rtError_t aclStub::rtMbufGetBuffSize(rtMbufPtr_t mbuf, uint64_t *size)
+{
+    return RT_ERROR_NONE;
+}
+
+rtError_t aclStub::rtMbufGetPrivInfo(rtMbufPtr_t mbuf, void **priv, uint64_t *size)
+{
+    return RT_ERROR_NONE;
+}
+
+rtError_t aclStub::rtMemGrpCreate(const char *name, const rtMemGrpConfig_t *cfg)
+{
+    return RT_ERROR_NONE;
+}
+
+rtError_t aclStub::rtMemGrpAddProc(const char *name, int32_t pid, const rtMemGrpShareAttr_t *attr)
+{
+    return RT_ERROR_NONE;
+}
+
+rtError_t aclStub::rtMemGrpAttach(const char *name, int32_t timeout)
+{
+    return RT_ERROR_NONE;
+}
+
+rtError_t aclStub::rtMemGrpQuery(int32_t cmd, const rtMemGrpQueryInput_t *input, rtMemGrpQueryOutput_t *output)
+{
+    return RT_ERROR_NONE;
+}
+
 MockFunctionTest& MockFunctionTest::aclStubInstance()
 {
     static MockFunctionTest stub;
@@ -851,4 +975,131 @@ rtError_t rtSetOpWaitTimeOut(uint32_t timeout)
 rtError_t rtSetOpExecuteTimeOut(uint32_t timeout)
 {
     return MockFunctionTest::aclStubInstance().rtSetOpExecuteTimeOut(timeout);
+}
+
+rtError_t rtMemQueueInitQS(int32_t devId)
+{
+    return MockFunctionTest::aclStubInstance().rtMemQueueInitQS(devId);
+}
+
+rtError_t rtMemQueueCreate(int32_t devId, const rtMemQueueAttr_t *queAttr, uint32_t *qid)
+{
+    return MockFunctionTest::aclStubInstance().rtMemQueueCreate(devId, queAttr, qid);
+}
+
+rtError_t rtMemQueueDestroy(int32_t devId, uint32_t qid)
+{
+    return MockFunctionTest::aclStubInstance().rtMemQueueDestroy(devId, qid);
+}
+
+rtError_t rtMemQueueInit(int32_t devId)
+{
+    return MockFunctionTest::aclStubInstance().rtMemQueueInit(devId);
+}
+
+rtError_t rtMemQueueEnQueue(int32_t devId, uint32_t qid, void *mbuf)
+{
+    return MockFunctionTest::aclStubInstance().rtMemQueueEnQueue(devId, qid, mbuf);
+}
+
+rtError_t rtMemQueueDeQueue(int32_t devId, uint32_t qid, void **mbuf)
+{
+    return MockFunctionTest::aclStubInstance().rtMemQueueDeQueue(devId, qid, mbuf);
+}
+
+rtError_t rtMemQueuePeek(int32_t devId, uint32_t qid, size_t *bufLen, int32_t timeout)
+{
+    return MockFunctionTest::aclStubInstance().rtMemQueuePeek(devId, qid, bufLen, timeout);
+}
+
+rtError_t rtMemQueueEnQueueBuff(int32_t devId, uint32_t qid, rtMemQueueBuff_t *inBuf, int32_t timeout)
+
+{
+    return MockFunctionTest::aclStubInstance().rtMemQueueEnQueueBuff(devId, qid, inBuf, timeout);
+}
+
+rtError_t rtMemQueueDeQueueBuff(int32_t devId, uint32_t qid, rtMemQueueBuff_t *outBuf, int32_t timeout)
+{
+    return MockFunctionTest::aclStubInstance().rtMemQueueDeQueueBuff(devId, qid,outBuf, timeout);
+}
+
+rtError_t rtMemQueueQuery(int32_t devId, rtMemQueueQueryCmd_t cmd, void *inBuff, uint32_t inLen,
+                                  void *outBuff, uint32_t *outLen)
+{
+    return MockFunctionTest::aclStubInstance().rtMemQueueQuery( devId, cmd, inBuff, inLen, outBuff, outLen);
+}
+
+rtError_t rtMemQueueGrant(int32_t devId, uint32_t qid, int32_t pid, rtMemQueueShareAttr_t *attr)
+{
+    return MockFunctionTest::aclStubInstance().rtMemQueueGrant(devId, qid, pid, attr);
+}
+
+rtError_t rtMemQueueAttach(int32_t devId, uint32_t qid, int32_t timeout)
+{
+    return MockFunctionTest::aclStubInstance().rtMemQueueAttach(devId, qid, timeout);
+}
+
+rtError_t rtEschedSubmitEventSync(int32_t devId, rtEschedEventSummary_t *event, rtEschedEventReply_t *ack)
+{
+    return MockFunctionTest::aclStubInstance().rtEschedSubmitEventSync(devId, event, ack);
+}
+
+rtError_t rtQueryDevPid(rtBindHostpidInfo_t *info, pid_t *devPid)
+{
+    return MockFunctionTest::aclStubInstance().rtQueryDevPid(info, devPid);
+}
+
+rtError_t rtMbufInit(rtMemBuffCfg_t *cfg)
+{
+    return MockFunctionTest::aclStubInstance().rtMbufInit(cfg);
+}
+
+rtError_t rtMbufAlloc(rtMbufPtr_t *mbuf, uint64_t size)
+{
+    *mbuf = malloc(size);
+    return MockFunctionTest::aclStubInstance().rtMbufAlloc(mbuf, size);
+}
+
+rtError_t rtMbufFree(rtMbufPtr_t mbuf)
+{
+    free(mbuf);
+    return MockFunctionTest::aclStubInstance().rtMbufFree(mbuf);
+}
+
+rtError_t rtMbufGetBuffAddr(rtMbufPtr_t mbuf, void **databuf)
+{
+    *databuf = mbuf;
+    return MockFunctionTest::aclStubInstance().rtMbufGetBuffAddr(mbuf, databuf);
+}
+
+rtError_t rtMbufGetBuffSize(rtMbufPtr_t mbuf, uint64_t *size)
+{
+    *size = 0;
+    return MockFunctionTest::aclStubInstance().rtMbufGetBuffSize(mbuf, size);
+}
+
+rtError_t rtMbufGetPrivInfo(rtMbufPtr_t mbuf, void **priv, uint64_t *size)
+{
+    *priv = mbuf;
+    return MockFunctionTest::aclStubInstance().rtMbufGetPrivInfo(mbuf, priv, size);
+}
+
+rtError_t rtMemGrpCreate(const char *name, const rtMemGrpConfig_t *cfg)
+{
+    return MockFunctionTest::aclStubInstance().rtMemGrpCreate(name, cfg);
+}
+
+rtError_t rtMemGrpAddProc(const char *name, int32_t pid, const rtMemGrpShareAttr_t *attr)
+{
+    return MockFunctionTest::aclStubInstance().rtMemGrpAddProc(name, pid, attr);
+}
+
+rtError_t rtMemGrpAttach(const char *name, int32_t timeout)
+{
+    return MockFunctionTest::aclStubInstance().rtMemGrpAttach(name, timeout);
+}
+
+rtError_t rtMemGrpQuery(int32_t cmd, const rtMemGrpQueryInput_t *input, rtMemGrpQueryOutput_t *output)
+{
+    return MockFunctionTest::aclStubInstance().rtMemGrpQuery(cmd, input, output);
 }

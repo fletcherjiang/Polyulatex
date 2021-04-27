@@ -120,9 +120,19 @@ INT32 mmGetPid()
 
 INT32 mmGetTimeOfDay(mmTimeval *timeVal, mmTimezone *timeZone)
 {
-    timeVal->tv_sec = 2;
+    if (timeVal == nullptr) {
+        return -1;
+    }
+    int32_t ret = gettimeofday((struct timeval *)timeVal, (struct timezone *)timeZone);
+    return ret;
+}
+
+INT32 mmSleep(UINT32 milliSecond)
+{
+    usleep(milliSecond);
     return 0;
 }
+
 mmSize mmGetPageSize()
 {
     return 2;

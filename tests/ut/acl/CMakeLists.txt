@@ -69,6 +69,7 @@ set(UT_FILES
     "testcase/acl_venc_unittest.cpp"
     "testcase/acl_runtime_unittest.cpp"
     "testcase/acl_tensorDataTransfer_unittest.cpp"
+    "testcase/acl_queue_unittest.cpp"
 )
 
 set(SRC_FILES
@@ -147,6 +148,12 @@ set(SRC_FILES
     "${BASE_DIR}/single_op/retr/retr_search.cpp"
     "${BASE_DIR}/types/retr.cpp"
     "${BASE_DIR}/tensor_data_transfer/tensor_data_transfer.cpp"
+    "${BASE_DIR}/tensor_data_transfer/queue.cpp"
+    "${BASE_DIR}/tensor_data_transfer/queue_manager.cpp"
+    "${BASE_DIR}/tensor_data_transfer/queue_process.cpp"
+    "${BASE_DIR}/tensor_data_transfer/queue_process_host.cpp"
+    "${BASE_DIR}/tensor_data_transfer/queue_process_mdc.cpp"
+    "${BASE_DIR}/tensor_data_transfer/queue_process_ccpu.cpp"
 )
 
 ############ libut_ascendcl_src.a ############

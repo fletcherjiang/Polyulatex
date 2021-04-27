@@ -1,6 +1,7 @@
 #include "acl/acl_base.h"
 #include "acl/acl.h"
 #include "acl/acl_tdt.h"
+#include "acl/acl_tdt_queue.h"
 #include "log_inner.h"
 
 
@@ -31,6 +32,14 @@ namespace acl {
     extern void GetTensorDimsString(const int64_t *dims, size_t dimNum, std::string &dimsStr);
     extern aclError GetTdtDataTypeByAclDataType(acltdtTensorType aclType, tdt::TdtDataType &tdtDataType);
     extern bool GetTensorShape(const std::string &dimsStr, std::vector<int64_t> &dims);
+
+    extern aclError GetTdtDataTypeByAclDataTypeV2(acltdtTensorType aclType, int32_t &tdtDataType);
+    extern aclError GetAclTypeByTdtDataTypeV2(int32_t tdtDataType, acltdtTensorType &aclType);
+    extern aclError TensorDatasetSerializesV2(const acltdtDataset *dataset, std::vector<aclTdtDataItemInfo> &itemVec);
+    extern aclError TensorDatasetDeserializesV2(const std::vector<aclTdtDataItemInfo> &itemVec, acltdtDataset *dataset);
+    extern aclError UnpackageRecvDataInfo(uint8_t *outputHostAddr, size_t size, std::vector<aclTdtDataItemInfo> &itemVec);
+    extern aclError TensorDataitemSerialize(std::vector<aclTdtDataItemInfo> &itemVec,
+                                            std::vector<rtMemQueueBuffInfo> &qBufVec);
 }
 
 class UTEST_tensor_data_transfer : public testing::Test
@@ -455,3 +464,58 @@ TEST_F(UTEST_tensor_data_transfer, acltdtGetDimsFromItemTest)
     acltdtDataItem *dataItem = (acltdtDataItem *)0x11;
     acltdtGetDimsFromItem(dataItem, dims, dimNum);
 }
+
+TEST_F(UTEST_tensor_data_transfer, TensorDatasetSerializesV2)
+{
+    acltdtDataset *dataset = acltdtCreateDataset();
+    EXPECT_NE(dataset, nullptr);
+    acltdtDataItem item;
+    item.tdtType = ACL_TENSOR_DATA_TENSOR;
+    dataset->blobs.push_back(&item);
+    std::vector<aclTdtDataItemInfo> itemVec;
+    auto ret = TensorDatasetSerializesV2(dataset, itemVec);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    EXPECT_EQ(itemVec.size(), 1);
+    acltdtDestroyDataset(dataset);
+}
+
+TEST_F(UTEST_tensor_data_transfer, TensorDatasetDeserializesV2)
+{
+    acltdtDataset *dataset = acltdtCreateDataset();
+    EXPECT_NE(dataset, nullptr);
+    std::vector<aclTdtDataItemInfo> itemVec;
+    aclTdtDataItemInfo info;
+    info.ctrlInfo.dataType = 1;
+    itemVec.push_back(info);
+    auto ret = TensorDatasetDeserializesV2(itemVec, dataset);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    acltdtDestroyDataset(dataset);
+}
+
+TEST_F(UTEST_tensor_data_transfer, acltdtSendTensorV2)
+{
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtGetRunMode(_))
+        .WillOnce(Return((RT_ERROR_NONE)));
+    acltdtChannelHandle *handle = acltdtCreateChannelWithDepth(0, "test", 3);
+    EXPECT_NE(handle, nullptr);
+    acltdtDataset *dataset = acltdtCreateDataset();
+    EXPECT_NE(dataset, nullptr);
+    int32_t timeout = 300;
+    auto ret = acltdtSendTensorV2(handle, dataset, timeout);
+    EXPECT_EQ(ret, ACL_SUCCESS);
+    acltdtDestroyChannel(handle);
+    acltdtDestroyDataset(dataset);
+}
+
+TEST_F(UTEST_tensor_data_transfer, acltdtReceiveTensorV2)
+{
+    acltdtChannelHandle *handle = acltdtCreateChannelWithDepth(0, "TF_RECEIVE_1", 3);
+    EXPECT_NE(handle, nullptr);
+    acltdtDataset *dataset = acltdtCreateDataset();
+    EXPECT_NE(dataset, nullptr);
+    int32_t timeout = 300;
+    auto ret = acltdtReceiveTensorV2(handle, dataset, timeout);
+    acltdtDestroyChannel(handle);
+    acltdtDestroyDataset(dataset);
+}
+

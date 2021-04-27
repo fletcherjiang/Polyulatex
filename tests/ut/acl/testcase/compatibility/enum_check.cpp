@@ -6,6 +6,7 @@
 #include "acl/acl_op_compiler.h"
 #include "acl/acl_prof.h"
 #include "acl/acl_tdt.h"
+#include "acl/acl_tdt_queue.h"
 #include "acl/ops/acl_cblas.h"
 #include "acl/ops/acl_dvpp.h"
 #include "acl/ops/acl_fv.h"
@@ -21,6 +22,51 @@ class UTEST_ACL_compatibility_enum_check : public testing::Test
         virtual void SetUp() {}
         virtual void TearDown() {}
 };
+
+TEST_F(UTEST_ACL_compatibility_enum_check, acltdtQueueAttrType)
+{
+    EXPECT_EQ(ACL_TDT_QUEUE_PERMISSION_MANAGE, 1);
+    EXPECT_EQ(ACL_TDT_QUEUE_PERMISSION_DEQUEUE, 2);
+    EXPECT_EQ(ACL_TDT_QUEUE_PERMISSION_ENQUEUE, 4);
+    acltdtQueueAttrType type;
+    type = (acltdtQueueAttrType)0;
+    EXPECT_EQ(type, ACL_TDT_QUEUE_NAME_PTR);
+    type = (acltdtQueueAttrType)1;
+    EXPECT_EQ(type, ACL_TDT_QUEUE_DEPTH_UINT32);
+}
+
+TEST_F(UTEST_ACL_compatibility_enum_check, acltdtQueueRouteParamType)
+{
+    acltdtQueueRouteParamType type;
+    type = (acltdtQueueRouteParamType)0;
+    EXPECT_EQ(type, ACL_TDT_QUEUE_ROUTE_SRC_UINT32);
+    type = (acltdtQueueRouteParamType)1;
+    EXPECT_EQ(type, ACL_TDT_QUEUE_ROUTE_DST_UINT32);
+    type = (acltdtQueueRouteParamType)2;
+    EXPECT_EQ(type, ACL_TDT_QUEUE_ROUTE_STATUS_INT32);
+}
+
+TEST_F(UTEST_ACL_compatibility_enum_check, acltdtQueueRouteQueryMode)
+{
+    acltdtQueueRouteQueryMode type;
+    type = (acltdtQueueRouteQueryMode)0;
+    EXPECT_EQ(type, ACL_TDT_QUEUE_ROUTE_QUERY_SRC);
+    type = (acltdtQueueRouteQueryMode)1;
+    EXPECT_EQ(type, ACL_TDT_QUEUE_ROUTE_QUERY_DST);
+    type = (acltdtQueueRouteQueryMode)2;
+    EXPECT_EQ(type, ACL_TDT_QUEUE_ROUTE_QUERY_SRC_AND_DST);
+}
+
+TEST_F(UTEST_ACL_compatibility_enum_check, acltdtQueueRouteQueryInfoParamType)
+{
+    acltdtQueueRouteQueryInfoParamType type;
+    type = (acltdtQueueRouteQueryInfoParamType)0;
+    EXPECT_EQ(type, ACL_TDT_QUEUE_ROUTE_QUERY_MODE_ENUM);
+    type = (acltdtQueueRouteQueryInfoParamType)1;
+    EXPECT_EQ(type, ACL_TDT_QUEUE_ROUTE_QUERY_SRC_ID_UINT32);
+    type = (acltdtQueueRouteQueryInfoParamType)2;
+    EXPECT_EQ(type, ACL_TDT_QUEUE_ROUTE_QUERY_DST_ID_UINT32);
+}
 
 TEST_F(UTEST_ACL_compatibility_enum_check, aclDataType)
 {
