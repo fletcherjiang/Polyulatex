@@ -20,8 +20,8 @@
 #include "mmpa/mmpa_api.h"
 #include "acl/acl_base.h"
 
-#define ACL_MODE_ID static_cast<int>(ASCENDCL)
-#define APP_MODE_ID static_cast<int>(APP)
+#define ACL_MODE_ID static_cast<int32_t>(ASCENDCL)
+#define APP_MODE_ID static_cast<int32_t>(APP)
 
 constexpr int MAX_LOG_STRING = 1024;
 
@@ -196,7 +196,7 @@ inline bool IsInfoLogEnabled()
 
 #define ACL_REQUIRES_OK(expr) \
     do { \
-        auto __ret = (expr); \
+        const auto __ret = (expr); \
         if (__ret != ACL_SUCCESS) { \
             return __ret; \
         } \
@@ -206,7 +206,7 @@ inline bool IsInfoLogEnabled()
 // Validate whether the expr value is true
 #define ACL_REQUIRES_TRUE(expr, errCode, errDesc) \
     do { \
-        auto __ret = (expr); \
+        const auto __ret = (expr); \
         if (__ret != true) { \
             ACL_LOG_ERROR(errDesc); \
             return (errCode); \
