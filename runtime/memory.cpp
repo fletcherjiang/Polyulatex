@@ -24,8 +24,6 @@
 
 #include "toolchain/resource_statistics.h"
 
-using namespace acl;
-
 
 aclError aclrtMalloc(void **devPtr, size_t size, aclrtMemMallocPolicy policy)
 {
@@ -43,7 +41,7 @@ aclError aclrtMalloc(void **devPtr, size_t size, aclrtMemMallocPolicy policy)
         return ACL_ERROR_INVALID_PARAM;
     }
     size_t alignedSize;
-    ACL_REQUIRES_OK(GetAlignedSize(size, alignedSize));
+    ACL_REQUIRES_OK(acl::GetAlignedSize(size, alignedSize));
     uint32_t flags = RT_MEMORY_DEFAULT;
     if (policy == ACL_MEM_MALLOC_HUGE_FIRST) {
         flags |= RT_MEMORY_POLICY_HUGE_PAGE_FIRST;
@@ -79,7 +77,7 @@ aclError aclrtMallocCached(void **devPtr, size_t size, aclrtMemMallocPolicy poli
         return ACL_ERROR_INVALID_PARAM;
     }
     size_t alignedSize;
-    ACL_REQUIRES_OK(GetAlignedSize(size, alignedSize));
+    ACL_REQUIRES_OK(acl::GetAlignedSize(size, alignedSize));
     uint32_t cacheFlags = RT_MEMORY_DEFAULT;
     if (policy == ACL_MEM_MALLOC_HUGE_FIRST) {
         cacheFlags |= RT_MEMORY_POLICY_HUGE_PAGE_FIRST;
@@ -87,6 +85,8 @@ aclError aclrtMallocCached(void **devPtr, size_t size, aclrtMemMallocPolicy poli
         cacheFlags |= RT_MEMORY_POLICY_HUGE_PAGE_ONLY;
     } else if (policy == ACL_MEM_MALLOC_NORMAL_ONLY) {
         cacheFlags |= RT_MEMORY_POLICY_DEFAULT_PAGE_ONLY;
+    } else {
+        cacheFlags = RT_MEMORY_DEFAULT;
     }
     rtError_t rtErr = rtMallocCached(devPtr, alignedSize, cacheFlags);
     if (rtErr != RT_ERROR_NONE) {
@@ -248,7 +248,7 @@ aclError aclrtMemset(void *devPtr, size_t maxCount, int32_t value, size_t count)
         maxCount, count, value);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(devPtr);
 
-    rtError_t rtErr = rtMemset(devPtr, maxCount, value, count);
+    rtError_t rtErr = rtMemset(devPtr, maxCount, static_cast<uint32_t>(value), count);
     if (rtErr != RT_ERROR_NONE) {
         ACL_LOG_CALL_ERROR("set memory failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
@@ -291,7 +291,7 @@ aclError aclrtMemsetAsync(void *devPtr, size_t maxCount, int32_t value, size_t c
         maxCount, value, count);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(devPtr);
 
-    rtError_t rtErr = rtMemsetAsync(devPtr, maxCount, value, count, stream);
+    rtError_t rtErr = rtMemsetAsync(devPtr, maxCount, static_cast<uint32_t>(value), count, stream);
     if (rtErr != RT_ERROR_NONE) {
         ACL_LOG_CALL_ERROR("asynchronized memset failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
@@ -404,21 +404,21 @@ aclError aclrtDeviceDisablePeerAccess(int32_t peerDeviceId)
     return ACL_SUCCESS;
 }
 
-aclError aclrtGetMemInfo(aclrtMemAttr attr, size_t *free, size_t *total)
+aclError aclrtGetMemInfo(aclrtMemAttr attr, size_t *freeMem, size_t *totalMem)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
-    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(free);
-    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(total);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(freeMem);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(totalMem);
     ACL_LOG_INFO("start to execute aclrtGetMemInfo, memory attribute = %d", static_cast<int32_t>(attr));
 
-    rtError_t rtErr = rtMemGetInfoEx(static_cast<rtMemInfoType_t>(attr), free, total);
+    rtError_t rtErr = rtMemGetInfoEx(static_cast<rtMemInfoType_t>(attr), freeMem, totalMem);
     if (rtErr != RT_ERROR_NONE) {
         ACL_LOG_CALL_ERROR("get memory information failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
 
     ACL_LOG_INFO("successfully execute aclrtGetMemInfo, memory attribute = %d, free memory = %zu, total memory = %zu",
-        static_cast<int32_t>(attr), *free, *total);
+        static_cast<int32_t>(attr), *freeMem, *totalMem);
     return ACL_SUCCESS;
 }
 
