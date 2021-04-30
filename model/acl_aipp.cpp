@@ -64,10 +64,10 @@ constexpr int32_t PADDING_MIN = 0;
 constexpr int32_t PADDING_MAX = 32;
 constexpr int16_t MEAN_CHN_MIN = 0;
 constexpr int16_t MEAN_CHN_MAX = 255;
-constexpr float MIN_CHN_MIN = 0F;
-constexpr float MIN_CHN_MAX = 255F;
-constexpr float VR_CHN_MIN = -65504F;
-constexpr float VR_CHN_MAX = 65504F;
+constexpr float MIN_CHN_MIN = 0.0;
+constexpr float MIN_CHN_MAX = 255.0;
+constexpr float VR_CHN_MIN = -65504.0;
+constexpr float VR_CHN_MAX = 65504.0;
 }
 
 static bool IsRoundOne(const uint64_t man, const uint16_t truncLen)
@@ -864,7 +864,7 @@ static aclError CheckAippDataIndex(const uint32_t modelId, const size_t idx, con
         return ACL_SUCCESS;
     } else if (type == ge::DATA_WITHOUT_AIPP) {
         // maybe this is old om when getaipptype interface is unsupported, ensure compatibility
-        const size_t indexInModel;
+        size_t indexInModel;
         const auto mdlRet = aclmdlGetInputIndexByName(modelDesc, ACL_DYNAMIC_AIPP_NAME, &indexInModel);
         if (mdlRet != ACL_SUCCESS) {
             ACL_LOG_INNER_ERROR("[Get][InputIndex]the model is not a dynamic aipp model, there is no dynamic aipp "
@@ -1094,7 +1094,7 @@ static std::string AippDimsDebugString(const aclAippDims *aippDims, const size_t
     return ssDims.str();
 }
 
-static void SetAippInfo(const aclAippInfo *aippInfo, const ge::AippConfigInfo &aippParams)
+static void SetAippInfo(aclAippInfo *aippInfo, const ge::AippConfigInfo &aippParams)
 {
     ACL_LOG_DEBUG("start to execute SetAippInfo");
     if (aippInfo == nullptr) {
