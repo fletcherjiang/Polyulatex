@@ -11,9 +11,6 @@
 #ifndef ACL_COMMON_LOG_INNER_H_
 #define ACL_COMMON_LOG_INNER_H_
 
-#include <cstdint>
-#include <cstdarg>
-#include <cstdio>
 #include <string>
 #include <vector>
 #include "toolchain/slog.h"
@@ -176,20 +173,6 @@ public:
             }                                                                                       \
     } while (false)
 #endif
-
-inline bool IsDebugLogEnabled()
-{
-    int eventEnable = 0;
-    int dlogLevel = dlog_getlevel(ACL_MODE_ID, &eventEnable);
-    return dlogLevel <= DLOG_DEBUG;
-}
-
-inline bool IsInfoLogEnabled()
-{
-    int eventEnable = 0;
-    int dlogLevel = dlog_getlevel(ACL_MODE_ID, &eventEnable);
-    return dlogLevel <= DLOG_INFO;
-}
 
 #define ACL_STAGES_REG(firstStage, secondStage) \
     const acl::AclErrorLogManager error_manager(firstStage, secondStage)
