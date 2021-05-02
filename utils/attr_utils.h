@@ -25,7 +25,7 @@
 
 namespace acl {
 namespace attr_utils {
-ACL_FUNC_VISIBILITY std::string GeAttrValueToString(const ge::GeAttrValue &value);
+ACL_FUNC_VISIBILITY std::string GeAttrValueToString(const ge::GeAttrValue &val);
 
 ACL_FUNC_VISIBILITY std::string AttrMapToString(const std::map<std::string, ge::GeAttrValue> &attrMap);
 
@@ -38,11 +38,11 @@ ACL_FUNC_VISIBILITY bool OpAttrEquals(const aclopAttr *lhs, const aclopAttr *rhs
 ACL_FUNC_VISIBILITY uint64_t GetCurrentTimestamp();
 
 bool ValueRangeCheck(const std::map<AttrRangeType, ge::GeAttrValue> &valueRange,
-                     const aclDataBuffer *value, aclDataType dataType);
+                     const aclDataBuffer *dataBuffer, aclDataType dataType);
 
 bool SaveConstToAttr(OpModelDef& modelDef);
 
-bool SaveConstToAttr(const AclOp &aclOp, aclopAttr *opAttr);
+bool SaveConstToAttr(const AclOp &opDesc, aclopAttr *opAttr);
 } // namespace attr_utils
 } // acl
 
