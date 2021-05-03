@@ -55,6 +55,8 @@ aclError aclrtMalloc(void **devPtr, size_t size, aclrtMemMallocPolicy policy)
         flags |= RT_MEMORY_POLICY_HUGE_PAGE_ONLY_P2P;
     } else if (policy == ACL_MEM_MALLOC_NORMAL_ONLY_P2P) {
         flags |= RT_MEMORY_POLICY_DEFAULT_PAGE_ONLY_P2P;
+    } else {
+        flags = RT_MEMORY_DEFAULT;
     }
     rtError_t rtErr = rtMalloc(devPtr, alignedSize, flags);
     if (rtErr != RT_ERROR_NONE) {
