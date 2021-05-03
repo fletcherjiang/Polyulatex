@@ -37,7 +37,7 @@ namespace {
             exec_expr; \
         } \
     }
-// TODO check it
+
 constexpr int16_t FP16_MAX_EXP = 0x001F;
 constexpr int16_t FP16_MAX_MAN = 0x03FF;
 constexpr int16_t FP16_MAN_HIDE_BIT = 0x0400;
@@ -121,7 +121,7 @@ struct Fp16Type {
         int16_t eRet;
         uint32_t eF;
         uint32_t mF;
-        // TODO how to fix it?
+
         void *pV = const_cast<float *>(&fVal); // 1:8:23bit sign:exp:man
         const uint32_t ui32V = *(static_cast<uint32_t *>(pV));
         uint32_t mLenDelta;
@@ -167,14 +167,13 @@ struct Fp16Type {
             if (needRound) {
                 mRet++;
             }
-            // TODO how to fix it?
+
             if (mRet & static_cast<uint16_t>(FP16_MAN_HIDE_BIT)) {
                 eRet++;
             }
         )
 
         Fp16Normalize(eRet, mRet);
-        // TODO how to fix it?
         val =  (((sRet) << static_cast<uint16_t>(FP16_SIGN_INDEX)) |
                 ((static_cast<uint16_t>(eRet)) << FP16_MAN_LEN) |
                 ((mRet) & static_cast<uint16_t>(FP16_MAX_MAN)));
@@ -186,7 +185,6 @@ static aclError SetIODims(const ge::InputOutputDims oriDims, aclmdlIODims &dstDi
 {
     ACL_LOG_DEBUG("start to execute SetIODims");
     dstDims.dimCount = oriDims.dim_num;
-    // TODO how to fix it
     if (oriDims.dims.size() > ACL_MAX_DIM_CNT) {
         ACL_LOG_INNER_ERROR("[Check][Params]size of dims[%zu] must be smaller than ACL_MAX_DIM_CNT(128)",
             oriDims.dims.size());
@@ -236,7 +234,6 @@ aclmdlAIPP *aclmdlCreateAIPP(uint64_t batchSize)
         aippParmsSet->aippBatchPara.resize(batchSize);
         ACL_LOG_INFO("the size of aippBatchPara is [%zu]", aippParmsSet->aippBatchPara.size());
         for (uint64_t i = 0U; i < batchSize; i++) {
-            // TODO check how to fix it?
             aippParmsSet->aippBatchPara[i].dtcPixelVarReciChn0 = Fp16Type(1.0F).val;
             aippParmsSet->aippBatchPara[i].dtcPixelVarReciChn1 = Fp16Type(1.0F).val;
             aippParmsSet->aippBatchPara[i].dtcPixelVarReciChn2 = Fp16Type(1.0F).val;
@@ -297,7 +294,6 @@ aclError aclmdlSetAIPPInputFormat(aclmdlAIPP *aippParmsSet, aclAippInputFormat i
     return ACL_SUCCESS;
 }
 
-// TODO should fix acl_mdl func name or not?
 aclError aclmdlSetAIPPCscParams(aclmdlAIPP *aippParmsSet, int8_t cscSwitch,
                                 int16_t cscMatrixR0C0, int16_t cscMatrixR0C1, int16_t cscMatrixR0C2,
                                 int16_t cscMatrixR1C0, int16_t cscMatrixR1C1, int16_t cscMatrixR1C2,
@@ -547,7 +543,6 @@ aclError aclmdlSetAIPPDtcPixelMin(aclmdlAIPP *aippParmsSet,
             std::vector<std::string>({"batch_index", errMsg}));
         return ACL_ERROR_INVALID_PARAM;
     }
-    // TODO fix the macro?
     ACL_CHECK_RANGE_FLOAT(dtcPixelMinChn0, MIN_CHN_MIN, MIN_CHN_MAX);
     ACL_CHECK_RANGE_FLOAT(dtcPixelMinChn1, MIN_CHN_MIN, MIN_CHN_MAX);
     ACL_CHECK_RANGE_FLOAT(dtcPixelMinChn2, MIN_CHN_MIN, MIN_CHN_MAX);
@@ -847,7 +842,6 @@ static aclError GetAndCheckAippParams(const uint32_t modelId, const aclmdlDesc &
     return AippParamsCheck(aippParmsSet, GetSocVersion());
 }
 
-// TODO how to fix modelDesc?
 static aclError CheckAippDataIndex(const uint32_t modelId, const size_t idx, const aclmdlDesc* modelDesc)
 {
     ACL_LOG_INFO("call ge interface executor.GetAippType, modelId[%u]", modelId);
@@ -883,7 +877,6 @@ static aclError CheckAippDataIndex(const uint32_t modelId, const size_t idx, con
     }
 }
 
-// TODO should fix index?
 aclError aclmdlSetInputAIPP(uint32_t modelId,
                             aclmdlDataset *dataset,
                             size_t index,
@@ -917,14 +910,12 @@ aclError aclmdlSetInputAIPP(uint32_t modelId,
             std::vector<std::string>({"parameters", "parameters verification failed"}));
         return mdlRet;
     }
-    // TODO check it
     const aclDataBuffer *buff = aclmdlGetDatasetBuffer(dataset, index);
     if (buff == nullptr) {
         ACL_LOG_INNER_ERROR("[Check][Buff]failed to get data buffer by index[%zu]", index);
         return ACL_ERROR_INVALID_PARAM;
     }
 
-    //TODO check it
     void *devPtr = aclGetDataBufferAddr(buff);
     if (devPtr == nullptr) {
         ACL_LOG_INNER_ERROR("[Check][DevPtr]failed to get addr by index[%zu]", index);
@@ -995,7 +986,6 @@ aclError aclmdlSetAIPPByInputIndex(uint32_t modelId,
     return aclmdlSetInputAIPP(modelId, dataset, dynamicAttachedDataIndex, aippParmsSet);
 }
 
-// TODO how to fix?
 static std::string AippInfoDebugString(const aclAippInfo *aippInfo)
 {
     if (aippInfo == nullptr) {
@@ -1080,7 +1070,6 @@ static std::string DimsDebugString(const aclmdlIODims &ioDims)
     return ss.str();
 }
 
-// TODO how to fix
 static std::string AippDimsDebugString(const aclAippDims *aippDims, const size_t shapeCount)
 {
     std::stringstream ssDims;
@@ -1159,7 +1148,6 @@ static void SetAippInfo(aclAippInfo *aippInfo, const ge::AippConfigInfo &aippPar
     ACL_LOG_DEBUG("end to execute SetAippInfo");
 }
 
-// TODO should fix acl_mdl func name and index or not?
 aclError aclmdlGetFirstAippInfo(uint32_t modelId, size_t index, aclAippInfo *aippInfo)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
