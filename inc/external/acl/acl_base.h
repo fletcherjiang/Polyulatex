@@ -48,83 +48,83 @@ extern "C" {
 typedef void *aclrtStream;
 typedef void *aclrtEvent;
 typedef void *aclrtContext;
-typedef int32_t aclError;
+typedef int aclError;
 typedef uint16_t aclFloat16;
 typedef struct aclDataBuffer aclDataBuffer;
 typedef struct aclTensorDesc aclTensorDesc;
 
-static const int32_t ACL_ERROR_NONE = 0;
-static const int32_t ACL_SUCCESS = 0;
+static const int ACL_ERROR_NONE = 0;
+static const int ACL_SUCCESS = 0;
 
-static const int32_t ACL_ERROR_INVALID_PARAM = 100000;
-static const int32_t ACL_ERROR_UNINITIALIZE = 100001;
-static const int32_t ACL_ERROR_REPEAT_INITIALIZE = 100002;
-static const int32_t ACL_ERROR_INVALID_FILE = 100003;
-static const int32_t ACL_ERROR_WRITE_FILE = 100004;
-static const int32_t ACL_ERROR_INVALID_FILE_SIZE = 100005;
-static const int32_t ACL_ERROR_PARSE_FILE = 100006;
-static const int32_t ACL_ERROR_FILE_MISSING_ATTR = 100007;
-static const int32_t ACL_ERROR_FILE_ATTR_INVALID = 100008;
-static const int32_t ACL_ERROR_INVALID_DUMP_CONFIG = 100009;
-static const int32_t ACL_ERROR_INVALID_PROFILING_CONFIG = 100010;
-static const int32_t ACL_ERROR_INVALID_MODEL_ID = 100011;
-static const int32_t ACL_ERROR_DESERIALIZE_MODEL = 100012;
-static const int32_t ACL_ERROR_PARSE_MODEL = 100013;
-static const int32_t ACL_ERROR_READ_MODEL_FAILURE = 100014;
-static const int32_t ACL_ERROR_MODEL_SIZE_INVALID = 100015;
-static const int32_t ACL_ERROR_MODEL_MISSING_ATTR = 100016;
-static const int32_t ACL_ERROR_MODEL_INPUT_NOT_MATCH = 100017;
-static const int32_t ACL_ERROR_MODEL_OUTPUT_NOT_MATCH = 100018;
-static const int32_t ACL_ERROR_MODEL_NOT_DYNAMIC = 100019;
-static const int32_t ACL_ERROR_OP_TYPE_NOT_MATCH = 100020;
-static const int32_t ACL_ERROR_OP_INPUT_NOT_MATCH = 100021;
-static const int32_t ACL_ERROR_OP_OUTPUT_NOT_MATCH = 100022;
-static const int32_t ACL_ERROR_OP_ATTR_NOT_MATCH = 100023;
-static const int32_t ACL_ERROR_OP_NOT_FOUND = 100024;
-static const int32_t ACL_ERROR_OP_LOAD_FAILED = 100025;
-static const int32_t ACL_ERROR_UNSUPPORTED_DATA_TYPE = 100026;
-static const int32_t ACL_ERROR_FORMAT_NOT_MATCH = 100027;
-static const int32_t ACL_ERROR_BIN_SELECTOR_NOT_REGISTERED = 100028;
-static const int32_t ACL_ERROR_KERNEL_NOT_FOUND = 100029;
-static const int32_t ACL_ERROR_BIN_SELECTOR_ALREADY_REGISTERED = 100030;
-static const int32_t ACL_ERROR_KERNEL_ALREADY_REGISTERED = 100031;
-static const int32_t ACL_ERROR_INVALID_QUEUE_ID = 100032;
-static const int32_t ACL_ERROR_REPEAT_SUBSCRIBE = 100033;
-static const int32_t ACL_ERROR_STREAM_NOT_SUBSCRIBE = 100034;
-static const int32_t ACL_ERROR_THREAD_NOT_SUBSCRIBE = 100035;
-static const int32_t ACL_ERROR_WAIT_CALLBACK_TIMEOUT = 100036;
-static const int32_t ACL_ERROR_REPEAT_FINALIZE = 100037;
-static const int32_t ACL_ERROR_NOT_STATIC_AIPP = 100038;
-static const int32_t ACL_ERROR_COMPILING_STUB_MODE = 100039;
-static const int32_t ACL_ERROR_GROUP_NOT_SET = 100040;
-static const int32_t ACL_ERROR_GROUP_NOT_CREATE = 100041;
-static const int32_t ACL_ERROR_PROF_ALREADY_RUN = 100042;
-static const int32_t ACL_ERROR_PROF_NOT_RUN = 100043;
-static const int32_t ACL_ERROR_DUMP_ALREADY_RUN = 100044;
-static const int32_t ACL_ERROR_DUMP_NOT_RUN = 100045;
-static const int32_t ACL_ERROR_PROF_REPEAT_SUBSCRIBE = 148046;
-static const int32_t ACL_ERROR_PROF_API_CONFLICT = 148047;
-static const int32_t ACL_ERROR_INVALID_MAX_OPQUEUE_NUM_CONFIG = 148048;
-static const int32_t ACL_ERROR_INVALID_OPP_PATH = 148049;
-static const int32_t ACL_ERROR_OP_UNSUPPORTED_DYNAMIC = 148050;
+static const int ACL_ERROR_INVALID_PARAM = 100000;
+static const int ACL_ERROR_UNINITIALIZE = 100001;
+static const int ACL_ERROR_REPEAT_INITIALIZE = 100002;
+static const int ACL_ERROR_INVALID_FILE = 100003;
+static const int ACL_ERROR_WRITE_FILE = 100004;
+static const int ACL_ERROR_INVALID_FILE_SIZE = 100005;
+static const int ACL_ERROR_PARSE_FILE = 100006;
+static const int ACL_ERROR_FILE_MISSING_ATTR = 100007;
+static const int ACL_ERROR_FILE_ATTR_INVALID = 100008;
+static const int ACL_ERROR_INVALID_DUMP_CONFIG = 100009;
+static const int ACL_ERROR_INVALID_PROFILING_CONFIG = 100010;
+static const int ACL_ERROR_INVALID_MODEL_ID = 100011;
+static const int ACL_ERROR_DESERIALIZE_MODEL = 100012;
+static const int ACL_ERROR_PARSE_MODEL = 100013;
+static const int ACL_ERROR_READ_MODEL_FAILURE = 100014;
+static const int ACL_ERROR_MODEL_SIZE_INVALID = 100015;
+static const int ACL_ERROR_MODEL_MISSING_ATTR = 100016;
+static const int ACL_ERROR_MODEL_INPUT_NOT_MATCH = 100017;
+static const int ACL_ERROR_MODEL_OUTPUT_NOT_MATCH = 100018;
+static const int ACL_ERROR_MODEL_NOT_DYNAMIC = 100019;
+static const int ACL_ERROR_OP_TYPE_NOT_MATCH = 100020;
+static const int ACL_ERROR_OP_INPUT_NOT_MATCH = 100021;
+static const int ACL_ERROR_OP_OUTPUT_NOT_MATCH = 100022;
+static const int ACL_ERROR_OP_ATTR_NOT_MATCH = 100023;
+static const int ACL_ERROR_OP_NOT_FOUND = 100024;
+static const int ACL_ERROR_OP_LOAD_FAILED = 100025;
+static const int ACL_ERROR_UNSUPPORTED_DATA_TYPE = 100026;
+static const int ACL_ERROR_FORMAT_NOT_MATCH = 100027;
+static const int ACL_ERROR_BIN_SELECTOR_NOT_REGISTERED = 100028;
+static const int ACL_ERROR_KERNEL_NOT_FOUND = 100029;
+static const int ACL_ERROR_BIN_SELECTOR_ALREADY_REGISTERED = 100030;
+static const int ACL_ERROR_KERNEL_ALREADY_REGISTERED = 100031;
+static const int ACL_ERROR_INVALID_QUEUE_ID = 100032;
+static const int ACL_ERROR_REPEAT_SUBSCRIBE = 100033;
+static const int ACL_ERROR_STREAM_NOT_SUBSCRIBE = 100034;
+static const int ACL_ERROR_THREAD_NOT_SUBSCRIBE = 100035;
+static const int ACL_ERROR_WAIT_CALLBACK_TIMEOUT = 100036;
+static const int ACL_ERROR_REPEAT_FINALIZE = 100037;
+static const int ACL_ERROR_NOT_STATIC_AIPP = 100038;
+static const int ACL_ERROR_COMPILING_STUB_MODE = 100039;
+static const int ACL_ERROR_GROUP_NOT_SET = 100040;
+static const int ACL_ERROR_GROUP_NOT_CREATE = 100041;
+static const int ACL_ERROR_PROF_ALREADY_RUN = 100042;
+static const int ACL_ERROR_PROF_NOT_RUN = 100043;
+static const int ACL_ERROR_DUMP_ALREADY_RUN = 100044;
+static const int ACL_ERROR_DUMP_NOT_RUN = 100045;
+static const int ACL_ERROR_PROF_REPEAT_SUBSCRIBE = 148046;
+static const int ACL_ERROR_PROF_API_CONFLICT = 148047;
+static const int ACL_ERROR_INVALID_MAX_OPQUEUE_NUM_CONFIG = 148048;
+static const int ACL_ERROR_INVALID_OPP_PATH = 148049;
+static const int ACL_ERROR_OP_UNSUPPORTED_DYNAMIC = 148050;
 
-static const int32_t ACL_ERROR_BAD_ALLOC = 200000;
-static const int32_t ACL_ERROR_API_NOT_SUPPORT = 200001;
-static const int32_t ACL_ERROR_INVALID_DEVICE = 200002;
-static const int32_t ACL_ERROR_MEMORY_ADDRESS_UNALIGNED = 200003;
-static const int32_t ACL_ERROR_RESOURCE_NOT_MATCH = 200004;
-static const int32_t ACL_ERROR_INVALID_RESOURCE_HANDLE = 200005;
-static const int32_t ACL_ERROR_FEATURE_UNSUPPORTED = 200006;
-static const int32_t ACL_ERROR_PROF_MODULES_UNSUPPORTED = 200007;
+static const int ACL_ERROR_BAD_ALLOC = 200000;
+static const int ACL_ERROR_API_NOT_SUPPORT = 200001;
+static const int ACL_ERROR_INVALID_DEVICE = 200002;
+static const int ACL_ERROR_MEMORY_ADDRESS_UNALIGNED = 200003;
+static const int ACL_ERROR_RESOURCE_NOT_MATCH = 200004;
+static const int ACL_ERROR_INVALID_RESOURCE_HANDLE = 200005;
+static const int ACL_ERROR_FEATURE_UNSUPPORTED = 200006;
+static const int ACL_ERROR_PROF_MODULES_UNSUPPORTED = 200007;
 
-static const int32_t ACL_ERROR_STORAGE_OVER_LIMIT = 300000;
+static const int ACL_ERROR_STORAGE_OVER_LIMIT = 300000;
 
-static const int32_t ACL_ERROR_INTERNAL_ERROR = 500000;
-static const int32_t ACL_ERROR_FAILURE = 500001;
-static const int32_t ACL_ERROR_GE_FAILURE = 500002;
-static const int32_t ACL_ERROR_RT_FAILURE = 500003;
-static const int32_t ACL_ERROR_DRV_FAILURE = 500004;
-static const int32_t ACL_ERROR_PROFILING_FAILURE = 500005;
+static const int ACL_ERROR_INTERNAL_ERROR = 500000;
+static const int ACL_ERROR_FAILURE = 500001;
+static const int ACL_ERROR_GE_FAILURE = 500002;
+static const int ACL_ERROR_RT_FAILURE = 500003;
+static const int ACL_ERROR_DRV_FAILURE = 500004;
+static const int ACL_ERROR_PROFILING_FAILURE = 500005;
 
 #define ACL_TENSOR_SHAPE_RANGE_NUM 2
 #define ACL_UNKNOWN_RANK 0xFFFFFFFFFFFFFFFE
@@ -309,8 +309,8 @@ ACL_FUNC_VISIBILITY size_t aclDataTypeSize(aclDataType dataType);
  * @retval nullptr if param is invalid or run out of memory
  */
 ACL_FUNC_VISIBILITY aclTensorDesc *aclCreateTensorDesc(aclDataType dataType,
-                                                       int32_t numDims,
-                                                       const  *dims,
+                                                       int numDims,
+                                                       const int64_t *dims,
                                                        aclFormat format);
 
 /**
@@ -334,7 +334,7 @@ ACL_FUNC_VISIBILITY void aclDestroyTensorDesc(const aclTensorDesc *desc);
  */
 ACL_FUNC_VISIBILITY aclError aclSetTensorShapeRange(aclTensorDesc* desc,
                                                     size_t dimsCount,
-                                                     dimsRange[][ACL_TENSOR_SHAPE_RANGE_NUM]);
+                                                    int64_t dimsRange[][ACL_TENSOR_SHAPE_RANGE_NUM]);
 
 /**
  * @ingroup AscendCL
@@ -403,7 +403,7 @@ ACL_FUNC_VISIBILITY size_t aclGetTensorDescNumDims(const aclTensorDesc *desc);
  * @retval -1 if description or index is invalid
  */
 ACL_DEPRECATED_MESSAGE("aclGetTensorDescDim is deprecated, use aclGetTensorDescDimV2 instead")
-ACL_FUNC_VISIBILITY  aclGetTensorDescDim(const aclTensorDesc *desc, size_t index);
+ACL_FUNC_VISIBILITY int64_t aclGetTensorDescDim(const aclTensorDesc *desc, size_t index);
 
 /**
  * @ingroup AscendCL
@@ -416,7 +416,7 @@ ACL_FUNC_VISIBILITY  aclGetTensorDescDim(const aclTensorDesc *desc, size_t index
  * @retval ACL_SUCCESS The function is successfully executed.
  * @retval OtherValues Failure
  */
-ACL_FUNC_VISIBILITY aclError aclGetTensorDescDimV2(const aclTensorDesc *desc, size_t index,  *dimSize);
+ACL_FUNC_VISIBILITY aclError aclGetTensorDescDimV2(const aclTensorDesc *desc, size_t index, int64_t *dimSize);
 
 /**
  * @ingroup AscendCL
@@ -433,7 +433,7 @@ ACL_FUNC_VISIBILITY aclError aclGetTensorDescDimV2(const aclTensorDesc *desc, si
 ACL_FUNC_VISIBILITY aclError aclGetTensorDescDimRange(const aclTensorDesc *desc,
                                                       size_t index,
                                                       size_t dimRangeNum,
-                                                       *dimRange);
+                                                      int64_t *dimRange);
 
 /**
  * @ingroup AscendCL
@@ -496,7 +496,7 @@ ACL_FUNC_VISIBILITY aclError aclSetTensorStorageFormat(aclTensorDesc *desc, aclF
  * @retval OtherValues Failure
  */
 ACL_DEPRECATED_MESSAGE("aclSetTensorStorageShape is deprecated, use aclSetTensorShape instead")
-ACL_FUNC_VISIBILITY aclError aclSetTensorStorageShape(aclTensorDesc *desc, int32_t numDims, const  *dims);
+ACL_FUNC_VISIBILITY aclError aclSetTensorStorageShape(aclTensorDesc *desc, int numDims, const int64_t *dims);
 
 /**
  * @ingroup AscendCL
@@ -521,7 +521,7 @@ ACL_FUNC_VISIBILITY aclError aclSetTensorFormat(aclTensorDesc *desc, aclFormat f
  * @retval ACL_SUCCESS     The function is successfully executed.
  * @retval OtherValues Failure
  */
-ACL_FUNC_VISIBILITY aclError aclSetTensorShape(aclTensorDesc *desc, int32_t numDims, const  *dims);
+ACL_FUNC_VISIBILITY aclError aclSetTensorShape(aclTensorDesc *desc, int numDims, const int64_t *dims);
 
 /**
  * @ingroup AscendCL
@@ -546,7 +546,7 @@ ACL_FUNC_VISIBILITY aclError aclSetTensorOriginFormat(aclTensorDesc *desc, aclFo
  * @retval ACL_SUCCESS     The function is successfully executed.
  * @retval OtherValues Failure
  */
-ACL_FUNC_VISIBILITY aclError aclSetTensorOriginShape(aclTensorDesc *desc, int32_t numDims, const  *dims);
+ACL_FUNC_VISIBILITY aclError aclSetTensorOriginShape(aclTensorDesc *desc, int numDims, const int64_t *dims);
 
 /**
  * @ingroup AscendCL
