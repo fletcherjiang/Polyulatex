@@ -36,7 +36,7 @@ std::string ScalarAttrToString<string>(const ge::GeAttrValue &attrVal)
 {
     std::string val;
     attrVal.GetValue<string>(val);
-    return strVal;
+    return val;
 }
 
 template<>
