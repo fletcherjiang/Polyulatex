@@ -20,8 +20,6 @@
 #define ACL_MODE_ID static_cast<int32_t>(ASCENDCL)
 #define APP_MODE_ID static_cast<int32_t>(APP)
 
-constexpr int MAX_LOG_STRING = 1024;
-
 namespace acl {
 const char *const INVALID_PARAM_MSG = "EH0001";
 const char *const INVALID_NULL_POINTER_MSG = "EH0002";

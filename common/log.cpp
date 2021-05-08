@@ -14,6 +14,10 @@
 #include "common/log_inner.h"
 #include "toolchain/slog.h"
 
+namespace {
+    constexpr int32_t MAX_LOG_STRING = 1024;
+}
+
 void aclAppLog(aclLogLevel logLevel, const char *func, const char *file, uint32_t line, const char *fmt, ...)
 {
     if ((fmt == nullptr) || (func == nullptr) || (file == nullptr)) {

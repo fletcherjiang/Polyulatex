@@ -14,6 +14,7 @@
 
 namespace acl {
 bool AclLog::isEnableEvent_ = false;
+constexpr int32_t MAX_LOG_STRING = 1024;
 
 aclLogLevel AclLog::GetCurLogLevel()
 {
