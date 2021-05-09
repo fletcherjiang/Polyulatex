@@ -102,8 +102,8 @@ namespace {
                 valueSize, sizeof(void *));
             return ACL_ERROR_INVALID_PARAM;
         }
-        void *value = *static_cast<void **>(const_cast<void *>(attrValue));
-        ACL_REQUIRES_NOT_NULL(value);
+        void *val = *static_cast<void **>(const_cast<void *>(attrValue));
+        ACL_REQUIRES_NOT_NULL(val);
         ACL_LOG_INFO("successfully execute CheckMdlLoadPtrAttrEx");
         return ACL_SUCCESS;
     }
@@ -122,8 +122,8 @@ namespace {
     aclError SetMdlLoadMemPtr(aclmdlConfigHandle *handle, void *attrValue)
     {
         ACL_LOG_INFO("start to execute SetMdlLoadMemPtr");
-        void *value = *static_cast<void **>(attrValue);
-        handle->mdlAddr = value;
+        void *val = *static_cast<void **>(attrValue);
+        handle->mdlAddr = val;
         handle->attrState.insert(ACL_MDL_MEM_ADDR_PTR);
         ACL_LOG_INFO("successfully execute SetMdlLoadMemPtr");
         return ACL_SUCCESS;
@@ -132,8 +132,8 @@ namespace {
     aclError SetMdlLoadInputQPtr(aclmdlConfigHandle *handle, void *attrValue)
     {
         ACL_LOG_INFO("start to execute SetMdlLoadInputQPtr");
-        void *value = *static_cast<void **>(attrValue);
-        handle->inputQ = static_cast<uint32_t *>(value);
+        void *val = *static_cast<void **>(attrValue);
+        handle->inputQ = static_cast<uint32_t *>(val);
         handle->attrState.insert(ACL_MDL_INPUTQ_ADDR_PTR);
         ACL_LOG_INFO("successfully execute SetMdlLoadInputQPtr");
         return ACL_SUCCESS;
@@ -142,8 +142,8 @@ namespace {
     aclError SetMdlLoadOutputQPtr(aclmdlConfigHandle *handle, void *attrValue)
     {
         ACL_LOG_INFO("start to execute SetMdlLoadOutputQPtr");
-        void *value = *static_cast<void **>(attrValue);
-        handle->outputQ = static_cast<uint32_t *>(value);
+        void *val = *static_cast<void **>(attrValue);
+        handle->outputQ = static_cast<uint32_t *>(val);
         handle->attrState.insert(ACL_MDL_OUTPUTQ_ADDR_PTR);
         ACL_LOG_INFO("successfully execute SetMdlLoadOutputQPtr");
         return ACL_SUCCESS;
@@ -224,8 +224,8 @@ namespace {
     aclError SetMdlLoadWeightPtr(aclmdlConfigHandle *handle, void *attrValue)
     {
         ACL_LOG_INFO("start to execute SetMdlLoadWeightPtr");
-        void *value = *static_cast<void **>(attrValue);
-        handle->weightPtr = value;
+        void *val = *static_cast<void **>(attrValue);
+        handle->weightPtr = val;
         ACL_LOG_INFO("successfully execute SetMdlLoadWeightPtr");
         return ACL_SUCCESS;
     }
@@ -233,8 +233,8 @@ namespace {
     aclError SetMdlLoadWorkPtr(aclmdlConfigHandle *handle, void *attrValue)
     {
         ACL_LOG_INFO("start to execute SetMdlLoadWorkPtr");
-        void *value = *static_cast<void **>(attrValue);
-        handle->workPtr = value;
+        void *val = *static_cast<void **>(attrValue);
+        handle->workPtr = val;
         ACL_LOG_INFO("successfully execute SetMdlLoadWorkPtr");
         return ACL_SUCCESS;
     }
@@ -366,8 +366,8 @@ aclError aclmdlSetConfigOpt(aclmdlConfigHandle *handle, aclmdlConfigAttr attr,
             "valueSize[%zu]", ret, static_cast<int32_t>(attr), valueSize);
         return ret;
     }
-    void *value = const_cast<void *>(attrValue);
-    ret = paramFunc.setFunc(handle, value);
+    void *val = const_cast<void *>(attrValue);
+    ret = paramFunc.setFunc(handle, val);
     if (ret != ACL_SUCCESS) {
         ACL_LOG_INNER_ERROR("[Set][Params]set params by aclmdlSetConfigOpt error, result[%d], attr[%d]", ret,
             static_cast<int32_t>(attr));
