@@ -497,8 +497,6 @@ static bool CheckDimRange(std::pair<int64_t, int64_t> rangeLeft, std::pair<int64
             ACL_LOG_INFO("the range:[%ld, %ld] is not in range of the model:[%ld, -1]",
                 minRange, maxRange, rangeRight.first);
             return false;
-        } else {
-            return true;
         }
     } else if (maxRange == UNKNOW_DIM) { // the input range max is -1
         ACL_LOG_INFO("the range:[%ld, -1] is not in range of the model:[%ld, %ld]",
@@ -509,6 +507,8 @@ static bool CheckDimRange(std::pair<int64_t, int64_t> rangeLeft, std::pair<int64
         ACL_LOG_WARN("the range:[%ld, %ld] in compile is not in range of the model:[%ld, %ld]",
             minRange, maxRange, rangeRight.first, rangeRight.second);
         return false;
+    } else {
+        return true;
     }
     return true;
 }
@@ -546,6 +546,8 @@ static bool CheckRange(int32_t tensorNum,
                     continue;
                 } else if (tensorDesc[tensorIndex]->dims[dimIndex] > shapeRange[rangeIndex].second) {
                     return false;
+                } else {
+                    continue;
                 }
             }
         }

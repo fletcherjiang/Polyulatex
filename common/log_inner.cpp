@@ -14,7 +14,6 @@
 
 namespace acl {
 bool AclLog::isEnableEvent_ = false;
-constexpr int32_t MAX_LOG_STRING = 1024;
 
 aclLogLevel AclLog::GetCurLogLevel()
 {
@@ -105,8 +104,9 @@ std::string AclErrorLogManager::FormatStr(const char *fmt, ...)
 
     va_list ap;
     va_start(ap, fmt);
-    char str[MAX_LOG_STRING] = { '\0' };
-    int32_t printRet = vsnprintf_s(str, static_cast<size_t>(MAX_LOG_STRING), static_cast<size_t>(MAX_LOG_STRING - 1), fmt, ap);
+    char str[acl::MAX_LOG_STRING] = { '\0' };
+    int32_t printRet = vsnprintf_s(str, static_cast<size_t>(acl::MAX_LOG_STRING),
+        static_cast<size_t>(acl::MAX_LOG_STRING - 1), fmt, ap);
     if (printRet == -1) {
         va_end(ap);
         return "";
