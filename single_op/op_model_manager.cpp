@@ -25,11 +25,11 @@ using namespace std;
 
 namespace acl {
 namespace {
-constexpr int OM_FILE_SUFFIX_LEN = 3;
-constexpr int OM_DIR_MAX_DEPTH = 3;
-constexpr int DECIMAL = 10;
+constexpr int32_t OM_FILE_SUFFIX_LEN = 3;
+constexpr int32_t OM_DIR_MAX_DEPTH = 3;
+constexpr int32_t DECIMAL = 10;
+constexpr size_t DEFAULT_STRING_SIZE = 64;
 const std::string ACL_MAX_OPQUEUE_NUM = "max_opqueue_num";
-const int32_t DEFAULT_STRING_SIZE = 64;
 const std::string UNKNOWN_RANK_DIM_STR = "-2_";
 const std::string DYNAMIC_SHAPE_DIM_STR = "-1_";
 const std::string STATIC_SHAPE_DIM_STR = "0_";
@@ -44,8 +44,7 @@ aclError OpModelManager::HandleMaxOpQueueConfig(const char *configPath)
 {
     ACL_LOG_INFO("start to execute HandleMaxOpQueueConfig");
     nlohmann::json js;
-    acl::JsonParser jsonParser;
-    aclError ret = jsonParser.ParseJsonFromFile(configPath, js, nullptr, nullptr);
+    aclError ret =  acl::JsonParser::ParseJsonFromFile(configPath, js, nullptr, nullptr);
     if (ret != ACL_SUCCESS) {
         ACL_LOG_INNER_ERROR("[Parse][Config]parse max_opqueue_num config from file[%s] failed, result = %d",
             configPath, ret);
@@ -53,8 +52,8 @@ aclError OpModelManager::HandleMaxOpQueueConfig(const char *configPath)
     }
     try {
         if (js.find(ACL_MAX_OPQUEUE_NUM) != js.end()) {
-            std::string maxOpNumStr = js.at(ACL_MAX_OPQUEUE_NUM).get<std::string>();
-            long maxOpNum = strtol(maxOpNumStr.c_str(), nullptr, DECIMAL);
+            const std::string maxOpNumStr = js.at(ACL_MAX_OPQUEUE_NUM).get<std::string>();
+            int64_t maxOpNum = strtol(maxOpNumStr.c_str(), nullptr, DECIMAL);
             ACL_LOG_EVENT("max_opqueue_num is set [%ld].", maxOpNum);
             if (maxOpNum <= 0) {
                 ACL_LOG_INNER_ERROR("[Check][MaxOpNum]max_opqueue_num [%s] is invalid from file[%s], "
@@ -86,7 +85,7 @@ bool OpModelManager::OmFileFilterFn(const std::string &fileName)
         return false;
     }
 
-    return pos == (fileName.size() - OM_FILE_SUFFIX_LEN);
+    return pos == (fileName.size() - static_cast<size_t>(OM_FILE_SUFFIX_LEN));
 }
 
 bool OpModelManager::IsDynamicOpModel(const OpModelDef &modelDef)
@@ -118,12 +117,12 @@ bool OpModelManager::IsDynamicOpModel(const OpModelDef &modelDef)
 
 bool OpModelManager::IsDynamicOpModel(const AclOp &aclOp)
 {
-    for (int i = 0; i < aclOp.numInputs; ++i) {
+    for (int32_t i = 0; i < aclOp.numInputs; ++i) {
         if (aclOp.inputDesc[i]->IsDynamicTensor()) {
             return true;
         }
     }
-    for (int i = 0; i < aclOp.numOutputs; ++i) {
+    for (int32_t i = 0; i < aclOp.numOutputs; ++i) {
         if (aclOp.outputDesc[i]->IsDynamicTensor()) {
             return true;
         }
@@ -167,7 +166,7 @@ aclError OpModelManager::LoadModelFromMem(const void *model, size_t modelSize, b
     return LoadModelFromSharedMem(modelData, modelSize, isStatic);
 }
 
-aclError OpModelManager::LoadModelFromSharedMem(std::shared_ptr<void> &model, size_t modelSize, bool isStatic)
+aclError OpModelManager::LoadModelFromSharedMem(const std::shared_ptr<void> &model, size_t modelSize, bool isStatic)
 {
     ACL_LOG_INFO("Load inner op model begin. modelSize = %zu", modelSize);
     ACL_REQUIRES_NOT_NULL(model);
@@ -199,11 +198,11 @@ aclError OpModelManager::LoadModelFromSharedMem(std::shared_ptr<void> &model, si
     return ACL_SUCCESS;
 }
 
-static void SetShapeStatus(int tensorNum,
+static void SetShapeStatus(int32_t tensorNum,
                            const aclTensorDesc *const tensorDesc[],
                            std::vector<aclTensorShapeStatus> &shapeStatus)
 {
-    for (int tensorIndex = 0; tensorIndex < tensorNum; ++tensorIndex) {
+    for (int32_t tensorIndex = 0; tensorIndex < tensorNum; ++tensorIndex) {
         aclTensorShapeStatus tensorShapeStatus;
         if ((tensorDesc[tensorIndex]->dims.size() > 0) && (tensorDesc[tensorIndex]->dims[0] == UNKNOW_RANK)) {
             tensorShapeStatus.isUnkownRank = true;
@@ -282,10 +281,10 @@ std::string OpModelManager::TensorStatusToStr(const std::vector<aclTensorShapeSt
     return tensorShapeStatusDesc;
 }
 
-static void SetShapeRange(int tensorNum, const aclTensorDesc *const tensorDesc[],
+static void SetShapeRange(int32_t tensorNum, const aclTensorDesc *const tensorDesc[],
     std::vector<std::pair<int64_t, int64_t>> &shapeRanges)
 {
-    for (int tensorIndex = 0; tensorIndex < tensorNum; ++tensorIndex) {
+    for (int32_t tensorIndex = 0; tensorIndex < tensorNum; ++tensorIndex) {
         // Complete the shape range for static tensor
         if (tensorDesc[tensorIndex]->shapeRange.empty()) {
             if ((tensorDesc[tensorIndex]->dims.size() > 0) &&
@@ -366,8 +365,8 @@ aclError OpModelManager::RegisterModel(OpModelDef &&modelConfig,
     AclOp aclOp;
     aclOp.opType = modelConfig.opType;
     aclOp.opAttr = &modelConfig.opAttr;
-    aclOp.numInputs = numInputs;
-    aclOp.numOutputs = numOutputs;
+    aclOp.numInputs = static_cast<int32_t>(numInputs);
+    aclOp.numOutputs = static_cast<int32_t>(numOutputs);
     aclOp.inputDesc = input_desc.data();
     aclOp.outputDesc = output_desc.data();
     if (!isStaticRegister) {
@@ -385,17 +384,17 @@ aclError OpModelManager::RegisterModel(OpModelDef &&modelConfig,
         SetTensorShapeRange(aclOp, shapeStatus);
         ACL_REQUIRES_OK(opDynamicModelDefs.Insert(aclOp, modelDefPtr, agingModelDef));
         if (agingModelDef != nullptr) {
-            dynamicModelCache_.Delete(*agingModelDef);
+            ACL_REQUIRES_OK(dynamicModelCache_.Delete(*agingModelDef));
         }
     } else {
         ACL_LOG_INFO("The model is static shape");
         ACL_REQUIRES_OK(opModelDefs.Insert(aclOp, modelDefPtr, agingModelDef));
         if (agingModelDef != nullptr) {
-            modelCache_.Delete(*agingModelDef);
+            ACL_REQUIRES_OK(modelCache_.Delete(*agingModelDef));
         }
     }
-    bool castHasTruncate = !GetIfCastHasTruncateAttr() && (aclOp.opType == "Cast") &&
-                           (aclOp.opAttr != nullptr) && (aclOp.opAttr->HasAttr("truncate"));
+    bool castHasTruncate = (!GetIfCastHasTruncateAttr() && (aclOp.opType == "Cast")) &&
+                           ((aclOp.opAttr != nullptr) && (aclOp.opAttr->HasAttr("truncate")));
     if (castHasTruncate) {
         ACL_LOG_INFO("Find cast op whose attr contains truncate");
         SetCastHasTruncateAttr(true);
@@ -440,9 +439,9 @@ aclError OpModelManager::SetTensorConst(aclTensorDesc *desc, const aclDataBuffer
     return ACL_SUCCESS;
 }
 
-aclError OpModelManager::SetHostMemToConst(AclOp &aclopHostMemToConst, bool &isExistConst)
+aclError OpModelManager::SetHostMemToConst(const AclOp &aclopHostMemToConst, bool &isExistConst)
 {
-    for (int i = 0; i < aclopHostMemToConst.numInputs; ++i) {
+    for (int32_t i = 0; i < aclopHostMemToConst.numInputs; ++i) {
         if ((aclopHostMemToConst.inputDesc[i]->memtype == ACL_MEMTYPE_HOST) &&
             (!aclopHostMemToConst.inputDesc[i]->isConst)) {
             isExistConst = true;
@@ -452,7 +451,7 @@ aclError OpModelManager::SetHostMemToConst(AclOp &aclopHostMemToConst, bool &isE
                 aclopHostMemToConst.inputs[i]));
         }
     }
-    for (int i = 0; i < aclopHostMemToConst.numOutputs; ++i) {
+    for (int32_t i = 0; i < aclopHostMemToConst.numOutputs; ++i) {
         if ((aclopHostMemToConst.outputDesc[i]->memtype == ACL_MEMTYPE_HOST) &&
             (!aclopHostMemToConst.outputDesc[i]->isConst)) {
             isExistConst = true;
@@ -474,7 +473,8 @@ aclError OpModelManager::GetOpModel(AclOp &aclOp)
         aclOp.opModel = opModel;
         aclOp.isMatched = true;
         aclOp.isDynamic = isDynamic;
-        ACL_LOG_INFO("operator %s is already registered, isDynamicModel = %d", aclOp.opType.c_str(), isDynamic);
+        ACL_LOG_INFO("operator %s is already registered, isDynamicModel = %d", aclOp.opType.c_str(),
+                     static_cast<int32_t>(isDynamic));
         return ret;
     }
 
@@ -507,17 +507,19 @@ static bool CheckDimRange(std::pair<int64_t, int64_t> rangeLeft, std::pair<int64
         ACL_LOG_WARN("the range:[%ld, %ld] in compile is not in range of the model:[%ld, %ld]",
             minRange, maxRange, rangeRight.first, rangeRight.second);
         return false;
+    } else {
+        return true;
     }
     return true;
 }
 
-static bool CheckRange(int tensorNum,
+static bool CheckRange(int32_t tensorNum,
                        const aclTensorDesc *const tensorDesc[],
                        const std::vector<aclTensorShapeStatus> &tensorShapeStatus,
                        const std::vector<std::pair<int64_t, int64_t>> &shapeRange,
                        size_t &rangeIndex, size_t &statusIndex, size_t &tensorDimSize)
 {
-    for (int tensorIndex = 0; tensorIndex < tensorNum; ++tensorIndex, ++statusIndex) {
+    for (int32_t tensorIndex = 0; tensorIndex < tensorNum; ++tensorIndex, ++statusIndex) {
         if (tensorShapeStatus[statusIndex].isUnkownRank) {
             ACL_LOG_INFO("the tensor is isUnkownRank tensor, tensorId is %d", tensorIndex);
             continue;
@@ -544,6 +546,8 @@ static bool CheckRange(int tensorNum,
                     continue;
                 } else if (tensorDesc[tensorIndex]->dims[dimIndex] > shapeRange[rangeIndex].second) {
                     return false;
+                } else {
+                    continue;
                 }
             }
         }
@@ -577,7 +581,7 @@ bool OpModelManager::CheckShapeRange(const AclOp &aclOp,
     return true;
 }
 
-static void FixedAclOp(int tensorNum,
+static void FixedAclOp(int32_t tensorNum,
                        const aclTensorDesc *const tensorDesc[],
                        const std::vector<aclTensorShapeStatus> &tensorShapeStatus,
                        const std::vector<std::pair<int64_t, int64_t>> &shapeRange,
@@ -586,7 +590,7 @@ static void FixedAclOp(int tensorNum,
                        size_t &shapeIndex, size_t &shapeBegin)
 {
     size_t dimIndex = 0; // The index of dims
-    for (int tensorIndex = 0; tensorIndex < tensorNum; ++tensorIndex, ++tensorStatusIndex) {
+    for (int32_t tensorIndex = 0; tensorIndex < tensorNum; ++tensorIndex, ++tensorStatusIndex) {
         size_t statusIndex = 0;
         std::vector<int64_t> dim;
         for (size_t i = 0; i < tensorDesc[tensorIndex]->dims.size(); ++i) {
@@ -610,8 +614,9 @@ static void FixedAclOp(int tensorNum,
             shapeIndex++;
         }
         // The length of shapeRange is equal to the sum of inputDesc.dims.size and outputDesc.dims.size
-        std::vector<std::pair<int64_t, int64_t>> inputTensorShapeRange(shapeRange.begin() + shapeBegin,
-            shapeRange.begin() + shapeIndex);
+        std::vector<std::pair<int64_t, int64_t>> inputTensorShapeRange(
+                shapeRange.begin() + static_cast<int64_t>(shapeBegin),
+                shapeRange.begin() + static_cast<int64_t>(shapeIndex));
         shapeBegin = shapeIndex;
         const_cast<aclTensorDesc *>(tensorDesc[tensorIndex])->shapeRange = inputTensorShapeRange;
 
@@ -626,7 +631,7 @@ static void FixedAclOp(int tensorNum,
     }
 }
 
-void OpModelManager::FixedAclopMatch(AclOp &aclOpMatch,
+void OpModelManager::FixedAclopMatch(const AclOp &aclOpMatch,
                                      const std::vector<aclTensorShapeStatus> &tensorShapeStatus,
                                      const std::vector<std::pair<int64_t, int64_t>> &shapeRange,
                                      std::vector<std::vector<int64_t>> &tensorDims,
@@ -646,7 +651,7 @@ void OpModelManager::FixedAclopMatch(AclOp &aclOpMatch,
     ACL_LOG_INFO("OutputDesc FixedAclopMatch success");
 }
 
-static bool BackAclOp(int tensorNum,
+static bool BackAclOp(int32_t tensorNum,
                       const aclTensorDesc *const tensorDesc[],
                       const std::vector<aclTensorShapeStatus> &tensorShapeStatus,
                       const std::vector<std::vector<int64_t>> &tensorDims,
@@ -654,7 +659,7 @@ static bool BackAclOp(int tensorNum,
                       size_t &oriStoDimsIndex, size_t &tensorStatusIndex)
 {
     size_t dimIndex = 0; // The index of dims
-    for (int tensorIndex = 0; tensorIndex < tensorNum; ++tensorIndex, ++tensorStatusIndex) {
+    for (int32_t tensorIndex = 0; tensorIndex < tensorNum; ++tensorIndex, ++tensorStatusIndex) {
         if (tensorShapeStatus[tensorStatusIndex].isUnkownRank) {
             const_cast<aclTensorDesc *>(tensorDesc[tensorIndex])->dims = tensorDims[tensorStatusIndex];
             continue;
@@ -833,7 +838,7 @@ aclError OpModelManager::ReadModelDefs(const std::string &configPath,
     std::vector<OpModelDef> &configList)
 {
     vector<string> modelFilePaths;
-    ACL_REQUIRES_OK(file_utils::ListFiles(configPath, OmFileFilterFn, modelFilePaths, OM_DIR_MAX_DEPTH));
+    ACL_REQUIRES_OK(file_utils::ListFiles(configPath, &OmFileFilterFn, modelFilePaths, OM_DIR_MAX_DEPTH));
 
     for (auto &path : modelFilePaths) {
         OpModel opModel;
@@ -849,10 +854,10 @@ aclError OpModelManager::ReadModelDefs(const std::string &configPath,
         configList.emplace_back(std::move(modelDef));
         if (IsDynamicOpModel(configList.back())) {
             ACL_LOG_INFO("Add dynamic model: %s", configList.back().modelPath.c_str());
-            dynamicModelCache_.Add(configList.back(), opModel);
+            ACL_REQUIRES_OK(dynamicModelCache_.Add(configList.back(), opModel));
         } else {
             ACL_LOG_INFO("Add static model: %s", configList.back().modelPath.c_str());
-            modelCache_.Add(configList.back(), opModel);
+            ACL_REQUIRES_OK(modelCache_.Add(configList.back(), opModel));
         }
     }
 

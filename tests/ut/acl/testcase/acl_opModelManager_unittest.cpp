@@ -34,6 +34,7 @@ using namespace std;
 using namespace testing;
 using namespace acl;
 using namespace acl::file_utils;
+using namespace acl::attr_utils;
 
 class UTEST_ACL_OpModelManager : public testing::Test {
 protected:
@@ -670,4 +671,33 @@ TEST_F(UTEST_ACL_OpModelManager, ModelHashCheckTest)
     aclDestroyTensorDesc(inputDesc[1]);
     aclDestroyTensorDesc(outputDesc[0]);
     aclopDestroyAttr(opAttr);
+}
+
+TEST_F(UTEST_ACL_OpModelManager, ValueRangeCheckTest)
+{
+    std::map<AttrRangeType, ge::GeAttrValue> valueRange;
+    void *data = malloc(4);
+    aclDataBuffer *dataBuffer = aclCreateDataBuffer(data, 4);
+    aclDataType dataType = ACL_FLOAT;
+    auto ret = ValueRangeCheck(valueRange, dataBuffer, dataType);
+    EXPECT_EQ(ret ,true);
+
+    dataType = ACL_FLOAT16;
+    ret = ValueRangeCheck(valueRange, dataBuffer, dataType);
+    EXPECT_EQ(ret ,true);
+
+    dataType = ACL_INT8;
+    ret = ValueRangeCheck(valueRange, dataBuffer, dataType);
+    EXPECT_EQ(ret ,true);
+
+    dataType = ACL_UINT8;
+    ret = ValueRangeCheck(valueRange, dataBuffer, dataType);
+    EXPECT_EQ(ret ,true);
+
+    dataType = ACL_INT16;
+    ret = ValueRangeCheck(valueRange, dataBuffer, dataType);
+    EXPECT_EQ(ret ,true);
+
+    free(data);
+    aclDestroyDataBuffer(dataBuffer);
 }

@@ -24,11 +24,12 @@ void aclAppLog(aclLogLevel logLevel, const char *func, const char *file, uint32_
     }
     va_list ap;
     va_start(ap, fmt);
-    char str[MAX_LOG_STRING] = { '\0' };
-    char strLog[MAX_LOG_STRING] = { '\0' };
-    int32_t printRet = vsnprintf_s(str, static_cast<size_t>(MAX_LOG_STRING), static_cast<size_t>(MAX_LOG_STRING - 1), fmt, ap);
+    char str[acl::MAX_LOG_STRING] = { '\0' };
+    char strLog[acl::MAX_LOG_STRING] = { '\0' };
+    int32_t printRet = vsnprintf_s(str, static_cast<size_t>(acl::MAX_LOG_STRING),
+        static_cast<size_t>(acl::MAX_LOG_STRING - 1), fmt, ap);
     if (printRet != -1) {
-        printRet = sprintf_s(strLog, static_cast<size_t>(MAX_LOG_STRING), "%d %s:%s:%d: \"%s\"",
+        printRet = sprintf_s(strLog, static_cast<size_t>(acl::MAX_LOG_STRING), "%d %s:%s:%d: \"%s\"",
             acl::AclLog::GetTid(), func, file, line, str);
         if (printRet != -1) {
             acl::AclLog::ACLSaveLog(logLevel, strLog);

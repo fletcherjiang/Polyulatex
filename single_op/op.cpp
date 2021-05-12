@@ -295,10 +295,11 @@ aclError aclTransTensorDescFormat(const aclTensorDesc *srcDesc, aclFormat dstFor
     if (geRet != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Call][TransShape]invoke TransShape failed. ge result = %u",
             geRet);
-        return ACL_GET_ERRCODE_GE(geRet);
+        return static_cast<int32_t>(ACL_GET_ERRCODE_GE(geRet));
     }
 
-    *dstDesc = aclCreateTensorDesc(srcDesc->dataType, dstShape.size(), dstShape.data(), srcDesc->format);
+    *dstDesc = aclCreateTensorDesc(srcDesc->dataType, static_cast<int32_t>(dstShape.size()),
+                                   dstShape.data(), srcDesc->format);
     if (*dstDesc == nullptr) {
         ACL_LOG_INNER_ERROR("[Create][Desc]aclCreateTensorDesc failed.");
         return ACL_ERROR_BAD_ALLOC;
@@ -313,7 +314,7 @@ aclError aclopCreateKernel(const char *opType,
                            void *binData,
                            int binSize,
                            aclopEngineType enginetype,
-                           void (*deallocator)(void *data, size_t length))
+                           aclDataDeallocator deallocator)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
     ACL_STAGES_REG(acl::ACL_STAGE_CREATE, acl::ACL_STAGE_DEFAULT);
@@ -461,10 +462,10 @@ static aclError LoadOpsProto()
             "invalid.");
         return ACL_ERROR_INVALID_OPP_PATH;
     }
-    ge::OpsProtoManager *manager = ge::OpsProtoManager::Instance();
+    ge::OpsProtoManager *protoManager = ge::OpsProtoManager::Instance();
     std::map<std::string, std::string> optionTmp;
     optionTmp.emplace(std::pair<std::string, std::string>(string("ge.opsProtoLibPath"), opsprotoPath));
-    bool isProtoInit = manager->Initialize(optionTmp);
+    bool isProtoInit = protoManager->Initialize(optionTmp);
     if (!isProtoInit) {
         ACL_LOG_INNER_ERROR("[Init][Manager]Load ops_proto lib failed, ops proto path[%s] is invalid.",
             opsprotoPath.c_str());
@@ -476,7 +477,7 @@ static aclError LoadOpsProto()
     ge::graphStatus ret = ge::OperatorFactory::GetOpsTypeList(allOp);
     if (ret != ge::GRAPH_SUCCESS) {
         ACL_LOG_CALL_ERROR("[Get][OpsType]GetOpsTypeList failed.");
-        return ACL_GET_ERRCODE_GE(ret);
+        return static_cast<int32_t>(ACL_GET_ERRCODE_GE(ret));
     }
     ACL_LOG_INFO("OpsTypeListSize is %zu", allOp.size());
     return ACL_SUCCESS;
@@ -487,7 +488,7 @@ static aclError UpdateOutPutDesc(ge::Operator inferOp, int numOutputs, aclTensor
     ACL_LOG_INFO("Begin to update OutPutDesc, numOutputs is %d", numOutputs);
     // update outputDesc
     std::stringstream ss;
-    for (int i = 0; i < numOutputs; ++i) {
+    for (uint32_t i = 0; i < numOutputs; ++i) {
         ge::AscendString ascendString;
         // get inferOutputDesc after inferShape
         auto inferOutputDesc = inferOp.GetOutputDesc(i);
@@ -496,7 +497,7 @@ static aclError UpdateOutPutDesc(ge::Operator inferOp, int numOutputs, aclTensor
         auto ret = inferOutputDesc.GetName(ascendString);
         if (ret != ge::GRAPH_SUCCESS) {
             ACL_LOG_CALL_ERROR("[Get][Name]the %d tensor GetName failed.", i);
-            return ACL_GET_ERRCODE_GE(ret);
+            return static_cast<int32_t>(ACL_GET_ERRCODE_GE(ret));
         }
         std::string outputName;
         if (ascendString.GetString() != nullptr) {
@@ -507,7 +508,7 @@ static aclError UpdateOutPutDesc(ge::Operator inferOp, int numOutputs, aclTensor
         ret = inferOutputDesc.GetShapeRange(outputRange);
         if (ret != ge::GRAPH_SUCCESS) {
             ACL_LOG_CALL_ERROR("[Get][ShapeRange]the %d tensor GetShapeRange failed.", i);
-            return ACL_GET_ERRCODE_GE(ret);
+            return static_cast<int32_t>(ACL_GET_ERRCODE_GE(ret));
         }
 
         // update outputDesc
@@ -548,7 +549,7 @@ static void AddOpDesc(aclTensorDesc *tensorDesc, ge::OpDescPtr &opDesc, bool isI
                                   geFormat,
                                   geDataType);
     geTensorDesc.SetOriginFormat(geFormat);
-    ge::TensorUtils::SetRealDimCnt(geTensorDesc, tensorDesc->dims.size());
+    ge::TensorUtils::SetRealDimCnt(geTensorDesc, static_cast<uint32_t>(tensorDesc->dims.size()));
 
     if (isInput) {
         ge::TensorUtils::SetInputTensor(geTensorDesc, true);
@@ -559,15 +560,15 @@ static void AddOpDesc(aclTensorDesc *tensorDesc, ge::OpDescPtr &opDesc, bool isI
     }
     if (!tensorDesc->name.empty()) {
         if (isInput) {
-            opDesc->AddInputDesc(tensorDesc->name, geTensorDesc);
+            (void)opDesc->AddInputDesc(tensorDesc->name, geTensorDesc);
         } else {
-            opDesc->AddOutputDesc(tensorDesc->name, geTensorDesc);
+            (void)opDesc->AddOutputDesc(tensorDesc->name, geTensorDesc);
         }
     } else {
         if (isInput) {
-            opDesc->AddInputDesc(geTensorDesc);
+            (void)opDesc->AddInputDesc(geTensorDesc);
         } else {
-            opDesc->AddOutputDesc(geTensorDesc);
+            (void)opDesc->AddOutputDesc(geTensorDesc);
         }
     }
 }
@@ -593,7 +594,7 @@ static aclError AddDataInput(aclTensorDesc *inputDesc,
     auto args = std::unique_ptr<uint8_t[]>(new(std::nothrow) uint8_t[tensorSize]);
     if (args == nullptr) {
         ACL_LOG_INNER_ERROR("[Allocate][Mem]Allocate memory failed.");
-        return ACL_ERROR_BAD_ALLOC;
+        return static_cast<int32_t>(ACL_ERROR_BAD_ALLOC);
     }
     constData = std::move(args);
     if (memcpy_s(constData.get(), tensorSize, inputs->data, tensorSize) != EOK) {
@@ -662,7 +663,7 @@ aclError aclopInferShape(const char *opType,
 
     if (attr != nullptr) {
         for (const auto &it : attr->Attrs()) {
-            opDesc->SetAttr(it.first, it.second);
+            (void)opDesc->SetAttr(it.first, it.second);
         }
     }
     std::unique_ptr<uint8_t[]> *constData = new(std::nothrow) std::unique_ptr<uint8_t[]>[numInputs];
@@ -678,7 +679,7 @@ aclError aclopInferShape(const char *opType,
             return ret;
         }
         ACL_LOG_INFO("opDesc.GetInputNameByIndex, index = %d", i);
-        std::string inferOpName = opDesc->GetInputNameByIndex(i);
+        std::string inferOpName = opDesc->GetInputNameByIndex(static_cast<uint32_t>(i));
         ACL_LOG_INFO("opDesc.GetInputNameByIndex, inferOpName = %s", inferOpName.c_str());
         (void)inferOp.SetInput(inferOpName.c_str(), constOp, "y");
     }
@@ -688,7 +689,7 @@ aclError aclopInferShape(const char *opType,
         ACL_LOG_CALL_ERROR("[Infer][ShapeAndType]the op:%s inferShape failed. ge result = %u",
             opType, retInfer);
         ACL_DELETE_ARRAY_AND_SET_NULL(constData);
-        return ACL_GET_ERRCODE_GE(retInfer);
+        return static_cast<int32_t>(ACL_GET_ERRCODE_GE(retInfer));
     }
     for (size_t i = 0; i < constOps.size(); ++i) {
         constOps[i].BreakConnect();

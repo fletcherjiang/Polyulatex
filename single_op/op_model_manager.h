@@ -48,7 +48,7 @@ public:
 
     aclError LoadModelFromMem(const void *model, size_t modelSize, bool isStatic = false);
 
-    aclError LoadModelFromSharedMem(std::shared_ptr<void> &model, size_t modelSize, bool isStatic = false);
+    aclError LoadModelFromSharedMem(const std::shared_ptr<void> &model, size_t modelSize, bool isStatic = false);
 
     aclError GetOpModel(AclOp &aclOp);
 
@@ -56,9 +56,9 @@ public:
 
     aclError HandleMaxOpQueueConfig(const char *configPath);
 
-    aclError SetHostMemToConst(AclOp &aclopHostMemToConst, bool &isExistConst);
+    aclError SetHostMemToConst(const AclOp &aclopHostMemToConst, bool &isExistConst);
 
-    aclError SetTensorConst(aclTensorDesc *desc, const aclDataBuffer *hostMem);
+    aclError SetTensorConst(aclTensorDesc *desc, const aclDataBuffer *dataBuffer);
 
     void SetCompileFlag(int32_t flag);
 
@@ -98,7 +98,7 @@ private:
     static bool CheckShapeRange(const AclOp &aclOp,
                                 const std::vector<aclTensorShapeStatus> &tensorShapeStatus,
                                 const std::vector<std::pair<int64_t, int64_t>> &shapeRange);
-    static void FixedAclopMatch(AclOp &aclOpMatch,
+    static void FixedAclopMatch(const AclOp &aclOpMatch,
                                 const std::vector<aclTensorShapeStatus> &tensorShapeStatus,
                                 const std::vector<std::pair<int64_t, int64_t>> &shapeRange,
                                 std::vector<std::vector<int64_t>> &tensorDims,

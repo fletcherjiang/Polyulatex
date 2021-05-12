@@ -11,9 +11,6 @@
 #ifndef ACL_COMMON_LOG_INNER_H_
 #define ACL_COMMON_LOG_INNER_H_
 
-#include <cstdint>
-#include <cstdarg>
-#include <cstdio>
 #include <string>
 #include <vector>
 #include "toolchain/slog.h"
@@ -22,8 +19,6 @@
 
 #define ACL_MODE_ID static_cast<int32_t>(ASCENDCL)
 #define APP_MODE_ID static_cast<int32_t>(APP)
-
-constexpr int MAX_LOG_STRING = 1024;
 
 namespace acl {
 const char *const INVALID_PARAM_MSG = "EH0001";
@@ -56,6 +51,7 @@ const char *const ACL_STAGE_MBUF = "MBUF";
 // second stage
 const char *const ACL_STAGE_DEFAULT = "DEFAULT";
 
+constexpr int32_t MAX_LOG_STRING = 1024;
 class ACL_FUNC_VISIBILITY AclLog {
 public:
     static bool IsLogOutputEnable(aclLogLevel logLevel);
@@ -176,20 +172,6 @@ public:
             }                                                                                       \
     } while (false)
 #endif
-
-inline bool IsDebugLogEnabled()
-{
-    int eventEnable = 0;
-    int dlogLevel = dlog_getlevel(ACL_MODE_ID, &eventEnable);
-    return dlogLevel <= DLOG_DEBUG;
-}
-
-inline bool IsInfoLogEnabled()
-{
-    int eventEnable = 0;
-    int dlogLevel = dlog_getlevel(ACL_MODE_ID, &eventEnable);
-    return dlogLevel <= DLOG_INFO;
-}
 
 #define ACL_STAGES_REG(firstStage, secondStage) \
     const acl::AclErrorLogManager error_manager(firstStage, secondStage)

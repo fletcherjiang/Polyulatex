@@ -33,29 +33,29 @@
 namespace {
 #define FP16_IF_BOOL_EXEC(expr, exec_expr) \
     { \
-        if (expr) { \
+        if ((expr)) { \
             exec_expr; \
         } \
     }
 
-const int16_t FP16_MAX_EXP = 0x001F;
-const int16_t FP16_MAX_MAN = 0x03FF;
-const int16_t FP16_MAN_HIDE_BIT = 0x0400;
-const int16_t FP16_SIGN_INDEX = 15;
-const uint32_t FP32_SIGN_MASK = 0x80000000u;
-const uint32_t FP32_SIGN_INDEX = 31;
-const uint32_t FP32_EXP_MASK = 0x7F800000u;
-const uint32_t FP32_MAN_LEN = 23;
-const uint32_t FP16_MAN_LEN = 10;
-const uint32_t FP32_MAN_MASK = 0x007FFFFFu;
-const uint32_t FP32_MAN_HIDE_BIT = 0x00800000u;
+constexpr int16_t FP16_MAX_EXP = 0x001F;
+constexpr int16_t FP16_MAX_MAN = 0x03FF;
+constexpr int16_t FP16_MAN_HIDE_BIT = 0x0400;
+constexpr int16_t FP16_SIGN_INDEX = 15;
+constexpr uint32_t FP32_SIGN_MASK = 0x80000000U;
+constexpr uint32_t FP32_SIGN_INDEX = 31U;
+constexpr uint32_t FP32_EXP_MASK = 0x7F800000U;
+constexpr uint32_t FP32_MAN_LEN = 23U;
+constexpr uint32_t FP16_MAN_LEN = 10U;
+constexpr uint32_t FP32_MAN_MASK = 0x007FFFFFU;
+constexpr uint32_t FP32_MAN_HIDE_BIT = 0x00800000U;
 
 constexpr int8_t AIPP_SWITCH_ON = 1;
 constexpr int8_t AIPP_SWITCH_OFF = 0;
 constexpr int16_t CSC_MATRIX_MIN = -32677;
 constexpr int16_t CSC_MATRIX_MAX = 32676;
-constexpr uint8_t BIAS_MIN = 0;
-constexpr uint8_t BIAS_MAX = 255;
+constexpr uint8_t BIAS_MIN = 0U;
+constexpr uint8_t BIAS_MAX = 255U;
 constexpr int32_t IMAGE_SIZE_MIN = 1;
 constexpr int32_t IMAGE_SIZE_MAX = 4096;
 constexpr int32_t SCF_SIZE_MIN = 16;
@@ -64,37 +64,37 @@ constexpr int32_t PADDING_MIN = 0;
 constexpr int32_t PADDING_MAX = 32;
 constexpr int16_t MEAN_CHN_MIN = 0;
 constexpr int16_t MEAN_CHN_MAX = 255;
-constexpr float MIN_CHN_MIN = 0;
-constexpr float MIN_CHN_MAX = 255;
-constexpr float VR_CHN_MIN = -65504;
-constexpr float VR_CHN_MAX = 65504;
+constexpr float MIN_CHN_MIN = 0.0;
+constexpr float MIN_CHN_MAX = 255.0;
+constexpr float VR_CHN_MIN = -65504.0;
+constexpr float VR_CHN_MAX = 65504.0;
 }
 
-static bool IsRoundOne(uint64_t man, uint16_t truncLen)
+static bool IsRoundOne(const uint64_t man, const uint16_t truncLen)
 {
-    uint16_t shiftOut = truncLen - 2; // shift 2 byte
-    uint64_t mask = 0x4;
-    uint64_t mask1 = 0x2;
+    const uint16_t shiftOut = truncLen - 2U; // shift 2 byte
+    uint64_t mask = 0x4U;
+    uint64_t mask1 = 0x2U;
     uint64_t mask2;
 
     mask = mask << shiftOut;
     mask1 = mask1 << shiftOut;
-    mask2 = mask1 - 1;
-    bool lastBit = ((man & mask) > 0);
-    bool truncHigh = ((man & mask1) > 0);
-    bool truncLeft = ((man & mask2) > 0);
+    mask2 = mask1 - 1U;
+    const bool lastBit = ((man & mask) > 0U);
+    const bool truncHigh = ((man & mask1) > 0U);
+    const bool truncLeft = ((man & mask2) > 0U);
     return (truncHigh && (truncLeft || lastBit));
 }
 
-static void Fp16Normalize(int16_t &exp, uint16_t &man)
+static void Fp16Normalize(int16_t &expo, uint16_t &man)
 {
-    FP16_IF_BOOL_EXEC(exp >= FP16_MAX_EXP,
-        exp = FP16_MAX_EXP - 1;
-        man = FP16_MAX_MAN;
+    FP16_IF_BOOL_EXEC(expo >= FP16_MAX_EXP,
+                      expo = FP16_MAX_EXP - 1U;
+    man = FP16_MAX_MAN;
     )
-    FP16_IF_BOOL_EXEC(exp == 0 && man == FP16_MAN_HIDE_BIT,
-        exp++;
-        man = 0;
+    FP16_IF_BOOL_EXEC((expo == 0U) && (man == FP16_MAN_HIDE_BIT),
+                      expo++;
+        man = 0U;
     )
 }
 
@@ -103,12 +103,12 @@ struct Fp16Type {
 
     Fp16Type(void)
     {
-        val = 0x0u;
+        val = 0x0U;
     }
 
     explicit Fp16Type(const float &fVal)
     {
-        val = 0x0u;
+        val = 0x0U;
         this->operator=(fVal);
     }
 
@@ -116,11 +116,14 @@ struct Fp16Type {
 
     Fp16Type &operator=(const float &fVal)
     {
-        uint16_t sRet, mRet;
+        uint16_t sRet;
+        uint16_t mRet;
         int16_t eRet;
-        uint32_t eF, mF;
+        uint32_t eF;
+        uint32_t mF;
+
         void *pV = const_cast<float *>(&fVal); // 1:8:23bit sign:exp:man
-        uint32_t ui32V = *(static_cast<uint32_t *>(pV));
+        const uint32_t ui32V = *(static_cast<uint32_t *>(pV));
         uint32_t mLenDelta;
 
         sRet = static_cast<uint16_t>((ui32V & FP32_SIGN_MASK) >> FP32_SIGN_INDEX); // 4Byte->2Byte
@@ -130,48 +133,50 @@ struct Fp16Type {
 
         bool needRound = false;
         // Exponent overflow/NaN converts to signed inf/NaN
-        FP16_IF_BOOL_EXEC(eF > 0x8Fu,
+        FP16_IF_BOOL_EXEC(eF > 0x8FU,
             // 0x8Fu:142=127+15
-            eRet = FP16_MAX_EXP - 1;
-            mRet = FP16_MAX_MAN;
+            eRet = static_cast<int16_t>(FP16_MAX_EXP - 1U);
+            mRet = static_cast<uint16_t>(FP16_MAX_MAN);
         )
-        FP16_IF_BOOL_EXEC(eF <= 0x70u,
+        FP16_IF_BOOL_EXEC(eF <= 0x70U,
             // 0x70u:112=127-15 Exponent underflow converts to denormalized half or signed zero
             eRet = 0;
-            if (eF >= 0x67) {
+            if (eF >= 0x67U) {
                 // 0x67:103=127-24 Denormal
                 mF = (mF | FP32_MAN_HIDE_BIT);
-                uint16_t shiftOut = FP32_MAN_LEN;
-                uint64_t m_tmp = (static_cast<uint64_t>(mF)) << (eF - 0x67);
+                const uint16_t shiftOut = static_cast<uint16_t>(FP32_MAN_LEN);
+                const uint64_t m_tmp = (static_cast<uint64_t>(mF)) << (eF - 0x67U);
 
                 needRound = IsRoundOne(m_tmp, shiftOut);
                 mRet = static_cast<uint16_t>(m_tmp >> shiftOut);
                 if (needRound) {
                     mRet++;
                 }
-            } else if (eF == 0x66 && mF > 0) {
+            } else if ((eF == 0x66U) && (mF > 0)) {
                 // 0x66:102 Denormal 0<f_v<min(Denormal)
-                mRet = 1;
+                mRet = 1U;
             } else {
-                mRet = 0;
+                mRet = 0U;
             }
         )
-        FP16_IF_BOOL_EXEC(0x8Fu >= eF && eF > 0x70u,
+        FP16_IF_BOOL_EXEC((0x8FU >= eF) && (eF > 0x70U),
             // Regular case with no overflow or underflow
-            eRet = (int16_t) (eF - 0x70u);
+            eRet = static_cast<int16_t>(eF - 0x70U);
             needRound = IsRoundOne(mF, mLenDelta);
             mRet = static_cast<uint16_t>(mF >> mLenDelta);
             if (needRound) {
                 mRet++;
             }
-            if (mRet & FP16_MAN_HIDE_BIT) {
+
+            if (mRet & static_cast<uint16_t>(FP16_MAN_HIDE_BIT)) {
                 eRet++;
             }
         )
 
         Fp16Normalize(eRet, mRet);
-        val =  (((sRet) << FP16_SIGN_INDEX) |
-            ((static_cast<uint16_t>(eRet)) << FP16_MAN_LEN) | ((mRet) & FP16_MAX_MAN));
+        val =  (((sRet) << static_cast<uint16_t>(FP16_SIGN_INDEX)) |
+                ((static_cast<uint16_t>(eRet)) << FP16_MAN_LEN) |
+                ((mRet) & static_cast<uint16_t>(FP16_MAX_MAN)));
         return *this;
     }
 };
@@ -185,14 +190,14 @@ static aclError SetIODims(const ge::InputOutputDims oriDims, aclmdlIODims &dstDi
             oriDims.dims.size());
         return ACL_ERROR_GE_FAILURE;
     }
-    for (size_t i = 0; i < oriDims.dims.size(); ++i) {
+    for (size_t i = 0U; i < oriDims.dims.size(); ++i) {
         dstDims.dims[i] = oriDims.dims[i];
     }
     if (oriDims.name.empty()) {
         ACL_LOG_WARN("the name of oriDims is empty");
         return ACL_SUCCESS;
     }
-    auto ret = strncpy_s(dstDims.name, sizeof(dstDims.name), oriDims.name.c_str(), oriDims.name.size());
+    const auto ret = strncpy_s(dstDims.name, sizeof(dstDims.name), oriDims.name.c_str(), oriDims.name.size());
     if (ret != EOK) {
         ACL_LOG_INNER_ERROR("[Copy][Str]call strncpy_s failed");
         return ACL_ERROR_FAILURE;
@@ -207,7 +212,7 @@ aclmdlAIPP *aclmdlCreateAIPP(uint64_t batchSize)
     try {
         ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_AIPP);
         ACL_LOG_INFO("start to execute aclmdlCreateAIPP, batchSize[%lu]", batchSize);
-        if (batchSize == 0) {
+        if (batchSize == 0U) {
             ACL_LOG_INNER_ERROR("[Check][BatchSize]the batchSize can't be zero");
             return nullptr;
         }
@@ -217,7 +222,7 @@ aclmdlAIPP *aclmdlCreateAIPP(uint64_t batchSize)
             return nullptr;
         }
 
-        auto ret = memset_s(aippParmsSet, sizeof(aclmdlAIPP), 0, sizeof(aclmdlAIPP));
+        const auto ret = memset_s(aippParmsSet, sizeof(aclmdlAIPP), 0, sizeof(aclmdlAIPP));
         if (ret != EOK) {
             ACL_LOG_INNER_ERROR("[Set][Mem]memset failed, result[%d]", ret);
             ACL_DELETE(aippParmsSet);
@@ -228,11 +233,11 @@ aclmdlAIPP *aclmdlCreateAIPP(uint64_t batchSize)
         aippParmsSet->aippParms.batchNum = static_cast<int8_t>(batchSize);
         aippParmsSet->aippBatchPara.resize(batchSize);
         ACL_LOG_INFO("the size of aippBatchPara is [%zu]", aippParmsSet->aippBatchPara.size());
-        for (uint64_t i = 0; i < batchSize; i++) {
-            aippParmsSet->aippBatchPara[i].dtcPixelVarReciChn0 = Fp16Type(1.0).val;
-            aippParmsSet->aippBatchPara[i].dtcPixelVarReciChn1 = Fp16Type(1.0).val;
-            aippParmsSet->aippBatchPara[i].dtcPixelVarReciChn2 = Fp16Type(1.0).val;
-            aippParmsSet->aippBatchPara[i].dtcPixelVarReciChn3 = Fp16Type(1.0).val;
+        for (uint64_t i = 0U; i < batchSize; i++) {
+            aippParmsSet->aippBatchPara[i].dtcPixelVarReciChn0 = Fp16Type(1.0F).val;
+            aippParmsSet->aippBatchPara[i].dtcPixelVarReciChn1 = Fp16Type(1.0F).val;
+            aippParmsSet->aippBatchPara[i].dtcPixelVarReciChn2 = Fp16Type(1.0F).val;
+            aippParmsSet->aippBatchPara[i].dtcPixelVarReciChn3 = Fp16Type(1.0F).val;
         }
         ACL_ADD_APPLY_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_AIPP);
         return aippParmsSet;
@@ -279,7 +284,7 @@ aclError aclmdlSetAIPPInputFormat(aclmdlAIPP *aippParmsSet, aclAippInputFormat i
         {ACL_RAW24, CCE_RAW24}
     };
 
-    auto it = inputFormatMap.find(inputFormat);
+    const auto it = inputFormatMap.find(inputFormat);
     if (it == inputFormatMap.end()) {
         ACL_LOG_INNER_ERROR("[Unsupported][Format]unsupported inputFormat[%d]", static_cast<int32_t>(inputFormat));
         return ACL_ERROR_INVALID_PARAM;
@@ -384,11 +389,11 @@ aclError aclmdlSetAIPPScfParams(aclmdlAIPP *aippParmsSet, int8_t scfSwitch,
     ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlSetAIPPScfParams");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
-    uint64_t aippBatchParaSize = static_cast<uint64_t>(aippParmsSet->aippBatchPara.size());
+    const uint64_t aippBatchParaSize = static_cast<uint64_t>(aippParmsSet->aippBatchPara.size());
     if (batchIndex >= aippBatchParaSize) {
         ACL_LOG_ERROR("[Check][Param]Set batch parameter Failed, batch_index (%lu) is greater than or "
             "equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
-        std::string errMsg = acl::AclErrorLogManager::FormatStr("batch_index (%lu) is greater than or "
+        const std::string errMsg = acl::AclErrorLogManager::FormatStr("batch_index (%lu) is greater than or "
             "equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_AIPP_MSG, std::vector<std::string>({"param", "reason"}),
             std::vector<std::string>({"batch_index", errMsg}));
@@ -421,11 +426,11 @@ aclError aclmdlSetAIPPCropParams(aclmdlAIPP *aippParmsSet, int8_t cropSwitch,
     ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlSetAIPPCropParams");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
-    uint64_t aippBatchParaSize = static_cast<uint64_t>(aippParmsSet->aippBatchPara.size());
+    const uint64_t aippBatchParaSize = static_cast<uint64_t>(aippParmsSet->aippBatchPara.size());
     if (batchIndex >= aippBatchParaSize) {
         ACL_LOG_ERROR("[Check][Param]Set batch parameter Failed, batch_index (%lu) is greater than or "
             "equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
-        std::string errMsg = acl::AclErrorLogManager::FormatStr("batch_index (%lu) is greater than or "
+        const std::string errMsg = acl::AclErrorLogManager::FormatStr("batch_index (%lu) is greater than or "
             "equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_AIPP_MSG, std::vector<std::string>({"param", "reason"}),
             std::vector<std::string>({"batch_index", errMsg}));
@@ -458,11 +463,11 @@ aclError aclmdlSetAIPPPaddingParams(aclmdlAIPP *aippParmsSet, int8_t paddingSwit
     ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlSetAIPPPaddingParams");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
-    uint64_t aippBatchParaSize = static_cast<uint64_t>(aippParmsSet->aippBatchPara.size());
+    const uint64_t aippBatchParaSize = static_cast<uint64_t>(aippParmsSet->aippBatchPara.size());
     if (batchIndex >= aippBatchParaSize) {
         ACL_LOG_ERROR("[Check][Param]Set batch parameter Failed, batch_index (%lu) is greater "
             "than or equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
-        std::string errMsg = acl::AclErrorLogManager::FormatStr("batch_index (%lu) is greater "
+        const std::string errMsg = acl::AclErrorLogManager::FormatStr("batch_index (%lu) is greater "
             "than or equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_AIPP_MSG, std::vector<std::string>({"param",
             "reason"}), std::vector<std::string>({"batch_index", errMsg}));
@@ -497,7 +502,7 @@ aclError aclmdlSetAIPPDtcPixelMean(aclmdlAIPP *aippParmsSet,
     ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlSetAIPPDtcPixelMean");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
-    uint64_t aippBatchParaSize = static_cast<uint64_t>(aippParmsSet->aippBatchPara.size());
+    const uint64_t aippBatchParaSize = static_cast<uint64_t>(aippParmsSet->aippBatchPara.size());
     if (batchIndex >= aippBatchParaSize) {
         ACL_LOG_ERROR("[Check][Param]Set batch parameter Failed, batch_index (%lu) is greater than or "
             "equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
@@ -528,11 +533,11 @@ aclError aclmdlSetAIPPDtcPixelMin(aclmdlAIPP *aippParmsSet,
     ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlSetAIPPDtcPixelMin");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
-    uint64_t aippBatchParaSize = static_cast<uint64_t>(aippParmsSet->aippBatchPara.size());
+    const uint64_t aippBatchParaSize = static_cast<uint64_t>(aippParmsSet->aippBatchPara.size());
     if (batchIndex >= aippBatchParaSize) {
         ACL_LOG_ERROR("[Check][Param]Set batch parameter Failed, batch_index (%lu) is greater than or "
             "equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
-        std::string errMsg = acl::AclErrorLogManager::FormatStr("batch_index (%lu) is greater than or "
+        const std::string errMsg = acl::AclErrorLogManager::FormatStr("batch_index (%lu) is greater than or "
             "equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_AIPP_MSG, std::vector<std::string>({"param", "reason"}),
             std::vector<std::string>({"batch_index", errMsg}));
@@ -562,11 +567,11 @@ aclError aclmdlSetAIPPPixelVarReci(aclmdlAIPP *aippParmsSet,
     ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclmdlSetAIPPPixelVarReci");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
-    uint64_t aippBatchParaSize = static_cast<uint64_t>(aippParmsSet->aippBatchPara.size());
+    const uint64_t aippBatchParaSize = static_cast<uint64_t>(aippParmsSet->aippBatchPara.size());
     if (batchIndex >= aippBatchParaSize) {
         ACL_LOG_ERROR("[Check][Param]Set batch parameter Failed, batch_index (%lu) is greater than or "
         "equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
-        std::string errMsg = acl::AclErrorLogManager::FormatStr("batch_index (%lu) is greater than or "
+        const std::string errMsg = acl::AclErrorLogManager::FormatStr("batch_index (%lu) is greater than or "
             "equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_AIPP_MSG, std::vector<std::string>({"param", "reason"}),
             std::vector<std::string>({"batch_index", errMsg}));
@@ -653,12 +658,12 @@ static std::string AippParmsDebugString(const kAippDynamicPara &aippParms)
     return ss.str();
 }
 
-static bool GetDynamicAippInfo(uint32_t modelId, size_t index, ge::AippConfigInfo &aippParams)
+static bool GetDynamicAippInfo(const uint32_t modelId, const size_t idx, ge::AippConfigInfo &aippParams)
 {
     // get dynamic aipp config
     ge::GeExecutor executor;
     ACL_LOG_DEBUG("call ge interface executor.GetAIPPInfo");
-    auto ret = executor.GetAIPPInfo(modelId, index, aippParams);
+    const auto ret = executor.GetAIPPInfo(modelId, idx, aippParams);
     if (ret != ge::SUCCESS) {
         ACL_LOG_WARN("Get dynamic aippInfo fail, the model may be old model, ge result[%u]", ret);
         return false;
@@ -670,9 +675,9 @@ static bool GetDynamicAippInfo(uint32_t modelId, size_t index, ge::AippConfigInf
 
 static size_t GetMaxShapeIndex(const std::vector<ge::InputOutputDims> &inputDims)
 {
-    size_t maxShapeIndex = 0;
-    uint32_t shapeSize = 0;
-    for (size_t i = 0; i < inputDims.size(); ++i) {
+    size_t maxShapeIndex = 0U;
+    uint32_t shapeSize = 0U;
+    for (size_t i = 0U; i < inputDims.size(); ++i) {
         if (inputDims[i].size > shapeSize) {
             shapeSize = inputDims[i].size;
             maxShapeIndex = i;
@@ -682,8 +687,8 @@ static size_t GetMaxShapeIndex(const std::vector<ge::InputOutputDims> &inputDims
     return maxShapeIndex;
 }
 
-static aclError GetModelOriDims(uint32_t modelId, uint32_t relatedInputRank, bool &isGetDim,
-                                int64_t &mdlOriH, int64_t &mdlOriW, int64_t &mdlOriN)
+static aclError GetModelOriDims(const uint32_t modelId, const uint32_t relatedInputRank,
+                                bool &isGetDim, int64_t &mdlOriH, int64_t &mdlOriW, int64_t &mdlOriN)
 {
     // get model origin input info
     ge::GeExecutor executor;
@@ -695,7 +700,7 @@ static aclError GetModelOriDims(uint32_t modelId, uint32_t relatedInputRank, boo
                                        "ge result[%u]", modelId, relatedInputRank, ret);
         return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
-    aclFormat srcFormat = static_cast<aclFormat>(inputInfo.format);
+    const aclFormat srcFormat = static_cast<aclFormat>(inputInfo.format);
 
     // get model origin input dims
     std::vector<ge::InputOutputDims> inputDims;
@@ -714,16 +719,16 @@ static aclError GetModelOriDims(uint32_t modelId, uint32_t relatedInputRank, boo
         return ACL_ERROR_GE_FAILURE;
     }
     // Get the index of the maximum gear
-    size_t maxShapeIndex = GetMaxShapeIndex(inputDims);
+    const size_t maxShapeIndex = GetMaxShapeIndex(inputDims);
     aclmdlIODims srcDims;
-    aclError ioRet = SetIODims(inputDims[maxShapeIndex], srcDims);
+    const aclError ioRet = SetIODims(inputDims[maxShapeIndex], srcDims);
     if (ioRet != ACL_SUCCESS) {
         ACL_LOG_INNER_ERROR("[Set][IODims]srcDims SetIODims failed, modelId[%u], result[%d]", modelId, ioRet);
         return ioRet;
     }
     switch (srcFormat) {
         case ACL_FORMAT_NCHW:
-            if (srcDims.dimCount == 4) {
+            if (srcDims.dimCount == 4U) {
                 mdlOriH = srcDims.dims[2];
                 mdlOriW = srcDims.dims[3];
                 mdlOriN = srcDims.dims[0];
@@ -731,7 +736,7 @@ static aclError GetModelOriDims(uint32_t modelId, uint32_t relatedInputRank, boo
             isGetDim = true;
             break;
         case ACL_FORMAT_NHWC:
-            if (srcDims.dimCount == 4) {
+            if (srcDims.dimCount == 4U) {
                 mdlOriH = srcDims.dims[1];
                 mdlOriW = srcDims.dims[2];
                 mdlOriN = srcDims.dims[0];
@@ -747,16 +752,16 @@ static aclError GetModelOriDims(uint32_t modelId, uint32_t relatedInputRank, boo
     return ACL_SUCCESS;
 }
 
-static aclError GetAndCheckAippOutputShape(uint32_t modelId, const aclmdlDesc &modelDesc,
-    size_t index, const aclmdlAIPP *aippParmsSet)
+static aclError GetAndCheckAippOutputShape(const uint32_t modelId, const aclmdlDesc &modelDesc,
+                                           const size_t idx, const aclmdlAIPP *aippParmsSet)
 {
-    int64_t batchSize = static_cast<int64_t>(aippParmsSet->batchSize);
-    if (index >= modelDesc.inputDesc.size()) {
+    const int64_t batchSize = static_cast<int64_t>(aippParmsSet->batchSize);
+    if (idx >= modelDesc.inputDesc.size()) {
         ACL_LOG_INNER_ERROR("[Check][Params]index[%zu] can not greater than or equal to tensor "
-            "size[%zu]", index, modelDesc.inputDesc.size());
+            "size[%zu]", idx, modelDesc.inputDesc.size());
         return ACL_ERROR_INVALID_PARAM;
     }
-    auto &shapeRanges = modelDesc.inputDesc[index].shapeRanges;
+    auto &shapeRanges = modelDesc.inputDesc[idx].shapeRanges;
     if (!shapeRanges.empty()) {
         ACL_LOG_INFO("check aipp parameters of dynamic shape model[%u]", modelId);
         return ACL_SUCCESS;
@@ -769,11 +774,11 @@ static aclError GetAndCheckAippOutputShape(uint32_t modelId, const aclmdlDesc &m
     int64_t mdlOriH = 0;
     int64_t mdlOriW = 0;
     int64_t mdlOriN = 0;
-    aclError result = GetAippOutputHW(aippParmsSet, 0, GetSocVersion(), aippOutputW, aippOutputH);
+    const aclError result = GetAippOutputHW(aippParmsSet, 0, GetSocVersion(), aippOutputW, aippOutputH);
     if (result != ACL_SUCCESS) {
         return result;
     }
-    aclError mdlRet = GetModelOriDims(modelId, index, isGetDim, mdlOriH, mdlOriW, mdlOriN);
+    const aclError mdlRet = GetModelOriDims(modelId, idx, isGetDim, mdlOriH, mdlOriW, mdlOriN);
     if (mdlRet != ACL_SUCCESS) {
         ACL_LOG_INNER_ERROR("[Get][ModelOriDims]get model original dims fail");
         return mdlRet;
@@ -781,14 +786,14 @@ static aclError GetAndCheckAippOutputShape(uint32_t modelId, const aclmdlDesc &m
 
     if (isGetDim) {
         ACL_LOG_INFO("relatedInputRank[%zu], mdlOriH[%ld], mdlOriW[%ld], mdlOriN[%ld]",
-            index, mdlOriH, mdlOriW, mdlOriN);
+                     idx, mdlOriH, mdlOriW, mdlOriN);
         // check batchSize
         if ((batchSize != mdlOriN) || (aippOutputW != mdlOriW) || (aippOutputH != mdlOriH)) {
             ACL_LOG_ERROR("[Check][Params]aipp output shape set by ACL must be equal to aipp output "
                 "shape in the model! AclAippBatchSize = %ld, AclAippOutputW = %ld, AclAippOutputH = %ld, "
                 "ModelAippBatchSize = %ld, ModelAippOutputW = %ld, ModelAippOutputH = %ld.",
                 batchSize, aippOutputW, aippOutputH, mdlOriN, mdlOriW, mdlOriH);
-            std::string errMsg = acl::AclErrorLogManager::FormatStr("aipp output shape set by ACL "
+            const std::string errMsg = acl::AclErrorLogManager::FormatStr("aipp output shape set by ACL "
                 "must be equal to aipp output shape in the model! AclAippBatchSize = %ld, AclAippOutputW = %ld, "
                 "AclAippOutputH = %ld, ModelAippBatchSize = %ld, ModelAippOutputW = %ld, ModelAippOutputH = %ld.",
                 batchSize, aippOutputW, aippOutputH, mdlOriN, mdlOriW, mdlOriH);
@@ -804,29 +809,29 @@ static aclError GetAndCheckAippOutputShape(uint32_t modelId, const aclmdlDesc &m
     return ACL_SUCCESS;
 }
 
-static aclError GetAndCheckAippParams(uint32_t modelId, const aclmdlDesc &modelDesc,
-    size_t index, const aclmdlAIPP *aippParmsSet)
+static aclError GetAndCheckAippParams(const uint32_t modelId, const aclmdlDesc &modelDesc,
+                                      const size_t idx, const aclmdlAIPP *aippParmsSet)
 {
     // check dynamic aipp parameters
     ge::AippConfigInfo aippParams;
-    bool isNewAippModel = GetDynamicAippInfo(modelId, index, aippParams);
+    const bool isNewAippModel = GetDynamicAippInfo(modelId, idx, aippParams);
     if (isNewAippModel) {
-        uint32_t relatedInputRank = aippParams.related_input_rank;
-        uint64_t maxSrcImageSize = static_cast<uint64_t>(aippParams.max_src_image_size);
+        const uint32_t relatedInputRank = aippParams.related_input_rank;
+        const uint64_t maxSrcImageSize = static_cast<uint64_t>(aippParams.max_src_image_size);
         // check max_src_image_size
-        uint64_t size = GetSrcImageSize(aippParmsSet);
+        const uint64_t size = GetSrcImageSize(aippParmsSet);
         ACL_LOG_INFO("Input SrcImageSize = %lu", size);
         if (size > maxSrcImageSize) {
             ACL_LOG_ERROR("[Check][Size]the dynamic aipp size[%lu] is bigger than max_src_image_size[%lu]",
                 size, maxSrcImageSize);
-            std::string errMsg = acl::AclErrorLogManager::FormatStr("bigger than max_src_image_size[%lu]",
+            const std::string errMsg = acl::AclErrorLogManager::FormatStr("bigger than max_src_image_size[%lu]",
                 maxSrcImageSize);
             acl::AclErrorLogManager::ReportInputError(acl::INVALID_AIPP_MSG,
                 std::vector<std::string>({"param", "reason"}),
                 std::vector<std::string>({"dynamic aipp size", errMsg}));
             return ACL_ERROR_INVALID_PARAM;
         }
-        aclError ret = GetAndCheckAippOutputShape(modelId, modelDesc, relatedInputRank, aippParmsSet);
+        const aclError ret = GetAndCheckAippOutputShape(modelId, modelDesc, relatedInputRank, aippParmsSet);
         if (ret != ACL_SUCCESS) {
             return ret;
         }
@@ -837,37 +842,37 @@ static aclError GetAndCheckAippParams(uint32_t modelId, const aclmdlDesc &modelD
     return AippParamsCheck(aippParmsSet, GetSocVersion());
 }
 
-static aclError CheckAippDataIndex(uint32_t modelId, size_t index, aclmdlDesc* modelDesc)
+static aclError CheckAippDataIndex(const uint32_t modelId, const size_t idx, const aclmdlDesc* modelDesc)
 {
     ACL_LOG_INFO("call ge interface executor.GetAippType, modelId[%u]", modelId);
     ge::GeExecutor executor;
     ge::InputAippType type;
-    size_t aippIndex = 0;
-    auto ret = executor.GetAippType(modelId, index, type, aippIndex);
+    size_t aippIndex = 0U;
+    const auto ret = executor.GetAippType(modelId, idx, type, aippIndex);
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Get][AippType]Get aipp type failed, ge result[%u]", ret);
         return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
     if (type == ge::DYNAMIC_AIPP_NODE) {
-        ACL_LOG_INFO("Index [%zu] entered by the user is dynamic aipp data", index);
+        ACL_LOG_INFO("Index [%zu] entered by the user is dynamic aipp data", idx);
         return ACL_SUCCESS;
     } else if (type == ge::DATA_WITHOUT_AIPP) {
         // maybe this is old om when getaipptype interface is unsupported, ensure compatibility
         size_t indexInModel;
-        auto mdlRet = aclmdlGetInputIndexByName(modelDesc, ACL_DYNAMIC_AIPP_NAME, &indexInModel);
+        const auto mdlRet = aclmdlGetInputIndexByName(modelDesc, ACL_DYNAMIC_AIPP_NAME, &indexInModel);
         if (mdlRet != ACL_SUCCESS) {
             ACL_LOG_INNER_ERROR("[Get][InputIndex]the model is not a dynamic aipp model, there is no dynamic aipp "
                 "node");
             return mdlRet;
         }
-        if (indexInModel != index) {
+        if (indexInModel != idx) {
             ACL_LOG_INNER_ERROR("[Check][indexInModel]index[%zu] entered by the user is not dynamic aipp index[%zu]",
-                index, indexInModel);
+                                idx, indexInModel);
             return ACL_ERROR_INVALID_PARAM;
         }
         return ACL_SUCCESS;
     } else {
-        ACL_LOG_INNER_ERROR("[Check][Index]index[%zu] entered by the user is not dynamic aipp data index.", index);
+        ACL_LOG_INNER_ERROR("[Check][Index]index[%zu] entered by the user is not dynamic aipp data index.", idx);
         return ACL_ERROR_INVALID_PARAM;
     }
 }
@@ -892,7 +897,7 @@ aclError aclmdlSetInputAIPP(uint32_t modelId,
     mdlRet = CheckAippDataIndex(modelId, index, &modelDesc);
     if (mdlRet != ACL_SUCCESS) {
         ACL_LOG_ERROR("[Check][AippData]Dynamic AIPP data index %zu is invalid, parameters verification failed", index);
-        std::string errMsg = acl::AclErrorLogManager::FormatStr("index %zu is invalid", index);
+        const std::string errMsg = acl::AclErrorLogManager::FormatStr("index %zu is invalid", index);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_AIPP_MSG, std::vector<std::string>({"param", "reason"}),
             std::vector<std::string>({"Dynamic AIPP data index", errMsg}));
         return mdlRet;
@@ -905,8 +910,7 @@ aclError aclmdlSetInputAIPP(uint32_t modelId,
             std::vector<std::string>({"parameters", "parameters verification failed"}));
         return mdlRet;
     }
-
-    aclDataBuffer *buff = aclmdlGetDatasetBuffer(dataset, index);
+    const aclDataBuffer *buff = aclmdlGetDatasetBuffer(dataset, index);
     if (buff == nullptr) {
         ACL_LOG_INNER_ERROR("[Check][Buff]failed to get data buffer by index[%zu]", index);
         return ACL_ERROR_INVALID_PARAM;
@@ -917,16 +921,16 @@ aclError aclmdlSetInputAIPP(uint32_t modelId,
         ACL_LOG_INNER_ERROR("[Check][DevPtr]failed to get addr by index[%zu]", index);
         return ACL_ERROR_INVALID_PARAM;
     }
-    uint64_t memSize = aclGetDataBufferSizeV2(buff);
+    const uint64_t memSize = aclGetDataBufferSizeV2(buff);
     ACL_LOG_DEBUG("aippParmsSet->aippParms: %s .", AippParmsDebugString(aippParmsSet->aippParms).c_str());
-    for (size_t i = 0; i < aippParmsSet->aippBatchPara.size(); ++i) {
+    for (size_t i = 0U; i < aippParmsSet->aippBatchPara.size(); ++i) {
         ACL_LOG_DEBUG("batchIndex[%lu] aippParmsSet->aippBatchPara: %s .",
             i, AippBatchParaDebugString(aippParmsSet->aippBatchPara[i]).c_str());
     }
     // send dynamic aipp to GE
     ACL_LOG_INFO("call ge interface executor.SetDynamicAippData, modelId[%u]", modelId);
     ge::GeExecutor executor;
-    auto ret = executor.SetDynamicAippData(modelId, devPtr, memSize,
+    const auto ret = executor.SetDynamicAippData(modelId, devPtr, memSize,
         aippParmsSet->aippBatchPara, aippParmsSet->aippParms);
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Set][DynamicAippData]SetDynamicImageSize failed, ge result[%u]", ret);
@@ -942,12 +946,12 @@ aclError aclmdlGetAippType(uint32_t modelId, size_t index, aclmdlInputAippType *
     *dynamicAttachedDataIndex = ACL_INVALID_NODE_INDEX;
     ge::GeExecutor executor;
     ge::InputAippType typeTmp;
-    auto ret = executor.GetAippType(modelId, index, typeTmp, *dynamicAttachedDataIndex);
+    const auto ret = executor.GetAippType(modelId, index, typeTmp, *dynamicAttachedDataIndex);
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Get][AippType]Get aipp type failed, ge result[%u]", ret);
         return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
-    *type = (aclmdlInputAippType)typeTmp;
+    *type = static_cast<aclmdlInputAippType>(typeTmp);
     ACL_LOG_INFO("successfully execute aclmdlGetAippType, modelId[%u], index[%zu]", modelId, index);
     return ACL_SUCCESS;
 }
@@ -963,14 +967,14 @@ aclError aclmdlSetAIPPByInputIndex(uint32_t modelId,
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
     if ((dataset == nullptr) || (index >= dataset->blobs.size())) {
         ACL_LOG_ERROR("[Check][Dataset]input param is invalid, dataset[%p], index[%zu]", dataset, index);
-        std::string errMsg = acl::AclErrorLogManager::FormatStr("dataset[%p], index[%zu]", dataset, index);
+        const std::string errMsg = acl::AclErrorLogManager::FormatStr("dataset[%p], index[%zu]", dataset, index);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_AIPP_MSG, std::vector<std::string>({"param", "reason"}),
             std::vector<std::string>({"params", errMsg}));
         return ACL_ERROR_INVALID_PARAM;
     }
     aclmdlInputAippType type;
-    size_t dynamicAttachedDataIndex = 0;
-    auto ret = aclmdlGetAippType(modelId, index, &type, &dynamicAttachedDataIndex);
+    size_t dynamicAttachedDataIndex = 0U;
+    const auto ret = aclmdlGetAippType(modelId, index, &type, &dynamicAttachedDataIndex);
     if (ret != ACL_SUCCESS) {
         return ret;
     }
@@ -982,7 +986,7 @@ aclError aclmdlSetAIPPByInputIndex(uint32_t modelId,
     return aclmdlSetInputAIPP(modelId, dataset, dynamicAttachedDataIndex, aippParmsSet);
 }
 
-static std::string AippInfoDebugString(aclAippInfo *aippInfo)
+static std::string AippInfoDebugString(const aclAippInfo *aippInfo)
 {
     if (aippInfo == nullptr) {
         ACL_LOG_INNER_ERROR("[Check][aippInfo]param aippInfo must not be null");
@@ -1053,20 +1057,20 @@ static std::string AippInfoDebugString(aclAippInfo *aippInfo)
     return ss.str();
 }
 
-static std::string DimsDebugString(aclmdlIODims &ioDims)
+static std::string DimsDebugString(const aclmdlIODims &ioDims)
 {
     std::stringstream ss;
     ss << "[" << " tensorName:" << ioDims.name;
     ss << " dimcount:" << static_cast<int32_t>(ioDims.dimCount);
     ss << " dims:";
-    for (size_t i = 0; i < ioDims.dimCount; i++) {
+    for (size_t i = 0U; i < ioDims.dimCount; i++) {
         ss << " " << ioDims.dims[i];
     }
     ss << "]; ";
     return ss.str();
 }
 
-static std::string AippDimsDebugString(aclAippDims *aippDims, size_t shapeCount)
+static std::string AippDimsDebugString(const aclAippDims *aippDims, const size_t shapeCount)
 {
     std::stringstream ssDims;
     for (size_t i = 0; i < shapeCount; i++) {
@@ -1206,7 +1210,7 @@ aclError aclmdlGetFirstAippInfo(uint32_t modelId, size_t index, aclAippInfo *aip
             shapeCount, inputDims.size(), outputDims.size());
         return ACL_ERROR_GE_FAILURE;
     }
-    for (size_t i = 0 ; i < shapeCount; i++) {
+    for (size_t i = 0U; i < shapeCount; i++) {
         aclError ioRet = SetIODims(inputDims[i], aippInfo->outDims[i].srcDims);
         if (ioRet != ACL_SUCCESS) {
             ACL_LOG_INNER_ERROR("[Set][IODims]srcDims SetIODims failed, modelId[%u], index[%zu], result[%d]",

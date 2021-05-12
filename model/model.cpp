@@ -179,7 +179,7 @@ static aclError GetModelOutputShapeInfo(aclmdlDesc *modelDesc)
         // acl converts string like "0:0:1,3,224,224" to vector<int64_t>
         for (auto &strIt : it) {
             if ((strIt >= '0') && (strIt <= '9')) { // numeric character
-                val = val * 10 + (strIt - '0'); // character to number
+                val = val * 10 + static_cast<int64_t>(strIt - '0'); // character to number
             } else if (strIt == '-') { // '-' represents that dynamic model has static output
                 negativeFlag = -1;
                 ACL_LOG_DEBUG("dynamic model include static output");
@@ -216,7 +216,7 @@ static aclError ModelLoadFromFileWithMem(const char *modelPath, uint32_t *modelI
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Model][FromFile]load model from file[%s] failed, ge result[%u]", modelPath, ret);
         ACL_DELETE_ARRAY(data.model_data);
-        return ACL_GET_ERRCODE_GE(ret);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
     data.priority = priority;
     ACL_LOG_INFO("call ge interface executor.LoadModelFromData, workSize[%zu], weightSize[%zu]",
@@ -225,7 +225,7 @@ static aclError ModelLoadFromFileWithMem(const char *modelPath, uint32_t *modelI
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Model][FromData]load model from data failed, ge result[%u]", ret);
         ACL_DELETE_ARRAY(data.model_data);
-        return ACL_GET_ERRCODE_GE(ret);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
 
     *modelId = id;
@@ -258,7 +258,7 @@ static aclError ModelLoadFromMemWithMem(const void *model, size_t modelSize, uin
     ge::Status ret = geExecutor.LoadModelFromData(id, modelData, workPtr, workSize, weightPtr, weightSize);
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Model][FromData]load model from data failed, ge result[%u]", ret);
-        return ACL_GET_ERRCODE_GE(ret);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
 
     *modelId = id;
@@ -292,7 +292,7 @@ static aclError ModelLoadFromFileWithQ(const char *modelPath, uint32_t *modelId,
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Load][FromFile]load model from file[%s], ge result[%u], failed", modelPath, ret);
         ACL_DELETE_ARRAY(modelData.model_data);
-        return ACL_GET_ERRCODE_GE(ret);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
     modelData.priority = priority;
     std::vector<uint32_t> inputQVec(inputQ, inputQ + inputQNum);
@@ -303,7 +303,7 @@ static aclError ModelLoadFromFileWithQ(const char *modelPath, uint32_t *modelId,
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Load][WithQ]execute LoadModelWithQ failed, ge result[%u]", ret);
         ACL_DELETE_ARRAY(modelData.model_data);
-        return ACL_GET_ERRCODE_GE(ret);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
 
     *modelId = id;
@@ -344,7 +344,7 @@ static aclError ModelLoadFromMemWithQ(const void *model, size_t modelSize, uint3
     ge::Status ret = executor.LoadModelWithQ(id, data, inputQVec, outputQVec);
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Load][WithQ]load model with Q, ge result[%u], failed", ret);
-        return ACL_GET_ERRCODE_GE(ret);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
 
     *modelId = id;
@@ -369,7 +369,7 @@ aclError aclmdlGetDesc(aclmdlDesc *modelDesc, uint32_t modelId)
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Get][ModelDescInfo]get model description failed, ge result[%u], model id[%u]",
             ret, modelId);
-        return ACL_GET_ERRCODE_GE(ret);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
 
     std::vector<ge::TensorDesc> inputDescV2;
@@ -378,7 +378,7 @@ aclError aclmdlGetDesc(aclmdlDesc *modelDesc, uint32_t modelId)
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Get][ModelDescInfo]get model description v2 failed, ge result[%u], model id[%u]",
             ret, modelId);
-        return ACL_GET_ERRCODE_GE(ret);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
 
     for (size_t i = 0; i < inputDesc.size(); ++i) {
@@ -388,7 +388,7 @@ aclError aclmdlGetDesc(aclmdlDesc *modelDesc, uint32_t modelId)
         ge::graphStatus ret = inputDesc[i].GetName(inputName);
         if (ret != ge::GRAPH_SUCCESS) {
             ACL_LOG_WARN("the %zu input tensor GetName failed.", i);
-            return ACL_GET_ERRCODE_GE(ret);
+            return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
         }
         std::string inputStr;
         if (inputName.GetString() != nullptr) {
@@ -401,7 +401,7 @@ aclError aclmdlGetDesc(aclmdlDesc *modelDesc, uint32_t modelId)
         tensorDesc.dims = shape.GetDims();
         ge::Shape shapeV2 = inputDescV2[i].GetShape();
         tensorDesc.dimsV2 = shapeV2.GetDims();
-        inputDesc[i].GetShapeRange(tensorDesc.shapeRanges);
+        (void)inputDesc[i].GetShapeRange(tensorDesc.shapeRanges);
         modelDesc->inputDesc.push_back(tensorDesc);
     }
 
@@ -412,7 +412,7 @@ aclError aclmdlGetDesc(aclmdlDesc *modelDesc, uint32_t modelId)
         ge::graphStatus ret = outputDesc[i].GetName(outputName);
         if (ret != ge::GRAPH_SUCCESS) {
             ACL_LOG_WARN("the %zu output tensor GetName failed.", i);
-            return ACL_GET_ERRCODE_GE(ret);
+            return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
         }
         std::string outputStr;
         if (outputName.GetString() != nullptr) {
@@ -425,7 +425,7 @@ aclError aclmdlGetDesc(aclmdlDesc *modelDesc, uint32_t modelId)
         tensorDesc.dims = shape.GetDims();
         ge::Shape shapeV2 = outputDescV2[i].GetShape();
         tensorDesc.dimsV2 = shapeV2.GetDims();
-        outputDesc[i].GetShapeRange(tensorDesc.shapeRanges);
+        (void)outputDesc[i].GetShapeRange(tensorDesc.shapeRanges);
         modelDesc->outputDesc.push_back(tensorDesc);
     }
 
@@ -493,7 +493,7 @@ static size_t aclmdlGetTensorSize(aclmdlTensorDesc &tensorDesc, size_t index)
                              i, shapeRanges[i].second, index);
                 return 0;
             }
-            if (acl::CheckSizeTMultiOverflow(outputSizeByMaxShapeRange, shapeRanges[i].second,
+            if (acl::CheckSizeTMultiOverflow(outputSizeByMaxShapeRange, static_cast<size_t>(shapeRanges[i].second),
                                              outputSizeByMaxShapeRange) == ACL_ERROR_FAILURE) {
                 return 0;
             }
@@ -822,7 +822,7 @@ aclError ModelExecute(uint32_t modelId, const aclmdlDataset *input,
     ge::Status ret = executor.ExecModel(modelId, stream, inputData, inputGeDesc, outputData, outputGeDesc, async);
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Exec][Model]Execute model failed, ge result[%u], modelId[%u]", ret, modelId);
-        return ACL_GET_ERRCODE_GE(ret);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
 
     if (dynamicFlag) {
@@ -897,7 +897,7 @@ aclError aclmdlUnload(uint32_t modelId)
     ge::Status ret = executor.UnloadModel(modelId);
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Unload][Model]model unload failed, ge result[%u], modelId[%u]", ret, modelId);
-        return ACL_GET_ERRCODE_GE(ret);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
 
     ACL_LOG_INFO("aclmdlUnload success, modelId[%u]", modelId);
@@ -922,7 +922,7 @@ aclError aclmdlQuerySize(const char *fileName, size_t *workSize, size_t *weightS
     ge::Status ret = executor.GetMemAndWeightSize(path, work, weight);
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Get][MemAndWeightSize]query size failed, ge result[%u]", ret);
-        return ACL_GET_ERRCODE_GE(ret);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
 
     *workSize = work;
@@ -949,7 +949,7 @@ aclError aclmdlQuerySizeFromMem(const void *model, size_t modelSize, size_t *wor
     ge::Status ret = executor.GetMemAndWeightSize(model, modelSize, work, weight);
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Get][MemAndWeightSize]query size from mem failed, ge result[%u]", ret);
-        return ACL_GET_ERRCODE_GE(ret);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
 
     *workSize = work;
@@ -993,7 +993,7 @@ aclError aclmdlSetDynamicBatchSize(uint32_t modelId, aclmdlDataset *dataset, siz
     ge::Status ret = executor.SetDynamicBatchSize(modelId, devPtr, memSize, batchSize);
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Set][DynamicBatchSize]set DynamicBatchSize failed, ge result[%u]", ret);
-        return ACL_GET_ERRCODE_GE(ret);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
 
     ACL_LOG_INFO("successfully execute aclmdlSetDynamicBatchSize, modelId[%u], index[%zu], batchSize[%lu]",
@@ -1037,7 +1037,7 @@ aclError aclmdlSetDynamicHWSize(uint32_t modelId, aclmdlDataset *dataset, size_t
     ge::Status ret = executor.SetDynamicImageSize(modelId, devPtr, memSize, height, width);
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Set][DynamicImageSize]Set dynamic image size, ge result[%u]", index);
-        return ACL_GET_ERRCODE_GE(ret);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
 
     ACL_LOG_INFO("successfully execute aclmdlSetDynamicHWSize, modelId[%u], index[%zu], height[%lu], width[%lu]",
@@ -1090,14 +1090,14 @@ aclError aclmdlSetInputDynamicDims(uint32_t modelId, aclmdlDataset *dataset, siz
     ge::Status ret = executor.SetDynamicDims(modelId, devPtr, memSize, curAllDims);
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Set][DynamicDims]set dynamic dims failed, ge result[%u]", ret);
-        return ACL_GET_ERRCODE_GE(ret);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
 
     vector<uint64_t> curDynmaicDims;
     ret = executor.GetCurDynamicDims(modelId, curAllDims, curDynmaicDims);
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Get][CurDynamicDims]get current dynamic dims failed, ge result[%u]", ret);
-        return ACL_GET_ERRCODE_GE(ret);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
     ACL_LOG_DEBUG("current dynamic dims size %zu", curDynmaicDims.size());
     dataset->dynamicDims = curDynmaicDims;
@@ -1391,7 +1391,7 @@ aclError aclmdlGetCurOutputDims(const aclmdlDesc *modelDesc, size_t index, aclmd
     ge::Status geRet = executor.GetCurShape(modelId, geShapeInfo, dynamicType);
     if (geRet != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Get][CurShape]can not get current shape, ge result[%d], modelId[%u]", geRet, modelId);
-        return ACL_GET_ERRCODE_GE(geRet);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(geRet));
     }
     // dynamic batch type is 1, dynamic hw type is 2, dynamic dims type is 3;
     // static model or not set dynamic shape info, dynamic type is 0, other value is invalid
@@ -1754,7 +1754,7 @@ aclError aclmdlGetInputDynamicDims(const aclmdlDesc *modelDesc, size_t index, ac
     for (auto &dataName : modelDesc->dataNameOrder) {
         for (auto &inputDesc : modelDesc->inputDesc) {
             if (inputDesc.name == dataName) {
-                allRawDims.insert(allRawDims.end(), inputDesc.dims.begin(), inputDesc.dims.end());
+                (void)allRawDims.insert(allRawDims.end(), inputDesc.dims.begin(), inputDesc.dims.end());
             }
         }
     }
@@ -1796,7 +1796,7 @@ aclError aclmdlCreateAndGetOpDesc(uint32_t deviceId, uint32_t streamId, uint32_t
     if (geRet != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Get][OpDescInfo]get op desc faild, ge result[%d], deviceId[%u], streamId[%u], taskId[%u]",
             geRet, deviceId, streamId, taskId);
-        return ACL_GET_ERRCODE_GE(geRet);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(geRet));
     }
 
     if (opNameLen <= opDescInfo.op_name.length()) {
@@ -1904,7 +1904,7 @@ static const char *TransTensorNameToReal(const aclmdlDesc *modelDesc, const stri
             TENSOR_NAME_PREFIX, tensorName.c_str());
         return nullptr;
     }
-    const int base = 10;
+    const int32_t base = 10;
     if ((valArr[1] == MODEL_ID_STR) && (acl::string_utils::IsDigit(valArr[2]))) {
         auto modelId = strtoul(valArr[2].c_str(), nullptr, base);
         if (modelId != modelDesc->modelId) {

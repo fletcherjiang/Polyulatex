@@ -17,51 +17,51 @@
 namespace acl {
 namespace attr_utils {
 namespace {
-constexpr int DEFAULT_BUFFER_SIZE = 32;
+constexpr size_t DEFAULT_STRING_SIZE = 32;
 constexpr float FLOAT_DELTA = 1e-6;
 }
 
 template<typename T>
-std::string ScalarAttrToString(const ge::GeAttrValue &value)
+std::string ScalarAttrToString(const ge::GeAttrValue &attrVal)
 {
     std::stringstream ss;
     T val {};
-    value.GetValue<T>(val);
+    attrVal.GetValue<T>(val);
     ss << val;
     return ss.str();
 }
 
 template<>
-std::string ScalarAttrToString<string>(const ge::GeAttrValue &val)
+std::string ScalarAttrToString<string>(const ge::GeAttrValue &attrVal)
 {
-    std::string value;
-    val.GetValue<string>(value);
-    return value;
+    std::string val;
+    attrVal.GetValue<string>(val);
+    return val;
 }
 
 template<>
-std::string ScalarAttrToString<bool>(const ge::GeAttrValue &val)
+std::string ScalarAttrToString<bool>(const ge::GeAttrValue &attrVal)
 {
-    bool value = false;
-    val.GetValue<bool>(value);
-    return value ? "True" : "False";
+    bool val = false;
+    attrVal.GetValue<bool>(val);
+    return val ? "True" : "False";
 }
 
 template<typename T>
-std::string ListAttrToString(const ge::GeAttrValue &value)
+std::string ListAttrToString(const ge::GeAttrValue &attrVal)
 {
     std::stringstream ss;
     std::vector<T> values;
-    value.GetValue<std::vector<T>>(values);
+    attrVal.GetValue<std::vector<T>>(values);
     return string_utils::VectorToString(values);
 }
 
 template<>
-std::string ListAttrToString<bool>(const ge::GeAttrValue &value)
+std::string ListAttrToString<bool>(const ge::GeAttrValue &attrVal)
 {
     std::stringstream ss;
     std::vector<bool> values;
-    value.GetValue<std::vector<bool>>(values);
+    attrVal.GetValue<std::vector<bool>>(values);
     ss << '[';
     auto size = values.size();
     for (size_t i = 0; i < size; ++i) {
@@ -70,7 +70,7 @@ std::string ListAttrToString<bool>(const ge::GeAttrValue &value)
         } else {
             ss << "False";
         }
-        if (i != size - 1) {
+        if (i != (size - 1)) {
             ss << ", ";
         }
     }
@@ -79,12 +79,12 @@ std::string ListAttrToString<bool>(const ge::GeAttrValue &value)
 }
 
 template<typename T>
-std::string ListListAttrToString(const ge::GeAttrValue &value)
+std::string ListListAttrToString(const ge::GeAttrValue &attrVal)
 {
     std::stringstream ss;
     ss << '[';
     std::vector<std::vector<T>> values;
-    value.GetValue<std::vector<std::vector<T>>>(values);
+    attrVal.GetValue<std::vector<std::vector<T>>>(values);
     return string_utils::VectorToString(values);
 }
 
@@ -122,34 +122,34 @@ string GeAttrValueToString(const ge::GeAttrValue &val)
 }
 
 template<typename T>
-void ScalarAttrToString(std::string &buffer, const ge::GeAttrValue &value)
+void ScalarAttrToString(std::string &buffer, const ge::GeAttrValue &attrVal)
 {
     T val{};
-    value.GetValue<T>(val);
+    attrVal.GetValue<T>(val);
     buffer += std::to_string(val);
 }
 
 template<>
-void ScalarAttrToString<string>(std::string &buffer, const ge::GeAttrValue &value)
+void ScalarAttrToString<string>(std::string &buffer, const ge::GeAttrValue &attrVal)
 {
     std::string val;
-    value.GetValue<string>(val);
+    attrVal.GetValue<string>(val);
     buffer += val;
 }
 
 template<>
-void ScalarAttrToString<float>(std::string &buffer, const ge::GeAttrValue &value)
+void ScalarAttrToString<float>(std::string &buffer, const ge::GeAttrValue &attrVal)
 {
     float val = 0.0;
-    value.GetValue<float>(val);
+    attrVal.GetValue<float>(val);
     buffer += std::to_string(val);
 }
 
 template<typename T>
-void ListAttrToStringForDigest(std::string &buffer, const ge::GeAttrValue &value)
+void ListAttrToStringForDigest(std::string &buffer, const ge::GeAttrValue &attrVal)
 {
     std::vector<T> values;
-    value.GetValue<std::vector<T>>(values);
+    attrVal.GetValue<std::vector<T>>(values);
     for (const T &str : values) {
         buffer += std::to_string(str);
         buffer.push_back(',');
@@ -157,10 +157,10 @@ void ListAttrToStringForDigest(std::string &buffer, const ge::GeAttrValue &value
 }
 
 template<typename T>
-void ListListAttrToStringForDigest(std::string &buffer, const ge::GeAttrValue &value)
+void ListListAttrToStringForDigest(std::string &buffer, const ge::GeAttrValue &attrVal)
 {
     std::vector<std::vector<T>> values;
-    value.GetValue<std::vector<std::vector<T>>>(values);
+    attrVal.GetValue<std::vector<std::vector<T>>>(values);
     for (auto &subVec : values) {
         for (auto &val : subVec) {
             buffer += std::to_string(val);
@@ -171,20 +171,20 @@ void ListListAttrToStringForDigest(std::string &buffer, const ge::GeAttrValue &v
 }
 
 template<>
-void ListAttrToStringForDigest<bool>(std::string &buffer, const ge::GeAttrValue &value)
+void ListAttrToStringForDigest<bool>(std::string &buffer, const ge::GeAttrValue &attrVal)
 {
     std::vector<bool> values;
-    value.GetValue<std::vector<bool>>(values);
+    attrVal.GetValue<std::vector<bool>>(values);
     for (bool val : values) {
         buffer.push_back(val ? 'T' : 'F');
     }
 }
 
 template<>
-void ListAttrToStringForDigest<float>(std::string &buffer, const ge::GeAttrValue &value)
+void ListAttrToStringForDigest<float>(std::string &buffer, const ge::GeAttrValue &attrVal)
 {
     std::vector<float> values;
-    value.GetValue<std::vector<float>>(values);
+    attrVal.GetValue<std::vector<float>>(values);
     for (float val : values) {
         buffer += std::to_string(val);
         buffer.push_back(',');
@@ -192,10 +192,10 @@ void ListAttrToStringForDigest<float>(std::string &buffer, const ge::GeAttrValue
 }
 
 template<>
-void ListAttrToStringForDigest<string>(std::string &buffer, const ge::GeAttrValue &value)
+void ListAttrToStringForDigest<string>(std::string &buffer, const ge::GeAttrValue &attrVal)
 {
     std::vector<string> values;
-    value.GetValue<vector<string>>(values);
+    attrVal.GetValue<vector<string>>(values);
     for (const string &str : values) {
         buffer.append(str);
         buffer.push_back(',');
@@ -206,9 +206,9 @@ void GeAttrValueToStringForDigest(std::string &buffer, const ge::GeAttrValue &va
 {
     switch (val.GetValueType()) {
         case ge::GeAttrValue::VT_BOOL: {
-            bool value = false;
-            val.GetValue<bool>(value);
-            buffer.push_back(value ? 'T' : 'F');
+            bool boolVal = false;
+            val.GetValue<bool>(boolVal);
+            buffer.push_back(boolVal ? 'T' : 'F');
             break;
         }
         case ge::GeAttrValue::VT_STRING:
@@ -251,10 +251,11 @@ std::string AttrMapToString(const std::map<std::string, ge::GeAttrValue> &attrMa
     std::stringstream ss;
     ss << "{";
     size_t size = attrMap.size();
-    size_t count = 0;
+    size_t cnt = 0;
     for (auto &attr : attrMap) {
         ss << attr.first << " = " << GeAttrValueToString(attr.second);
-        if (++count != size) {
+        cnt++;
+        if (cnt != size) {
             ss << ", ";
         }
     }
@@ -269,7 +270,7 @@ size_t AttrMapToDigest(const std::map<std::string, ge::GeAttrValue> &attrMap)
     }
 
     std::string digest;
-    digest.reserve(DEFAULT_BUFFER_SIZE);
+    digest.reserve(DEFAULT_STRING_SIZE);
     for (auto &attr : attrMap) {
         GeAttrValueToStringForDigest(digest, attr.second);
     }
@@ -424,49 +425,50 @@ bool CheckValueExact(const std::vector<T> &valueRange, const std::vector<T> &dat
 }
 
 template<typename T1, typename T2>
-void SetInputValue(const aclDataBuffer *value, std::vector<T1> &inputData)
+void SetInputValue(const aclDataBuffer *dataBuffer, std::vector<T1> &inputData)
 {
-    for (size_t i = 0; i < (value->length / sizeof(T2)); ++i) {
-        inputData.push_back(*(reinterpret_cast<const T2 *>(value->data) + i));
+    for (size_t i = 0; i < (dataBuffer->length / sizeof(T2)); ++i) {
+        inputData.push_back(*(reinterpret_cast<const T2 *>(dataBuffer->data) + i));
     }
     return;
 }
 
-bool GetInputData(const aclDataBuffer *value, aclDataType dataType,
+bool GetInputData(const aclDataBuffer *dataBuffer, aclDataType dataType,
                   std::vector<int64_t> &inputIntData, std::vector<float> &inputFloatData)
 {
     switch (dataType) {
         case ACL_FLOAT:
-            SetInputValue<float, float>(value, inputFloatData);
+            SetInputValue<float, float>(dataBuffer, inputFloatData);
             break;
         case ACL_FLOAT16:
-            for (size_t i = 0; i < (value->length / sizeof(aclFloat16)); ++i) {
-                inputFloatData.push_back(aclFloat16ToFloat(*(reinterpret_cast<const aclFloat16 *>(value->data) + i)));
+            for (size_t i = 0; i < (dataBuffer->length / sizeof(aclFloat16)); ++i) {
+                inputFloatData.push_back(
+                    aclFloat16ToFloat(*(reinterpret_cast<const aclFloat16 *>(dataBuffer->data) + i)));
             }
             break;
         case ACL_INT8:
-            SetInputValue<int64_t, int8_t>(value, inputIntData);
+            SetInputValue<int64_t, int8_t>(dataBuffer, inputIntData);
             break;
         case ACL_UINT8:
-            SetInputValue<int64_t, uint8_t>(value, inputIntData);
+            SetInputValue<int64_t, uint8_t>(dataBuffer, inputIntData);
             break;
         case ACL_INT16:
-            SetInputValue<int64_t, int16_t>(value, inputIntData);
+            SetInputValue<int64_t, int16_t>(dataBuffer, inputIntData);
             break;
         case ACL_UINT16:
-            SetInputValue<int64_t, uint16_t>(value, inputIntData);
+            SetInputValue<int64_t, uint16_t>(dataBuffer, inputIntData);
             break;
         case ACL_INT32:
-            SetInputValue<int64_t, int32_t>(value, inputIntData);
+            SetInputValue<int64_t, int32_t>(dataBuffer, inputIntData);
             break;
         case ACL_UINT32:
-            SetInputValue<int64_t, uint32_t>(value, inputIntData);
+            SetInputValue<int64_t, uint32_t>(dataBuffer, inputIntData);
             break;
         case ACL_INT64:
-            SetInputValue<int64_t, int64_t>(value, inputIntData);
+            SetInputValue<int64_t, int64_t>(dataBuffer, inputIntData);
             break;
         case ACL_UINT64:
-            SetInputValue<int64_t, uint64_t>(value, inputIntData);
+            SetInputValue<int64_t, uint64_t>(dataBuffer, inputIntData);
             break;
         default:
             ACL_LOG_WARN("unsupported type: %d", dataType);
@@ -560,15 +562,15 @@ bool CheckFloatValueRange(const std::map<AttrRangeType, ge::GeAttrValue> &valueR
 }
 
 bool ValueRangeCheck(const std::map<AttrRangeType, ge::GeAttrValue> &valueRange,
-                     const aclDataBuffer *value, aclDataType dataType)
+                     const aclDataBuffer *dataBuffer, aclDataType dataType)
 {
     // value is not nullptr
-    if (value->data == nullptr) {
+    if (dataBuffer->data == nullptr) {
         return true;
     }
     std::vector<int64_t> inputIntData;
     std::vector<float> inputFloatData;
-    if (!GetInputData(value, dataType, inputIntData, inputFloatData)) {
+    if (!GetInputData(dataBuffer, dataType, inputIntData, inputFloatData)) {
         return false;
     }
     // check value range
@@ -645,7 +647,7 @@ uint64_t GetCurrentTimestamp()
         ACL_LOG_WARN("Func mmGetTimeOfDay failed, ret = %d", ret);
     }
     // 1000000: seconds to microseconds
-    uint64_t total_use_time = tv.tv_usec + static_cast<uint64_t>(tv.tv_sec) * 1000000;
+    uint64_t total_use_time = static_cast<uint64_t>(tv.tv_usec) + (static_cast<uint64_t>(tv.tv_sec)) * 1000000u;
     return total_use_time;
 }
 
@@ -693,11 +695,11 @@ bool SaveConstToAttr(OpModelDef &modelDef)
     return true;
 }
 
-static bool ConstToAttr(int tensorNum,
+static bool ConstToAttr(int32_t tensorNum,
                         const aclTensorDesc *const tensorDesc[],
                         std::vector<std::string> &constStr)
 {
-    for (int i = 0; i < tensorNum; ++i) {
+    for (int32_t i = 0; i < tensorNum; ++i) {
         const aclTensorDesc *desc = tensorDesc[i];
         if (desc->isConst) {
             if ((desc->constDataBuf != nullptr) && (desc->constDataLen <= 0)) {
@@ -717,16 +719,16 @@ static bool ConstToAttr(int tensorNum,
     return true;
 }
 
-bool SaveConstToAttr(const AclOp &aclOp, aclopAttr *opAttr)
+bool SaveConstToAttr(const AclOp &opDesc, aclopAttr *opAttr)
 {
     std::vector<std::string> constStr;
     ACL_LOG_INFO("begin to insert constDataBuf in aclopAttr");
-    bool ret = ConstToAttr(aclOp.numInputs, aclOp.inputDesc, constStr);
+    bool ret = ConstToAttr(opDesc.numInputs, opDesc.inputDesc, constStr);
     if (!ret) {
         ACL_LOG_INNER_ERROR("[Check][InputTenspr]inputTenspr get const dataLen failed");
         return false;
     }
-    ret = ConstToAttr(aclOp.numOutputs, aclOp.outputDesc, constStr);
+    ret = ConstToAttr(opDesc.numOutputs, opDesc.outputDesc, constStr);
     if (!ret) {
         ACL_LOG_INNER_ERROR("[Check][OutputTensor]outputTensor get const dataLen failed");
         return false;
