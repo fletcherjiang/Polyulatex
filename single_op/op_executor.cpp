@@ -100,6 +100,8 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
         if (aclOp.inputDesc[i]->dataType != ACL_DT_UNDEFINED) {
             geDataType = static_cast<::ge::DataType>(aclOp.inputDesc[i]->dataType);
         }
+
+        ACL_LOG_DEBUG("Use storageDims to construct GeShape in op execute");
         ge::GeTensorDesc tensorDesc(ge::GeShape(aclOp.inputDesc[i]->storageDims),
                                     geFormat,
                                     geDataType);
@@ -129,6 +131,8 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
         if (aclOp.outputDesc[i]->dataType != ACL_DT_UNDEFINED) {
             geDataType = static_cast<::ge::DataType>(aclOp.outputDesc[i]->dataType);
         }
+        
+        ACL_LOG_DEBUG("Use storageDims to construct GeShape in op execute");
         ge::GeTensorDesc tensorDesc(ge::GeShape(aclOp.outputDesc[i]->storageDims),
                                     geFormat,
                                     geDataType);
