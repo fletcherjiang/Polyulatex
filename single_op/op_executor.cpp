@@ -107,6 +107,11 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
                                     geDataType);
         //TODO: should modify to use GE high-performance interfaces after GE is ready
         tensorDesc.SetOriginShape(ge::GeShape(aclOp.inputDesc[i]->dims)); 
+        ge::Format geOriginFormat = ge::FORMAT_RESERVED;
+        if (aclOp.inputDesc[i]->format != ACL_FORMAT_UNDEFINED) {
+            geOriginFormat = static_cast<::ge::Format>(aclOp.inputDesc[i]->format);
+        }
+        tensorDesc.SetOriginFormat(geOriginFormat);
 
         ge::AttrUtils::SetInt(tensorDesc, ge::ATTR_NAME_PLACEMENT, static_cast<int64_t>(aclOp.inputDesc[i]->memtype));
         inputDesc.emplace_back(std::move(tensorDesc));
@@ -131,13 +136,18 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
         if (aclOp.outputDesc[i]->dataType != ACL_DT_UNDEFINED) {
             geDataType = static_cast<::ge::DataType>(aclOp.outputDesc[i]->dataType);
         }
-        
         ACL_LOG_DEBUG("Use storageDims to construct GeShape in op execute");
         ge::GeTensorDesc tensorDesc(ge::GeShape(aclOp.outputDesc[i]->storageDims),
                                     geFormat,
                                     geDataType);
         //TODO: should modify to use GE high-performance interfaces after GE is ready
         tensorDesc.SetOriginShape(ge::GeShape(aclOp.inputDesc[i]->dims));
+
+        ge::Format geOriginFormat = ge::FORMAT_RESERVED;
+        if (aclOp.outputDesc[i]->format != ACL_FORMAT_UNDEFINED) {
+            geOriginFormat = static_cast<::ge::Format>(aclOp.outputDesc[i]->format);
+        }
+        tensorDesc.SetOriginFormat(geOriginFormat);
         
         ge::AttrUtils::SetInt(tensorDesc, ge::ATTR_NAME_PLACEMENT, static_cast<int64_t>(aclOp.outputDesc[i]->memtype));
         outputDesc.emplace_back(std::move(tensorDesc));
