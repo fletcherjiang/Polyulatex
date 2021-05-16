@@ -193,8 +193,7 @@ TEST_F(OpExecutorTest, DoExecuteAsyncDynamicSuccessTest)
     ASSERT_NE(OpExecutor::DoExecuteAsync(dynamicSingleOp, aclOp, inputs_, outputs_), ACL_SUCCESS);
     ASSERT_EQ(OpExecutor::DoExecuteAsync(dynamicSingleOp, aclOp, inputs_, outputs_), ACL_SUCCESS);
     
-    bool executeWithExactModel = true;
-    
+    bool executeWithExactModel = true;   
     aclSetTensorStorageFormat(const_cast<aclTensorDesc *>(aclOp.inputDesc[0]), ACL_FORMAT_ND);
     ASSERT_EQ(OpExecutor::DoExecuteAsync(dynamicSingleOp, aclOp, inputs_, outputs_, executeWithExactModel), ACL_SUCCESS);
 
@@ -204,19 +203,11 @@ TEST_F(OpExecutorTest, DoExecuteAsyncDynamicSuccessTest)
     aclOp.exeucteType = ACL_OP_EXECUTE_V2;
     ASSERT_EQ(OpExecutor::DoExecuteAsync(dynamicSingleOp, aclOp, inputs_, outputs_, executeWithExactModel), ACL_SUCCESS);
 
-
-
-
     aclSetTensorPlaceMent(inputDesc[0], aclMemType::ACL_MEMTYPE_HOST);
     ASSERT_EQ(OpExecutor::DoExecuteAsync(dynamicSingleOp, aclOp, inputs_, outputs_, executeWithExactModel), ACL_SUCCESS);
 
     aclSetTensorPlaceMent(outputDesc[0], aclMemType::ACL_MEMTYPE_HOST);
     ASSERT_EQ(OpExecutor::DoExecuteAsync(dynamicSingleOp, aclOp, inputs_, outputs_, executeWithExactModel), ACL_SUCCESS);
-
-
-
-
-
 
     aclDestroyTensorDesc(inputDesc[0]);
     aclDestroyTensorDesc(inputDesc[1]);
