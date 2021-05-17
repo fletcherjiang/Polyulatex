@@ -163,12 +163,7 @@ TEST_F(OpExecutorTest, DoExecuteAsyncDynamicSuccessTest)
     auto *dynamicSingleOp = (DynamicSingleOp *) 0x12345678;
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), ExecuteAsync(_,_,_,_,_))
         .WillOnce(Return(PARAM_INVALID))
-        .WillOnce(Return(SUCCESS))
-        .WillOnce(Return(SUCCESS))
-        .WillOnce(Return(SUCCESS))
-        .WillOnce(Return(SUCCESS))
-        .WillOnce(Return(SUCCESS))
-        .WillOnce(Return(SUCCESS));
+        .WillRepeatedly(Return(SUCCESS));
     AclOp aclOp;
     aclOp.opType = "Add";
     aclOp.numInputs = 2;
