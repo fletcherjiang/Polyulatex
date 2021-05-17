@@ -111,15 +111,15 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
                 static_cast<int32_t>(geOriginFormat), static_cast<int32_t>(geFormat));
             //TODO: should modify to use GE high-performance interfaces after GE is ready
             tensorDesc.SetShape(ge::GeShape(aclOp.inputDesc[i]->storageDims));     
-            tensorDesc.SetFormat(geFormat);                  
+            tensorDesc.SetFormat(geFormat); 
+            tensorDesc.SetOriginShape(ge::GeShape(aclOp.inputDesc[i]->dims));                  
         } else {
             ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are equal", 
                 static_cast<int32_t>(geOriginFormat), static_cast<int32_t>(geFormat));
             tensorDesc.SetShape(ge::GeShape(aclOp.inputDesc[i]->dims));      
             tensorDesc.SetFormat(geOriginFormat); 
+            tensorDesc.SetOriginShape(tensorDesc.GetShape());
         }      
-         
-        tensorDesc.SetOriginShape(ge::GeShape(aclOp.inputDesc[i]->dims)); 
         tensorDesc.SetOriginFormat(geOriginFormat);
         tensorDesc.SetDataType(geDataType);
         ge::AttrUtils::SetInt(tensorDesc, ge::ATTR_NAME_PLACEMENT, static_cast<int64_t>(aclOp.inputDesc[i]->memtype));
@@ -157,15 +157,16 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
                 static_cast<int32_t>(geOriginFormat), static_cast<int32_t>(geFormat));
             //TODO: should modify to use GE high-performance interfaces after GE is ready
             tensorDesc.SetShape(ge::GeShape(aclOp.outputDesc[i]->storageDims));     
-            tensorDesc.SetFormat(geFormat);                  
+            tensorDesc.SetFormat(geFormat);  
+            tensorDesc.SetOriginShape(ge::GeShape(aclOp.outputDesc[i]->dims));                
         } else {
             ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are equal", 
                 static_cast<int32_t>(geOriginFormat), static_cast<int32_t>(geFormat));
             tensorDesc.SetShape(ge::GeShape(aclOp.outputDesc[i]->dims));      
             tensorDesc.SetFormat(geOriginFormat); 
+            tensorDesc.SetOriginShape(tensorDesc.GetShape());
         }    
-           
-        tensorDesc.SetOriginShape(ge::GeShape(aclOp.outputDesc[i]->dims));
+
         tensorDesc.SetOriginFormat(geOriginFormat);
         tensorDesc.SetDataType(geDataType);
         
