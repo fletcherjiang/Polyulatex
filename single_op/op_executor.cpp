@@ -109,7 +109,6 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
         if (geOriginFormat != geFormat) {
             ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are not equal", 
                 static_cast<int32_t>(geOriginFormat), static_cast<int32_t>(geFormat));
-            //TODO: should modify to use GE high-performance interfaces after GE is ready
             tensorDesc.SetShape(ge::GeShape(aclOp.inputDesc[i]->storageDims));     
             tensorDesc.SetFormat(geFormat); 
             tensorDesc.SetOriginShape(ge::GeShape(aclOp.inputDesc[i]->dims));                  
@@ -155,7 +154,6 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
         if (geOriginFormat != geFormat) {
             ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are not equal", 
                 static_cast<int32_t>(geOriginFormat), static_cast<int32_t>(geFormat));
-            //TODO: should modify to use GE high-performance interfaces after GE is ready
             tensorDesc.SetShape(ge::GeShape(aclOp.outputDesc[i]->storageDims));     
             tensorDesc.SetFormat(geFormat);  
             tensorDesc.SetOriginShape(ge::GeShape(aclOp.outputDesc[i]->dims));                
