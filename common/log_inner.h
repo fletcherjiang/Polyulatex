@@ -51,6 +51,7 @@ const char *const ACL_STAGE_MBUF = "MBUF";
 // second stage
 const char *const ACL_STAGE_DEFAULT = "DEFAULT";
 
+constexpr int32_t MAX_LOG_STRING = 1024;
 class ACL_FUNC_VISIBILITY AclLog {
 public:
     static bool IsLogOutputEnable(aclLogLevel logLevel);
