@@ -265,7 +265,7 @@ size_t aclDataTypeSize(aclDataType dataType)
         case ACL_UINT32:
             return sizeof(int32_t);
         case ACL_COMPLEX128:
-            return static_cast<size_t>(2) * sizeof(int64_t);
+            return 2U * sizeof(int64_t);
         case ACL_INT64:
         case ACL_UINT64:
         case ACL_DOUBLE:
@@ -318,7 +318,7 @@ aclError aclSetTensorShapeRange(aclTensorDesc* desc, size_t dimsCount, int64_t d
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(desc);
     // dimsCount should be equal to length of array dimsRange
     desc->shapeRange.clear();
-    for (size_t i = static_cast<int32_t>(0); i < dimsCount; ++i) {
+    for (size_t i = 0U; i < dimsCount; ++i) {
         desc->shapeRange.emplace_back(std::make_pair(dimsRange[i][0], dimsRange[i][1]));
     }
     return ACL_SUCCESS;
@@ -362,7 +362,6 @@ size_t aclGetTensorDescSize(const aclTensorDesc *desc)
     size_t size = 0U;
     const size_t descCount = aclGetTensorDescElementCount(desc);
     const size_t typeSize = aclDataTypeSize(desc->dataType);
-    std::cout << "************************ " << descCount << "," << typeSize << std::endl;
     (void)acl::CheckSizeTMultiOverflow(descCount, typeSize, size);
     return size;
 }
@@ -378,7 +377,7 @@ size_t aclGetTensorDescElementCount(const aclTensorDesc *desc)
     }
 
     if (desc->dims.empty()) {
-        return static_cast<size_t>(1);
+        return 1U;
     }
 
     size_t elementCount = 1;
@@ -544,7 +543,7 @@ uint32_t aclGetDataBufferSize(const aclDataBuffer *dataBuffer)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if (dataBuffer == nullptr) {
-        return static_cast<uint32_t>(0);
+        return 0U;
     }
 
     return static_cast<uint32_t>(dataBuffer->length);
