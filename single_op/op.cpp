@@ -560,27 +560,15 @@ static void AddOpDesc(aclTensorDesc *tensorDesc, ge::OpDescPtr &opDesc, bool isI
     }
     if (!tensorDesc->name.empty()) {
         if (isInput) {
-            ge::graphStatus ret = opDesc->AddInputDesc(tensorDesc->name, geTensorDesc);
-            if (ret != ge::GRAPH_SUCCESS) {
-                ACL_LOG_CALL_ERROR("[Add][InputDesc] Add input desc failed, ge result[%u]", ret);
-            }
+            (void)opDesc->AddInputDesc(tensorDesc->name, geTensorDesc);
         } else {
-            ge::graphStatus ret = opDesc->AddOutputDesc(tensorDesc->name, geTensorDesc);
-            if (ret != ge::GRAPH_SUCCESS) {
-                ACL_LOG_CALL_ERROR("[Add][OutputDesc] Add output desc failed, ge result[%u]", ret);
-            }
+            (void)opDesc->AddOutputDesc(tensorDesc->name, geTensorDesc);
         }
     } else {
         if (isInput) {
-            ge::graphStatus ret = opDesc->AddInputDesc(geTensorDesc);
-            if (ret != ge::GRAPH_SUCCESS) {
-                ACL_LOG_CALL_ERROR("[Add][InputDesc] Add input desc failed, ge result[%u]", ret);
-            }
+            (void)opDesc->AddInputDesc(geTensorDesc);
         } else {
-            ge::graphStatus ret = opDesc->AddOutputDesc(geTensorDesc);
-            if (ret != ge::GRAPH_SUCCESS) {
-                ACL_LOG_CALL_ERROR("[Add][OutputDesc] Add output desc failed, ge result[%u]", ret);
-            }
+            (void)opDesc->AddOutputDesc(geTensorDesc);
         }
     }
 }
@@ -675,10 +663,7 @@ aclError aclopInferShape(const char *opType,
 
     if (attr != nullptr) {
         for (const auto &it : attr->Attrs()) {
-            ge::graphStatus ret = opDesc->SetAttr(it.first, it.second);
-            if (ret != ge::GRAPH_SUCCESS) {
-                ACL_LOG_CALL_ERROR("[Set][Attr] Set attr failed, ge result[%u]", ret);
-            }
+            (void)opDesc->SetAttr(it.first, it.second);
         }
     }
     std::unique_ptr<uint8_t[]> *constData = new(std::nothrow) std::unique_ptr<uint8_t[]>[numInputs];

@@ -33,7 +33,7 @@ ACL_FUNC_VISIBILITY size_t AttrMapToDigest(const std::map<std::string, ge::GeAtt
 
 ACL_FUNC_VISIBILITY bool AttrValueEquals(const ge::GeAttrValue &lhs, const ge::GeAttrValue &rhs);
 
-ACL_FUNC_VISIBILITY bool OpAttrEquals(const aclopAttr *lhs, const aclopAttr *rhs);
+ACL_FUNC_VISIBILITY bool OpAttrEquals(const aclopAttr *const lhs, const aclopAttr *const rhs);
 
 ACL_FUNC_VISIBILITY uint64_t GetCurrentTimestamp();
 
