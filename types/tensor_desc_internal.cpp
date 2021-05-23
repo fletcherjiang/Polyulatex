@@ -404,7 +404,7 @@ size_t aclGetTensorDescNumDims(const aclTensorDesc *desc)
             std::vector<std::string>({"param"}), std::vector<std::string>({"desc"}));
         return 0U;
     }
-    if ((desc->dims.size() > 0U) && (desc->dims.at(0U) == acl::UNKNOW_RANK)) {
+    if ((desc->dims.size() > 0U) && (desc->dims[0U] == acl::UNKNOW_RANK)) {
         return ACL_UNKNOWN_RANK;
     }
     return desc->dims.size();
@@ -628,7 +628,7 @@ aclError aclSetTensorShape(aclTensorDesc *desc, int numDims, const int64_t *dims
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dims);
 
     desc->storageDims.clear();
-    for (size_t i = 0U; i < numDims; ++i) {
+    for (int32_t i = 0; i < static_cast<int32_t>(numDims); ++i) {
         desc->storageDims.push_back(*(dims + i));
     }
 
