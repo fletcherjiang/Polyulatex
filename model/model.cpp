@@ -32,11 +32,11 @@
 using namespace std;
 
 namespace {
-constexpr size_t MIN_OUTPUT_SHAPE_INFO_SIZE = 2;
+constexpr size_t MIN_OUTPUT_SHAPE_INFO_SIZE = 2U;
 constexpr size_t MAX_OUTPUT_SHAPE_INFO_SIZE = MIN_OUTPUT_SHAPE_INFO_SIZE + ACL_MAX_DIM_CNT;
-constexpr size_t DYNAMIC_BATCH_SIZE = 1;
-constexpr size_t DYNAMIC_HW_SIZE = 2;
-constexpr size_t TENSOR_NAME_ATTR_NUM = 5;
+constexpr size_t DYNAMIC_BATCH_SIZE = 1U;
+constexpr size_t DYNAMIC_HW_SIZE = 2U;
+constexpr size_t TENSOR_NAME_ATTR_NUM = 5U;
 
 constexpr const char *TENSOR_NAME_PREFIX = "acl";
 constexpr const char *TENSOR_INPUT_STR = "input";
@@ -74,12 +74,12 @@ aclError aclmdlDestroyDesc(aclmdlDesc *modelDesc)
     return ACL_SUCCESS;
 }
 
-static aclError ParseBatchInfo(aclmdlDesc *modelDesc, int32_t dynamicType, const vector<vector<int64_t>> &batchInfo)
+static aclError ParseBatchInfo(aclmdlDesc * const modelDesc, const int32_t dynamicType, const vector<vector<int64_t>> &batchInfo)
 {
     uint32_t modelId = modelDesc->modelId;
     if (dynamicType == static_cast<int32_t>(ge::DYNAMIC_DIMS)) { // dynamic dims, size can be [1, 4]
         size_t dimCount = batchInfo[0].size();
-        for (size_t i = 0; i < batchInfo.size(); ++i) {
+        for (size_t i = 0U; i < batchInfo.size(); ++i) {
             if (batchInfo[i].size() != dimCount) {
                 ACL_LOG_INNER_ERROR("[Check][Size]Get dynamic model info invalid, model id[%u], one dim count is %zu "
                     "while another is %zu", modelId, dimCount, batchInfo[i].size());
@@ -87,13 +87,13 @@ static aclError ParseBatchInfo(aclmdlDesc *modelDesc, int32_t dynamicType, const
                 return ACL_ERROR_GE_FAILURE;
             }
             vector<uint64_t> oneDims;
-            for (size_t j = 0; j < dimCount; ++j) {
+            for (size_t j = 0U; j < dimCount; ++j) {
                 oneDims.push_back(static_cast<uint64_t>(batchInfo[i][j]));
             }
             modelDesc->dynamicDims.push_back(oneDims);
         }
     } else if (batchInfo[0].size() == DYNAMIC_BATCH_SIZE) { // dynamic batch,size is 1
-        for (size_t i = 0; i < batchInfo.size(); ++i) {
+        for (size_t i = 0U; i < batchInfo.size(); ++i) {
             if (batchInfo[i].size() != DYNAMIC_BATCH_SIZE) {
                 ACL_LOG_INNER_ERROR("[Check][Size]get dynamic model info invalid, model id[%u]", modelId);
                 modelDesc->dynamicBatch.clear();
@@ -102,7 +102,7 @@ static aclError ParseBatchInfo(aclmdlDesc *modelDesc, int32_t dynamicType, const
             modelDesc->dynamicBatch.push_back(static_cast<uint64_t>(batchInfo[i][0]));
         }
     } else if (batchInfo[0].size() == DYNAMIC_HW_SIZE) { // dynamic hw,size is 2
-        for (size_t i = 0; i < batchInfo.size(); ++i) {
+        for (size_t i = 0U; i < batchInfo.size(); ++i) {
             if (batchInfo[i].size() != DYNAMIC_HW_SIZE) { // dynamic hw,size is 2
                 ACL_LOG_INNER_ERROR("[Check][Size]get dynamic model info invalid, model id[%u]", modelId);
                 modelDesc->dynamicHW.clear();
@@ -179,7 +179,7 @@ static aclError GetModelOutputShapeInfo(aclmdlDesc *modelDesc)
         // acl converts string like "0:0:1,3,224,224" to vector<int64_t>
         for (auto &strIt : it) {
             if ((strIt >= '0') && (strIt <= '9')) { // numeric character
-                val = val * 10 + static_cast<int64_t>(strIt - '0'); // character to number
+                val = (val * 10) + static_cast<int64_t>(strIt - '0'); // character to number
             } else if (strIt == '-') { // '-' represents that dynamic model has static output
                 negativeFlag = -1;
                 ACL_LOG_DEBUG("dynamic model include static output");
@@ -207,7 +207,7 @@ static aclError ModelLoadFromFileWithMem(const char *modelPath, uint32_t *modelI
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelId);
 
     ge::GeExecutor executor;
-    uint32_t id = 0;
+    uint32_t id = 0U;
     ge::ModelData data;
     std::string path(modelPath);
     ACL_LOG_INFO("call ge interface executor.LoadDataFromFile, workSize[%zu], weightSize[%zu]",
@@ -242,13 +242,13 @@ static aclError ModelLoadFromMemWithMem(const void *model, size_t modelSize, uin
         workSize, weightSize, priority);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(model);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelId);
-    if (modelSize == 0) {
+    if (modelSize == 0U) {
         ACL_LOG_INNER_ERROR("[Check][ModelSize]modelSize[%zu] is invalid, should not be zero", modelSize);
         return ACL_ERROR_INVALID_PARAM;
     }
 
     ge::GeExecutor geExecutor;
-    uint32_t id = 0;
+    uint32_t id = 0U;
     ge::ModelData modelData;
     modelData.model_data = const_cast<void *>(model);
     modelData.model_len = modelSize;
@@ -277,14 +277,14 @@ static aclError ModelLoadFromFileWithQ(const char *modelPath, uint32_t *modelId,
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(inputQ);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(outputQ);
 
-    if ((inputQNum == 0) || (outputQNum == 0)) {
+    if ((inputQNum == 0U) || (outputQNum == 0U)) {
         ACL_LOG_INNER_ERROR("[Check][QNum]inputQNum[%zu] or outputQNum[%zu] is invalid, can't be zero",
             inputQNum, outputQNum);
         return ACL_ERROR_INVALID_PARAM;
     }
 
     ge::GeExecutor geExecutor;
-    uint32_t id = 0;
+    uint32_t id = 0U;
     ge::ModelData modelData;
     std::string path(modelPath);
     ACL_LOG_INFO("call ge interface executor.LoadDataFromFile");
@@ -323,14 +323,14 @@ static aclError ModelLoadFromMemWithQ(const void *model, size_t modelSize, uint3
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(modelId);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(inputQ);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(outputQ);
-    if ((modelSize == 0) || (inputQNum == 0) || (outputQNum == 0)) {
+    if ((modelSize == 0U) || (inputQNum == 0U) || (outputQNum == 0U)) {
         ACL_LOG_INNER_ERROR("[Check][Params]modelSize[%zu] or inputQNum[%zu] or outputQNum[%zu] is invalid, "
             "can't be zero", modelSize, inputQNum, outputQNum);
         return ACL_ERROR_INVALID_PARAM;
     }
 
     ge::GeExecutor executor;
-    uint32_t id = 0;
+    uint32_t id = 0U;
     ge::ModelData data;
 
     data.model_data = const_cast<void *>(model);
@@ -381,10 +381,10 @@ aclError aclmdlGetDesc(aclmdlDesc *modelDesc, uint32_t modelId)
         return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
 
-    for (size_t i = 0; i < inputDesc.size(); ++i) {
+    for (size_t i = 0U; i < inputDesc.size(); ++i) {
         ge::AscendString inputName;
         aclmdlTensorDesc tensorDesc;
-        tensorDesc.size = inputDesc[i].GetSize();
+        tensorDesc.size = static_cast<size_t>(inputDesc[i].GetSize());
         ge::graphStatus ret = inputDesc[i].GetName(inputName);
         if (ret != ge::GRAPH_SUCCESS) {
             ACL_LOG_WARN("the %zu input tensor GetName failed.", i);
@@ -405,10 +405,10 @@ aclError aclmdlGetDesc(aclmdlDesc *modelDesc, uint32_t modelId)
         modelDesc->inputDesc.push_back(tensorDesc);
     }
 
-    for (size_t i = 0; i < outputDesc.size(); ++i) {
+    for (size_t i = 0U; i < outputDesc.size(); ++i) {
         ge::AscendString outputName;
         aclmdlTensorDesc tensorDesc;
-        tensorDesc.size = outputDesc[i].GetSize();
+        tensorDesc.size = static_cast<size_t>(outputDesc[i].GetSize());
         ge::graphStatus ret = outputDesc[i].GetName(outputName);
         if (ret != ge::GRAPH_SUCCESS) {
             ACL_LOG_WARN("the %zu output tensor GetName failed.", i);
@@ -452,7 +452,7 @@ size_t aclmdlGetNumInputs(aclmdlDesc *modelDesc)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if (modelDesc == nullptr) {
-        return 0;
+        return 0U;
     }
 
     return modelDesc->inputDesc.size();
@@ -462,7 +462,7 @@ size_t aclmdlGetNumOutputs(aclmdlDesc *modelDesc)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
     if (modelDesc == nullptr) {
-        return 0;
+        return 0U;
     }
 
     return modelDesc->outputDesc.size();
@@ -472,7 +472,7 @@ static size_t aclmdlGetTensorSize(aclmdlTensorDesc &tensorDesc, size_t index)
 {
     std::vector<int64_t> &dims = tensorDesc.dims;
     bool needCalcByMaxShapeRange = false;
-    for (size_t i = 0; i < dims.size(); ++i) {
+    for (size_t i = 0U; i < dims.size(); ++i) {
         if (dims[i] < 0) {
             needCalcByMaxShapeRange = true;
             break;
@@ -487,15 +487,15 @@ static size_t aclmdlGetTensorSize(aclmdlTensorDesc &tensorDesc, size_t index)
         std::vector<std::pair<int64_t, int64_t>> &shapeRanges = tensorDesc.shapeRanges;
         size_t elementTypeSize = aclDataTypeSize(tensorDesc.dataType);
         size_t outputSizeByMaxShapeRange = elementTypeSize;
-        for (size_t i = 0; i < shapeRanges.size(); ++i) {
+        for (size_t i = 0U; i < shapeRanges.size(); ++i) {
             if (shapeRanges[i].second <= 0) {
                 ACL_LOG_INFO("max shape of shapeRanges[%zu] is [%ld], index[%zu]",
                              i, shapeRanges[i].second, index);
-                return 0;
+                return 0U;
             }
             if (acl::CheckSizeTMultiOverflow(outputSizeByMaxShapeRange, static_cast<size_t>(shapeRanges[i].second),
                                              outputSizeByMaxShapeRange) == ACL_ERROR_FAILURE) {
-                return 0;
+                return 0U;
             }
         }
         return outputSizeByMaxShapeRange;
@@ -508,7 +508,7 @@ size_t aclmdlGetInputSizeByIndex(aclmdlDesc *modelDesc, size_t index)
 {
     if ((modelDesc == nullptr) || (index >= modelDesc->inputDesc.size())) {
         ACL_LOG_INNER_ERROR("input param is invalid, modelDesc[%p], index[%zu]", modelDesc, index);
-        return 0;
+        return 0U;
     }
 
     aclmdlTensorDesc &tensorDesc = modelDesc->inputDesc[index];
@@ -519,7 +519,7 @@ size_t aclmdlGetOutputSizeByIndex(aclmdlDesc *modelDesc, size_t index)
 {
     if ((modelDesc == nullptr) || (index >= modelDesc->outputDesc.size())) {
         ACL_LOG_INNER_ERROR("input param is invalid, index[%zu]", index);
-        return 0;
+        return 0U;
     }
     aclmdlTensorDesc &tensorDesc = modelDesc->outputDesc[index];
     return aclmdlGetTensorSize(tensorDesc, index);
@@ -538,7 +538,7 @@ aclError aclmdlDestroyDataset(const aclmdlDataset *dataset)
     ACL_STAGES_REG(acl::ACL_STAGE_DESTROY, acl::ACL_STAGE_DEFAULT);
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_DATASET);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataset);
-    for (size_t i = 0; i < dataset->blobs.size(); ++i) {
+    for (size_t i = 0U; i < dataset->blobs.size(); ++i) {
         ACL_DELETE_ARRAY_AND_SET_NULL((const_cast<aclmdlDataset *>(dataset))->blobs[i].tensorDesc);
     }
     ACL_DELETE_AND_SET_NULL(dataset);
@@ -564,7 +564,7 @@ size_t aclmdlGetDatasetNumBuffers(const aclmdlDataset *dataset)
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}),
             std::vector<std::string>({"dataset"}));
-        return 0;
+        return 0U;
     }
 
     return dataset->blobs.size();
@@ -635,7 +635,7 @@ aclError aclmdlLoadFromFile(const char *modelPath, uint32_t *modelId)
     ACL_PROFILING_REG(ACL_PROF_FUNC_MODEL);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_LOAD_UNLOAD_MODEL);
     ACL_LOG_INFO("start to execute aclmdlLoadFromFile");
-    aclError ret = ModelLoadFromFileWithMem(modelPath, modelId, nullptr, 0, nullptr, 0, 0);
+    aclError ret = ModelLoadFromFileWithMem(modelPath, modelId, nullptr, 0U, nullptr, 0U, 0U);
     if (ret != ACL_SUCCESS) {
         return ret;
     }
@@ -667,7 +667,7 @@ aclError aclmdlLoadFromMem(const void *model, size_t modelSize, uint32_t *modelI
     ACL_STAGES_REG(acl::ACL_STAGE_LOAD, acl::ACL_STAGE_DEFAULT);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_LOAD_UNLOAD_MODEL);
     ACL_LOG_INFO("start to execute aclmdlLoadFromMem, modelSize[%zu]", modelSize);
-    aclError ret = ModelLoadFromMemWithMem(model, modelSize, modelId, nullptr, 0, nullptr, 0, 0);
+    aclError ret = ModelLoadFromMemWithMem(model, modelSize, modelId, nullptr, 0U, nullptr, 0U, 0U);
     if (ret != ACL_SUCCESS) {
         return ret;
     }
@@ -733,14 +733,14 @@ aclError aclmdlLoadFromMemWithQ(const void *model, size_t modelSize, uint32_t *m
 
 static void SetInputData(const vector<AclModelTensor> &blobs, vector<ge::GeTensorDesc> &inputGeDesc, bool &isDynamic)
 {
-    for (size_t i = 0; i < blobs.size(); ++i) {
+    for (size_t i = 0U; i < blobs.size(); ++i) {
         if (blobs[i].tensorDesc != nullptr) {
             isDynamic = true;
             break;
         }
     }
     if (isDynamic) {
-        for (size_t i = 0; i < blobs.size(); ++i) {
+        for (size_t i = 0U; i < blobs.size(); ++i) {
             if (blobs[i].tensorDesc != nullptr) {
                 ge::GeShape shape(blobs[i].tensorDesc->dims);
                 ge::GeTensorDesc geTensorDescTmp(shape);
@@ -763,9 +763,9 @@ aclError ModelExecute(uint32_t modelId, const aclmdlDataset *input,
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(output);
 
     ge::RunModelData inputData;
-    inputData.timeout = 0;
-    inputData.timestamp = 0;
-    inputData.index = 0;
+    inputData.timeout = 0U;
+    inputData.timestamp = 0U;
+    inputData.index = 0U;
     inputData.modelId = modelId;
 
     inputData.dynamic_batch_size = input->dynamicBatchSize;
@@ -775,7 +775,7 @@ aclError ModelExecute(uint32_t modelId, const aclmdlDataset *input,
     ACL_LOG_DEBUG("ModelExecute dynamic param: batch_size[%lu], height[%lu], width[%lu], dim_num[%zu]",
                   input->dynamicBatchSize, input->dynamicResolutionHeight, input->dynamicResolutionWidth,
                   input->dynamicDims.size());
-    for (size_t i = 0; i < input->blobs.size(); ++i) {
+    for (size_t i = 0U; i < input->blobs.size(); ++i) {
         ge::DataBuffer inputBuffer;
         auto dataBuffer = input->blobs[i].dataBuf;
         if (dataBuffer == nullptr) {
@@ -798,7 +798,7 @@ aclError ModelExecute(uint32_t modelId, const aclmdlDataset *input,
 
     ge::RunModelData outputData;
     outputData.modelId = modelId;
-    for (size_t i = 0; i < output->blobs.size(); ++i) {
+    for (size_t i = 0U; i < output->blobs.size(); ++i) {
         ge::DataBuffer outputBuffer;
         auto dataBuffer = output->blobs[i].dataBuf;
         if (dataBuffer == nullptr) {
@@ -826,7 +826,7 @@ aclError ModelExecute(uint32_t modelId, const aclmdlDataset *input,
     }
 
     if (dynamicFlag) {
-        for (size_t i = 0; i < output->blobs.size(); ++i) {
+        for (size_t i = 0U; i < output->blobs.size(); ++i) {
             if (output->blobs[i].tensorDesc != nullptr) {
                 aclDestroyTensorDesc(output->blobs[i].tensorDesc);   
             }
@@ -834,7 +834,7 @@ aclError ModelExecute(uint32_t modelId, const aclmdlDataset *input,
         }
     }
 
-    for (size_t i = 0; i < outputGeDesc.size(); ++i) {
+    for (size_t i = 0U; i < outputGeDesc.size(); ++i) {
         if (output->blobs[i].tensorDesc != nullptr) {
             output->blobs[i].tensorDesc->dims.clear();
             std::vector<int64_t> dims = outputGeDesc[i].GetShape().GetDims();
@@ -967,7 +967,7 @@ aclError aclmdlSetDynamicBatchSize(uint32_t modelId, aclmdlDataset *dataset, siz
         modelId, index, batchSize);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataset);
 
-    if (batchSize == 0) {
+    if (batchSize == 0U) {
         ACL_LOG_INNER_ERROR("[Check][Batchsize]input param[batchSize] invalid, batchSize can't be zero");
         return ACL_ERROR_INVALID_PARAM;
     }
@@ -986,8 +986,8 @@ aclError aclmdlSetDynamicBatchSize(uint32_t modelId, aclmdlDataset *dataset, siz
     uint64_t memSize = aclGetDataBufferSizeV2(buf);
 
     dataset->dynamicBatchSize = batchSize;
-    dataset->dynamicResolutionHeight = 0;
-    dataset->dynamicResolutionWidth = 0;
+    dataset->dynamicResolutionHeight = 0U;
+    dataset->dynamicResolutionWidth = 0U;
     ACL_LOG_DEBUG("call ge interface executor.SetDynamicBatchSize, batchSize[%lu]", batchSize);
     ge::GeExecutor executor;
     ge::Status ret = executor.SetDynamicBatchSize(modelId, devPtr, memSize, batchSize);
@@ -1010,7 +1010,7 @@ aclError aclmdlSetDynamicHWSize(uint32_t modelId, aclmdlDataset *dataset, size_t
         modelId, index, height, width);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataset);
 
-    if ((height == 0) || (width == 0)) {
+    if ((height == 0U) || (width == 0U)) {
         ACL_LOG_INNER_ERROR("[Check][Params]height[%lu] or width[%lu] is invalid, can't be zero.", height, width);
         return ACL_ERROR_INVALID_PARAM;
     }
@@ -1029,7 +1029,7 @@ aclError aclmdlSetDynamicHWSize(uint32_t modelId, aclmdlDataset *dataset, size_t
     }
     uint64_t memSize = aclGetDataBufferSizeV2(buffer);
 
-    dataset->dynamicBatchSize = 0;
+    dataset->dynamicBatchSize = 0U;
     dataset->dynamicResolutionHeight = height;
     dataset->dynamicResolutionWidth = width;
     ACL_LOG_DEBUG("call ge interface executor.SetDynamicImageSize, height[%lu],width[%lu]", height, width);
@@ -1051,7 +1051,7 @@ aclError aclmdlSetInputDynamicDims(uint32_t modelId, aclmdlDataset *dataset, siz
     ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataset);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dims);
-    if (dims->dimCount == 0) {
+    if (dims->dimCount == 0U) {
         ACL_LOG_ERROR("[Check][dimCount]dimCount[%u] is invalid, can't be zero.", dims->dimCount);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("dimCount[%u] can't be zero", dims->dimCount);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
@@ -1076,12 +1076,12 @@ aclError aclmdlSetInputDynamicDims(uint32_t modelId, aclmdlDataset *dataset, siz
     }
     uint64_t memSize = aclGetDataBufferSizeV2(buffer);
 
-    dataset->dynamicBatchSize = 0;
-    dataset->dynamicResolutionHeight = 0;
-    dataset->dynamicResolutionWidth = 0;
+    dataset->dynamicBatchSize = 0U;
+    dataset->dynamicResolutionHeight = 0U;
+    dataset->dynamicResolutionWidth = 0U;
     dataset->dynamicDims.clear();
     vector<uint64_t> curAllDims;
-    for (size_t i = 0; i < static_cast<std::size_t>(dims->dimCount); ++i) {
+    for (size_t i = 0U; i < static_cast<std::size_t>(dims->dimCount); ++i) {
         curAllDims.push_back(dims->dims[i]);
     }
     ACL_LOG_DEBUG("Call ge interface executor.SetDynamicDims, dimCount[%u]", dims->dimCount);
@@ -1110,13 +1110,13 @@ aclError aclmdlSetInputDynamicDims(uint32_t modelId, aclmdlDataset *dataset, siz
 // get real tensor name from modelDesc, it will return nullptr if tensorName isn't in modelDesc
 static const char *GetRealTensorName(const aclmdlDesc *modelDesc, const string &tensorName)
 {
-    for (size_t index = 0; index < modelDesc->inputDesc.size(); ++index) {
+    for (size_t index = 0U; index < modelDesc->inputDesc.size(); ++index) {
         if (modelDesc->inputDesc[index].name == tensorName) {
             return modelDesc->inputDesc[index].name.c_str();
         }
     }
 
-    for (size_t index = 0; index < modelDesc->outputDesc.size(); ++index) {
+    for (size_t index = 0U; index < modelDesc->outputDesc.size(); ++index) {
         if (modelDesc->outputDesc[index].name == tensorName) {
             return modelDesc->outputDesc[index].name.c_str();
         }
@@ -1132,19 +1132,19 @@ static bool IsConvertTensorNameLegal(const aclmdlDesc *modelDesc, const string &
 // current conversion tensor name illegal needs to be transformed
 static bool TransConvertTensorNameToLegal(const aclmdlDesc *modelDesc, string &tensorName)
 {
-    size_t depth = 0;
+    size_t depth = 0U;
     tensorName = tensorName + "_";
     queue<string> q;
     q.push(tensorName);
-    constexpr size_t maxDepth = 3;
+    constexpr size_t maxDepth = 3U;
     while (!q.empty()) {
         if (depth == maxDepth) {
             ACL_LOG_INFO("reach max depth[%zu], cannot generate legal convert tensor name", maxDepth);
-            tensorName = tensorName.substr(0, tensorName.size() - 1);
+            tensorName = tensorName.substr(0U, tensorName.size() - 1U);
             return false;
         }
         size_t len = q.size();
-        for (size_t index = 0; index < len; ++index) {
+        for (size_t index = 0U; index < len; ++index) {
             string curTensorName = q.front();
             q.pop();
             for (char c = 'a'; c <= 'z'; ++c) {
@@ -1154,7 +1154,7 @@ static bool TransConvertTensorNameToLegal(const aclmdlDesc *modelDesc, string &t
                     return true;
                 }
                 q.push(curTensorName);
-                curTensorName = curTensorName.substr(0, curTensorName.size() - 1);
+                curTensorName = curTensorName.substr(0U, curTensorName.size() - 1U);
             }
         }
         depth++;
@@ -1181,7 +1181,7 @@ static aclError GetTensorDescNameToDims(const aclmdlDesc *modelDesc, const strin
 {
     size_t dimsNameLen = sizeof(dims->name);
     std::string tensorName;
-    if ((realName.size() + 1) > dimsNameLen) {
+    if ((realName.size() + 1U) > dimsNameLen) {
         // use conversion name because realname is too long
         ACL_LOG_INFO("use conversion name because real tensor name is over than %zu", dimsNameLen);
         GetConvertTensorName(modelDesc, index, tensorType, tensorName);
@@ -1245,7 +1245,7 @@ static aclError GetDims(const aclmdlDesc *modelDesc, TensorType tensorType, Dims
     }
     dims->dimCount = dimSize;
 
-    for (size_t i = 0; i < dimSize; ++i) {
+    for (size_t i = 0U; i < dimSize; ++i) {
         dims->dims[i] = tensorDims[i];
     }
 
@@ -1303,7 +1303,7 @@ static aclError GetCurGearIndex(const aclmdlDesc *modelDesc, std::vector<uint64_
     if (dynamicType == static_cast<int32_t>(ge::DYNAMIC_DIMS)) { // dynamic dims, type is 3
         ACL_LOG_DEBUG("Get dynamic dims gear index, dynamicType[%d], modelId[%u]",
                       dynamicType, modelDesc->modelId);
-        for (size_t i = 0; i < modelDesc->dynamicDims.size(); ++i) {
+        for (size_t i = 0U; i < modelDesc->dynamicDims.size(); ++i) {
             // shapeInfo is current dims
             if (shapeInfo == modelDesc->dynamicDims[i]) {
                 curGearIndex = i;
@@ -1315,7 +1315,7 @@ static aclError GetCurGearIndex(const aclmdlDesc *modelDesc, std::vector<uint64_
         if (shapeSize == DYNAMIC_BATCH_SIZE) { // dynamic batch, type is 1
             ACL_LOG_DEBUG("Get dynamic batch gear index, dynamicType[%d], modelId[%u]", dynamicType,
                           modelDesc->modelId);
-            for (size_t i = 0; i < modelDesc->dynamicBatch.size(); ++i) {
+            for (size_t i = 0U; i < modelDesc->dynamicBatch.size(); ++i) {
                 // shapeInfo[0] is current batch size
                 if (shapeInfo[0] == modelDesc->dynamicBatch[i]) {
                     curGearIndex = i;
@@ -1324,7 +1324,7 @@ static aclError GetCurGearIndex(const aclmdlDesc *modelDesc, std::vector<uint64_
             }
         } else if (shapeSize == DYNAMIC_HW_SIZE) { // dynamic hw, type is 2
             ACL_LOG_DEBUG("Get dynamic hw gear index, dynamicType[%d], modelId[%u]", dynamicType, modelDesc->modelId);
-            for (size_t i = 0; i < modelDesc->dynamicHW.size(); ++i) {
+            for (size_t i = 0U; i < modelDesc->dynamicHW.size(); ++i) {
                 // shapeInfo is current hw
                 if (shapeInfo == modelDesc->dynamicHW[i]) {
                     curGearIndex = i;
@@ -1355,10 +1355,11 @@ static aclError GetCurOuputShapeInfo(const aclmdlDesc *modelDesc, size_t index,
         if (((static_cast<int64_t>(curGearIndex) == it[0]) || (it[0] == -1)) &&
             (static_cast<int64_t>(index) == it[1])) {
             int32_t idx = 0;
-            for (size_t i = 2; i < it.size(); ++i) { // from the third element is shape info
-                dims->dims[idx++] = it[i];
+            for (size_t i = 2U; i < it.size(); ++i) { // from the third element is shape info
+                dims->dims[idx] = it[i];
+                idx++;
             }
-            dims->dimCount = it.size() - 2;
+            dims->dimCount = it.size() - 2U;
             const aclmdlTensorDesc &tensorDesc = modelDesc->outputDesc[index];
             auto ret = GetTensorDescNameToDims(modelDesc, tensorDesc.name, OUTPUT_TENSOR_TYPE, index, dims);
             if (ret != ACL_SUCCESS) {
@@ -1397,10 +1398,10 @@ aclError aclmdlGetCurOutputDims(const aclmdlDesc *modelDesc, size_t index, aclmd
     // static model or not set dynamic shape info, dynamic type is 0, other value is invalid
     aclError aclRet;
     size_t shapeSize = geShapeInfo.size();
-    if (dynamicType != static_cast<int32_t>(ge::DYNAMIC_DIMS) && shapeSize > 2) {
+    if ((dynamicType != static_cast<int32_t>(ge::DYNAMIC_DIMS)) && (shapeSize > 2)) {
         ACL_LOG_INNER_ERROR("[Check][dynamicType]shapeSize[%zu] is invalid, modelId[%u]", shapeSize, modelId);
         return ACL_ERROR_GE_FAILURE;
-    } else if (shapeSize == 0) {
+    } else if (shapeSize == 0U) {
         ACL_LOG_DEBUG("Dynamic type is 0, model[%u] is static or not set dynamic shape info", modelId);
         aclRet = GetDims(modelDesc, OUTPUT_TENSOR_TYPE, DIMS_TYPE_V1, index, dims);
         if (aclRet != ACL_SUCCESS) {
@@ -1408,9 +1409,12 @@ aclError aclmdlGetCurOutputDims(const aclmdlDesc *modelDesc, size_t index, aclmd
                 aclRet, index, modelId);
         }
         return aclRet;
+    }else {
+        ;
     }
 
-    size_t curGearIndex = 0;
+
+    size_t curGearIndex = 0U;
     std::vector<uint64_t> shapeInfo;
     for (auto &it : geShapeInfo) {
         shapeInfo.emplace_back(static_cast<uint64_t>(it));
@@ -1607,7 +1611,7 @@ static aclError aclmdlGetIndexByName(const std::vector<aclmdlTensorDesc> &desc, 
     ACL_REQUIRES_NOT_NULL(index);
 
     std::string tensorName(name);
-    for (size_t i = 0; i < desc.size(); ++i) {
+    for (size_t i = 0U; i < desc.size(); ++i) {
         if (desc[i].name == tensorName) {
             *index = i;
             ACL_LOG_DEBUG("success to get tensor[%s] index[%zu]", name, *index);
@@ -1663,12 +1667,12 @@ aclError aclmdlGetDynamicBatch(const aclmdlDesc *modelDesc, aclmdlBatch *batch)
     }
 
     batch->batchCount = batchCnt;
-    if (batchCnt == 0) {
+    if (batchCnt == 0U) {
         ACL_LOG_WARN("batch count is 0");
         return ACL_SUCCESS;
     }
 
-    for (size_t i = 0; i < batchCnt; ++i) {
+    for (size_t i = 0U; i < batchCnt; ++i) {
         batch->batch[i] = modelDesc->dynamicBatch[i];
     }
 
@@ -1691,13 +1695,13 @@ aclError aclmdlGetDynamicHW(const aclmdlDesc *modelDesc, size_t index, aclmdlHW 
     }
 
     hw->hwCount = hwCnt;
-    if (hwCnt == 0) {
+    if (hwCnt == 0U) {
         ACL_LOG_WARN("hw count is 0");
         return ACL_SUCCESS;
     }
 
-    for (size_t i = 0; i < hwCnt; ++i) {
-        for (size_t j = 0; j < 2; ++j) { // dynamic hw,size is 2
+    for (size_t i = 0U; i < hwCnt; ++i) {
+        for (size_t j = 0U; j < 2U; ++j) { // dynamic hw,size is 2
             hw->hw[i][j] = modelDesc->dynamicHW[i][j];
         }
     }
@@ -1725,8 +1729,8 @@ aclError aclmdlGetInputDynamicGearCount(const aclmdlDesc *modelDesc, size_t inde
         return ACL_ERROR_STORAGE_OVER_LIMIT;
     }
 
-    if (dimCnt == 0) {
-        *gearCount = 0;
+    if (dimCnt == 0U) {
+        *gearCount = 0U;
         ACL_LOG_WARN("Gear count is 0");
         return ACL_SUCCESS;
     }
@@ -1759,15 +1763,16 @@ aclError aclmdlGetInputDynamicDims(const aclmdlDesc *modelDesc, size_t index, ac
         }
     }
 
-    for (size_t i = 0; i < modelDesc->dynamicDims.size(); ++i) {
-        size_t begIndex = 0;
-        for (size_t j = 0; j < allRawDims.size(); ++j) {
+    for (size_t i = 0U; i < modelDesc->dynamicDims.size(); ++i) {
+        size_t begIndex = 0U;
+        for (size_t j = 0U; j < allRawDims.size(); ++j) {
             if (allRawDims[j] < 0) {
                 if (begIndex >= modelDesc->dynamicDims[i].size()) {
                     ACL_LOG_INNER_ERROR("[Check][begIndex]User input data index[%zu] shape size overflow", index);
                     return ACL_ERROR_INVALID_PARAM;
                 }
-                dims[i].dims[j] = modelDesc->dynamicDims[i][begIndex++];
+                dims[i].dims[j] = modelDesc->dynamicDims[i][begIndex];
+                begIndex++;
             } else {
                 dims[i].dims[j] = allRawDims[j];
             }
@@ -1826,13 +1831,13 @@ aclError aclmdlCreateAndGetOpDesc(uint32_t deviceId, uint32_t streamId, uint32_t
         return ACL_ERROR_FAILURE;
     }
 
-    for (size_t idx = 0; idx < inputNum; ++idx) {
+    for (size_t idx = 0U; idx < inputNum; ++idx) {
         inputDesc[idx]->format = static_cast<aclFormat>(opDescInfo.input_format[idx]);
         inputDesc[idx]->dataType = static_cast<aclDataType>(opDescInfo.input_data_type[idx]);
         inputDesc[idx]->dims.assign(opDescInfo.input_shape[idx].begin(), opDescInfo.input_shape[idx].end());
         inputDesc[idx]->address = opDescInfo.input_addrs[idx];
     }
-    for (size_t idx = 0; idx < outputNum; ++idx) {
+    for (size_t idx = 0U; idx < outputNum; ++idx) {
         outputDesc[idx]->format = static_cast<aclFormat>(opDescInfo.output_format[idx]);
         outputDesc[idx]->dataType = static_cast<aclDataType>(opDescInfo.output_data_type[idx]);
         outputDesc[idx]->dims.assign(opDescInfo.output_shape[idx].begin(), opDescInfo.output_shape[idx].end());
@@ -1860,13 +1865,13 @@ aclError aclmdlLoadWithConfig(const aclmdlConfigHandle *handle, uint32_t *modelI
     switch (handle->mdlLoadType) {
         case ACL_MDL_LOAD_FROM_FILE:
             return ModelLoadFromFileWithMem(handle->loadPath.c_str(), modelId,
-                nullptr, 0, nullptr, 0, handle->priority);
+                nullptr, 0U, nullptr, 0U, handle->priority);
         case ACL_MDL_LOAD_FROM_FILE_WITH_MEM:
             return ModelLoadFromFileWithMem(handle->loadPath.c_str(), modelId, handle->workPtr,
                 handle->workSize, handle->weightPtr, handle->weightSize, handle->priority);
         case ACL_MDL_LOAD_FROM_MEM:
             return ModelLoadFromMemWithMem(handle->mdlAddr, handle->mdlSize, modelId,
-                nullptr, 0, nullptr, 0, handle->priority);
+                nullptr, 0U, nullptr, 0U, handle->priority);
         case ACL_MDL_LOAD_FROM_MEM_WITH_MEM:
             return ModelLoadFromMemWithMem(handle->mdlAddr, handle->mdlSize,
                 modelId, handle->workPtr, handle->workSize,
@@ -1894,7 +1899,7 @@ static const char *TransTensorNameToReal(const aclmdlDesc *modelDesc, const stri
 {
     vector<string> valArr;
     acl::string_utils::Split(tensorName, '_', valArr);
-    if ((valArr.size() != TENSOR_NAME_ATTR_NUM) && (valArr.size() != TENSOR_NAME_ATTR_NUM + 1)) {
+    if ((valArr.size() != TENSOR_NAME_ATTR_NUM) && (valArr.size() != (TENSOR_NAME_ATTR_NUM + 1))) {
         ACL_LOG_INNER_ERROR("[Check][Params]tensorName[%s] cannot be devided into %zu parts",
             tensorName.c_str(), TENSOR_NAME_ATTR_NUM);
         return nullptr;
@@ -1919,19 +1924,21 @@ static const char *TransTensorNameToReal(const aclmdlDesc *modelDesc, const stri
     if (acl::string_utils::IsDigit(valArr[4])) {
         auto index = strtoul(valArr[4].c_str(), nullptr, base);
         if (valArr[3] == TENSOR_INPUT_STR) {
-            if (index >= modelDesc->inputDesc.size() || index < 0) {
+            if ((index >= modelDesc->inputDesc.size()) || (index < 0U)) {
                 ACL_LOG_INNER_ERROR("[Check][index]inputDesc index[%lu] should be in [0, %zu), tensorName[%s]",
                     index, modelDesc->inputDesc.size(), tensorName.c_str());
                 return nullptr;
             }
             return modelDesc->inputDesc[index].name.c_str();
         } else if (valArr[3] == TENSOR_OUTPUT_STR) {
-            if (index >= modelDesc->outputDesc.size() || index < 0) {
+            if ((index >= modelDesc->outputDesc.size()) || (index < 0U)) {
                 ACL_LOG_INNER_ERROR("[Check][index]outputDesc index[%lu] should be in [0, %zu), tensorName[%s]", index,
                     modelDesc->outputDesc.size(), tensorName.c_str());
                 return nullptr;
             }
             return modelDesc->outputDesc[index].name.c_str();
+        } else{
+            ;
         }
     }
 
