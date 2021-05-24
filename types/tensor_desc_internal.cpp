@@ -114,7 +114,7 @@ std::string DebugConstData(const bool isConst, const void* const constDataBuf, c
     if (isConst) {
         ss << " , isConst = true, Const Len = "<< (constDataLen / sizeof(int)) << " ,Const data = ";
         for (size_t i = 0U; i < (constDataLen / sizeof(int32_t)); ++i) {
-            ss <<  *((int32_t *)constDataBuf + i);
+            ss <<  *(static_cast<const int32_t*>(constDataBuf) + i);
             ss << ",";
         }
     }
