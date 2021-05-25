@@ -24,7 +24,6 @@ namespace acl {
 const char *const INVALID_PARAM_MSG = "EH0001";
 const char *const INVALID_NULL_POINTER_MSG = "EH0002";
 const char *const INVALID_PATH_MSG = "EH0003";
-const char *const INVALID_FILE_MSG = "EH0004";
 const char *const INVALID_AIPP_MSG = "EH0005";
 const char *const UNSUPPORTED_FEATURE_MSG = "EH0006";
 
@@ -33,7 +32,6 @@ const char *const ACL_STAGE_SET = "SET";
 const char *const ACL_STAGE_GET = "GET";
 const char *const ACL_STAGE_CREATE = "CREATE";
 const char *const ACL_STAGE_DESTROY = "DESTROY";
-const char *const ACL_STAGE_PROF = "PROF";
 const char *const ACL_STAGE_BLAS = "BLAS";
 const char *const ACL_STAGE_INFER = "INFER";
 const char *const ACL_STAGE_COMP = "COMP";
@@ -71,7 +69,7 @@ public:
     static std::string FormatStr(const char *fmt, ...);
 #if !defined(ENABLE_DVPP_INTERFACE) || defined(RUN_TEST)
     static void ReportInputError(std::string errorCode, const std::vector<std::string> &key = {},
-        const std::vector<std::string> &value = {});
+        const std::vector<std::string> &val = {});
 #else
 #endif
     static void ReportInputErrorWithChar(const char *const errorCode, const char *argNames[],
