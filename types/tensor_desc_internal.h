@@ -42,7 +42,6 @@ struct ACL_FUNC_VISIBILITY aclTensorDesc {
     aclTensorDesc(const aclTensorDesc &tensorDesc);
     aclTensorDesc() = default;
     ~aclTensorDesc() = default;
-    // TODO: private
     aclDataType dataType;
     aclFormat storageFormat = ACL_FORMAT_UNDEFINED;
     aclFormat format;
