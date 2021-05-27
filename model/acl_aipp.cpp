@@ -31,13 +31,6 @@
 
 
 namespace {
-#define FP16_IF_BOOL_EXEC(expr, exec_expr) \
-    { \
-        if ((expr)) { \
-            exec_expr; \
-        } \
-    }
-
 constexpr int16_t FP16_MAX_EXP = 0x001F;
 constexpr int16_t FP16_MAX_MAN = 0x03FF;
 constexpr int16_t FP16_MAN_HIDE_BIT = 0x0400;
@@ -88,14 +81,14 @@ static bool IsRoundOne(const uint64_t man, const uint16_t truncLen)
 
 static void Fp16Normalize(int16_t &expo, uint16_t &man)
 {
-    FP16_IF_BOOL_EXEC(expo >= FP16_MAX_EXP,
-                      expo = FP16_MAX_EXP - 1U;
-    man = FP16_MAX_MAN;
-    )
-    FP16_IF_BOOL_EXEC((expo == 0U) && (man == FP16_MAN_HIDE_BIT),
-                      expo++;
+    if (static_cast<int16_t>(expo) >= FP16_MAX_EXP) {
+        expo = static_cast<int16_t>(FP16_MAX_EXP) - 1U;
+        man = static_cast<uint16_t>(FP16_MAX_MAN);
+    }
+    if ((expo == 0) && (static_cast<int16_t>(man) == FP16_MAN_HIDE_BIT)) {
+        expo++;
         man = 0U;
-    )
+    }
 }
 
 struct Fp16Type {
@@ -133,46 +126,43 @@ struct Fp16Type {
 
         bool needRound = false;
         // Exponent overflow/NaN converts to signed inf/NaN
-        FP16_IF_BOOL_EXEC(eF > 0x8FU,
-            // 0x8Fu:142=127+15
+        // 0x8Fu:142=127+15
+        if (eF > 0x8FU) {
             eRet = static_cast<int16_t>(FP16_MAX_EXP - 1U);
             mRet = static_cast<uint16_t>(FP16_MAX_MAN);
-        )
-        FP16_IF_BOOL_EXEC(eF <= 0x70U,
-            // 0x70u:112=127-15 Exponent underflow converts to denormalized half or signed zero
+        }
+
+        // 0x70u:112=127-15 Exponent underflow converts to denormalized half or signed zero
+        if (eF <= 0x70U) {
             eRet = 0;
             if (eF >= 0x67U) {
-                // 0x67:103=127-24 Denormal
                 mF = (mF | FP32_MAN_HIDE_BIT);
                 const uint16_t shiftOut = static_cast<uint16_t>(FP32_MAN_LEN);
                 const uint64_t m_tmp = (static_cast<uint64_t>(mF)) << (eF - 0x67U);
-
                 needRound = IsRoundOne(m_tmp, shiftOut);
                 mRet = static_cast<uint16_t>(m_tmp >> shiftOut);
                 if (needRound) {
                     mRet++;
                 }
             } else if ((eF == 0x66U) && (mF > 0)) {
-                // 0x66:102 Denormal 0<f_v<min(Denormal)
                 mRet = 1U;
             } else {
                 mRet = 0U;
             }
-        )
-        FP16_IF_BOOL_EXEC((0x8FU >= eF) && (eF > 0x70U),
+        }
+
+        if ((0x8FU >= eF) && (eF > 0x70U)) {
             // Regular case with no overflow or underflow
             eRet = static_cast<int16_t>(eF - 0x70U);
-            needRound = IsRoundOne(mF, mLenDelta);
+            needRound = IsRoundOne(static_cast<uint64_t>(mF), static_cast<uint16_t>(mLenDelta));
             mRet = static_cast<uint16_t>(mF >> mLenDelta);
             if (needRound) {
                 mRet++;
             }
-
             if (mRet & static_cast<uint16_t>(FP16_MAN_HIDE_BIT)) {
                 eRet++;
             }
-        )
-
+        }
         Fp16Normalize(eRet, mRet);
         val =  (((sRet) << static_cast<uint16_t>(FP16_SIGN_INDEX)) |
                 ((static_cast<uint16_t>(eRet)) << FP16_MAN_LEN) |
@@ -879,12 +869,12 @@ static aclError CheckAippDataIndex(const uint32_t modelId, const size_t idx, con
 
 aclError aclmdlSetInputAIPP(uint32_t modelId,
                             aclmdlDataset *dataset,
-                            size_t index,
+                            size_t idx,
                             const aclmdlAIPP *aippParmsSet)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_MODEL);
     ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
-    ACL_LOG_DEBUG("start to execute aclmdlSetInputAIPP, modelId[%u], index[%zu]", modelId, index);
+    ACL_LOG_DEBUG("start to execute aclmdlSetInputAIPP, modelId[%u], index[%zu]", modelId, idx);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataset);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
     // check dynamic aipp index
@@ -894,31 +884,31 @@ aclError aclmdlSetInputAIPP(uint32_t modelId,
         ACL_LOG_INNER_ERROR("[Get][ModelDesc]get modelDesc fail, modelId[%u]", modelId);
         return mdlRet;
     }
-    mdlRet = CheckAippDataIndex(modelId, index, &modelDesc);
+    mdlRet = CheckAippDataIndex(modelId, idx, &modelDesc);
     if (mdlRet != ACL_SUCCESS) {
-        ACL_LOG_ERROR("[Check][AippData]Dynamic AIPP data index %zu is invalid, parameters verification failed", index);
-        const std::string errMsg = acl::AclErrorLogManager::FormatStr("index %zu is invalid", index);
+        ACL_LOG_ERROR("[Check][AippData]Dynamic AIPP data index %zu is invalid, parameters verification failed", idx);
+        const std::string errMsg = acl::AclErrorLogManager::FormatStr("index %zu is invalid", idx);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_AIPP_MSG, std::vector<std::string>({"param", "reason"}),
             std::vector<std::string>({"Dynamic AIPP data index", errMsg}));
         return mdlRet;
     }
 
-    mdlRet = GetAndCheckAippParams(modelId, modelDesc, index, aippParmsSet);
+    mdlRet = GetAndCheckAippParams(modelId, modelDesc, idx, aippParmsSet);
     if (mdlRet != ACL_SUCCESS) {
         ACL_LOG_ERROR("[Check][AippParams]Dynamic AIPP parameters is invalid, parameters verification failed");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_AIPP_MSG, std::vector<std::string>({"param", "reason"}),
             std::vector<std::string>({"parameters", "parameters verification failed"}));
         return mdlRet;
     }
-    const aclDataBuffer *buff = aclmdlGetDatasetBuffer(dataset, index);
+    const aclDataBuffer *buff = aclmdlGetDatasetBuffer(dataset, idx);
     if (buff == nullptr) {
-        ACL_LOG_INNER_ERROR("[Check][Buff]failed to get data buffer by index[%zu]", index);
+        ACL_LOG_INNER_ERROR("[Check][Buff]failed to get data buffer by index[%zu]", idx);
         return ACL_ERROR_INVALID_PARAM;
     }
 
     void *devPtr = aclGetDataBufferAddr(buff);
     if (devPtr == nullptr) {
-        ACL_LOG_INNER_ERROR("[Check][DevPtr]failed to get addr by index[%zu]", index);
+        ACL_LOG_INNER_ERROR("[Check][DevPtr]failed to get addr by index[%zu]", idx);
         return ACL_ERROR_INVALID_PARAM;
     }
     const uint64_t memSize = aclGetDataBufferSizeV2(buff);
@@ -939,54 +929,54 @@ aclError aclmdlSetInputAIPP(uint32_t modelId,
     return ACL_SUCCESS;
 }
 
-aclError aclmdlGetAippType(uint32_t modelId, size_t index, aclmdlInputAippType *type, size_t *dynamicAttachedDataIndex)
+aclError aclmdlGetAippType(uint32_t modelId, size_t idx, aclmdlInputAippType *type, size_t *dynamicAttachedDataIndex)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
-    ACL_LOG_INFO("start to execute aclmdlGetAippType, modelId[%u], index[%zu]", modelId, index);
+    ACL_LOG_INFO("start to execute aclmdlGetAippType, modelId[%u], index[%zu]", modelId, idx);
     *dynamicAttachedDataIndex = ACL_INVALID_NODE_INDEX;
     ge::GeExecutor executor;
     ge::InputAippType typeTmp;
-    const auto ret = executor.GetAippType(modelId, index, typeTmp, *dynamicAttachedDataIndex);
+    const auto ret = executor.GetAippType(modelId, idx, typeTmp, *dynamicAttachedDataIndex);
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Get][AippType]Get aipp type failed, ge result[%u]", ret);
         return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
     *type = static_cast<aclmdlInputAippType>(typeTmp);
-    ACL_LOG_INFO("successfully execute aclmdlGetAippType, modelId[%u], index[%zu]", modelId, index);
+    ACL_LOG_INFO("successfully execute aclmdlGetAippType, modelId[%u], index[%zu]", modelId, idx);
     return ACL_SUCCESS;
 }
 
 aclError aclmdlSetAIPPByInputIndex(uint32_t modelId,
                                    aclmdlDataset *dataset,
-                                   size_t index,
+                                   size_t idx,
                                    const aclmdlAIPP *aippParmsSet)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_MODEL);
     ACL_STAGES_REG(acl::ACL_STAGE_SET, acl::ACL_STAGE_DEFAULT);
-    ACL_LOG_INFO("start to execute aclmdlSetAIPPByInputIndex, modelId[%u], index[%zu]", modelId, index);
+    ACL_LOG_INFO("start to execute aclmdlSetAIPPByInputIndex, modelId[%u], index[%zu]", modelId, idx);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
-    if ((dataset == nullptr) || (index >= dataset->blobs.size())) {
-        ACL_LOG_ERROR("[Check][Dataset]input param is invalid, dataset[%p], index[%zu]", dataset, index);
-        const std::string errMsg = acl::AclErrorLogManager::FormatStr("dataset[%p], index[%zu]", dataset, index);
+    if ((dataset == nullptr) || (idx >= dataset->blobs.size())) {
+        ACL_LOG_ERROR("[Check][Dataset]input param is invalid, dataset[%p], index[%zu]", dataset, idx);
+        const std::string errMsg = acl::AclErrorLogManager::FormatStr("dataset[%p], index[%zu]", dataset, idx);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_AIPP_MSG, std::vector<std::string>({"param", "reason"}),
             std::vector<std::string>({"params", errMsg}));
         return ACL_ERROR_INVALID_PARAM;
     }
     aclmdlInputAippType type;
     size_t dynamicAttachedDataIndex = 0U;
-    const auto ret = aclmdlGetAippType(modelId, index, &type, &dynamicAttachedDataIndex);
+    const auto ret = aclmdlGetAippType(modelId, idx, &type, &dynamicAttachedDataIndex);
     if (ret != ACL_SUCCESS) {
         return ret;
     }
     if (type != ACL_DATA_WITH_DYNAMIC_AIPP) {
-        ACL_LOG_INNER_ERROR("[Check][Type]This %zu input has no dynamic aipp linked, modelId[%u]", index, modelId);
+        ACL_LOG_INNER_ERROR("[Check][Type]This %zu input has no dynamic aipp linked, modelId[%u]", idx, modelId);
         return ACL_ERROR_FAILURE;
     }
-    ACL_LOG_INFO("successfully execute aclmdlSetAIPPByInputIndex, modelId[%u], index[%zu]", modelId, index);
+    ACL_LOG_INFO("successfully execute aclmdlSetAIPPByInputIndex, modelId[%u], index[%zu]", modelId, idx);
     return aclmdlSetInputAIPP(modelId, dataset, dynamicAttachedDataIndex, aippParmsSet);
 }
 
-static std::string AippInfoDebugString(const aclAippInfo *aippInfo)
+static std::string AippInfoDebugString(const aclAippInfo *const aippInfo)
 {
     if (aippInfo == nullptr) {
         ACL_LOG_INNER_ERROR("[Check][aippInfo]param aippInfo must not be null");
@@ -1070,7 +1060,7 @@ static std::string DimsDebugString(const aclmdlIODims &ioDims)
     return ss.str();
 }
 
-static std::string AippDimsDebugString(const aclAippDims *aippDims, const size_t shapeCount)
+static std::string AippDimsDebugString(const aclAippDims *const aippDims, const size_t shapeCount)
 {
     std::stringstream ssDims;
     for (size_t i = 0; i < shapeCount; i++) {
@@ -1148,23 +1138,23 @@ static void SetAippInfo(aclAippInfo *aippInfo, const ge::AippConfigInfo &aippPar
     ACL_LOG_DEBUG("end to execute SetAippInfo");
 }
 
-aclError aclmdlGetFirstAippInfo(uint32_t modelId, size_t index, aclAippInfo *aippInfo)
+aclError aclmdlGetFirstAippInfo(uint32_t modelId, size_t idx, aclAippInfo *aippInfo)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
-    ACL_LOG_DEBUG("start to execute aclmdlGetFirstAippInfo, modelId[%u], index[%zu]", modelId, index);
+    ACL_LOG_DEBUG("start to execute aclmdlGetFirstAippInfo, modelId[%u], index[%zu]", modelId, idx);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippInfo);
 
     ge::AippConfigInfo aippParams;
     ge::GeExecutor executor;
     ACL_LOG_DEBUG("call ge interface executor.GetAIPPInfo");
-    auto ret = executor.GetAIPPInfo(modelId, index, aippParams);
+    auto ret = executor.GetAIPPInfo(modelId, idx, aippParams);
     if (ret == ACL_ERROR_GE_AIPP_NOT_EXIST) {
         ACL_LOG_WARN("the tensor index[%lu] is not configured with aipp, modelId[%u], index[%zu], ge result[%u]",
-            index, modelId, index, ret);
+                     idx, modelId, idx, ret);
         return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     } else if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Get][AIPPInfo]GetAIPPInfo failed, modelId[%u], index[%zu], ge result[%u]",
-            modelId, index, ret);
+            modelId, idx, ret);
         return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
     SetAippInfo(aippInfo, aippParams);
@@ -1174,7 +1164,7 @@ aclError aclmdlGetFirstAippInfo(uint32_t modelId, size_t index, aclAippInfo *aip
     ret = executor.GetBatchInfoSize(modelId, shapeCount);
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Get][BatchInfo]GetBatchInfoSize failed, modelId[%u], index[%zu], ge result[%u]",
-            modelId, index, ret);
+            modelId, idx, ret);
         return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
     ACL_LOG_DEBUG("get shapeCount[%zu]", shapeCount);
@@ -1182,10 +1172,10 @@ aclError aclmdlGetFirstAippInfo(uint32_t modelId, size_t index, aclAippInfo *aip
 
     ge::OriginInputInfo inputInfo;
     ACL_LOG_DEBUG("call ge interface executor.GetOrigInputInfo");
-    ret = executor.GetOrigInputInfo(modelId, index, inputInfo);
+    ret = executor.GetOrigInputInfo(modelId, idx, inputInfo);
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Get][OrigInputInfo]GetOrigInputInfo failed, modelId[%u], index[%zu], ge result[%u]",
-            modelId, index, ret);
+            modelId, idx, ret);
         return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
     aippInfo->srcFormat = static_cast<aclFormat>(inputInfo.format);
@@ -1196,15 +1186,17 @@ aclError aclmdlGetFirstAippInfo(uint32_t modelId, size_t index, aclAippInfo *aip
     std::vector<ge::InputOutputDims> inputDims;
     std::vector<ge::InputOutputDims> outputDims;
     ACL_LOG_DEBUG("call ge interface executor.GetAllAippInputOutputDims");
-    ret = executor.GetAllAippInputOutputDims(modelId, index, inputDims, outputDims);
+    ret = executor.GetAllAippInputOutputDims(modelId, idx, inputDims, outputDims);
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Get][AllAippInputOutputDims]GetAllAippInputOutputDims failed, modelId[%u], index[%zu], "
-            "ge result[%u]", modelId, index, ret);
+            "ge result[%u]", modelId, idx, ret);
         return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
 
     ACL_LOG_DEBUG("GetAllAippInputOutputDims success");
-    if ((shapeCount > static_cast<size_t>(ACL_MAX_SHAPE_COUNT)) || (shapeCount != inputDims.size()) || (shapeCount != outputDims.size())) {
+    if ((shapeCount > static_cast<size_t>(ACL_MAX_SHAPE_COUNT)) ||
+        (shapeCount != inputDims.size()) ||
+        (shapeCount != outputDims.size())) {
         ACL_LOG_INNER_ERROR("[Check][Params]shapeCount[%zu] should be smaller than ACL_MAX_SHAPE_COUNT(128) and it "
             "should be equal to size of inputDims[%zu], size of outputDims[%zu]",
             shapeCount, inputDims.size(), outputDims.size());
@@ -1214,14 +1206,14 @@ aclError aclmdlGetFirstAippInfo(uint32_t modelId, size_t index, aclAippInfo *aip
         aclError ioRet = SetIODims(inputDims[i], aippInfo->outDims[i].srcDims);
         if (ioRet != ACL_SUCCESS) {
             ACL_LOG_INNER_ERROR("[Set][IODims]srcDims SetIODims failed, modelId[%u], index[%zu], result[%d]",
-                modelId, index, ioRet);
+                modelId, idx, ioRet);
             return ioRet;
         }
         aippInfo->outDims[i].srcSize = inputDims[i].size;
         ioRet = SetIODims(outputDims[i], aippInfo->outDims[i].aippOutdims);
         if (ioRet != ACL_SUCCESS) {
             ACL_LOG_INNER_ERROR("[Set][IODims]aippOutdims SetIODims failed, modelId[%u], index[%zu], result[%d]",
-                modelId, index, ioRet);
+                modelId, idx, ioRet);
             return ioRet;
         }
         aippInfo->outDims[i].aippOutSize = outputDims[i].size;
