@@ -27,7 +27,7 @@ namespace acl{
 }
 
 struct aclDataBuffer {
-    aclDataBuffer(void* const dataIn, const uint64_t len) : data(dataIn), length(len)
+    aclDataBuffer(void* const dataIn, uint64_t len) : data(dataIn), length(len)
     {
     }
 
@@ -38,7 +38,7 @@ struct aclDataBuffer {
 
 struct ACL_FUNC_VISIBILITY aclTensorDesc {
     aclTensorDesc(const aclDataType dataType, const std::initializer_list<int64_t> shape, const aclFormat format);
-    aclTensorDesc(const aclDataType dataType, const size_t numDims, const int64_t* const dims, const aclFormat format);
+    aclTensorDesc(const aclDataType dataType, size_t numDims, const int64_t* const dims, const aclFormat format);
     aclTensorDesc(const aclTensorDesc &tensorDesc);
     aclTensorDesc() = default;
     ~aclTensorDesc() = default;

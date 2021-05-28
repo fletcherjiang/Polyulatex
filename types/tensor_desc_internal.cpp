@@ -108,7 +108,7 @@ const std::string &aclTensorDesc::GetShapeKey() const
     return cachedShapeKey;
 }
 
-std::string DebugConstData(const bool isConst, const void* const constDataBuf, const size_t constDataLen)
+std::string DebugConstData(const bool isConst, const void* const constDataBuf, size_t constDataLen)
 {
     std::stringstream ss;
     if (isConst) {
@@ -150,7 +150,7 @@ bool aclTensorDesc::IsDynamicTensor() const
     return false;
 }
 
-bool aclTensorDesc::CheckConstTensor(const bool needCheckHostMem) const
+bool aclTensorDesc::CheckConstTensor(bool needCheckHostMem) const
 {
     if (isConst) {
         return true;
@@ -360,8 +360,8 @@ size_t aclGetTensorDescSize(const aclTensorDesc *desc)
         return 0U;
     }
     size_t size = 0U;
-    const size_t descCount = aclGetTensorDescElementCount(desc);
-    const size_t typeSize = aclDataTypeSize(desc->dataType);
+    size_t descCount = aclGetTensorDescElementCount(desc);
+    size_t typeSize = aclDataTypeSize(desc->dataType);
     (void)acl::CheckSizeTMultiOverflow(descCount, typeSize, size);
     return size;
 }
@@ -381,7 +381,7 @@ size_t aclGetTensorDescElementCount(const aclTensorDesc *desc)
     }
 
     size_t elementCount = 1;
-    for (const int64_t dim : desc->dims) {
+    for (int64_t dim : desc->dims) {
         if (dim < 0) { // dim cannot be less than 0
             ACL_LOG_INNER_ERROR("[Check][Dim]invalid dim value %ld", dim);
             return 0U;
