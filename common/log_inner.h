@@ -24,6 +24,7 @@ namespace acl {
 const char *const INVALID_PARAM_MSG = "EH0001";
 const char *const INVALID_NULL_POINTER_MSG = "EH0002";
 const char *const INVALID_PATH_MSG = "EH0003";
+const char *const INVALID_FILE_MSG = "EH0004";
 const char *const INVALID_AIPP_MSG = "EH0005";
 const char *const UNSUPPORTED_FEATURE_MSG = "EH0006";
 
