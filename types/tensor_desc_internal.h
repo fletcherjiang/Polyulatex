@@ -37,8 +37,8 @@ struct aclDataBuffer {
 };
 
 struct ACL_FUNC_VISIBILITY aclTensorDesc {
-    aclTensorDesc(const aclDataType dataType, const std::initializer_list<int64_t> shape, const aclFormat format);
-    aclTensorDesc(const aclDataType dataType, size_t numDims, const int64_t* const dims, const aclFormat format);
+    aclTensorDesc(const aclDataType dataType, const std::initializer_list<int64_t> shape, aclFormat format);
+    aclTensorDesc(const aclDataType dataType, size_t numDims, const int64_t* const dims, aclFormat format);
     aclTensorDesc(const aclTensorDesc &tensorDesc);
     aclTensorDesc() = default;
     ~aclTensorDesc() = default;
