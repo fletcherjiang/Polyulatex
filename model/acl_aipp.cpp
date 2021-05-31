@@ -81,8 +81,8 @@ static bool IsRoundOne(const uint64_t man, const uint16_t truncLen)
 
 static void Fp16Normalize(int16_t &expo, uint16_t &man)
 {
-    if (static_cast<int16_t>(expo) >= FP16_MAX_EXP) {
-        expo = static_cast<int16_t>(FP16_MAX_EXP) - 1U;
+    if (expo >= FP16_MAX_EXP) {
+        expo = FP16_MAX_EXP - 1;
         man = static_cast<uint16_t>(FP16_MAX_MAN);
     }
     if ((expo == 0) && (static_cast<int16_t>(man) == FP16_MAN_HIDE_BIT)) {
@@ -135,6 +135,7 @@ struct Fp16Type {
         // 0x70u:112=127-15 Exponent underflow converts to denormalized half or signed zero
         if (eF <= 0x70U) {
             eRet = 0;
+            // 0x67:103=127-24 Denormal
             if (eF >= 0x67U) {
                 mF = (mF | FP32_MAN_HIDE_BIT);
                 const uint16_t shiftOut = static_cast<uint16_t>(FP32_MAN_LEN);
@@ -145,6 +146,7 @@ struct Fp16Type {
                     mRet++;
                 }
             } else if ((eF == 0x66U) && (mF > 0)) {
+                // 0x66:102 Denormal 0<f_v<min(Denormal)
                 mRet = 1U;
             } else {
                 mRet = 0U;
