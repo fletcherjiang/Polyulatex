@@ -77,7 +77,7 @@ const std::string &aclTensorDesc::GetKey() const
         cachedKey += std::to_string(storageFormat);
         cachedKey.push_back('_');
     }
-    for (const auto dim : dims) {
+    for (const auto &dim : dims) {
         cachedKey += std::to_string(dim);
         cachedKey.push_back('_');
     }
