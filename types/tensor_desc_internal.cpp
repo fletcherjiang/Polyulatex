@@ -108,7 +108,7 @@ const std::string &aclTensorDesc::GetShapeKey() const
     return cachedShapeKey;
 }
 
-std::string DebugConstData(const bool isConst, const void* const constDataBuf, size_t constDataLen)
+std::string DebugConstData(bool isConst, const void* const constDataBuf, size_t constDataLen)
 {
     std::stringstream ss;
     if (isConst) {
