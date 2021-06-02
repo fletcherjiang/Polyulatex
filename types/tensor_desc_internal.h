@@ -17,28 +17,28 @@
 #include "graph/ge_attr_value.h"
 #include "acl/acl_base.h"
 
-constexpr int64_t UNKNOW_DIM = -1;
-constexpr int64_t UNKNOW_RANK = -2;
+namespace acl{
+    constexpr int64_t UNKNOW_DIM = -1;
+    constexpr int64_t UNKNOW_RANK = -2;
+    enum AttrRangeType {
+        RANGE_TYPE,
+        VALUE_TYPE
+    };
+}
 
 struct aclDataBuffer {
-    aclDataBuffer(void *dataIn, uint64_t len) : data(dataIn), length(len)
+    aclDataBuffer(void* const dataIn, uint64_t len) : data(dataIn), length(len)
     {
     }
 
     ~aclDataBuffer() = default;
-
     void *data;
     uint64_t length;
 };
 
-enum AttrRangeType {
-    RANGE_TYPE,
-    VALUE_TYPE
-};
-
 struct ACL_FUNC_VISIBILITY aclTensorDesc {
-    aclTensorDesc(aclDataType dataType, std::initializer_list<int64_t> dims, aclFormat format);
-    aclTensorDesc(aclDataType dataType, size_t numDims, const int64_t *dims, aclFormat format);
+    aclTensorDesc(const aclDataType dataType, const std::initializer_list<int64_t> shape, aclFormat format);
+    aclTensorDesc(const aclDataType dataType, size_t numDims, const int64_t* const dims, aclFormat format);
     aclTensorDesc(const aclTensorDesc &tensorDesc);
     aclTensorDesc() = default;
     ~aclTensorDesc() = default;
@@ -53,11 +53,10 @@ struct ACL_FUNC_VISIBILITY aclTensorDesc {
     std::string dynamicInputName;
     bool isConst = false;
     std::shared_ptr<void> constDataBuf;
-    size_t constDataLen = 0;
+    size_t constDataLen = 0U;
     aclMemType memtype = ACL_MEMTYPE_DEVICE;
     // for windows compile,use map ignore dvpp.so find the implementation GeAttrValue
-    std::map<AttrRangeType, ge::GeAttrValue> valueRange;
-
+    std::map<acl::AttrRangeType, ge::GeAttrValue> valueRange;
     const std::string& GetKey() const;
     const std::string &GetShapeKey() const;
     std::string DebugString() const;

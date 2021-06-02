@@ -20,7 +20,7 @@
 
 namespace {
     typedef aclError (*CheckMdlConfigFunc)(const void *, size_t);
-    typedef aclError (*SetMdlConfigFunc)(aclmdlConfigHandle *, void *);
+    typedef aclError (*SetMdlConfigFunc)(aclmdlConfigHandle *, const void *);
 
     struct SetMdlConfigParamFunc {
         CheckMdlConfigFunc checkFunc;
@@ -56,10 +56,10 @@ namespace {
         return ACL_SUCCESS;
     }
 
-    aclError SetMdlLoadPriority(aclmdlConfigHandle *handle, void *attrValue)
+    aclError SetMdlLoadPriority(aclmdlConfigHandle *handle, const void *attrValue)
     {
         ACL_LOG_INFO("start to execute SetMdlLoadPriority.");
-        int32_t priority = *static_cast<int32_t *>(attrValue);
+        int32_t priority = *static_cast<const int32_t *>(attrValue);
         handle->priority = priority;
         ACL_LOG_INFO("successfully execute SetMdlLoadPriority");
         return ACL_SUCCESS;
@@ -74,7 +74,8 @@ namespace {
             return ACL_ERROR_INVALID_PARAM;
         }
         size_t type = *static_cast<const size_t *>(attrValue);
-        if ((type < ACL_MDL_LOAD_FROM_FILE) || (type > ACL_MDL_LOAD_FROM_MEM_WITH_Q)) {
+        if ((type < static_cast<size_t>(ACL_MDL_LOAD_FROM_FILE)) ||
+            (type > static_cast<size_t>(ACL_MDL_LOAD_FROM_MEM_WITH_Q))) {
             ACL_LOG_INNER_ERROR("[Check][Type]type[%zu] is invalid, it should be in [%d, %d]",
                 type, ACL_MDL_LOAD_FROM_FILE, ACL_MDL_LOAD_FROM_MEM_WITH_Q);
         }
@@ -82,12 +83,12 @@ namespace {
         return ACL_SUCCESS;
     }
 
-    aclError SetMdlLoadType(aclmdlConfigHandle *handle, void *attrValue)
+    aclError SetMdlLoadType(aclmdlConfigHandle *handle, const void *attrValue)
     {
         ACL_LOG_INFO("start to execute SetMdlLoadType.");
-        size_t type = *static_cast<size_t *>(attrValue);
+        size_t type = *static_cast<const size_t *>(attrValue);
         handle->mdlLoadType = type;
-        handle->attrState.insert(ACL_MDL_LOAD_TYPE_SIZET);
+        (void)handle->attrState.insert(ACL_MDL_LOAD_TYPE_SIZET);
         ACL_LOG_INFO("successfully execute SetMdlLoadType to set aclmdlLoadType[%zu]", type);
         return ACL_SUCCESS;
     }
@@ -108,43 +109,43 @@ namespace {
         return ACL_SUCCESS;
     }
 
-    aclError SetMdlLoadPath(aclmdlConfigHandle *handle, void *attrValue)
+    aclError SetMdlLoadPath(aclmdlConfigHandle *handle, const void *attrValue)
     {
         ACL_LOG_INFO("start to execute SetMdlLoadPath");
         // set model path with deep copy
-        char *loadPath = *static_cast<char **>(attrValue);
+        char *loadPath = *static_cast<char * const *>(attrValue);
         handle->loadPath = loadPath;
-        handle->attrState.insert(ACL_MDL_PATH_PTR);
+        (void)handle->attrState.insert(ACL_MDL_PATH_PTR);
         ACL_LOG_INFO("successfully execute SetMdlLoadPath to set loadPath[%s]", loadPath);
         return ACL_SUCCESS;
     }
 
-    aclError SetMdlLoadMemPtr(aclmdlConfigHandle *handle, void *attrValue)
+    aclError SetMdlLoadMemPtr(aclmdlConfigHandle *handle, const void *attrValue)
     {
         ACL_LOG_INFO("start to execute SetMdlLoadMemPtr");
-        void *val = *static_cast<void **>(attrValue);
+        void *val = *static_cast<void * const *>(attrValue);
         handle->mdlAddr = val;
-        handle->attrState.insert(ACL_MDL_MEM_ADDR_PTR);
+        (void)handle->attrState.insert(ACL_MDL_MEM_ADDR_PTR);
         ACL_LOG_INFO("successfully execute SetMdlLoadMemPtr");
         return ACL_SUCCESS;
     }
 
-    aclError SetMdlLoadInputQPtr(aclmdlConfigHandle *handle, void *attrValue)
+    aclError SetMdlLoadInputQPtr(aclmdlConfigHandle *handle, const void *attrValue)
     {
         ACL_LOG_INFO("start to execute SetMdlLoadInputQPtr");
-        void *val = *static_cast<void **>(attrValue);
+        void *val = *static_cast<void * const *>(attrValue);
         handle->inputQ = static_cast<uint32_t *>(val);
-        handle->attrState.insert(ACL_MDL_INPUTQ_ADDR_PTR);
+        (void)handle->attrState.insert(ACL_MDL_INPUTQ_ADDR_PTR);
         ACL_LOG_INFO("successfully execute SetMdlLoadInputQPtr");
         return ACL_SUCCESS;
     }
 
-    aclError SetMdlLoadOutputQPtr(aclmdlConfigHandle *handle, void *attrValue)
+    aclError SetMdlLoadOutputQPtr(aclmdlConfigHandle *handle, const void *attrValue)
     {
         ACL_LOG_INFO("start to execute SetMdlLoadOutputQPtr");
-        void *val = *static_cast<void **>(attrValue);
+        void *val = *static_cast<void * const *>(attrValue);
         handle->outputQ = static_cast<uint32_t *>(val);
-        handle->attrState.insert(ACL_MDL_OUTPUTQ_ADDR_PTR);
+        (void)handle->attrState.insert(ACL_MDL_OUTPUTQ_ADDR_PTR);
         ACL_LOG_INFO("successfully execute SetMdlLoadOutputQPtr");
         return ACL_SUCCESS;
     }
@@ -161,50 +162,50 @@ namespace {
         return ACL_SUCCESS;
     }
 
-    aclError SetMdlLoadWeightSize(aclmdlConfigHandle *handle, void *attrValue)
+    aclError SetMdlLoadWeightSize(aclmdlConfigHandle *handle, const void *attrValue)
     {
         ACL_LOG_INFO("start to execute SetMdlLoadWeightSize");
-        size_t weightSize = *static_cast<size_t *>(attrValue);
+        size_t weightSize = *static_cast<const size_t *>(attrValue);
         handle->weightSize = weightSize;
         ACL_LOG_INFO("successfully execute SetMdlLoadWeightSize to set weightSize[%zu]", weightSize);
         return ACL_SUCCESS;
     }
 
-    aclError SetMdlLoadWorkspaceSize(aclmdlConfigHandle *handle, void *attrValue)
+    aclError SetMdlLoadWorkspaceSize(aclmdlConfigHandle *handle, const void *attrValue)
     {
         ACL_LOG_INFO("start to execute SetMdlLoadWorkspaceSize");
-        size_t workSize = *static_cast<size_t *>(attrValue);
+        size_t workSize = *static_cast<const size_t *>(attrValue);
         handle->workSize = workSize;
         ACL_LOG_INFO("successfully execute SetMdlLoadWorkspaceSize to set workSize[%zu]", workSize);
         return ACL_SUCCESS;
     }
 
-    aclError SetMdlLoadInputQNum(aclmdlConfigHandle *handle, void *attrValue)
+    aclError SetMdlLoadInputQNum(aclmdlConfigHandle *handle, const void *attrValue)
     {
         ACL_LOG_INFO("start to execute SetMdlLoadInputQNum");
-        size_t num = *static_cast<size_t *>(attrValue);
+        size_t num = *static_cast<const size_t *>(attrValue);
         handle->inputQNum = num;
-        handle->attrState.insert(ACL_MDL_INPUTQ_NUM_SIZET);
+        (void)handle->attrState.insert(ACL_MDL_INPUTQ_NUM_SIZET);
         ACL_LOG_INFO("successfully execute SetMdlLoadInputQNum to set inputQNum[%zu]", num);
         return ACL_SUCCESS;
     }
 
-    aclError SetMdlLoadOutputQNum(aclmdlConfigHandle *handle, void *attrValue)
+    aclError SetMdlLoadOutputQNum(aclmdlConfigHandle *handle, const void *attrValue)
     {
         ACL_LOG_INFO("start to execute SetMdlLoadOutputQNum");
-        size_t num = *static_cast<size_t *>(attrValue);
+        size_t num = *static_cast<const size_t *>(attrValue);
         handle->outputQNum = num;
-        handle->attrState.insert(ACL_MDL_OUTPUTQ_NUM_SIZET);
+        (void)handle->attrState.insert(ACL_MDL_OUTPUTQ_NUM_SIZET);
         ACL_LOG_INFO("successfully execute SetMdlLoadOutputQNum to set outputQNum[%zu]", num);
         return ACL_SUCCESS;
     }
 
-    aclError SetMdlLoadMemSize(aclmdlConfigHandle *handle, void *attrValue)
+    aclError SetMdlLoadMemSize(aclmdlConfigHandle *handle, const void *attrValue)
     {
         ACL_LOG_INFO("start to execute SetMdlLoadMemSize");
-        size_t memSize = *static_cast<size_t *>(attrValue);
+        size_t memSize = *static_cast<const size_t *>(attrValue);
         handle->mdlSize = memSize;
-        handle->attrState.insert(ACL_MDL_MEM_SIZET);
+        (void)handle->attrState.insert(ACL_MDL_MEM_SIZET);
         ACL_LOG_INFO("successfully execute SetMdlLoadMemSize to set memSize[%zu]", memSize);
         return ACL_SUCCESS;
     }
@@ -221,38 +222,38 @@ namespace {
         return ACL_SUCCESS;
     }
 
-    aclError SetMdlLoadWeightPtr(aclmdlConfigHandle *handle, void *attrValue)
+    aclError SetMdlLoadWeightPtr(aclmdlConfigHandle *handle, const void *attrValue)
     {
         ACL_LOG_INFO("start to execute SetMdlLoadWeightPtr");
-        void *val = *static_cast<void **>(attrValue);
+        void *val = *static_cast<void * const *>(attrValue);
         handle->weightPtr = val;
         ACL_LOG_INFO("successfully execute SetMdlLoadWeightPtr");
         return ACL_SUCCESS;
     }
 
-    aclError SetMdlLoadWorkPtr(aclmdlConfigHandle *handle, void *attrValue)
+    aclError SetMdlLoadWorkPtr(aclmdlConfigHandle *handle, const void *attrValue)
     {
         ACL_LOG_INFO("start to execute SetMdlLoadWorkPtr");
-        void *val = *static_cast<void **>(attrValue);
+        void *val = *static_cast<void * const *>(attrValue);
         handle->workPtr = val;
         ACL_LOG_INFO("successfully execute SetMdlLoadWorkPtr");
         return ACL_SUCCESS;
     }
 
     std::map<aclmdlConfigAttr, SetMdlConfigParamFunc> g_setMdlConfigMap = {
-        {ACL_MDL_PRIORITY_INT32, {CheckMdlLoadPriority, SetMdlLoadPriority}},
-        {ACL_MDL_LOAD_TYPE_SIZET, {CheckMdlLoadType, SetMdlLoadType}},
-        {ACL_MDL_PATH_PTR, {CheckMdlLoadPtrAttrEx, SetMdlLoadPath}},
-        {ACL_MDL_MEM_ADDR_PTR, {CheckMdlLoadPtrAttrEx, SetMdlLoadMemPtr}},
-        {ACL_MDL_INPUTQ_ADDR_PTR, {CheckMdlLoadPtrAttrEx, SetMdlLoadInputQPtr}},
-        {ACL_MDL_OUTPUTQ_ADDR_PTR, {CheckMdlLoadPtrAttrEx, SetMdlLoadOutputQPtr}},
-        {ACL_MDL_MEM_SIZET, {CheckMdlLoadSizeAttr, SetMdlLoadMemSize}},
-        {ACL_MDL_WEIGHT_SIZET, {CheckMdlLoadSizeAttr, SetMdlLoadWeightSize}},
-        {ACL_MDL_WORKSPACE_SIZET, {CheckMdlLoadSizeAttr, SetMdlLoadWorkspaceSize}},
-        {ACL_MDL_INPUTQ_NUM_SIZET, {CheckMdlLoadSizeAttr, SetMdlLoadInputQNum}},
-        {ACL_MDL_OUTPUTQ_NUM_SIZET, {CheckMdlLoadSizeAttr, SetMdlLoadOutputQNum}},
-        {ACL_MDL_WEIGHT_ADDR_PTR, {CheckMdlLoadPtrAttr, SetMdlLoadWeightPtr}},
-        {ACL_MDL_WORKSPACE_ADDR_PTR, {CheckMdlLoadPtrAttr, SetMdlLoadWorkPtr}}
+        {ACL_MDL_PRIORITY_INT32, {&CheckMdlLoadPriority, &SetMdlLoadPriority}},
+        {ACL_MDL_LOAD_TYPE_SIZET, {&CheckMdlLoadType, &SetMdlLoadType}},
+        {ACL_MDL_PATH_PTR, {&CheckMdlLoadPtrAttrEx, &SetMdlLoadPath}},
+        {ACL_MDL_MEM_ADDR_PTR, {&CheckMdlLoadPtrAttrEx, &SetMdlLoadMemPtr}},
+        {ACL_MDL_INPUTQ_ADDR_PTR, {&CheckMdlLoadPtrAttrEx, &SetMdlLoadInputQPtr}},
+        {ACL_MDL_OUTPUTQ_ADDR_PTR, {&CheckMdlLoadPtrAttrEx, &SetMdlLoadOutputQPtr}},
+        {ACL_MDL_MEM_SIZET, {&CheckMdlLoadSizeAttr, &SetMdlLoadMemSize}},
+        {ACL_MDL_WEIGHT_SIZET, {&CheckMdlLoadSizeAttr, &SetMdlLoadWeightSize}},
+        {ACL_MDL_WORKSPACE_SIZET, {&CheckMdlLoadSizeAttr, &SetMdlLoadWorkspaceSize}},
+        {ACL_MDL_INPUTQ_NUM_SIZET, {&CheckMdlLoadSizeAttr, &SetMdlLoadInputQNum}},
+        {ACL_MDL_OUTPUTQ_NUM_SIZET, {&CheckMdlLoadSizeAttr, &SetMdlLoadOutputQNum}},
+        {ACL_MDL_WEIGHT_ADDR_PTR, {&CheckMdlLoadPtrAttr, &SetMdlLoadWeightPtr}},
+        {ACL_MDL_WORKSPACE_ADDR_PTR, {&CheckMdlLoadPtrAttr, &SetMdlLoadWorkPtr}}
     };
 } // anonymous namespace
 
@@ -319,25 +320,27 @@ bool CheckMdlConfigHandle(const aclmdlConfigHandle *handle)
         return false;
     }
 
-    if ((handle->mdlLoadType == ACL_MDL_LOAD_FROM_FILE) || (handle->mdlLoadType == ACL_MDL_LOAD_FROM_FILE_WITH_MEM)) {
+    if ((handle->mdlLoadType == static_cast<size_t>(ACL_MDL_LOAD_FROM_FILE)) ||
+        (handle->mdlLoadType == static_cast<size_t>(ACL_MDL_LOAD_FROM_FILE_WITH_MEM))) {
         if (!CheckMdlLoadConfigFromFile(handle)) {
             return false;
         }
     }
 
-    if ((handle->mdlLoadType == ACL_MDL_LOAD_FROM_MEM) || (handle->mdlLoadType == ACL_MDL_LOAD_FROM_MEM_WITH_MEM)) {
+    if ((handle->mdlLoadType == static_cast<size_t>(ACL_MDL_LOAD_FROM_MEM)) ||
+        (handle->mdlLoadType == static_cast<size_t>(ACL_MDL_LOAD_FROM_MEM_WITH_MEM))) {
         if ((!CheckMdlLoadConfigFromMem(handle))) {
             return false;
         }
     }
 
-    if (handle->mdlLoadType == ACL_MDL_LOAD_FROM_FILE_WITH_Q) {
+    if (handle->mdlLoadType == static_cast<size_t>(ACL_MDL_LOAD_FROM_FILE_WITH_Q)) {
         if ((!CheckMdlLoadConfigFromFile(handle)) || (!CheckMdlLoadConfigWithQ(handle))) {
             return false;
         }
     }
 
-    if (handle->mdlLoadType == ACL_MDL_LOAD_FROM_MEM_WITH_Q) {
+    if (handle->mdlLoadType == static_cast<size_t>(ACL_MDL_LOAD_FROM_MEM_WITH_Q)) {
         if ((!CheckMdlLoadConfigFromMem(handle)) || (!CheckMdlLoadConfigWithQ(handle))) {
             return false;
         }
@@ -366,8 +369,7 @@ aclError aclmdlSetConfigOpt(aclmdlConfigHandle *handle, aclmdlConfigAttr attr,
             "valueSize[%zu]", ret, static_cast<int32_t>(attr), valueSize);
         return ret;
     }
-    void *val = const_cast<void *>(attrValue);
-    ret = paramFunc.setFunc(handle, val);
+    ret = paramFunc.setFunc(handle, attrValue);
     if (ret != ACL_SUCCESS) {
         ACL_LOG_INNER_ERROR("[Set][Params]set params by aclmdlSetConfigOpt error, result[%d], attr[%d]", ret,
             static_cast<int32_t>(attr));
