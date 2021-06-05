@@ -170,14 +170,14 @@ aclError aclrtSynchronizeEvent(aclrtEvent event)
     return ACL_SUCCESS;
 }
 
-aclError aclrtEventElapsedTime(float *ms, aclrtEvent start, aclrtEvent end)
+aclError aclrtEventElapsedTime(float *ms, aclrtEvent startEvent, aclrtEvent endEvent)
 {
     ACL_LOG_INFO("start to execute aclrtEventElapsedTime");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(ms);
-    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(start);
-    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(end);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(startEvent);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(endEvent);
 
-    rtError_t rtErr = rtEventElapsedTime(ms, start, end);
+    rtError_t rtErr = rtEventElapsedTime(ms, startEvent, endEvent);
     if (rtErr != RT_ERROR_NONE) {
         ACL_LOG_CALL_ERROR("computes events elapsed time failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);

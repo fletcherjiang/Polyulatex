@@ -58,9 +58,9 @@ public:
 
     aclError SetHostMemToConst(const AclOp &aclopHostMemToConst, bool &isExistConst);
 
-    aclError SetTensorConst(aclTensorDesc *desc, const aclDataBuffer *dataBuffer);
+    static aclError SetTensorConst(aclTensorDesc *desc, const aclDataBuffer *dataBuffer);
 
-    void SetCompileFlag(int32_t flag);
+    static void SetCompileFlag(int32_t flag);
 
 private:
     OpModelManager() = default;
@@ -103,7 +103,7 @@ private:
                                 const std::vector<std::pair<int64_t, int64_t>> &shapeRange,
                                 std::vector<std::vector<int64_t>> &tensorDims,
                                 std::vector<int64_t> &storageTensorDims);
-    static bool BackAclopMatch(AclOp &aclOpMatch,
+    static bool BackAclopMatch(const AclOp &aclOpMatch,
                                const std::vector<aclTensorShapeStatus> &tensorShapeStatus,
                                const std::vector<std::vector<int64_t>> &tensorDims,
                                const std::vector<int64_t> &storageTensorDims);
