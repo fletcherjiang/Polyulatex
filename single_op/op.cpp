@@ -136,7 +136,7 @@ aclError aclopCreateHandle(const char *opType,
     OpHandle *opHandle = nullptr;
     ACL_REQUIRES_OK(OpExecutor::CreateOpHandle(aclOp, &opHandle));
 
-    auto *newHandle = new(std::nothrow) aclopHandle();
+    auto* const newHandle = new(std::nothrow) aclopHandle();
     ACL_CHECK_MALLOC_RESULT(newHandle);
 
     newHandle->opHandle = opHandle;
@@ -324,14 +324,14 @@ aclError aclopCreateKernel(const char *opType,
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(kernelName);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(binData);
 
-    auto *registration = new(std::nothrow) OpKernelRegistration();
+    auto* const registration = new(std::nothrow) OpKernelRegistration();
     ACL_CHECK_MALLOC_RESULT(registration);
 
     registration->opType = opType;
     registration->kernelId = kernelId;
     registration->kernelName = kernelName;
     registration->binData = binData;
-    registration->binSize = binSize;
+    registration->binSize = static_cast<uint64_t>(binSize);
     registration->enginetype = enginetype;
     registration->deallocator = deallocator;
 
@@ -434,7 +434,7 @@ aclError aclopRegisterCompileFunc(const char *opType, aclopCompileFunc func)
 static bool GetOpsProtoPath(std::string &opsProtoPath)
 {
     ACL_LOG_DEBUG("Start to get ops proto path schedule.");
-    const char *pathEnv = std::getenv("ASCEND_OPP_PATH");
+    const char* const pathEnv = std::getenv("ASCEND_OPP_PATH");
     if (pathEnv != nullptr) {
         std::string path = pathEnv;
         if (path.empty()) {
@@ -462,7 +462,7 @@ static aclError LoadOpsProto()
             "invalid.");
         return ACL_ERROR_INVALID_OPP_PATH;
     }
-    ge::OpsProtoManager *protoManager = ge::OpsProtoManager::Instance();
+    ge::OpsProtoManager* const protoManager = ge::OpsProtoManager::Instance();
     std::map<std::string, std::string> optionTmp;
     optionTmp.emplace(std::pair<std::string, std::string>(string("ge.opsProtoLibPath"), opsprotoPath));
     bool isProtoInit = protoManager->Initialize(optionTmp);
@@ -488,10 +488,10 @@ static aclError UpdateOutPutDesc(ge::Operator inferOp, int numOutputs, aclTensor
     ACL_LOG_INFO("Begin to update OutPutDesc, numOutputs is %d", numOutputs);
     // update outputDesc
     std::stringstream ss;
-    for (uint32_t i = 0; i < numOutputs; ++i) {
+    for (int i = 0; i < numOutputs; ++i) {
         ge::AscendString ascendString;
         // get inferOutputDesc after inferShape
-        auto inferOutputDesc = inferOp.GetOutputDesc(i);
+        auto inferOutputDesc = inferOp.GetOutputDesc(static_cast<uint32_t>(i));
         ge::Format outputFormat = inferOutputDesc.GetFormat();
         ge::DataType outputDType = inferOutputDesc.GetDataType();
         auto ret = inferOutputDesc.GetName(ascendString);
@@ -569,6 +569,7 @@ static void AddOpDesc(aclTensorDesc *tensorDesc, ge::OpDescPtr &opDesc, bool isI
             (void)opDesc->AddInputDesc(geTensorDesc);
         } else {
             (void)opDesc->AddOutputDesc(geTensorDesc);
+
         }
     }
 }
@@ -607,7 +608,7 @@ static aclError AddDataInput(aclTensorDesc *inputDesc,
     auto retConstInfer = constOp.InferShapeAndType();
     if (retConstInfer != ge::GRAPH_SUCCESS) {
         ACL_LOG_CALL_ERROR("the constOp inferShape failed. ge result = %u", retConstInfer);
-        return ACL_GET_ERRCODE_GE(retConstInfer);
+        return static_cast<int32_t>(ACL_GET_ERRCODE_GE(retConstInfer));
     }
     return ACL_SUCCESS;
 }
@@ -691,7 +692,7 @@ aclError aclopInferShape(const char *opType,
         ACL_DELETE_ARRAY_AND_SET_NULL(constData);
         return static_cast<int32_t>(ACL_GET_ERRCODE_GE(retInfer));
     }
-    for (size_t i = 0; i < constOps.size(); ++i) {
+    for (size_t i = static_cast<uint64_t>(0); i < constOps.size(); ++i) {
         constOps[i].BreakConnect();
     }
     ACL_LOG_INFO("the op:%s inferShape success", opType);
