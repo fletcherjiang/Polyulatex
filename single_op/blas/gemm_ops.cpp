@@ -15,8 +15,8 @@
 #include "toolchain/profiling_manager.h"
 
 namespace {
-constexpr int GEMM_NUM_INPUTS = 5;
-constexpr int GEMM_NUM_OUTPUTS = 1;
+constexpr int32_t GEMM_NUM_INPUTS = 5;
+constexpr int32_t GEMM_NUM_OUTPUTS = 1;
 constexpr char const *MATMUL_OP_TYPE = "GEMM";
 constexpr char const *MATMUL_OP_TRANSPOSE_A = "transpose_a";
 constexpr char const *MATMUL_OP_TRANSPOSE_B = "transpose_b";
@@ -24,7 +24,6 @@ constexpr size_t SIZE_ALPHA_BETA = 4;
 constexpr int64_t BLOCK_REDUCE = 16;
 constexpr int64_t BLOCK_REDUCE_INT8 = 32;
 constexpr int64_t BLOCK = 16;
-constexpr aclopAttr *ATTR_NULL = nullptr;
 
 template <typename T>
 T Ceil(T n1, T n2)
@@ -32,7 +31,7 @@ T Ceil(T n1, T n2)
     if (n1 == 0) {
         return 0;
     }
-    return (n2 != 0) ? (n1 - 1) / n2 + 1 : 0;
+    return (n2 != 0) ? (((n1 - 1) / n2) + 1) : 0;
 }
 
 class MatMulTemplate {
@@ -122,21 +121,21 @@ public:
         aclopAttr attr;
         uint8_t a = static_cast<uint8_t>(transposeA_ == ACL_TRANS_T);
         uint8_t b = static_cast<uint8_t>(transposeB_ == ACL_TRANS_T);
-        aclopSetAttrBool(&attr, MATMUL_OP_TRANSPOSE_A, a);
-        aclopSetAttrBool(&attr, MATMUL_OP_TRANSPOSE_B, b);
+        (void)aclopSetAttrBool(&attr, MATMUL_OP_TRANSPOSE_A, a);
+        (void)aclopSetAttrBool(&attr, MATMUL_OP_TRANSPOSE_B, b);
         return aclopExecuteV2(MATMUL_OP_TYPE,
                               GEMM_NUM_INPUTS, inputDesc_, devInputs,
                               GEMM_NUM_OUTPUTS, outputDesc_, devOutputs,
                               &attr, stream);
     }
 
-    aclError CreateHandle(aclopHandle **handle)
+    aclError CreateHandle(aclopHandle **handle) const
     {
         aclopAttr attr;
         uint8_t a = static_cast<uint8_t>(transposeA_ == ACL_TRANS_T);
         uint8_t b = static_cast<uint8_t>(transposeB_ == ACL_TRANS_T);
-        aclopSetAttrBool(&attr, MATMUL_OP_TRANSPOSE_A, a);
-        aclopSetAttrBool(&attr, MATMUL_OP_TRANSPOSE_B, b);
+        (void)aclopSetAttrBool(&attr, MATMUL_OP_TRANSPOSE_A, a);
+        (void)aclopSetAttrBool(&attr, MATMUL_OP_TRANSPOSE_B, b);
         return aclopCreateHandle(MATMUL_OP_TYPE,
                                  GEMM_NUM_INPUTS, inputDesc_,
                                  GEMM_NUM_OUTPUTS, outputDesc_,
@@ -171,9 +170,9 @@ aclError aclblasGemmEx(aclTransType transA,
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(matrixA);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(matrixB);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(matrixC);
-    if (m <= 0 || n <= 0 || k <= 0) {
+    if ((m <= 0) || (n <= 0) || (k <= 0)) {
         ACL_LOG_ERROR("[Check][Params]mnk must > 0. m = %d, n = %d, k = %d", m, n, k);
-        std::string values = acl::AclErrorLogManager::FormatStr("m = %d, n = %d, k = %d", m, n, k);
+        const std::string values = acl::AclErrorLogManager::FormatStr("m = %d, n = %d, k = %d", m, n, k);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"m, n, k", values, "mnk must > 0"}));
@@ -193,7 +192,7 @@ aclError aclblasGemmEx(aclTransType transA,
         return ACL_ERROR_INVALID_PARAM;
     }
 
-    if (transC != ACL_TRANS_N && transC != ACL_TRANS_NZ) {
+    if ((transC != ACL_TRANS_N) && (transC != ACL_TRANS_NZ)) {
         ACL_LOG_ERROR("[Check][Trans]transC is error, only support ACL_TRANS_N and ACL_TRANS_NZ");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
@@ -201,9 +200,9 @@ aclError aclblasGemmEx(aclTransType transA,
         return ACL_ERROR_INVALID_PARAM;
     }
 
-    if (lda != -1 || ldb != -1 || ldc != -1) {
+    if ((lda != -1) || (ldb != -1) || (ldc != -1)) {
         ACL_LOG_ERROR("[Check][Params]lda, ldb(incx) or ldc(incy) is error, only support -1.");
-        std::string values = acl::AclErrorLogManager::FormatStr("lda = %d, ldb = %d, ldc = %d", lda, ldb, ldc);
+        const std::string values = acl::AclErrorLogManager::FormatStr("lda = %d, ldb = %d, ldc = %d", lda, ldb, ldc);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"lda, ldb, ldc", values, "only support -1"}));
@@ -231,10 +230,10 @@ aclError aclblasCreateHandleForGemmEx(aclTransType transA,
     ACL_STAGES_REG(acl::ACL_STAGE_CREATE, acl::ACL_STAGE_DEFAULT);
     ACL_LOG_INFO("start to execute aclblasCreateHandleForGemmEx");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(handle);
-    if (m <= 0 || n <= 0 || k <= 0) {
+    if ((m <= 0) || (n <= 0) || (k <= 0)) {
         ACL_LOG_ERROR("[Check][Params]The value of m,n,k must be larger than zero.m = %d, n = %d, k = %d",
             m, n, k);
-        std::string errMsg = acl::AclErrorLogManager::FormatStr("m = %d, n = %d, k = %d", m, n, k);
+        const std::string errMsg = acl::AclErrorLogManager::FormatStr("m = %d, n = %d, k = %d", m, n, k);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
             std::vector<std::string>({"m, n, k", errMsg, "mnk must > 0"}));
@@ -254,7 +253,7 @@ aclError aclblasCreateHandleForGemmEx(aclTransType transA,
         return ACL_ERROR_INVALID_PARAM;
     }
 
-    if (transC != ACL_TRANS_N && transC != ACL_TRANS_NZ) {
+    if ((transC != ACL_TRANS_N) && (transC != ACL_TRANS_NZ)) {
         ACL_LOG_ERROR("[Check][transC]transC is error, only support ACL_TRANS_N and ACL_TRANS_NZ");
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
