@@ -105,7 +105,7 @@ aclError AclShapeRangeMap<T>::Aging(T &agingT)
     typename OutputMap::iterator itOutputMin;
     typename AttrMap::iterator itAttrMin;
     typename RangeMap::iterator itRangeMin;
-    size_t idx = 0;
+    size_t idx = static_cast<size_t>(0);
     bool found = false;
     for (auto itType = entries_.begin(); itType != entries_.end(); ++itType) {
         const string typeStr = itType->first;
@@ -121,7 +121,7 @@ aclError AclShapeRangeMap<T>::Aging(T &agingT)
                     for (auto itRange = rangeMap.begin(); itRange != rangeMap.end(); ++itRange) {
                         const string rangeStr = itRange->first;
                         auto &opVec = itRange->second;
-                        for (size_t i = 0; i < opVec.size(); ++i) {
+                        for (int32_t i = 0; i < opVec.size(); ++i) {
                             uint64_t timestampMin = static_cast<uint64_t>(ULLONG_MAX);
                             if (opVec[i].second->timestamp < timestampMin) {
                                 timestampMin = opVec[i].second->timestamp;
@@ -202,7 +202,7 @@ aclError AclShapeRangeMap<T>::Aging(T &agingT)
 template<typename T>
 void AclShapeRangeMap<T>::Updatetimestamp(const T &entry)
 {
-    if (entry->timestamp == ULLONG_MAX) {
+    if (entry->timestamp == static_cast<uint64_t>(ULLONG_MAX)) {
         ACL_LOG_INFO("Updatetimestamp IN, no need to update timestamp");
         return;
     }
@@ -218,7 +218,7 @@ aclError AclShapeRangeMap<T>::AddMemAndAging(std::vector<std::pair<aclopAttr, T>
     hashMap_[seed].emplace_back(entry);
     ACL_LOG_INFO("AclShapeRangeMap::Insert aclOp into HashMap success, seed = %zu", seed);
     ++cnt;
-    if ((entry->timestamp == ULLONG_MAX) || (cnt <= maxOpNum)) {
+    if ((entry->timestamp == static_cast<uint64_t>(ULLONG_MAX)) || (cnt <= maxOpNum)) {
         ACL_LOG_INFO("AclShapeRangeMap::AddMemAndAging in, cnt is %llu, maxOpNum is %llu, no need aging",
             cnt, maxOpNum);
         return ACL_SUCCESS;
@@ -231,7 +231,7 @@ aclError AclShapeRangeMap<T>::AddMemAndAging(std::vector<std::pair<aclopAttr, T>
 template<typename T>
 bool AclShapeRangeMap<T>::CheckValueRange(const AclOp &aclOp, const T &entry)
 {
-    for (size_t i = 0; i < entry->inputDescArr.size(); ++i) {
+    for (int32_t i = 0; i < entry->inputDescArr.size(); ++i) {
         if ((entry->inputDescArr[i].IsHostMemTensor()) && (!entry->inputDescArr[i].valueRange.empty())) {
             ACL_LOG_INFO("the input [%zu] needs to check value range", i);
             if (!attr_utils::ValueRangeCheck(entry->inputDescArr[i].valueRange,
@@ -241,7 +241,7 @@ bool AclShapeRangeMap<T>::CheckValueRange(const AclOp &aclOp, const T &entry)
             }
         }
     }
-    for (size_t i = 0; i < entry->outputDescArr.size(); ++i) {
+    for (int32_t i = 0; i < entry->outputDescArr.size(); ++i) {
         if ((entry->outputDescArr[i].IsHostMemTensor()) && (!entry->outputDescArr[i].valueRange.empty())) {
             ACL_LOG_INFO("the output [%zu] needs to check value range", i);
             if (!attr_utils::ValueRangeCheck(entry->outputDescArr[i].valueRange,
@@ -267,7 +267,7 @@ aclError AclShapeRangeMap<T>::Insert(const AclOp &aclOp, const T &entry, T &agin
         inputDescStr.c_str(), outputDescStr.c_str(), inputRangeStr.c_str(),
         outputRangeStr.c_str(), rangeKeyStr.c_str());
     
-    size_t digest = 0;
+    size_t digest = static_cast<size_t>(0);
     auto opAttr = aclOp.opAttr;
     aclopAttr emptyAttr;
     if (opAttr != nullptr) {
@@ -284,7 +284,7 @@ aclError AclShapeRangeMap<T>::Insert(const AclOp &aclOp, const T &entry, T &agin
         digest = attr_utils::AttrMapToDigest(emptyAttr.Attrs());
         opAttr = &emptyAttr;
     }
-    size_t seed = 0;
+    size_t seed = static_cast<size_t>(0);
     if (hash_utils::GetAclOpHash(aclOp, digest, seed) != ACL_SUCCESS) {
         ACL_LOG_ERROR("[Check][GetAclOpHash]GetAclOpHash failed, seed = %zu, aclOp = %s",
             seed, aclOp.DebugString().c_str());
@@ -305,7 +305,7 @@ template<typename T>
 aclError AclShapeRangeMap<T>::Get(const AclOp &aclOp, T &entry, bool needUpdateTimestamp)
 {
     auto opAttr = aclOp.opAttr;
-    size_t digest = 0;
+    size_t digest = static_cast<size_t>(0);
     aclopAttr emptyAttr;
     if (opAttr != nullptr) {
         digest = aclOp.opAttr->GetDigest();
@@ -317,7 +317,7 @@ aclError AclShapeRangeMap<T>::Get(const AclOp &aclOp, T &entry, bool needUpdateT
         opAttr = &emptyAttr;
     }
 
-    size_t seed = 0;
+    size_t seed = static_cast<size_t>(0);
     ACL_REQUIRES_OK(hash_utils::GetAclOpHash(aclOp, digest, seed));
     const std::lock_guard<std::mutex> lk(mutex_);
     const auto iter = hashMap_.find(seed);
@@ -325,7 +325,7 @@ aclError AclShapeRangeMap<T>::Get(const AclOp &aclOp, T &entry, bool needUpdateT
         ACL_LOG_WARN("Get aclOp from AclShapeRangeMap failed due to hashMap_ is empty when seed = %zu, aclOp = %s", 
             seed, aclOp.DebugString().c_str());
         return ACL_ERROR_OP_NOT_FOUND;
-    } else if (iter->second.size() == 1) {
+    } else if (iter->second.size() == static_cast<size_t>(1)) {
         if (needUpdateTimestamp) {
             Updatetimestamp(iter->second.back());
         }
@@ -385,7 +385,7 @@ aclError AclShapeRangeMap<T>::Get(const AclOp &aclOp, T &entry, bool needUpdateT
         const auto iter3 = filteredByOutputs.find(digest);
         if (iter3 == filteredByOutputs.end()) {
             ACL_LOG_WARN("Match attr by digest failed. user input attr = %s",
-                opAttr == nullptr ? "None" : opAttr->DebugString().c_str());
+                opAttr == nullptr ? "None" : (opAttr->DebugString().c_str()));
             return ACL_ERROR_OP_ATTR_NOT_MATCH;
         }
 
@@ -411,7 +411,7 @@ aclError AclShapeRangeMap<T>::Get(const AclOp &aclOp, T &entry, bool needUpdateT
 
         if (matchedByRange == nullptr) {
             ACL_LOG_WARN("Match op attr or constData failed. opType = %s, attr = %s",
-                opType.c_str(), opAttr == nullptr ? "None" : opAttr->DebugString().c_str());
+                opType.c_str(), opAttr == nullptr ? "None" : (opAttr->DebugString().c_str()));
             return ACL_ERROR_OP_ATTR_NOT_MATCH;
         }
         if (needUpdateTimestamp) {
