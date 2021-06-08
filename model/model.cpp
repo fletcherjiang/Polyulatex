@@ -29,7 +29,6 @@
 #include "utils/string_utils.h"
 #include "model_config.h"
 
-using namespace std;
 
 namespace {
 constexpr size_t MIN_OUTPUT_SHAPE_INFO_SIZE = 2U;
@@ -1134,7 +1133,7 @@ static bool TransConvertTensorNameToLegal(const aclmdlDesc *modelDesc, string &t
 {
     size_t depth = 0U;
     tensorName = tensorName + "_";
-    queue<string> q;
+    std::queue<string> q;
     q.push(tensorName);
     constexpr size_t maxDepth = 3U;
     while (!q.empty()) {

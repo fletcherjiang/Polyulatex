@@ -21,7 +21,7 @@
 
 namespace acl {
 namespace {
-constexpr int MAX_CACHED_NUM = 128;
+constexpr int32_t MAX_CACHED_NUM = 128;
 }
 
 aclError OpExecutor::DoExecuteAsync(ge::SingleOp *singleOp,
@@ -33,7 +33,7 @@ aclError OpExecutor::DoExecuteAsync(ge::SingleOp *singleOp,
     std::vector<ge::DataBuffer> inputVec;
     std::vector<ge::DataBuffer> outputVec;
 
-    for (int i = 0; i < aclOp.numInputs; ++i) {
+    for (int32_t i = 0; i < aclOp.numInputs; ++i) {
         // skip optional input
         if (aclOp.inputDesc[i]->IsOptinalTensor()) {
             ACL_LOG_INFO("unused optional input, index %d", i);
@@ -50,7 +50,7 @@ aclError OpExecutor::DoExecuteAsync(ge::SingleOp *singleOp,
         inputVec.emplace_back(buffer);
     }
 
-    for (int i = 0; i < aclOp.numOutputs; ++i) {
+    for (int32_t i = 0; i < aclOp.numOutputs; ++i) {
         if (aclOp.outputDesc[i]->CheckConstTensor(executeWithExactModel)) {
             ACL_LOG_INFO("the outputTensor is const tensor, index %d", i);
             continue;
@@ -66,7 +66,7 @@ aclError OpExecutor::DoExecuteAsync(ge::SingleOp *singleOp,
     ge::Status ret = ge::GeExecutor::ExecuteAsync(singleOp, inputVec, outputVec);
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Exec][Op]Execute op failed. ge result = %u", ret);
-        return ACL_GET_ERRCODE_GE(ret);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
 
     return ACL_SUCCESS;
@@ -82,7 +82,7 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
     std::vector<ge::DataBuffer> outputVec;
     std::vector<ge::GeTensorDesc> inputDesc;
     std::vector<ge::GeTensorDesc> outputDesc;
-    for (int i = 0; i < aclOp.numInputs; ++i) {
+    for (int32_t i = 0; i < aclOp.numInputs; ++i) {
         // skip optional input
         if (aclOp.inputDesc[i]->IsOptinalTensor()) {
             ACL_LOG_INFO("unused optional input, index %d", i);
@@ -119,7 +119,7 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
         inputVec.emplace_back(buffer);
     }
     ACL_LOG_INFO("Inputbuff and inputDesc are ready");
-    for (int i = 0; i < aclOp.numOutputs; ++i) {
+    for (int32_t i = 0; i < aclOp.numOutputs; ++i) {
         if (aclOp.outputDesc[i]->CheckConstTensor(executeWithExactModel)) {
             ACL_LOG_INFO("the outputTensor is const tensor, index %d", i);
             continue;
@@ -155,7 +155,7 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
     ge::Status ret = ge::GeExecutor::ExecuteAsync(singleOp, inputDesc, inputVec, outputDesc, outputVec);
     if (ret != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Exec][Op]Execute op failed. ge result = %u", ret);
-        return ACL_GET_ERRCODE_GE(ret);
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
 
     if (aclOp.exeucteType == ACL_OP_EXECUTE_V2) {
@@ -228,7 +228,7 @@ aclError OpExecutor::ExecuteAsync(const AclOp &aclOp,
 
     if (!aclOp.isMatched) {
         ACL_REQUIRES_OK(OpModelManager::GetInstance().MatchOpModel(aclOp, opModel, isDynamic));
-        ACL_LOG_DEBUG("match opModel success, opType = %s, isDynamic = %d", aclOp.opType.c_str(), isDynamic);
+        ACL_LOG_DEBUG("match opModel success, opType = %s, isDynamic = %d", aclOp.opType.c_str(), static_cast<int32_t>(isDynamic));
     } else {
         opModel = aclOp.opModel;
         isDynamic = aclOp.isDynamic;
@@ -355,7 +355,7 @@ aclError OpExecutor::CreateOpHandle(const AclOp &aclOp, OpHandle **handle)
 
     if (handlePtr->kernelDesc == nullptr) {
         ACL_REQUIRES_OK(OpModelManager::GetInstance().MatchOpModel(aclOp, handlePtr->opModel, isDynamic));
-        ACL_LOG_INFO("Match opModel success, opType = %s, isDynamic = %d", aclOp.opType.c_str(), isDynamic);
+        ACL_LOG_INFO("Match opModel success, opType = %s, isDynamic = %d", aclOp.opType.c_str(), static_cast<int32_t>(isDynamic));
     }
     handlePtr->isDynamic = isDynamic;
     *handle = handlePtr.release();
