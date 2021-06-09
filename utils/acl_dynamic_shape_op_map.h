@@ -233,7 +233,7 @@ bool AclShapeRangeMap<T>::CheckValueRange(const AclOp &aclOp, const T &entry)
 {
     for (int32_t i = 0; i < entry->inputDescArr.size(); ++i) {
         if ((entry->inputDescArr[i].IsHostMemTensor()) && (!entry->inputDescArr[i].valueRange.empty())) {
-            ACL_LOG_INFO("the input [%zu] needs to check value range", i);
+            ACL_LOG_INFO("the input [%d] needs to check value range", i);
             if (!attr_utils::ValueRangeCheck(entry->inputDescArr[i].valueRange,
                                              aclOp.inputs[i], entry->inputDescArr[i].dataType)) {
                 ACL_LOG_WARN("ValueRangeCheck input is not match");
@@ -243,7 +243,7 @@ bool AclShapeRangeMap<T>::CheckValueRange(const AclOp &aclOp, const T &entry)
     }
     for (int32_t i = 0; i < entry->outputDescArr.size(); ++i) {
         if ((entry->outputDescArr[i].IsHostMemTensor()) && (!entry->outputDescArr[i].valueRange.empty())) {
-            ACL_LOG_INFO("the output [%zu] needs to check value range", i);
+            ACL_LOG_INFO("the output [%d] needs to check value range", i);
             if (!attr_utils::ValueRangeCheck(entry->outputDescArr[i].valueRange,
                                              aclOp.outputs[i], entry->outputDescArr[i].dataType)) {
                 ACL_LOG_WARN("ValueRangeCheck output is not match");
