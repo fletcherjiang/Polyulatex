@@ -273,9 +273,9 @@ aclError OpModelParser::ToModelConfig(ge::Model &model, OpModelDef &modelDef)
         }
     }
 
-    ACL_REQUIRES_OK(model.DelAttr(ATTR_KEY_INPUT_TENSOR_DESC));
-    ACL_REQUIRES_OK(model.DelAttr(ATTR_KEY_OUTPUT_TENSOR_DESC));
-    ACL_REQUIRES_OK(model.DelAttr(ATTR_KEY_OP_TYPE));
+    (void)model.DelAttr(ATTR_KEY_INPUT_TENSOR_DESC);
+    (void)model.DelAttr(ATTR_KEY_OUTPUT_TENSOR_DESC);
+    (void)model.DelAttr(ATTR_KEY_OP_TYPE);
     ACL_LOG_INFO("after delete attrs");
 
     // parser const buffer
