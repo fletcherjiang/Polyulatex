@@ -34,16 +34,16 @@ public:
 
     aclError Get(const AclOp &op, T &entry, bool needUpdateTimestamp = false);
 
-    void SetMaxOpNum(const uint64_t maxNum) { maxOpNum = maxNum; }
+    void SetMaxOpNum(uint64_t maxNum) { maxOpNum = maxNum; }
 
 private:
     static std::string TensorDescArr2Str(int32_t num, const aclTensorDesc *const descArr[]);
     static std::string ShapeRangeArr2Str(int32_t num, const aclTensorDesc *const descArr[]);
     aclError Aging(T &agingT);
-    void Updatetimestamp(const T &entry);
+    void Updatetimestamp(T &entry);
     aclError AddMemAndAging(std::vector<std::pair<aclopAttr, T>> &modelVec,
                         const aclopAttr &attr, const T &entry, T &agingT, size_t &seed);
-    bool CheckValueRange(const AclOp &op, const T &entry);
+    bool CheckValueRange(const AclOp &op, T &entry);
 
     using HashMap = std::unordered_map<size_t, std::vector<T>>;
 
@@ -61,7 +61,7 @@ private:
 };
 
 template<typename T>
-std::string AclShapeRangeMap<T>::TensorDescArr2Str(const int num, const aclTensorDesc *const descArr[])
+std::string AclShapeRangeMap<T>::TensorDescArr2Str(int num, const aclTensorDesc *const descArr[])
 {
     if ((num > 0) && (descArr == nullptr)) {
         ACL_LOG_ERROR("[Check][Param]param descArr must not be null");
@@ -80,7 +80,7 @@ std::string AclShapeRangeMap<T>::TensorDescArr2Str(const int num, const aclTenso
 }
 
 template<typename T>
-std::string AclShapeRangeMap<T>::ShapeRangeArr2Str(const int num, const aclTensorDesc *const descArr[])
+std::string AclShapeRangeMap<T>::ShapeRangeArr2Str(int num, const aclTensorDesc *const descArr[])
 {
     if ((num > 0) && (descArr == nullptr)) {
         ACL_LOG_ERROR("[Check][Param]param descArr must not be null");
@@ -229,7 +229,7 @@ aclError AclShapeRangeMap<T>::AddMemAndAging(std::vector<std::pair<aclopAttr, T>
 }
 
 template<typename T>
-bool AclShapeRangeMap<T>::CheckValueRange(const AclOp &aclOp, const T &entry)
+bool AclShapeRangeMap<T>::CheckValueRange(const AclOp &aclOp, T &entry)
 {
     for (int32_t i = 0; i < entry->inputDescArr.size(); ++i) {
         if ((entry->inputDescArr[i].IsHostMemTensor()) && (!entry->inputDescArr[i].valueRange.empty())) {
