@@ -105,7 +105,7 @@ aclError AclShapeRangeMap<T>::Aging(T &agingT)
     typename OutputMap::iterator itOutputMin;
     typename AttrMap::iterator itAttrMin;
     typename RangeMap::iterator itRangeMin;
-    size_t idx = static_cast<size_t>(0);
+    size_t idx = 0;
     bool found = false;
     for (auto itType = entries_.begin(); itType != entries_.end(); ++itType) {
         const string typeStr = itType->first;
@@ -267,7 +267,7 @@ aclError AclShapeRangeMap<T>::Insert(const AclOp &aclOp, const T &entry, T &agin
         inputDescStr.c_str(), outputDescStr.c_str(), inputRangeStr.c_str(),
         outputRangeStr.c_str(), rangeKeyStr.c_str());
     
-    size_t digest = static_cast<size_t>(0);
+    size_t digest = 0;
     auto opAttr = aclOp.opAttr;
     aclopAttr emptyAttr;
     if (opAttr != nullptr) {
@@ -284,7 +284,7 @@ aclError AclShapeRangeMap<T>::Insert(const AclOp &aclOp, const T &entry, T &agin
         digest = attr_utils::AttrMapToDigest(emptyAttr.Attrs());
         opAttr = &emptyAttr;
     }
-    size_t seed = static_cast<size_t>(0);
+    size_t seed = 0;
     if (hash_utils::GetAclOpHash(aclOp, digest, seed) != ACL_SUCCESS) {
         ACL_LOG_ERROR("[Check][GetAclOpHash]GetAclOpHash failed, seed = %zu, aclOp = %s",
             seed, aclOp.DebugString().c_str());
@@ -305,7 +305,7 @@ template<typename T>
 aclError AclShapeRangeMap<T>::Get(const AclOp &aclOp, T &entry, bool needUpdateTimestamp)
 {
     auto opAttr = aclOp.opAttr;
-    size_t digest = static_cast<size_t>(0);
+    size_t digest = 0;
     aclopAttr emptyAttr;
     if (opAttr != nullptr) {
         digest = aclOp.opAttr->GetDigest();
@@ -317,7 +317,7 @@ aclError AclShapeRangeMap<T>::Get(const AclOp &aclOp, T &entry, bool needUpdateT
         opAttr = &emptyAttr;
     }
 
-    size_t seed = static_cast<size_t>(0);
+    size_t seed = 0;
     ACL_REQUIRES_OK(hash_utils::GetAclOpHash(aclOp, digest, seed));
     const std::lock_guard<std::mutex> lk(mutex_);
     const auto iter = hashMap_.find(seed);
@@ -325,7 +325,7 @@ aclError AclShapeRangeMap<T>::Get(const AclOp &aclOp, T &entry, bool needUpdateT
         ACL_LOG_WARN("Get aclOp from AclShapeRangeMap failed due to hashMap_ is empty when seed = %zu, aclOp = %s", 
             seed, aclOp.DebugString().c_str());
         return ACL_ERROR_OP_NOT_FOUND;
-    } else if (iter->second.size() == static_cast<size_t>(1)) {
+    } else if (iter->second.size() == 1) {
         if (needUpdateTimestamp) {
             Updatetimestamp(iter->second.back());
         }
