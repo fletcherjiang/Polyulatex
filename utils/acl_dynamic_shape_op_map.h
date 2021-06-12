@@ -200,7 +200,7 @@ aclError AclShapeRangeMap<T>::Aging(T &agingT)
 }
 
 template<typename T>
-void AclShapeRangeMap<T>::Updatetimestamp(const T &entry)
+void AclShapeRangeMap<T>::Updatetimestamp(T &entry)
 {
     if (entry->timestamp == static_cast<uint64_t>(ULLONG_MAX)) {
         ACL_LOG_INFO("Updatetimestamp IN, no need to update timestamp");
