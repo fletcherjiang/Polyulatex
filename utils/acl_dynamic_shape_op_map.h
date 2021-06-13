@@ -106,6 +106,7 @@ aclError AclShapeRangeMap<T>::Aging(T &agingT)
     typename AttrMap::iterator itAttrMin;
     typename RangeMap::iterator itRangeMin;
     size_t idx = 0;
+    uint64_t timestampMin = static_cast<uint64_t>(ULLONG_MAX);
     bool found = false;
     for (auto itType = entries_.begin(); itType != entries_.end(); ++itType) {
         const string typeStr = itType->first;
@@ -122,7 +123,6 @@ aclError AclShapeRangeMap<T>::Aging(T &agingT)
                         const string rangeStr = itRange->first;
                         auto &opVec = itRange->second;
                         for (int32_t i = 0; i < opVec.size(); ++i) {
-                            uint64_t timestampMin = static_cast<uint64_t>(ULLONG_MAX);
                             if (opVec[i].second->timestamp < timestampMin) {
                                 timestampMin = opVec[i].second->timestamp;
                                 itTypeMin = itType;
