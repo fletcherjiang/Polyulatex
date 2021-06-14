@@ -535,7 +535,7 @@ ACL_FUNC_VISIBILITY aclError aclrtSynchronizeEvent(aclrtEvent event);
  *
  * @see aclrtCreateEvent | aclrtRecordEvent | aclrtSynchronizeStream
  */
-ACL_FUNC_VISIBILITY aclError aclrtEventElapsedTime(float *ms, aclrtEvent start, aclrtEvent end);
+ACL_FUNC_VISIBILITY aclError aclrtEventElapsedTime(float *ms, aclrtEvent startEvent, aclrtEvent endEvent);
 
 /**
  * @ingroup AscendCL

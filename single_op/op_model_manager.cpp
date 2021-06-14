@@ -28,7 +28,7 @@ namespace {
 constexpr int32_t OM_FILE_SUFFIX_LEN = 3;
 constexpr int32_t OM_DIR_MAX_DEPTH = 3;
 constexpr int32_t DECIMAL = 10;
-constexpr size_t DEFAULT_STRING_SIZE = 64;
+constexpr size_t DEFAULT_LONG_STRING_SIZE = 64;
 const std::string ACL_MAX_OPQUEUE_NUM = "max_opqueue_num";
 const std::string UNKNOWN_RANK_DIM_STR = "-2_";
 const std::string DYNAMIC_SHAPE_DIM_STR = "-1_";
@@ -264,7 +264,7 @@ void OpModelManager::GetTensorShapeStatus(const AclOp &aclOp,
 std::string OpModelManager::TensorStatusToStr(const std::vector<aclTensorShapeStatus> &tensorShapeStatus)
 {
     std::string tensorShapeStatusDesc;
-    tensorShapeStatusDesc.reserve(DEFAULT_STRING_SIZE);
+    tensorShapeStatusDesc.reserve(DEFAULT_LONG_STRING_SIZE);
     for (size_t i = 0; i < tensorShapeStatus.size(); ++i) {
         tensorShapeStatusDesc.push_back('|');
         if (tensorShapeStatus[i].isUnkownRank) {
@@ -393,7 +393,7 @@ aclError OpModelManager::RegisterModel(OpModelDef &&modelConfig,
             ACL_REQUIRES_OK(modelCache_.Delete(*agingModelDef));
         }
     }
-    bool castHasTruncate = (!GetIfCastHasTruncateAttr() && (aclOp.opType == "Cast")) &&
+    bool castHasTruncate = ((!GetIfCastHasTruncateAttr()) && (aclOp.opType == "Cast")) &&
                            ((aclOp.opAttr != nullptr) && (aclOp.opAttr->HasAttr("truncate")));
     if (castHasTruncate) {
         ACL_LOG_INFO("Find cast op whose attr contains truncate");
@@ -686,7 +686,7 @@ static bool BackAclOp(int32_t tensorNum,
     return true;
 }
 
-bool OpModelManager::BackAclopMatch(AclOp &aclOpMatch,
+bool OpModelManager::BackAclopMatch(const AclOp &aclOpMatch,
                                     const std::vector<aclTensorShapeStatus> &tensorShapeStatus,
                                     const std::vector<std::vector<int64_t>> &tensorDims,
                                     const std::vector<int64_t> &storageTensorDims)

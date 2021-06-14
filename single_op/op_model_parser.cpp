@@ -71,7 +71,7 @@ aclError OpModelParser::DeserializeModel(const OpModel &opModel, ge::Model &mode
         return ACL_ERROR_DESERIALIZE_MODEL;
     }
 
-    auto ret = ge::Model::Load(modelPartition.data, modelPartition.size, model);
+    const auto ret = ge::Model::Load(modelPartition.data, static_cast<size_t>(modelPartition.size), model);
     if (ret != ge::GRAPH_SUCCESS) {
         ACL_LOG_CALL_ERROR("[Load][Model]Load model failed. ge result = %u", ret);
         return ACL_ERROR_DESERIALIZE_MODEL;
@@ -90,7 +90,7 @@ aclError OpModelParser::ParseModelContent(const OpModel &opModel, uint32_t &mode
 
     auto *file_header = reinterpret_cast<ModelFileHeader *>(opModel.data.get());
     modelSize = file_header->length;
-    if (file_header->length + sizeof(ModelFileHeader) != opModel.size) {
+    if ((file_header->length + sizeof(ModelFileHeader)) != opModel.size) {
         ACL_LOG_INNER_ERROR("[Check][Length]invalid model. header size = %u, model size = %u,"
             "file size = %u", sizeof(ModelFileHeader), modelSize, opModel.size);
         return ACL_ERROR_PARSE_MODEL;
@@ -111,7 +111,7 @@ static void GetFuzzBuildRet(ge::Model &model,
         return;
     }
     // ignore output
-    ge::GeAttrValue::NAMED_ATTRS fuzzBuildAttr = fuzzBuildAttrs[0];
+    const ge::GeAttrValue::NAMED_ATTRS fuzzBuildAttr = fuzzBuildAttrs[0u];
 
     (void)ge::AttrUtils::GetListNamedAttrs(fuzzBuildAttr, ge::ATTR_NAME_FUZZ_INPUTS_SUPPORTED_ATTRS, inputSupportAttrs);
     (void)ge::AttrUtils::GetListNamedAttrs(fuzzBuildAttr,
@@ -123,8 +123,8 @@ static void GetFuzzBuildRet(ge::Model &model,
 static aclError UpdateTensorAttrs(std::vector<aclTensorDesc> &tensorDescs,
                                   const ge::GeAttrValue::LIST_NAMED_ATTRS &tensorSupportAttrs)
 {
-    size_t tensorNum = 0;
-    for (size_t i = 0; i < tensorSupportAttrs.size(); ++i) {
+    size_t tensorNum = 0u;
+    for (size_t i = 0u; i < tensorSupportAttrs.size(); ++i) {
         ge::GeAttrValue::LIST_NAMED_ATTRS tensorAttrs;
         (void)ge::AttrUtils::GetListNamedAttrs(tensorSupportAttrs[i], "tensor", tensorAttrs);
         ACL_LOG_INFO("the number of dynamicInput is %zu, index is %zu", tensorAttrs.size(), i);
@@ -136,18 +136,18 @@ static aclError UpdateTensorAttrs(std::vector<aclTensorDesc> &tensorDescs,
             tensorNum, tensorDescs.size());
         return ACL_ERROR_PARSE_MODEL;
     }
-    int64_t index = 0;
-    for (size_t i = 0; i < tensorSupportAttrs.size(); ++i) {
+    for (size_t i = 0u; i < tensorSupportAttrs.size(); ++i) {
         ge::GeAttrValue::NAMED_ATTRS supportAttr = tensorSupportAttrs[i];
         ge::GeAttrValue::LIST_NAMED_ATTRS tensorAttrs;
         (void)ge::AttrUtils::GetListNamedAttrs(supportAttr, "tensor", tensorAttrs);
+        size_t idx = 0;
         for (size_t k = 0; k < tensorAttrs.size(); ++k) {
             ge::GeAttrValue::NAMED_ATTRS tensorAttr = tensorAttrs[k];
 
             ge::GeAttrValue::LIST_INT shape;
             ge::GeAttrValue::LIST_LIST_INT shapeRange;
-            std::string shape_key_name = "shape";
-            std::string shape_range_key_name = "shapeRange";
+            const std::string shape_key_name = "shape";
+            const std::string shape_range_key_name = "shapeRange";
             // shape item must be existed
             if (tensorAttr.GetItem(shape_key_name).GetValue<ge::GeAttrValue::LIST_INT>(shape) != ge::SUCCESS) {
                 ACL_LOG_INNER_ERROR("[Get][Item]Can not find attr of shape.");
@@ -156,7 +156,7 @@ static aclError UpdateTensorAttrs(std::vector<aclTensorDesc> &tensorDescs,
             // change LIST_INT to vector<int64>
             bool needCheckRange = false;
             std::vector<int64_t> shapeByAttr;
-            for (size_t indexShape = 0; indexShape < shape.size(); ++indexShape) {
+            for (size_t indexShape = 0u; indexShape < shape.size(); ++indexShape) {
                 // if shape is -2, no need to check shape range
                 if (shape.at(indexShape) == -1) {
                     needCheckRange = true;
@@ -169,10 +169,10 @@ static aclError UpdateTensorAttrs(std::vector<aclTensorDesc> &tensorDescs,
             (void)tensorAttr.GetItem(shape_range_key_name).GetValue<ge::GeAttrValue::LIST_LIST_INT>(shapeRange);
             // change LIST_LIST_INT to vector<pair<int64, int64>>
             std::vector<std::pair<int64_t, int64_t>> rangesByAttr;
-            for (size_t indexRange = 0; indexRange < shapeRange.size(); ++indexRange) {
+            for (size_t indexRange = 0u; indexRange < shapeRange.size(); ++indexRange) {
                 std::pair<int64_t, int64_t> range;
-                range.first = shapeRange[indexRange][0];
-                range.second = shapeRange[indexRange][1];
+                range.first = shapeRange[indexRange][0u];
+                range.second = shapeRange[indexRange][1u];
                 ACL_LOG_INFO("shape_ranges is [%ld, %ld].", range.first, range.second);
                 rangesByAttr.emplace_back(range);
             }
@@ -184,21 +184,21 @@ static aclError UpdateTensorAttrs(std::vector<aclTensorDesc> &tensorDescs,
             }
             ACL_LOG_INFO("the number of shape is [%zu], number of shapeRange is [%zu].",
                          shape.size(), shapeRange.size());
-            tensorDescs[index].UpdateTensorShape(shapeByAttr);
-            tensorDescs[index].UpdateTensorShapeRange(rangesByAttr);
+            tensorDescs[idx].UpdateTensorShape(shapeByAttr);
+            tensorDescs[idx].UpdateTensorShapeRange(rangesByAttr);
             if ((ge::AttrUtils::HasAttr(tensorAttr, "value_range")) && (ge::AttrUtils::HasAttr(tensorAttr, "value"))) {
                 ACL_LOG_INNER_ERROR("value and value_range can not be existed at the same time");
                 return ACL_ERROR_PARSE_MODEL;
             }
             if (ge::AttrUtils::HasAttr(tensorAttr, "value_range")) {
-                ACL_LOG_INFO("find value_range attr in %ld", index);
-                tensorDescs[index].valueRange[RANGE_TYPE] = tensorAttr.GetItem("value_range");
+                ACL_LOG_INFO("find value_range attr in %zu", idx);
+                tensorDescs[idx].valueRange[RANGE_TYPE] = tensorAttr.GetItem("value_range");
             }
             if (ge::AttrUtils::HasAttr(tensorAttr, "value")) {
-                ACL_LOG_INFO("find value attr in %ld", index);
-                tensorDescs[index].valueRange[VALUE_TYPE] = tensorAttr.GetItem("value");
+                ACL_LOG_INFO("find value attr in %zu", idx);
+                tensorDescs[idx].valueRange[VALUE_TYPE] = tensorAttr.GetItem("value");
             }
-            index++;
+            idx++;
         }
     }
     ACL_LOG_INFO("UpdateTensorAttrs succ");
@@ -211,9 +211,9 @@ aclError OpModelParser::ToModelConfig(ge::Model &model, OpModelDef &modelDef)
     vector<ge::GeTensorDesc> outputTensorDescList;
     vector<ge::ConstGeTensorPtr> inputTensorList;
     vector<ge::ConstGeTensorPtr> outputTensorList;
-    bool missingAttrs = !ge::AttrUtils::GetListTensor(model, ATTR_KEY_INPUT_TENSOR_DESC, inputTensorList) ||
-                        !ge::AttrUtils::GetListTensor(model, ATTR_KEY_OUTPUT_TENSOR_DESC, outputTensorList) ||
-                        !ge::AttrUtils::GetStr(model, ATTR_KEY_OP_TYPE, modelDef.opType);
+    const bool missingAttrs = (!ge::AttrUtils::GetListTensor(model, ATTR_KEY_INPUT_TENSOR_DESC, inputTensorList)) ||
+                              (!ge::AttrUtils::GetListTensor(model, ATTR_KEY_OUTPUT_TENSOR_DESC, outputTensorList)) ||
+                              (!ge::AttrUtils::GetStr(model, ATTR_KEY_OP_TYPE, modelDef.opType));
     if (missingAttrs) {
         ACL_LOG_WARN("Missing required attr. model = %s", modelDef.modelPath.c_str());
         return ACL_ERROR_MODEL_MISSING_ATTR;
@@ -248,34 +248,34 @@ aclError OpModelParser::ToModelConfig(ge::Model &model, OpModelDef &modelDef)
     ACL_REQUIRES_OK(ParseGeTensorDesc(outputTensorDescList, modelDef.outputDescArr, modelDef.opType));
 
     if (buildMode == 1) {
-        bool staticModel = !ge::AttrUtils::HasAttr(model, ge::ATTR_NAME_FUZZ_BUILD_RES_ATTRS) &&
-                           !ge::AttrUtils::HasAttr(model, "_AllShape");
+        const bool staticModel = (!ge::AttrUtils::HasAttr(model, ge::ATTR_NAME_FUZZ_BUILD_RES_ATTRS)) &&
+                                 (!ge::AttrUtils::HasAttr(model, "_AllShape"));
         if (staticModel) {
             // ACL_OP_COMPILE_FUZZ mode but model is static
             ACL_LOG_INFO("isStaticModelWithFuzzCompile is 1, the model is static model with fuzz compile");
-            modelDef.isStaticModelWithFuzzCompile = 1;
+            modelDef.isStaticModelWithFuzzCompile = 1u;
         } else {
             // ACL_OP_COMPILE_FUZZ mode and model is dynamic,maybe aicpu or aicore which return fuzz res
             ACL_LOG_INFO("The model [%s] is dynamic model with fuzz compile", modelDef.opType.c_str());
-            modelDef.isStaticModelWithFuzzCompile = 2;
+            modelDef.isStaticModelWithFuzzCompile = 2u;
             if (ge::AttrUtils::HasAttr(model, ge::ATTR_NAME_FUZZ_BUILD_RES_ATTRS)) {
                 ACL_LOG_INFO("The model [%s] is dynamic model with fuzz result", modelDef.opType.c_str());
                 ge::GeAttrValue::LIST_NAMED_ATTRS inputSupportAttrs;
                 ge::GeAttrValue::LIST_NAMED_ATTRS outputSupportAttrs;
                 GetFuzzBuildRet(model, inputSupportAttrs, outputSupportAttrs);
-                if (inputSupportAttrs.size() != 0) {
+                if (inputSupportAttrs.size() != 0u) {
                     ACL_REQUIRES_OK(UpdateTensorAttrs(modelDef.inputDescArr, inputSupportAttrs));
                 }
-                if (outputSupportAttrs.size() != 0) {
+                if (outputSupportAttrs.size() != 0u) {
                     ACL_REQUIRES_OK(UpdateTensorAttrs(modelDef.outputDescArr, outputSupportAttrs));
                 }
             }
         }
     }
 
-    model.DelAttr(ATTR_KEY_INPUT_TENSOR_DESC);
-    model.DelAttr(ATTR_KEY_OUTPUT_TENSOR_DESC);
-    model.DelAttr(ATTR_KEY_OP_TYPE);
+    (void)model.DelAttr(ATTR_KEY_INPUT_TENSOR_DESC);
+    (void)model.DelAttr(ATTR_KEY_OUTPUT_TENSOR_DESC);
+    (void)model.DelAttr(ATTR_KEY_OP_TYPE);
     ACL_LOG_INFO("after delete attrs");
 
     // parser const buffer
@@ -295,15 +295,15 @@ static aclError ParseConstTensor(const ge::GeTensorDesc &tensorDesc, aclTensorDe
         ACL_LOG_INNER_ERROR("[Get][Tensor]get const tensor failed");
         return ACL_ERROR_PARSE_MODEL;
     }
-    size_t constDataLen = constTensor->GetData().GetSize();
-    if (constDataLen == 0) {
+    const size_t constDataLen = constTensor->GetData().GetSize();
+    if (constDataLen == 0u) {
         ACL_LOG_INFO("parse constDataLen is 0");
         outputDesc.isConst = true;
         return ACL_SUCCESS;
     }
     const uint8_t *constDataBuf = constTensor->GetData().GetData();
     ACL_CHECK_MALLOC_RESULT(constDataBuf);
-    if (constDataLen < 0) {
+    if (constDataLen < 0u) {
         ACL_LOG_INNER_ERROR("[Get][Data]get const dataLen failed, constDataLen:[%zu] <= 0", constDataLen);
         return ACL_ERROR_PARSE_MODEL;
     }
@@ -315,8 +315,8 @@ static aclError ParseConstTensor(const ge::GeTensorDesc &tensorDesc, aclTensorDe
         ACL_DELETE_ARRAY_AND_SET_NULL(constData);
         return ACL_ERROR_PARSE_MODEL;
     }
-    outputDesc.constDataBuf.reset(constData, [](const char *p)
-        { delete[]p; ACL_LOG_DEBUG("delete const data in ParseConstTensor"); });
+    outputDesc.constDataBuf.reset(constData, [](const char *ptr)
+        { delete[]ptr; ACL_LOG_DEBUG("delete const data in ParseConstTensor"); });
 
     ACL_LOG_INFO("parse constDataLen is %zu", constDataLen);
     outputDesc.isConst = true;
@@ -327,7 +327,7 @@ static aclError ParseConstTensor(const ge::GeTensorDesc &tensorDesc, aclTensorDe
 aclError OpModelParser::ParseGeTensorDesc(vector<ge::GeTensorDesc> &geTensorDescList,
                                           vector<aclTensorDesc> &output, std::string &opType)
 {
-    size_t tensorNum = 0;
+    size_t tensorNum = 0u;
     for (auto &tensorDesc : geTensorDescList) {
         aclFormat format = ACL_FORMAT_UNDEFINED;
         aclFormat storageFormat = ACL_FORMAT_UNDEFINED;
@@ -347,7 +347,7 @@ aclError OpModelParser::ParseGeTensorDesc(vector<ge::GeTensorDesc> &geTensorDesc
             }
             shape = tensorDesc.GetOriginShape();
             auto &currentShape = tensorDesc.MutableShape();
-            for (size_t i = 0; i < currentShape.GetDims().size(); ++i) {
+            for (size_t i = 0u; i < currentShape.GetDims().size(); ++i) {
                 storageShape.emplace_back(currentShape.GetDims().at(i));
             }
         } else {
@@ -390,13 +390,13 @@ void OpModelParser::ParseOpAttrs(const ge::Model &model, aclopAttr &attrs)
 {
     for (auto &attr : model.GetAllAttrs()) {
         const string &attrName = attr.first;
-        if (attrName.find(ATTR_KEY_PREFIX) == 0) {
-            auto stripped_name = attrName.substr(ATTR_KEY_PREFIX.size());
-            if (stripped_name.empty() || stripped_name[0] == '_') {
+        if (attrName.find(ATTR_KEY_PREFIX) == 0u) {
+            const auto stripped_name = attrName.substr(ATTR_KEY_PREFIX.size());
+            if ((stripped_name.empty()) || (stripped_name[0u] == '_')) {
                 ACL_LOG_DEBUG("skip attribute: %s", stripped_name.c_str());
                 continue;
             }
-            attrs.EmplaceAttr(attrName.substr(ATTR_KEY_PREFIX.size()), attr.second);
+            (void)attrs.EmplaceAttr(attrName.substr(ATTR_KEY_PREFIX.size()), attr.second);
         }
     }
 }
