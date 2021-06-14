@@ -34,66 +34,6 @@ namespace acl {
          */
         aclError acldvppSetChannelDescMode(acldvppChannelDesc *channelDesc, uint32_t mode) override;
 
-        /**
-         * Get image width and height of png.
-         * @param data[in] image data in host memory
-         * @param size[in] the size of image data
-         * @param width[out] the width of image from image header
-         * @param height[out] the height of image from image header
-         * @param components [OUT]   the components of image from image header
-         * @param bitDepth [OUT]   the bit of image from image header
-         * @return ACL_SUCCESS for ok, others for fail
-         */
-        aclError GetPngImgInfo(const void *data,
-                               uint32_t dataSize,
-                               uint32_t *width,
-                               uint32_t *height,
-                               int32_t *components,
-                               uint32_t *bitDepth);
-
-        /**
-         * Get image width, height and format of png.
-         * @param data[in] image data in host memory
-         * @param size[in] the size of image data
-         * @param width[out] the width of image from image header
-         * @param height[out] the height of image from image header
-         * @param components [OUT]   the components of image from image header
-         * @return ACL_SUCCESS for ok, others for fail
-         */
-         aclError acldvppPngGetImageInfo(const void *data,
-                                         uint32_t dataSize,
-                                         uint32_t *width,
-                                         uint32_t *height,
-                                         int32_t *components) override;
-
-        /**
-         * Predict decode size of png image.
-         * @param data[in] origin image data in host memory
-         * @param dataSize[in] the size of origin image data
-         * @param outputPixelFormat[in] the pixel format jpeg decode
-         * @param decSize[out] the size predicted for decode image
-         * @return ACL_SUCCESS for ok, others for fail
-         */
-        aclError acldvppPngPredictDecSize(const void *data,
-                                          uint32_t dataSize,
-                                          acldvppPixelFormat outputPixelFormat,
-                                          uint32_t *decSize) override;
-
-        /**
-         * Png decode.
-         * @param channelDesc[in] channel desc
-         * @param data[in] decode input picture destruction's data
-         * @param size[in|out] decode input picture destruction's size
-         * @param outputDesc[in|out] decode output picture destruction
-         * @param stream[in] runtime stream
-         * @return ACL_SUCCESS for ok, others for fail
-         */
-        aclError acldvppPngDecodeAsync(acldvppChannelDesc *channelDesc,
-                                       const void *data,
-                                       uint32_t size,
-                                       acldvppPicDesc *outputDesc,
-                                       aclrtStream stream) override;
-
         ~ImageProcessorV100() = default;
 
         // not allow copy constructor and assignment operators

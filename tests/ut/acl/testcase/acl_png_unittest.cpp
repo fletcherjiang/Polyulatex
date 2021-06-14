@@ -193,7 +193,7 @@ TEST_F(PngTest, TestPngDecode200)
     dvppManager.aclRunMode_ = ACL_HOST;
     dvppManager.InitDvppProcessor();
 
-    EXPECT_EQ(acldvppPngDecodeAsync(nullptr, nullptr, 0, nullptr, nullptr), ACL_ERROR_FEATURE_UNSUPPORTED);
+    EXPECT_EQ(acldvppPngDecodeAsync(nullptr, nullptr, 0, nullptr, nullptr), ACL_ERROR_INVALID_PARAM);
 }
 
 TEST_F(PngTest, TestGetPngWidthHeightAndComponents200)
@@ -204,7 +204,7 @@ TEST_F(PngTest, TestGetPngWidthHeightAndComponents200)
     dvppManager.aclRunMode_ = ACL_HOST;
     dvppManager.InitDvppProcessor();
 
-    EXPECT_EQ(acldvppPngGetImageInfo(nullptr, 0, nullptr, nullptr, nullptr), ACL_ERROR_FEATURE_UNSUPPORTED);
+    EXPECT_EQ(acldvppPngGetImageInfo(nullptr, 0, nullptr, nullptr, nullptr), ACL_ERROR_INVALID_PARAM);
 }
 
 TEST_F(PngTest, TestPredictPngDecSize200)
@@ -214,7 +214,7 @@ TEST_F(PngTest, TestPredictPngDecSize200)
     dvppManager.aicpuVersion_ = 1;
     dvppManager.aclRunMode_ = ACL_HOST;
     dvppManager.InitDvppProcessor();
-    EXPECT_EQ(acldvppPngPredictDecSize(nullptr, 0, PIXEL_FORMAT_RGBA_8888, nullptr), ACL_ERROR_FEATURE_UNSUPPORTED);
+    EXPECT_EQ(acldvppPngPredictDecSize(nullptr, 0, PIXEL_FORMAT_RGBA_8888, nullptr), ACL_ERROR_INVALID_PARAM);
 }
 
 TEST_F(PngTest, TestPngDecodeAicpu0)
@@ -283,7 +283,7 @@ TEST_F(PngTest, acldvppPngDecodeAsync)
     acl::dvpp::DvppManager &dvppManager = acl::dvpp::DvppManager::GetInstance();
     dvppManager.aicpuVersion_ = 1;
     ret = acldvppPngDecodeAsync(channelDesc, data, size, outputDesc, stream);
-    EXPECT_EQ(ret, ACL_ERROR_FEATURE_UNSUPPORTED);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 }
 
 TEST_F(PngTest, acldvppPngGetImageInfo)
@@ -294,12 +294,12 @@ TEST_F(PngTest, acldvppPngGetImageInfo)
     uint32_t *height;
     int32_t *components;
     aclError ret = acldvppPngGetImageInfo(data, size, width, height, components);
-    EXPECT_EQ(ret, ACL_ERROR_FEATURE_UNSUPPORTED);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     acl::dvpp::DvppManager &dvppManager = acl::dvpp::DvppManager::GetInstance();
     dvppManager.aicpuVersion_ = 1;
     ret = acldvppPngGetImageInfo(data, size, width, height, components);
-    EXPECT_EQ(ret, ACL_ERROR_FEATURE_UNSUPPORTED);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 }
 
 TEST_F(PngTest, acldvppPngPredictDecSize)

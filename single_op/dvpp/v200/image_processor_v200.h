@@ -147,34 +147,6 @@ namespace acl {
          */
         uint32_t acldvppGetHistRetCode(acldvppHist* hist) override;
 
-         /**
-          * Get image width and height of png (not supported).
-          * @param data[in] image data in host memory
-          * @param size[in] the size of image data
-          * @param width[out] the width of image from image header
-          * @param height[out] the height of image from image header
-          * @param components[out] the components of image from image header
-          * @return ACL_SUCCESS for ok, others for fail
-          */
-        aclError acldvppPngGetImageInfo(const void *data,
-                                        uint32_t dataSize,
-                                        uint32_t *width,
-                                        uint32_t *height,
-                                        int32_t *components) override;
-
-        /**
-         * Predict decode size of png image (not supported).
-         * @param data[in] origin image data in host memory
-         * @param dataSize[in] the size of origin image data
-         * @param outputPixelFormat[in] the pixel format jpeg decode
-         * @param decSize[out] the size predicted for decode image
-         * @return ACL_SUCCESS for ok, others for fail
-         */
-        aclError acldvppPngPredictDecSize(const void *data,
-                                          uint32_t dataSize,
-                                          acldvppPixelFormat outputPixelFormat,
-                                          uint32_t *decSize) override;
-
         /**
          * crop the input batch picture with resize config and border configs according to the specified area
          * as the output batch pictures
