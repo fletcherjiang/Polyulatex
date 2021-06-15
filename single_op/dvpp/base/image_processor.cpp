@@ -2078,7 +2078,8 @@ namespace acl {
         aclDvppChannelDesc->channelIndex = nextChannelIndex++;
         // channelMode is not used in v100
         aclDvppChannelDesc->dvppDesc.channelMode =
-            aicpu::dvpp::DVPP_CHNMODE_VPC | aicpu::dvpp::DVPP_CHNMODE_JPEGD | aicpu::dvpp::DVPP_CHNMODE_JPEGE;
+            aicpu::dvpp::DVPP_CHNMODE_VPC | aicpu::dvpp::DVPP_CHNMODE_JPEGD | aicpu::dvpp::DVPP_CHNMODE_JPEGE |
+                aicpu::dvpp::DVPP_CHNMODE_PNGD;
 
         ACL_LOG_INFO("create DvppChannelDesc : channeldesc addr = %p, cmd addr = %p, share addr = %p,"
             "support type = %d", aclDvppChannelDesc->dataBuffer.data, aclDvppChannelDesc->cmdListBuffer.data,
