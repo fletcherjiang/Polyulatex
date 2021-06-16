@@ -17,11 +17,11 @@
 
 namespace {
     const std::string ACL_PROF_CONFIG_NAME = "profiler";
-    const uint32_t MAX_ENV_VALVE_LENGTH = 4096;
+    const uint32_t MAX_ENV_VALVE_LENGTH = 4096U;
     std::mutex g_aclProfMutex;
-    const uint64_t ACL_PROF_ACL_API = 0x0001;
-    const uint32_t START_PROFILING = 1;
-    const uint32_t STOP_PROFILING = 2;
+    const uint64_t ACL_PROF_ACL_API = 0x0001U;
+    const uint32_t START_PROFILING = 1U;
+    const uint32_t STOP_PROFILING = 2U;
 }
 
 namespace acl {
@@ -84,8 +84,8 @@ namespace acl {
         }
 
         // use profiling config from acl.json if exist
-        if (configFileFlag == true) {
-            if (configPath == nullptr || strlen(configPath) == 0) {
+        if (configFileFlag) {
+            if ((configPath == nullptr) || (strlen(configPath) == 0U)) {
                 ACL_LOG_INFO("configPath is null, no need to do profiling.");
                 noValidConfig = true;
                 ret = HandleProfilingCommand(strConfig, configFileFlag, noValidConfig);
@@ -169,10 +169,10 @@ static aclError aclProcessProfData(void *data, uint32_t len)
     aclError ret = ACL_SUCCESS;
     uint64_t profSwitch = profilerConfig->profSwitch;
     uint32_t type = profilerConfig->type;
-    if (((profSwitch & ACL_PROF_ACL_API) != 0) && (type == START_PROFILING)) {
+    if (((profSwitch & ACL_PROF_ACL_API) != 0U) && (type == START_PROFILING)) {
         ret = aclProfInnerStart(profilerConfig);
     }
-    if (((profSwitch & ACL_PROF_ACL_API) != 0) && (type == STOP_PROFILING)) {
+    if (((profSwitch & ACL_PROF_ACL_API) != 0U) && (type == STOP_PROFILING)) {
         ret = aclProfInnerStop(profilerConfig);
     }
 
@@ -186,7 +186,7 @@ aclError aclMsprofCtrlHandle(uint32_t dataType, void* data, uint32_t dataLen)
         MsprofReporterCallback callback = reinterpret_cast<MsprofReporterCallback>(data);
         acl::AclProfilingManager::GetInstance().SetProfReporterCallback(callback);
     } else if (dataType == RT_PROF_CTRL_SWITCH) {
-        aclError ret = aclProcessProfData(data, static_cast<size_t>(dataLen));
+        aclError ret = aclProcessProfData(data, static_cast<uint32_t>(dataLen));
         if (ret != ACL_SUCCESS) {
             ACL_LOG_INNER_ERROR("[Process][ProfSwitch]failed to call aclProcessProfData, result is %u", ret);
             return ret;
