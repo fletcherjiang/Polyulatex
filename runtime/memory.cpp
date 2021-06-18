@@ -455,8 +455,8 @@ aclError aclrtMemcpy2d(void *dst,
             rtKind = RT_MEMCPY_HOST_TO_DEVICE;
             break;
         }
-        case ACL_MEMCPY_DEVICE_TO_DEVICE: {
-            rtKind = RT_MEMCPY_DEVICE_TO_DEVICE;
+        case ACL_MEMCPY_DEVICE_TO_HOST: {
+            rtKind = RT_MEMCPY_DEVICE_TO_HOST;
             break;
         }
         default: {
@@ -506,8 +506,8 @@ aclError aclrtMemcpy2dAsync(void *dst,
             rtKind = RT_MEMCPY_HOST_TO_DEVICE;
             break;
         }
-        case ACL_MEMCPY_DEVICE_TO_DEVICE: {
-            rtKind = RT_MEMCPY_DEVICE_TO_DEVICE;
+        case ACL_MEMCPY_DEVICE_TO_HOST: {
+            rtKind = RT_MEMCPY_DEVICE_TO_HOST;
             break;
         }
         default: {
