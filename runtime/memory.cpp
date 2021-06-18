@@ -439,7 +439,7 @@ aclError aclrtMemcpy2d(void *dst,
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(src);
 
     if ((width <= 0) || (width > spitch) || (width > dpitch)) {
-        ACL_LOG_INNER_ERROR("The value of width[%zu] must be between 0 and spitch[%zu] or dpitch[%zu]",
+        ACL_LOG_INNER_ERROR("The value of width[%zu] must be between 0 and spitch[%zu] and dpitch[%zu]",
             width, spitch, dpitch);
         return ACL_ERROR_INVALID_PARAM;
     }
@@ -490,7 +490,7 @@ aclError aclrtMemcpy2dAsync(void *dst,
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(src);
 
     if ((width <= 0) || (width > spitch) || (width > dpitch)) {
-        ACL_LOG_INNER_ERROR("The value of width[%zu] must be between 0 and spitch[%zu] or dpitch[%zu]",
+        ACL_LOG_INNER_ERROR("The value of width[%zu] must be between 0 and spitch[%zu] and dpitch[%zu]",
             width, spitch, dpitch);
         return ACL_ERROR_INVALID_PARAM;
     }
