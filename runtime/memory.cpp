@@ -449,6 +449,11 @@ aclError aclrtMemcpy2d(void *dst,
         return ACL_ERROR_INVALID_PARAM;
     }
 
+    if ((dpitch <= 0) || (spitch <= 0)) {
+        ACL_LOG_INNER_ERROR("The value of dpitch[%zu] or spitch[%zu] must be larger than zero", dpitch, spitch);
+        return ACL_ERROR_INVALID_PARAM;
+    }
+
     rtMemcpyKind_t rtKind = RT_MEMCPY_RESERVED;
     switch (kind) {
         case ACL_MEMCPY_HOST_TO_DEVICE: {
@@ -497,6 +502,11 @@ aclError aclrtMemcpy2dAsync(void *dst,
 
     if (height <= 0) {
         ACL_LOG_INNER_ERROR("The value of height[%zu] must be larger than zero", height);
+        return ACL_ERROR_INVALID_PARAM;
+    }
+
+    if ((dpitch <= 0) || (spitch <= 0)) {
+        ACL_LOG_INNER_ERROR("The value of dpitch[%zu] or spitch[%zu] must be larger than zero", dpitch, spitch);
         return ACL_ERROR_INVALID_PARAM;
     }
 
