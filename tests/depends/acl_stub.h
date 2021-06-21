@@ -254,10 +254,10 @@ public:
     virtual rtError_t rtMemGrpQuery(int32_t cmd, const rtMemGrpQueryInput_t *input, rtMemGrpQueryOutput_t *output);
 
     virtual rtError_t rtMemcpy2d(void *dst, uint64_t dpitch, const void *src, uint64_t spitch, uint64_t width,
-        uint64_t height, rtMemcpyKind kind);
+        uint64_t height, rtMemcpyKind_t kind);
 
     virtual rtError_t rtMemcpy2dAsync(void *dst, uint64_t dpitch, const void *src, uint64_t spitch, uint64_t width,
-        uint64_t height, rtMemcpyKind kind, rtStream stream);
+        uint64_t height, rtMemcpyKind_t kind, rtStream_t stream);
 
     // tdt function
     virtual int32_t TdtHostInit(uint32_t deviceId);
