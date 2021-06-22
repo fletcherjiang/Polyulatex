@@ -567,6 +567,18 @@ rtError_t aclStub::rtMemGrpQuery(int32_t cmd, const rtMemGrpQueryInput_t *input,
     return RT_ERROR_NONE;
 }
 
+rtError_t aclStub::rtMemcpy2d(void *dst, uint64_t dpitch, const void *src, uint64_t spitch, uint64_t width,
+    uint64_t height, rtMemcpyKind_t kind)
+{
+    return RT_ERROR_NONE;
+}
+
+rtError_t aclStub::rtMemcpy2dAsync(void *dst, uint64_t dpitch, const void *src, uint64_t spitch, uint64_t width,
+    uint64_t height, rtMemcpyKind_t kind, rtStream_t stream)
+{
+    return RT_ERROR_NONE;
+}
+
 MockFunctionTest& MockFunctionTest::aclStubInstance()
 {
     static MockFunctionTest stub;
@@ -1102,4 +1114,16 @@ rtError_t rtMemGrpAttach(const char *name, int32_t timeout)
 rtError_t rtMemGrpQuery(int32_t cmd, const rtMemGrpQueryInput_t *input, rtMemGrpQueryOutput_t *output)
 {
     return MockFunctionTest::aclStubInstance().rtMemGrpQuery(cmd, input, output);
+}
+
+rtError_t rtMemcpy2d(void *dst, uint64_t dpitch, const void *src, uint64_t spitch, uint64_t width,
+    uint64_t height, rtMemcpyKind_t kind)
+{
+    return MockFunctionTest::aclStubInstance().rtMemcpy2d(dst, dpitch, src, spitch, width, height, kind);
+}
+
+rtError_t rtMemcpy2dAsync(void *dst, uint64_t dpitch, const void *src, uint64_t spitch, uint64_t width,
+    uint64_t height, rtMemcpyKind_t kind, rtStream_t stream)
+{
+    return MockFunctionTest::aclStubInstance().rtMemcpy2dAsync(dst, dpitch, src, spitch, width, height, kind, stream);
 }

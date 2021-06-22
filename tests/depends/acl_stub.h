@@ -255,7 +255,6 @@ public:
 
     virtual rtError_t rtMemcpy2d(void *dst, uint64_t dpitch, const void *src, uint64_t spitch, uint64_t width,
         uint64_t height, rtMemcpyKind_t kind);
-
     virtual rtError_t rtMemcpy2dAsync(void *dst, uint64_t dpitch, const void *src, uint64_t spitch, uint64_t width,
         uint64_t height, rtMemcpyKind_t kind, rtStream_t stream);
 
