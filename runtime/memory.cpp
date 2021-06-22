@@ -424,6 +424,25 @@ aclError aclrtGetMemInfo(aclrtMemAttr attr, size_t *freeMem, size_t *totalMem)
     return ACL_SUCCESS;
 }
 
+static aclError Memcpy2dKindTranslate(aclrtMemcpyKind kind, rtMemcpyKind_t &rtKind)
+{
+    switch (kind) {
+        case ACL_MEMCPY_HOST_TO_DEVICE: {
+            rtKind = RT_MEMCPY_HOST_TO_DEVICE;
+            break;
+        }
+        case ACL_MEMCPY_DEVICE_TO_HOST: {
+            rtKind = RT_MEMCPY_DEVICE_TO_HOST;
+            break;
+        }
+        default: {
+            ACL_LOG_INNER_ERROR("[Check][Kind]invalid kind of memcpy, kind = %d", static_cast<int32_t>(kind));
+            return ACL_ERROR_INVALID_PARAM;
+        }
+    }
+    return ACL_SUCCESS;
+}
+
 aclError aclrtMemcpy2d(void *dst,
                        size_t dpitch,
                        const void *src,
@@ -437,37 +456,25 @@ aclError aclrtMemcpy2d(void *dst,
         dpitch, spitch, width, height, static_cast<int32_t>(kind));
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dst);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(src);
+    ACL_REQUIRES_POSITIVE_WITH_INPUT_REPORT(height);
+    ACL_REQUIRES_POSITIVE_WITH_INPUT_REPORT(width);
 
-    if ((width <= 0) || (width > spitch) || (width > dpitch)) {
-        ACL_LOG_INNER_ERROR("The value of width[%zu] must be between 0 and spitch[%zu] and dpitch[%zu]",
+    if ((width > spitch) || (width > dpitch)) {
+        ACL_LOG_INNER_ERROR("[Check][Width]The value of width[%zu] must be smaller than spitch[%zu] and dpitch[%zu]",
             width, spitch, dpitch);
         return ACL_ERROR_INVALID_PARAM;
     }
 
-    if (height <= 0) {
-        ACL_LOG_INNER_ERROR("The value of height[%zu] must be larger than zero", height);
-        return ACL_ERROR_INVALID_PARAM;
-    }
-
     rtMemcpyKind_t rtKind = RT_MEMCPY_RESERVED;
-    switch (kind) {
-        case ACL_MEMCPY_HOST_TO_DEVICE: {
-            rtKind = RT_MEMCPY_HOST_TO_DEVICE;
-            break;
-        }
-        case ACL_MEMCPY_DEVICE_TO_HOST: {
-            rtKind = RT_MEMCPY_DEVICE_TO_HOST;
-            break;
-        }
-        default: {
-            ACL_LOG_INNER_ERROR("invalid kind of memcpy type, the current kind = %d", static_cast<int32_t>(kind));
-            return ACL_ERROR_INVALID_PARAM;
-        }
+    aclError ret = Memcpy2dKindTranslate(kind, rtKind);
+    if (ret != ACL_SUCCESS) {
+        ACL_LOG_INNER_ERROR("[Translate][Kind]invalid kind of memcpy, kind = %d", static_cast<int32_t>(kind));
+        return ret;
     }
 
     rtError_t rtErr = rtMemcpy2d(dst, dpitch, src, spitch, width, height, rtKind);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_CALL_ERROR("synchronized memcpy failed, kind = %d, runtime result = %d",
+        ACL_LOG_CALL_ERROR("[Synchronized][Memcpy]synchronized memcpy failed, kind = %d, runtime result = %d",
             static_cast<int32_t>(kind), static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
@@ -488,37 +495,25 @@ aclError aclrtMemcpy2dAsync(void *dst,
         " kind = %d", dpitch, spitch, width, height, static_cast<int32_t>(kind));
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dst);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(src);
+    ACL_REQUIRES_POSITIVE_WITH_INPUT_REPORT(height);
+    ACL_REQUIRES_POSITIVE_WITH_INPUT_REPORT(width);
 
-    if ((width <= 0) || (width > spitch) || (width > dpitch)) {
-        ACL_LOG_INNER_ERROR("The value of width[%zu] must be between 0 and spitch[%zu] and dpitch[%zu]",
+    if ((width > spitch) || (width > dpitch)) {
+        ACL_LOG_INNER_ERROR("[Check][Width]The value of width[%zu] must be smaller than spitch[%zu] and dpitch[%zu]",
             width, spitch, dpitch);
         return ACL_ERROR_INVALID_PARAM;
     }
 
-    if (height <= 0) {
-        ACL_LOG_INNER_ERROR("The value of height[%zu] must be larger than zero", height);
-        return ACL_ERROR_INVALID_PARAM;
-    }
-
     rtMemcpyKind_t rtKind = RT_MEMCPY_RESERVED;
-    switch (kind) {
-        case ACL_MEMCPY_HOST_TO_DEVICE: {
-            rtKind = RT_MEMCPY_HOST_TO_DEVICE;
-            break;
-        }
-        case ACL_MEMCPY_DEVICE_TO_HOST: {
-            rtKind = RT_MEMCPY_DEVICE_TO_HOST;
-            break;
-        }
-        default: {
-            ACL_LOG_INNER_ERROR("invalid kind of memcpy type, the current kind = %d", static_cast<int32_t>(kind));
-            return ACL_ERROR_INVALID_PARAM;
-        }
+    aclError ret = Memcpy2dKindTranslate(kind, rtKind);
+    if (ret != ACL_SUCCESS) {
+        ACL_LOG_INNER_ERROR("[Translate][Kind]invalid kind of memcpy, kind = %d", static_cast<int32_t>(kind));
+        return ret;
     }
 
     rtError_t rtErr = rtMemcpy2dAsync(dst, dpitch, src, spitch, width, height, rtKind, stream);
     if (rtErr != RT_ERROR_NONE) {
-        ACL_LOG_CALL_ERROR("asynchronized memcpy failed, kind = %d, runtime result = %d",
+        ACL_LOG_CALL_ERROR("[Asynchronized][Memcpy]asynchronized memcpy failed, kind = %d, runtime result = %d",
             static_cast<int32_t>(kind), static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
