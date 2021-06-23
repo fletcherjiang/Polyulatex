@@ -1100,8 +1100,9 @@ TEST_F(UTEST_ACL_Runtime, aclrtSetExceptionInfoCallbackFailedTest)
 
 TEST_F(UTEST_ACL_Runtime, aclrtMemcpy2dTest)
 {
-    void *dst = (void *)0x01;
-    void *src = (void *)0x02;
+    int32_t temp = 1;
+    void *dst = reinterpret_cast<void *>(&temp);
+    void *src = reinterpret_cast<void *>(&temp);
     size_t dpitch = 2;
     size_t spitch = 2;
     size_t width = 3;
@@ -1131,20 +1132,21 @@ TEST_F(UTEST_ACL_Runtime, aclrtMemcpy2dTest)
 
 TEST_F(UTEST_ACL_Runtime, aclrtMemcpy2dAsyncTest)
 {
-    void *dst = (void *)0x01;
-    void *src = (void *)0x02;
+    int32_t temp = 1;
+    void *dst = reinterpret_cast<void *>(&temp);
+    void *src = reinterpret_cast<void *>(&temp);
     size_t dpitch = 2;
     size_t spitch = 2;
     size_t width = 3;
     size_t height = 1;
-    aclrtStream stream = (aclrtStream)0x10;
+    aclrtStream stream;
     aclrtMemcpyKind kind = ACL_MEMCPY_HOST_TO_DEVICE;
-    aclError ret = aclrtMemcpy2dAsync(dst, dpitch, src, spitch, width, height, kind, stream);
+    aclError ret = aclrtMemcpy2dAsync(dst, dpitch, src, spitch, width, height, kind, &stream);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     width = 2;
     height = 0;
-    ret = aclrtMemcpy2dAsync(dst, dpitch, src, spitch, width, height, kind, stream);
+    ret = aclrtMemcpy2dAsync(dst, dpitch, src, spitch, width, height, kind, &stream);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     width = 1;

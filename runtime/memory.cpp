@@ -456,8 +456,8 @@ aclError aclrtMemcpy2d(void *dst,
         dpitch, spitch, width, height, static_cast<int32_t>(kind));
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dst);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(src);
-    ACL_REQUIRES_POSITIVE_WITH_INPUT_REPORT(height);
-    ACL_REQUIRES_POSITIVE_WITH_INPUT_REPORT(width);
+    ACL_REQUIRES_POSITIVE(height);
+    ACL_REQUIRES_POSITIVE(width);
 
     if ((width > spitch) || (width > dpitch)) {
         ACL_LOG_INNER_ERROR("[Check][Width]The value of width[%zu] must be smaller than spitch[%zu] and dpitch[%zu]",
@@ -495,8 +495,8 @@ aclError aclrtMemcpy2dAsync(void *dst,
         " kind = %d", dpitch, spitch, width, height, static_cast<int32_t>(kind));
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dst);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(src);
-    ACL_REQUIRES_POSITIVE_WITH_INPUT_REPORT(height);
-    ACL_REQUIRES_POSITIVE_WITH_INPUT_REPORT(width);
+    ACL_REQUIRES_POSITIVE(height);
+    ACL_REQUIRES_POSITIVE(width);
 
     if ((width > spitch) || (width > dpitch)) {
         ACL_LOG_INNER_ERROR("[Check][Width]The value of width[%zu] must be smaller than spitch[%zu] and dpitch[%zu]",

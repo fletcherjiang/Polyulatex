@@ -475,6 +475,10 @@ public:
     MOCK_METHOD3(rtMemGrpAddProc, rtError_t(const char *name, int32_t pid, const rtMemGrpShareAttr_t *attr));
     MOCK_METHOD2(rtMemGrpAttach, rtError_t(const char *name, int32_t timeout));
     MOCK_METHOD3(rtMemGrpQuery, rtError_t(int32_t cmd, const rtMemGrpQueryInput_t *input, rtMemGrpQueryOutput_t *output));
+    MOCK_METHOD7(rtMemcpy2d, rtError_t(void *dst, uint64_t dpitch, const void *src, uint64_t spitch, uint64_t width,
+        uint64_t height, rtMemcpyKind_t kind));
+    MOCK_METHOD8(rtMemcpy2dAsync, rtError_t(void *dst, uint64_t dpitch, const void *src, uint64_t spitch,
+        uint64_t width, uint64_t height, rtMemcpyKind_t kind, rtStream_t stream));
 
     //prof function stub
     MOCK_METHOD0(MsprofFinalize, int32_t());
