@@ -424,8 +424,30 @@ aclError aclrtGetMemInfo(aclrtMemAttr attr, size_t *freeMem, size_t *totalMem)
     return ACL_SUCCESS;
 }
 
-static aclError Memcpy2dKindTranslate(aclrtMemcpyKind kind, rtMemcpyKind_t &rtKind)
+static aclError CheckMemcpy2dParam(void *dst,
+                                   size_t dpitch,
+                                   const void *src,
+                                   size_t spitch,
+                                   size_t width,
+                                   size_t height,
+                                   aclrtMemcpyKind kind,
+                                   rtMemcpyKind_t &rtKind)
 {
+    ACL_LOG_INFO("start to execute CheckMemcpy2dParam");
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dst);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(src);
+    ACL_REQUIRES_POSITIVE(height);
+    ACL_REQUIRES_POSITIVE(width);
+
+    if ((width > spitch) || (width > dpitch)) {
+        ACL_LOG_ERROR("[Check][Width]input param width[%zu] must be smaller than spitch[%zu] and dpitch[%zu]",
+            width, spitch, dpitch);
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
+            std::vector<std::string>({"param", "value", "reason"}),
+            std::vector<std::string>({"width", std::to_string(width), "must be smaller than spitch and dpitch"}));
+        return ACL_ERROR_INVALID_PARAM;
+    }
+
     switch (kind) {
         case ACL_MEMCPY_HOST_TO_DEVICE: {
             rtKind = RT_MEMCPY_HOST_TO_DEVICE;
@@ -454,21 +476,10 @@ aclError aclrtMemcpy2d(void *dst,
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_LOG_INFO("start to execute aclrtMemcpy2d, dpitch = %zu, spitch = %zu, width = %zu, height = %zu, kind = %d",
         dpitch, spitch, width, height, static_cast<int32_t>(kind));
-    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dst);
-    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(src);
-    ACL_REQUIRES_POSITIVE(height);
-    ACL_REQUIRES_POSITIVE(width);
-
-    if ((width > spitch) || (width > dpitch)) {
-        ACL_LOG_INNER_ERROR("[Check][Width]The value of width[%zu] must be smaller than spitch[%zu] and dpitch[%zu]",
-            width, spitch, dpitch);
-        return ACL_ERROR_INVALID_PARAM;
-    }
 
     rtMemcpyKind_t rtKind = RT_MEMCPY_RESERVED;
-    aclError ret = Memcpy2dKindTranslate(kind, rtKind);
+    aclError ret = CheckMemcpy2dParam(dst, dpitch, src, spitch, width, height, kind, rtKind);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_INNER_ERROR("[Translate][Kind]invalid kind of memcpy, kind = %d", static_cast<int32_t>(kind));
         return ret;
     }
 
@@ -478,6 +489,9 @@ aclError aclrtMemcpy2d(void *dst,
             static_cast<int32_t>(kind), static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
+
+    ACL_LOG_INFO("Successfuly execute aclrtMemcpy2d, dpitch = %zu, spitch = %zu, width = %zu, height = %zu, "
+        "kind = %d", dpitch, spitch, width, height, static_cast<int32_t>(kind));
     return ACL_SUCCESS;
 }
 
@@ -493,29 +507,21 @@ aclError aclrtMemcpy2dAsync(void *dst,
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_LOG_INFO("start to execute aclrtMemcpy2dAsync, dpitch = %zu, spitch = %zu, width = %zu, height = %zu,"
         " kind = %d", dpitch, spitch, width, height, static_cast<int32_t>(kind));
-    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dst);
-    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(src);
-    ACL_REQUIRES_POSITIVE(height);
-    ACL_REQUIRES_POSITIVE(width);
 
-    if ((width > spitch) || (width > dpitch)) {
-        ACL_LOG_INNER_ERROR("[Check][Width]The value of width[%zu] must be smaller than spitch[%zu] and dpitch[%zu]",
-            width, spitch, dpitch);
-        return ACL_ERROR_INVALID_PARAM;
-    }
-
-    rtMemcpyKind_t rtKind = RT_MEMCPY_RESERVED;
-    aclError ret = Memcpy2dKindTranslate(kind, rtKind);
+    rtMemcpyKind_t rtKindVal = RT_MEMCPY_RESERVED;
+    aclError ret = CheckMemcpy2dParam(dst, dpitch, src, spitch, width, height, kind, rtKindVal);
     if (ret != ACL_SUCCESS) {
-        ACL_LOG_INNER_ERROR("[Translate][Kind]invalid kind of memcpy, kind = %d", static_cast<int32_t>(kind));
         return ret;
     }
 
-    rtError_t rtErr = rtMemcpy2dAsync(dst, dpitch, src, spitch, width, height, rtKind, stream);
+    rtError_t rtErr = rtMemcpy2dAsync(dst, dpitch, src, spitch, width, height, rtKindVal, stream);
     if (rtErr != RT_ERROR_NONE) {
         ACL_LOG_CALL_ERROR("[Asynchronized][Memcpy]asynchronized memcpy failed, kind = %d, runtime result = %d",
             static_cast<int32_t>(kind), static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
     }
+
+    ACL_LOG_INFO("Successfuly execute aclrtMemcpy2dAsync, dpitch = %zu, spitch = %zu, width = %zu, height = %zu, "
+        "kind = %d", dpitch, spitch, width, height, static_cast<int32_t>(kind));
     return ACL_SUCCESS;
 }
