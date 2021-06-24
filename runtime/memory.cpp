@@ -458,7 +458,10 @@ static aclError CheckMemcpy2dParam(void *dst,
             break;
         }
         default: {
-            ACL_LOG_INNER_ERROR("[Check][Kind]invalid kind of memcpy, kind = %d", static_cast<int32_t>(kind));
+            ACL_LOG_ERROR("[Check][Kind]invalid kind of memcpy, kind = %d", static_cast<int32_t>(kind));
+            acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
+                std::vector<std::string>({"param", "value", "reason"}),
+                std::vector<std::string>({"kind", std::to_string(kind), "invalid kind of memcpy"}));
             return ACL_ERROR_INVALID_PARAM;
         }
     }
