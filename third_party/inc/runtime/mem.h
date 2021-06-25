@@ -32,6 +32,7 @@ extern "C" {
  * @ingroup dvrt_mem
  * @brief memory type
  */
+#define WEAKFUC __attribute__((weak))
 #define RT_MEMORY_DEFAULT ((uint32_t)0x0)   // default memory on device
 #define RT_MEMORY_HBM ((uint32_t)0x2)       // HBM memory on device
 #define RT_MEMORY_RDMA_HBM ((uint32_t)0x3)  // RDMA-HBM memory on device
@@ -535,6 +536,11 @@ RTS_API rtError_t rtRDMASend(uint32_t index, uint32_t wqeIndex, rtStream_t strea
  */
 RTS_API rtError_t rtSetIpcMemPid(const char *name, int32_t pid[], int num);
 
+RTS_API rtError_t rtMemcpy2d(void *dst, uint64_t dpitch, const void *src, uint64_t spitch, uint64_t width,
+    uint64_t height, rtMemcpyKind_t kind) WEAKFUC;
+
+RTS_API rtError_t rtMemcpy2dAsync(void *dst, uint64_t dpitch, const void *src, uint64_t spitch, uint64_t width,
+    uint64_t height, rtMemcpyKind_t kind, rtStream_t stream) WEAKFUC;
 /**
  * @ingroup dvrt_mem
  * @brief HCCL Async memory cpy
