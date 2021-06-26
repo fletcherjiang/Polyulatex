@@ -80,7 +80,7 @@ static void Fp16Normalize(uint16_t &exp, uint16_t &man)
     }
 }
 
-float Fp16ToFloat(uint16_t value)
+float32_t Fp16ToFloat(uint16_t value)
 {
     uint16_t hfSign;
     uint16_t hfMan;
@@ -110,7 +110,7 @@ float Fp16ToFloat(uint16_t value)
     return ret;
 }
 
-uint16_t FloatToFp16(float value)
+uint16_t FloatToFp16(float32_t value)
 {
     TypeUnion u;
     u.fVal = value;
