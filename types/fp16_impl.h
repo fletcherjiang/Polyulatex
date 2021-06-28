@@ -336,9 +336,9 @@ typedef enum TagFp16RoundMode {
     ROUND_MODE_RESERVED,
 } fp16RoundMode_t;
 
-uint16_t FloatToFp16(float32_t float_value);
+uint16_t FloatToFp16(float float_value);
 
-float32_t Fp16ToFloat(uint16_t fp16_value);
+float Fp16ToFloat(uint16_t fp16_value);
 
 bool Fp16Eq(uint16_t lhs, uint16_t rhs);
 } // namespace acl
