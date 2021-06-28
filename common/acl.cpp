@@ -36,7 +36,7 @@ namespace {
     std::mutex aclInitMutex;
     std::mutex aclSocVersionMutex;
     std::string aclSocVersion;
-    const int ADX_ERROR_NONE = 0;
+    const int ADX_SUCCESS = 0;
     GeFinalizeCallback aclGeFinalizeCallback = nullptr;
     bool isCastHasTruncateAttr = false;
 }
@@ -147,7 +147,7 @@ aclError aclFinalize()
 
     if (acl::AclDump::GetInstance().GetAclDumpFlag()) {
         int adxRet = AdxDataDumpServerUnInit();
-        if (adxRet != ADX_ERROR_NONE) {
+        if (adxRet != ADX_SUCCESS) {
             ACL_LOG_CALL_ERROR("[Generate][DumpFile]generate dump file failed in disk, adx result = %d", adxRet);
             return ACL_ERROR_INTERNAL_ERROR;
         }
