@@ -123,7 +123,7 @@ std::string aclTensorDesc::DebugString() const
     if (isConst) {
         ss << " , isConst = true, Const Len = "<< (constDataLen / sizeof(int)) << " ,Const data = ";
         for (size_t i = 0U; i < (constDataLen / sizeof(int32_t)); ++i) {
-            ss <<  *(static_cast<const int32_t*>(constDataBuf) + i);
+            ss <<  *(static_cast<const int32_t*>(constDataBuf.get()) + i);
             ss << ",";
         }
     }
