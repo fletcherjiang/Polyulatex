@@ -25,7 +25,7 @@ aclTensorDesc::aclTensorDesc(aclDataType dataType, std::initializer_list<int64_t
     this->format = format;
 }
 
-aclTensorDesc::aclTensorDesc(aclDataType dataType, size_t numDims, const int64_t *dims, aclFormat format)
+aclTensorDesc::aclTensorDesc(aclDataType dataType, size_t numDims, const int64_t* const dims, aclFormat format)
 {
     this->dataType = dataType;
     this->format = format;
@@ -108,19 +108,6 @@ const std::string &aclTensorDesc::GetShapeKey() const
     return cachedShapeKey;
 }
 
-std::string DebugConstData(bool isConst, const void* const constDataBuf, size_t constDataLen)
-{
-    std::stringstream ss;
-    if (isConst) {
-        ss << " , isConst = true, Const Len = "<< (constDataLen / sizeof(int)) << " ,Const data = ";
-        for (size_t i = 0U; i < (constDataLen / sizeof(int32_t)); ++i) {
-            ss <<  *(static_cast<const int32_t*>(constDataBuf) + i);
-            ss << ",";
-        }
-    }
-    return ss.str();
-}
-
 std::string aclTensorDesc::DebugString() const
 {
     std::stringstream ss;
@@ -133,7 +120,13 @@ std::string aclTensorDesc::DebugString() const
     ss << ", shapeRange = " << acl::string_utils::VectorToString(shapeRange);
     ss << ", memtype = " << memtype;
     ss << ", isConst = " << isConst;
-    ss << DebugConstData(isConst, constDataBuf.get(), constDataLen);
+    if (isConst) {
+        ss << " , isConst = true, Const Len = "<< (constDataLen / sizeof(int)) << " ,Const data = ";
+        for (size_t i = 0U; i < (constDataLen / sizeof(int32_t)); ++i) {
+            ss <<  *(static_cast<const int32_t*>(constDataBuf) + i);
+            ss << ",";
+        }
+    }
     return ss.str();
 }
 
@@ -245,6 +238,13 @@ bool aclTensorDesc::operator==(const aclTensorDesc* const other)
     ACL_LOG_INFO("aclTensorDesc is equal!");
     return true;
 }
+
+
+
+
+
+
+
 
 size_t aclDataTypeSize(aclDataType dataType)
 {
@@ -360,8 +360,8 @@ size_t aclGetTensorDescSize(const aclTensorDesc *desc)
         return 0U;
     }
     size_t size = 0U;
-    size_t descCount = aclGetTensorDescElementCount(desc);
-    size_t typeSize = aclDataTypeSize(desc->dataType);
+    const size_t descCount = aclGetTensorDescElementCount(desc);
+    const size_t typeSize = aclDataTypeSize(desc->dataType);
     (void)acl::CheckSizeTMultiOverflow(descCount, typeSize, size);
     return size;
 }
@@ -377,11 +377,11 @@ size_t aclGetTensorDescElementCount(const aclTensorDesc *desc)
     }
 
     if (desc->dims.empty()) {
-        return 1U;
+        return static_cast<size_t>(1);
     }
 
     size_t elementCount = 1;
-    for (int64_t dim : desc->dims) {
+    for (const int64_t dim : desc->dims) {
         if (dim < 0) { // dim cannot be less than 0
             ACL_LOG_INNER_ERROR("[Check][Dim]invalid dim value %ld", dim);
             return 0U;
@@ -405,7 +405,7 @@ size_t aclGetTensorDescNumDims(const aclTensorDesc *desc)
         return 0U;
     }
     if ((desc->dims.size() > 0U) && (desc->dims[0U] == acl::UNKNOW_RANK)) {
-        return ACL_UNKNOWN_RANK;
+        return static_cast<size_t>(ACL_UNKNOWN_RANK);
     }
     return desc->dims.size();
 }
@@ -428,7 +428,7 @@ aclError aclGetTensorDescDimRange(const aclTensorDesc* desc,
             std::vector<std::string>({"index", std::to_string(index), errMsg}));
         return ACL_ERROR_INVALID_PARAM;
     }
-    if (dimRangeNum < ACL_TENSOR_SHAPE_RANGE_NUM) {
+    if (dimRangeNum < static_cast<size_t>(ACL_TENSOR_SHAPE_RANGE_NUM)) {
         ACL_LOG_ERROR("[Check][DimRangeNum]dimRangeNum cannot be less than 2. dimRangeNum = %zu",
             dimRangeNum);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
@@ -604,7 +604,7 @@ aclError aclSetTensorStorageShape(aclTensorDesc *desc, int numDims, const int64_
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dims);
 
     desc->storageDims.clear();
-    for (int i = 0; i < numDims; ++i) {
+    for (int32_t i = 0; i < static_cast<int32_t>(numDims); ++i) {
         desc->storageDims.push_back(*(dims + i));
     }
 
