@@ -103,19 +103,19 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
         ge::Format geOriginFormat = ge::FORMAT_RESERVED;
         if (aclOp.inputDesc[i]->format != ACL_FORMAT_UNDEFINED) {
             geOriginFormat = static_cast<::ge::Format>(aclOp.inputDesc[i]->format);
-        } 
+        }
         ACL_LOG_DEBUG("Use storageDims to construct GeShape in op execute");
         ge::GeTensorDesc tensorDesc;
         if (geFormat != ge::FORMAT_RESERVED && geOriginFormat != geFormat) {
-            ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are not equal", 
+            ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are not equal",
                 static_cast<int32_t>(geOriginFormat), static_cast<int32_t>(geFormat));
-            tensorDesc.SetShape(ge::GeShape(aclOp.inputDesc[i]->storageDims));     
-            tensorDesc.SetFormat(geFormat); 
-            tensorDesc.SetOriginShape(ge::GeShape(aclOp.inputDesc[i]->dims));                  
+            tensorDesc.SetShape(ge::GeShape(aclOp.inputDesc[i]->storageDims));
+            tensorDesc.SetFormat(geFormat);
+            tensorDesc.SetOriginShape(ge::GeShape(aclOp.inputDesc[i]->dims));
         } else {
             ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are equal", 
                 static_cast<int32_t>(geOriginFormat), static_cast<int32_t>(geFormat));
-            tensorDesc.SetShape(ge::GeShape(aclOp.inputDesc[i]->dims));      
+            tensorDesc.SetShape(ge::GeShape(aclOp.inputDesc[i]->dims));
             tensorDesc.SetFormat(geOriginFormat); 
             tensorDesc.SetOriginShape(tensorDesc.GetShape());
         }      
@@ -147,23 +147,23 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
         ge::Format geOriginFormat = ge::FORMAT_RESERVED;
         if (aclOp.outputDesc[i]->format != ACL_FORMAT_UNDEFINED) {
             geOriginFormat = static_cast<::ge::Format>(aclOp.outputDesc[i]->format);
-        } 
+        }
 
         ACL_LOG_DEBUG("Use storageDims to construct GeShape in op execute");
         ge::GeTensorDesc tensorDesc;
         if (geFormat != ge::FORMAT_RESERVED && geOriginFormat != geFormat) {
-            ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are not equal", 
+            ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are not equal",
                 static_cast<int32_t>(geOriginFormat), static_cast<int32_t>(geFormat));
-            tensorDesc.SetShape(ge::GeShape(aclOp.outputDesc[i]->storageDims));     
+            tensorDesc.SetShape(ge::GeShape(aclOp.outputDesc[i]->storageDims));
             tensorDesc.SetFormat(geFormat);  
-            tensorDesc.SetOriginShape(ge::GeShape(aclOp.outputDesc[i]->dims));                
+            tensorDesc.SetOriginShape(ge::GeShape(aclOp.outputDesc[i]->dims));
         } else {
-            ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are equal", 
+            ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are equal",
                 static_cast<int32_t>(geOriginFormat), static_cast<int32_t>(geFormat));
-            tensorDesc.SetShape(ge::GeShape(aclOp.outputDesc[i]->dims));      
-            tensorDesc.SetFormat(geOriginFormat); 
+            tensorDesc.SetShape(ge::GeShape(aclOp.outputDesc[i]->dims));
+            tensorDesc.SetFormat(geOriginFormat);
             tensorDesc.SetOriginShape(tensorDesc.GetShape());
-        }    
+        }
 
         tensorDesc.SetOriginFormat(geOriginFormat);
         tensorDesc.SetDataType(geDataType);
