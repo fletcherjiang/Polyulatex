@@ -722,7 +722,7 @@ aclError OpModelManager::MatchStaticOpModel(const AclOp &aclOp, OpModel &opModel
     bool isExistConst = false;
     ACL_REQUIRES_OK(SetHostMemToConst(aclopHostMemToConst, isExistConst));
     if (isExistConst) {
-        ret = opModels_.GetOp(aclopHostMemToConst, modelDef, true);
+        ret = opModels_.Get(aclopHostMemToConst, modelDef, true);
         if (ret == ACL_SUCCESS) {
             isDynamic = false;
             ACL_LOG_INFO("Match static model with const memory successfully. opType = %s, opModel = %s",
@@ -730,7 +730,7 @@ aclError OpModelManager::MatchStaticOpModel(const AclOp &aclOp, OpModel &opModel
             ret = modelCache_.GetOpModel(*modelDef, opModel);
             return ret;
         } else {
-            ret = opModels_.GetOp(aclOp, modelDef, true);
+            ret = opModels_.Get(aclOp, modelDef, true);
             if (ret == ACL_SUCCESS) {
                 isDynamic = false;
                 ACL_LOG_INFO("Match static model successfully. opType = %s, opModel = %s",
@@ -740,7 +740,7 @@ aclError OpModelManager::MatchStaticOpModel(const AclOp &aclOp, OpModel &opModel
             }
         }
     } else {
-        ret = opModels_.GetOp(aclOp, modelDef, true);
+        ret = opModels_.Get(aclOp, modelDef, true);
         if (ret == ACL_SUCCESS) {
             isDynamic = false;
             ACL_LOG_INFO("Match static model successfully. opType = %s, opModel = %s",

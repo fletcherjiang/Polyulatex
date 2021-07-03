@@ -88,7 +88,7 @@ aclError OpKernelSelector::SelectOpKernel(const AclOp &aclOp)
 
 aclError OpKernelSelector::GetOpKernelDesc(const AclOp &aclOp, std::shared_ptr<OpKernelDesc> &desc)
 {
-    return kernelDescMap_.GetOp(aclOp, desc);
+    return kernelDescMap_.Get(aclOp, desc);
 }
 
 bool OpKernelSelector::HasSelectFunc(const std::string &opType)

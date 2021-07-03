@@ -32,7 +32,7 @@ public:
 
     aclError Insert(const AclOp &op, const T &entry, T &agingT);
 
-    aclError GetOp(const AclOp &op, T &entry, bool needUpdateTimestamp = false);
+    aclError Get(const AclOp &op, T &entry, bool needUpdateTimestamp = false);
 
     void SetMaxOpNum(uint64_t inputMax) { maxOpNum = inputMax; }
 
@@ -271,7 +271,7 @@ aclError AclOpMap<T>::Insert(const AclOp &op, const T &entry, T &agingT)
 }
 
 template<typename T>
-aclError AclOpMap<T>::GetOp(const AclOp &op, T &entry, bool needUpdateTimestamp)
+aclError AclOpMap<T>::Get(const AclOp &op, T &entry, bool needUpdateTimestamp)
 {
     auto opAttr = op.opAttr;
     size_t digest = 0;
