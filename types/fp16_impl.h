@@ -20,7 +20,7 @@ namespace acl {
  * @ingroup fp16 basic parameter
  * @brief   fp16 exponent bias
  */
-static constexpr uint32_t FP16_EXP_BIAS = 15u;
+static constexpr uint32_t FP16_EXP_BIAS = 15U;
 /**
  * @ingroup fp16 basic parameter
  * @brief   the exponent bit lengt h of fp16 is 5
@@ -30,32 +30,32 @@ static constexpr int32_t FP16_EXP_LEN = 5;
  * @ingroup fp16 basic parameter
  * @brief   the mantissa bit length of fp16 is 10
  */
-static constexpr uint32_t FP16_MAN_LEN = 10u;
+static constexpr uint32_t FP16_MAN_LEN = 10U;
 /**
  * @ingroup fp16 basic parameter
  * @brief   bit index of sign in fp16
  */
-static constexpr uint32_t FP16_SIGN_INDEX = 15u;
+static constexpr uint32_t FP16_SIGN_INDEX = 15U;
 /**
  * @ingroup fp16 basic parameter
  * @brief   sign mask of fp16         (1 00000 00000 00000)
  */
-static constexpr uint32_t FP16_SIGN_MASK = 0x8000u;
+static constexpr uint32_t FP16_SIGN_MASK = 0x8000U;
 /**
  * @ingroup fp16 basic parameter
  * @brief   exponent mask of fp16     (  11111 00000 00000)
  */
-static constexpr uint32_t FP16_EXP_MASK = 0x7C00u;
+static constexpr uint32_t FP16_EXP_MASK = 0x7C00U;
 /**
  * @ingroup fp16 basic parameter
  * @brief   mantissa mask of fp16     (        11111 11111)
  */
-static constexpr uint32_t FP16_MAN_MASK = 0x03FFu;
+static constexpr uint32_t FP16_MAN_MASK = 0x03FFU;
 /**
  * @ingroup fp16 basic parameter
  * @brief   hide bit of mantissa of fp16(   1 00000 00000)
  */
-static constexpr uint32_t FP16_MAN_HIDE_BIT = 0x0400u;
+static constexpr uint32_t FP16_MAN_HIDE_BIT = 0x0400U;
 /**
  * @ingroup fp16 basic parameter
  * @brief   maximum value            (0111 1011 1111 1111)
@@ -75,7 +75,7 @@ static constexpr int32_t FP16_ABS_MAX = 0x7FFF;
  * @ingroup fp16 basic parameter
  * @brief   maximum exponent value of fp16 is 15(11111)
  */
-static constexpr uint32_t FP16_MAX_EXP = 0x001Fu;
+static constexpr uint32_t FP16_MAX_EXP = 0x001FU;
 /**
  * @ingroup fp16 basic parameter
  * @brief   maximum valid exponent value of fp16 is 14(11110)
@@ -85,7 +85,7 @@ static constexpr int32_t FP16_MAX_VALID_EXP = 0x001E;
  * @ingroup fp16 basic parameter
  * @brief   maximum mantissa value of fp16(11111 11111)
  */
-static constexpr uint32_t FP16_MAX_MAN = 0x03FFu;
+static constexpr uint32_t FP16_MAX_MAN = 0x03FFU;
 /**
  * @ingroup fp16 basic parameter
  * @brief   absolute minimum normal value of fp16
@@ -152,12 +152,12 @@ static constexpr int32_t FP32_EXP_LEN = 8;
  * @ingroup fp32 basic parameter
  * @brief   the mantissa bit length of float/fp32 is 23
  */
-static constexpr uint32_t FP32_MAN_LEN = 23u;
+static constexpr uint32_t FP32_MAN_LEN = 23U;
 /**
  * @ingroup fp32 basic parameter
  * @brief   bit index of sign in float/fp32
  */
-static constexpr uint32_t FP32_SIGN_INDEX = 31u;
+static constexpr uint32_t FP32_SIGN_INDEX = 31U;
 /**
  * @ingroup fp32 basic parameter
  * @brief   sign mask of fp32         (1 0000 0000  0000 0000 0000 0000 000)
@@ -167,22 +167,22 @@ static constexpr uint32_t FP32_SIGN_MASK = 0x80000000;
  * @ingroup fp32 basic parameter
  * @brief   exponent mask of fp32     (  1111 1111  0000 0000 0000 0000 000)
  */
-static constexpr uint32_t FP32_EXP_MASK = 0x7F800000u;
+static constexpr uint32_t FP32_EXP_MASK = 0x7F800000U;
 /**
  * @ingroup fp32 basic parameter
  * @brief   mantissa mask of fp32     (             1111 1111 1111 1111 111)
  */
-static constexpr uint32_t FP32_MAN_MASK = 0x007FFFFFu;
+static constexpr uint32_t FP32_MAN_MASK = 0x007FFFFFU;
 /**
  * @ingroup fp32 basic parameter
  * @brief   hide bit of mantissa of fp32      (  1  0000 0000 0000 0000 000)
  */
-static constexpr uint32_t FP32_MAN_HIDE_BIT = 0x00800000u;
+static constexpr uint32_t FP32_MAN_HIDE_BIT = 0x00800000U;
 /**
  * @ingroup fp32 basic parameter
  * @brief   absolute maximum value    (0 1111 1111  1111 1111 1111 1111 111)
  */
-static constexpr uint32_t FP32_ABS_MAX = 0x7FFFFFFFu;
+static constexpr uint32_t FP32_ABS_MAX = 0x7FFFFFFFU;
 /**
  * @ingroup fp32 basic parameter
  * @brief   maximum exponent value of fp32 is 255(1111 1111)
@@ -192,7 +192,7 @@ static constexpr int32_t FP32_MAX_EXP = 0xFF;
  * @ingroup fp32 basic parameter
  * @brief   maximum mantissa value of fp32    (1111 1111 1111 1111 1111 111)
  */
-static constexpr uint32_t FP32_MAX_MAN = 0x7FFFFFu;
+static constexpr uint32_t FP32_MAX_MAN = 0x7FFFFFU;
 /**
  * @ingroup fp32 special value judgment
  * @brief   whether a fp32 is NaN
@@ -259,22 +259,22 @@ static constexpr uint64_t FP64_SIGN_MASK = 0x8000000000000000;
  * @ingroup fp64 basic parameter
  * @brief   exponent mask of fp64            (0 1 11111 11111  0000?-?-(total 52bits 0))
  */
-static constexpr uint64_t FP64_EXP_MASK = 0x7FF0000000000000u;
+static constexpr uint64_t FP64_EXP_MASK = 0x7FF0000000000000U;
 /**
  * @ingroup fp64 basic parameter
  * @brief   mantissa mask of fp64            (                 1111?-?-(total 52bits 1))
  */
-static constexpr uint64_t FP64_MAN_MASK = 0x000FFFFFFFFFFFFFu;
+static constexpr uint64_t FP64_MAN_MASK = 0x000FFFFFFFFFFFFFU;
 /**
  * @ingroup fp64 basic parameter
  * @brief   hide bit of mantissa of fp64     (               1 0000?-?-(total 52bits 0))
  */
-static constexpr uint64_t FP64_MAN_HIDE_BIT = 0x0010000000000000u;
+static constexpr uint64_t FP64_MAN_HIDE_BIT = 0x0010000000000000U;
 /**
  * @ingroup fp64 basic parameter
  * @brief   absolute maximum value           (0 111?-?-(total 63bits 1))
  */
-static constexpr uint64_t FP64_ABS_MAX = 0x7FFFFFFFFFFFFFFFu;
+static constexpr uint64_t FP64_ABS_MAX = 0x7FFFFFFFFFFFFFFFU;
 /**
  * @ingroup fp64 basic parameter
  * @brief   maximum exponent value of fp64 is 2047(1 11111 11111)
@@ -284,7 +284,7 @@ static constexpr int32_t FP64_MAX_EXP = 0x07FF;
  * @ingroup fp64 basic parameter
  * @brief   maximum mantissa value of fp64  (111?-?-(total 52bits 1))
  */
-static constexpr uint64_t FP64_MAX_MAN = 0xFFFFFFFFFFFu;
+static constexpr uint64_t FP64_MAX_MAN = 0xFFFFFFFFFFFU;
 /**
  * @ingroup fp64 special value judgment
  * @brief   whether a fp64 is NaN
@@ -310,17 +310,17 @@ static constexpr int32_t BIT_LEN8_MAX = 0xFF;
  * @ingroup integer special value judgment
  * @brief   maximum positive value of int16_t           (0111 1111 1111 1111)
  */
-static constexpr uint32_t INT16_T_MAX = 0x7FFFu;
+static constexpr uint32_t INT16_T_MAX = 0x7FFFU;
 /**
  * @ingroup integer special value judgment
  * @brief   maximum value of a data with 16 bits length (1111 1111 1111 1111)
  */
-static constexpr uint32_t BIT_LEN16_MAX = 0xFFFFu;
+static constexpr uint32_t BIT_LEN16_MAX = 0xFFFFU;
 /**
  * @ingroup integer special value judgment
  * @brief   maximum positive value of int32_t           (0111 1111 1111 1111 1111 1111 1111 1111)
  */
-static constexpr uint32_t INT32_T_MAX = 0x7FFFFFFFu;
+static constexpr uint32_t INT32_T_MAX = 0x7FFFFFFFU;
 /**
  * @ingroup integer special value judgment
  * @brief   maximum value of a data with 32 bits length (1111 1111 1111 1111 1111 1111 1111 1111)
@@ -336,9 +336,9 @@ typedef enum TagFp16RoundMode {
     ROUND_MODE_RESERVED,
 } fp16RoundMode_t;
 
-uint16_t FloatToFp16(float float_value);
+uint16_t FloatToFp16(float val);
 
-float Fp16ToFloat(uint16_t fp16_value);
+float Fp16ToFloat(uint16_t val);
 
 bool Fp16Eq(uint16_t lhs, uint16_t rhs);
 } // namespace acl
