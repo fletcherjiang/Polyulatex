@@ -239,13 +239,6 @@ bool aclTensorDesc::operator==(const aclTensorDesc* const other)
     return true;
 }
 
-
-
-
-
-
-
-
 size_t aclDataTypeSize(aclDataType dataType)
 {
     switch (dataType) {
