@@ -40,10 +40,10 @@ namespace {
     const std::string ACL_DUMP_MODE = "dump_mode";
     const std::string ACL_DUMP_OP_SWITCH = "dump_op_switch";
     const std::string ACL_DUMP = "dump";
-    const int ADX_ERROR_NONE = 0;
-    const int MAX_IPV4_ADDRESS_LENGTH = 4;
-    const int MAX_DUMP_PATH_LENGTH = 512;
-    const int MAX_IPV4_ADDRESS_VALUE = 255;
+    const int32_t ADX_ERROR_NONE = 0;
+    const int32_t MAX_IPV4_ADDRESS_LENGTH = 4;
+    const int32_t MAX_DUMP_PATH_LENGTH = 512;
+    const int32_t MAX_IPV4_ADDRESS_VALUE = 255;
 }
 
 namespace acl {
@@ -172,7 +172,7 @@ namespace acl {
         const std::string pathWhiteList = "-=[];\\,./!@#$%^&*()_+{}:?";
         size_t len = dumpPath.length();
         for (size_t i = 0; i < len; ++i) {
-            int tmpChar = static_cast<int>(dumpPath[i]);
+            int32_t tmpChar = static_cast<int32_t>(dumpPath[i]);
             if ((std::islower(tmpChar) == 0) && (std::isupper(tmpChar) == 0) && (std::isdigit(tmpChar) == 0) &&
                 (pathWhiteList.find(dumpPath[i]) == std::string::npos)) {
                 ACL_LOG_ERROR("[Check][PathWhiteList]invalid dump_path [%s] in dump config at "
@@ -388,7 +388,7 @@ namespace acl {
         ACL_LOG_INFO("start to execute HandleDumpCommand.");
         ge::GeExecutor geExecutor;
         nlohmann::json js;
-        int adxRet = AdxDataDumpServerInit();
+        int32_t adxRet = AdxDataDumpServerInit();
         if (adxRet != ADX_ERROR_NONE) {
             ACL_LOG_INNER_ERROR("[AdxDataDumpServer][Init]dump server run failed, adx result = %d", adxRet);
             return ACL_ERROR_INTERNAL_ERROR;
@@ -459,7 +459,7 @@ aclError aclmdlInitDump()
         return ACL_ERROR_REPEAT_INITIALIZE;
     }
 
-    int adxRet = AdxDataDumpServerInit();
+    int32_t adxRet = AdxDataDumpServerInit();
     if (adxRet != ADX_ERROR_NONE) {
         ACL_LOG_CALL_ERROR("[AdxDataDumpServer][Init]dump server run failed, adx result = %d", adxRet);
         return ACL_ERROR_INTERNAL_ERROR;
@@ -550,7 +550,7 @@ aclError aclmdlFinalizeDump()
         }
 
         // interrupt dump server
-        int adxRet = AdxDataDumpServerUnInit();
+        int32_t adxRet = AdxDataDumpServerUnInit();
         if (adxRet != ADX_ERROR_NONE) {
             ACL_LOG_CALL_ERROR("[AdxDataDumpServer][UnInit]generate dump file failed in disk, adx result = %d", adxRet);
             return ACL_ERROR_INTERNAL_ERROR;
