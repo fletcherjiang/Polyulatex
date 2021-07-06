@@ -225,7 +225,7 @@ aclError AclOpMap<T>::AddMemAndAging(std::vector<std::pair<aclopAttr, T>> &model
         ACL_LOG_INFO("AclOpMap::AddMemAndAging in, cnt is %llu, maxOpNum is %llu, no need aging", cnt, maxOpNum);
         return ACL_SUCCESS;
     }
-    ACL_LOG_INFO("AclOpMap::time stamp is %lu, cnt is %lu, maxOpNum is %lu, start aging", 
+    ACL_LOG_INFO("AclOpMap::time stamp is %lu, cnt is %lu, maxOpNum is %lu, start aging",
         entry->timestamp, cnt, maxOpNum);
     return Aging(agingT);
 }
@@ -236,10 +236,9 @@ aclError AclOpMap<T>::Insert(const AclOp &op, const T &entry, T &agingT)
     ACL_LOG_DEBUG("AclOpMap::Insert IN, op = %s", op.DebugString().c_str());
     string inputDescStr = TensorDescArr2Str(op.numInputs, op.inputDesc);
     string outputDescStr = TensorDescArr2Str(op.numOutputs, op.outputDesc);
-    
     size_t digest = 0;
     auto opAttr = op.opAttr;
-    aclopAttr emptyAttr; 
+    aclopAttr emptyAttr;
     if (op.opAttr != nullptr) {
         if (!attr_utils::SaveConstToAttr(op, const_cast<aclopAttr *>(opAttr))) {
             ACL_LOG_ERROR("[Save][ConstData]save const data buffer to attr fail");
@@ -294,7 +293,7 @@ aclError AclOpMap<T>::Get(const AclOp &op, T &entry, bool needUpdateTimestamp)
     std::lock_guard<std::mutex> lk(mutex_);
     auto iter = hashMap_.find(seed);
     if (iter == hashMap_.end()) {
-        ACL_LOG_WARN("Get op from aclOpMap failed due to hashMap_ is empty when seed = %zu, op = %s", 
+        ACL_LOG_WARN("Get op from aclOpMap failed due to hashMap_ is empty when seed = %zu, op = %s",
             seed, op.DebugString().c_str());
         return ACL_ERROR_OP_NOT_FOUND;
     } else if (iter->second.size() == 1) {
@@ -312,12 +311,11 @@ aclError AclOpMap<T>::Get(const AclOp &op, T &entry, bool needUpdateTimestamp)
             return ACL_ERROR_OP_NOT_FOUND;
         }
     } else {
-        ACL_LOG_INFO("Match op by string from aclOpMap due to seed has conflict! seed = %zu, op = %s", 
+        ACL_LOG_INFO("Match op by string from aclOpMap due to seed has conflict! seed = %zu, op = %s",
             seed, op.DebugString().c_str());
         const string &opType = op.opType;
         string inputDescStr = TensorDescArr2Str(op.numInputs, op.inputDesc);
         string outputDescStr = TensorDescArr2Str(op.numOutputs, op.outputDesc);
-        
         auto it = entries_.find(opType);
         if (it == entries_.end()) {
             ACL_LOG_WARN("Match op type failed. opType = %s", opType.c_str());

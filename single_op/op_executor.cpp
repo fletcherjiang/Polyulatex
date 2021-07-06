@@ -113,12 +113,12 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
             tensorDesc.SetFormat(geFormat);
             tensorDesc.SetOriginShape(ge::GeShape(aclOp.inputDesc[i]->dims));
         } else {
-            ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are equal", 
+            ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are equal",
                 static_cast<int32_t>(geOriginFormat), static_cast<int32_t>(geFormat));
             tensorDesc.SetShape(ge::GeShape(aclOp.inputDesc[i]->dims));
-            tensorDesc.SetFormat(geOriginFormat); 
+            tensorDesc.SetFormat(geOriginFormat);
             tensorDesc.SetOriginShape(tensorDesc.GetShape());
-        }      
+        }
         tensorDesc.SetOriginFormat(geOriginFormat);
         tensorDesc.SetDataType(geDataType);
         (void)ge::AttrUtils::SetInt(tensorDesc, ge::ATTR_NAME_PLACEMENT, static_cast<int64_t>(aclOp.inputDesc[i]->memtype));
@@ -155,7 +155,7 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
             ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are not equal",
                 static_cast<int32_t>(geOriginFormat), static_cast<int32_t>(geFormat));
             tensorDesc.SetShape(ge::GeShape(aclOp.outputDesc[i]->storageDims));
-            tensorDesc.SetFormat(geFormat);  
+            tensorDesc.SetFormat(geFormat);
             tensorDesc.SetOriginShape(ge::GeShape(aclOp.outputDesc[i]->dims));
         } else {
             ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are equal",
@@ -167,7 +167,6 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
 
         tensorDesc.SetOriginFormat(geOriginFormat);
         tensorDesc.SetDataType(geDataType);
-        
         (void)ge::AttrUtils::SetInt(tensorDesc, ge::ATTR_NAME_PLACEMENT, static_cast<int64_t>(aclOp.outputDesc[i]->memtype));
         outputDesc.emplace_back(std::move(tensorDesc));
 

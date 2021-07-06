@@ -171,7 +171,7 @@ aclError AclShapeRangeMap<T>::Aging(T &agingT)
         }
     }
 
-    // remove model in hash map while time stamp in hash map is equal to model map 
+    // remove model in hash map while time stamp in hash map is equal to model map
     bool foundHash = false;
     for (auto hashMapIter = hashMap_.begin(); hashMapIter != hashMap_.end(); ++hashMapIter) {
         for (auto vecIter = hashMapIter->second.begin(); vecIter != hashMapIter->second.end(); ++vecIter) {

@@ -137,7 +137,7 @@ namespace acl {
             acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
                 std::vector<std::string>({"param", "value", "reason"}),
                 std::vector<std::string>({"dump config", "", "dump_list field is null and "
-                "dump_op_switch is off in config"}));            
+                "dump_op_switch is off in config"}));
             return false;
         }
         // if dump_op_switch is off and dump_list is not null but all field illegal, can't send dump config
