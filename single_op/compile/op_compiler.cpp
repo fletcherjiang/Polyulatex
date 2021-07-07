@@ -56,11 +56,11 @@ static void MakeHostMemTensor(const aclTensorDesc *desc, const aclDataBuffer *da
         if (compileFlag == 0) {
             // During static compilation, change hostMem to const input.
             ACL_LOG_INFO("compleFlag is ACL_OP_COMPILE_DEFAULT, change hostMem to const.");
-            (void)AttrUtils::SetBool(geTensorDesc, ge::CONST_ATTR_NAME_INPUT, true);
+            AttrUtils::SetBool(geTensorDesc, ge::CONST_ATTR_NAME_INPUT, true);
             ge::ConstGeTensorPtr constTensor = nullptr;
             ACL_MAKE_SHARED(constTensor = std::make_shared<GeTensor>(geTensorDesc,
                 static_cast<uint8_t *>(dataBuffer->data), dataBuffer->length), ;);
-            (void)ge::AttrUtils::SetTensor(geTensorDesc, ge::ATTR_NAME_WEIGHTS, constTensor);
+            ge::AttrUtils::SetTensor(geTensorDesc, ge::ATTR_NAME_WEIGHTS, constTensor);
         } else {
             // During fuzzy compilation, change hostMem to data input.
             ACL_LOG_INFO("compleFlag is ACL_OP_COMPILE_FUZZ, change hostMem to data.");
@@ -92,8 +92,7 @@ static void OptimizeTensorDescForTransdata(const AclOp &aclOp, bool isInput, GeT
         ACL_LOG_INFO("Find input origin format %d, output origin format %d", inOriFormat, outOriFormat);
         ge::Format transdataOriFormat = FORMAT_RESERVED;
         // if output is oringin format,input is not, need update input
-        if ((ge::TypeUtils::IsInternalFormat(inOriFormat)) &&
-            (!ge::TypeUtils::IsInternalFormat(outOriFormat))) {
+        if (ge::TypeUtils::IsInternalFormat(inOriFormat) && !ge::TypeUtils::IsInternalFormat(outOriFormat)) {
             transdataOriFormat = outOriFormat;
             if (isInput) {
                 geTensorDesc.SetOriginFormat(transdataOriFormat);
@@ -115,7 +114,7 @@ static void OptimizeTensorDescForTransdata(const AclOp &aclOp, bool isInput, GeT
 static aclError MakeInputCompileParam(const AclOp &aclOp, CompileParam &param,
                                       OpDesc *opDesc, int32_t compileFlag)
 {
-    for (size_t i = 0; i < static_cast<size_t>(aclOp.numInputs); ++i) {
+    for (int i = 0; i < aclOp.numInputs; ++i) {
         const aclTensorDesc *desc = aclOp.inputDesc[i];
         if (!desc->CheckShapeRange()) {
             ACL_LOG_INNER_ERROR("the number of shapeRange is not equal to number of dims");
@@ -149,7 +148,7 @@ static aclError MakeInputCompileParam(const AclOp &aclOp, CompileParam &param,
             return ACL_ERROR_GE_FAILURE;
         }
         AttrUtils::SetInt(geTensorDesc, ge::ATTR_NAME_PLACEMENT, static_cast<int64_t>(desc->memtype));
-        TensorUtils::SetRealDimCnt(geTensorDesc, static_cast<uint32_t>(desc->dims.size()));
+        TensorUtils::SetRealDimCnt(geTensorDesc, desc->dims.size());
         TensorUtils::SetInputTensor(geTensorDesc, true);
         TensorUtils::SetOutputTensor(geTensorDesc, false);
         if (desc->storageFormat != ACL_FORMAT_UNDEFINED) {
@@ -186,7 +185,7 @@ static aclError MakeInputCompileParam(const AclOp &aclOp, CompileParam &param,
 static aclError MakeOutputCompileParam(const AclOp &aclOp, CompileParam &param,
                                        OpDesc *opDesc, int32_t compileFlag)
 {
-    for (size_t i = 0; i < static_cast<size_t>(aclOp.numOutputs); ++i) {
+    for (int i = 0; i < aclOp.numOutputs; ++i) {
         const aclTensorDesc *desc = aclOp.outputDesc[i];
         GeTensorDesc geTensorDesc(GeShape(desc->dims),
                                   static_cast<::ge::Format>(desc->format),
@@ -209,7 +208,7 @@ static aclError MakeOutputCompileParam(const AclOp &aclOp, CompileParam &param,
         }
 
         AttrUtils::SetInt(geTensorDesc, ge::ATTR_NAME_PLACEMENT, static_cast<int64_t>(desc->memtype));
-        TensorUtils::SetRealDimCnt(geTensorDesc, static_cast<uint32_t>(desc->dims.size()));
+        TensorUtils::SetRealDimCnt(geTensorDesc, desc->dims.size());
         TensorUtils::SetInputTensor(geTensorDesc, false);
         TensorUtils::SetOutputTensor(geTensorDesc, true);
         if (desc->storageFormat != ACL_FORMAT_UNDEFINED) {
@@ -247,13 +246,13 @@ aclError OpCompiler::MakeCompileParam(const AclOp &aclOp, CompileParam &param, i
     ACL_MAKE_SHARED(opDesc = std::make_shared<ge::OpDesc>(aclOp.opType, aclOp.opType), return ACL_ERROR_BAD_ALLOC);
     ACL_CHECK_MALLOC_RESULT(opDesc);
 
-    const aclError inputRet = MakeInputCompileParam(aclOp, param, opDesc.get(), compileFlag);
+    aclError inputRet = MakeInputCompileParam(aclOp, param, opDesc.get(), compileFlag);
     if (inputRet != ACL_SUCCESS) {
         ACL_LOG_INNER_ERROR("make input compile param failed, result = %d", inputRet);
         return inputRet;
     }
 
-    const aclError outputRet = MakeOutputCompileParam(aclOp, param, opDesc.get(), compileFlag);
+    aclError outputRet = MakeOutputCompileParam(aclOp, param, opDesc.get(), compileFlag);
     if (outputRet != ACL_SUCCESS) {
         ACL_LOG_INNER_ERROR("make output compile param failed, result = %d", outputRet);
         return outputRet;
@@ -265,7 +264,7 @@ aclError OpCompiler::MakeCompileParam(const AclOp &aclOp, CompileParam &param, i
             opDesc->SetAttr(it.first, it.second);
             if (aclOp.compileType == OP_COMPILE_UNREGISTERED) {
                 GeAttrValue::ValueType valType = it.second.GetValueType();
-                const auto valTypeIt = ATTR_TYPES_MAP.find(valType);
+                auto valTypeIt = ATTR_TYPES_MAP.find(valType);
                 if (valTypeIt == ATTR_TYPES_MAP.end()) {
                     ACL_LOG_INNER_ERROR("Invalid attr value type, valType: %d", static_cast<int32_t>(valType));
                     return ACL_ERROR_INVALID_PARAM;
@@ -275,8 +274,8 @@ aclError OpCompiler::MakeCompileParam(const AclOp &aclOp, CompileParam &param, i
             }
         }
         // delete ; from end of attrTypeList
-        if (attrTypeList.length() != 0U) {
-            attrTypeList = attrTypeList.substr(0U, attrTypeList.length() - 1U);
+        if (attrTypeList.length() != 0) {
+            attrTypeList = attrTypeList.substr(0, attrTypeList.length() - 1);
         }
     }
 
@@ -287,8 +286,8 @@ aclError OpCompiler::MakeCompileParam(const AclOp &aclOp, CompileParam &param, i
 
     // set dynamic input attr
     array_utils::DynamicInputIndexPair indexPair;
-    const bool ret = array_utils::GetDynamicInputIndex(aclOp.numInputs, aclOp.inputDesc, indexPair);
-    if (!ret) {
+    bool ret = array_utils::GetDynamicInputIndex(aclOp.numInputs, aclOp.inputDesc, indexPair);
+    if (ret != true) {
         ACL_LOG_INFO("failed to get dynamic input index, invalid dynamic input attr, op type: %s",
             aclOp.opType.c_str());
         return ACL_ERROR_INVALID_PARAM;
@@ -307,7 +306,7 @@ aclError OpCompiler::MakeCompileParam(const AclOp &aclOp, CompileParam &param, i
 
 aclError OpCompiler::CompileOp(const AclOp &aclOp, std::shared_ptr<void> &modelData, size_t &modelSize)
 {
-    const int32_t compileFlag = GetGlobalCompileFlag();
+    int32_t compileFlag = GetGlobalCompileFlag();
     ACL_LOG_INFO("To compile op: %s, compileFlag is %d", aclOp.opType.c_str(), compileFlag);
     CompileParam param;
     ACL_REQUIRES_OK(MakeCompileParam(aclOp, param, compileFlag));
