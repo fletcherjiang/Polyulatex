@@ -60,7 +60,7 @@ aclError aclInit(const char *configPath)
     }
 
     aclError ret = ACL_SUCCESS;
-    if ((configPath != nullptr) && (strlen(configPath) != 0)) {
+    if ((configPath != nullptr) && (strlen(configPath) != 0UL)) {
         // config dump
         ACL_LOG_INFO("set DumpConfig in aclInit");
         ret = acl::AclDump::GetInstance().HandleDumpConfig(configPath);
@@ -79,7 +79,7 @@ aclError aclInit(const char *configPath)
         ACL_LOG_INFO("set HandleMaxOpQueueConfig success in aclInit");
     }
 
-    rtError_t rtRet = rtProfRegisterCtrlCallback(ASCENDCL, aclMsprofCtrlHandle);
+    rtError_t rtRet = rtProfRegisterCtrlCallback(ASCENDCL, &aclMsprofCtrlHandle);
     if (rtRet != RT_ERROR_NONE) {
         ACL_LOG_WARN("register Callback failed, rt result = %u", rtRet);
     }
@@ -203,9 +203,9 @@ aclError aclrtGetVersion(int32_t *majorVersion, int32_t *minorVersion, int32_t *
     return ACL_SUCCESS;
 }
 
-void SetGeFinalizeCallback(GeFinalizeCallback callback)
+void SetGeFinalizeCallback(GeFinalizeCallback func)
 {
-    aclGeFinalizeCallback = callback;
+    aclGeFinalizeCallback = func;
 }
 
 void SetThreadCompileOpts(const std::map<std::string, std::string> &options)

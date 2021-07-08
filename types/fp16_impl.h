@@ -87,12 +87,6 @@ static constexpr int32_t FP16_MAX_VALID_EXP = 0x001E;
  */
 static constexpr uint32_t FP16_MAX_MAN = 0x03FFU;
 /**
- * @ingroup fp16 basic parameter
- * @brief   absolute minimum normal value of fp16
- *         (E=1,M=0 D=2^(-14)=0.00006103515625)
- */
-#define FP16_MIN_NORMAL                ((1.0f / (2 << 14)))
-/**
  * @ingroup fp16 basic operator
  * @brief   get sign of fp16
  */
@@ -112,32 +106,6 @@ static constexpr uint32_t FP16_MAX_MAN = 0x03FFU;
  * @brief   constructor of fp16 from sign exponent and mantissa
  */
 #define FP16_CONSTRUCTOR(s, e, m)        (((s) << FP16_SIGN_INDEX) | ((e) << FP16_MAN_LEN) | ((m) & FP16_MAX_MAN))
-
-/**
- * @ingroup fp16 special value judgment
- * @brief   whether a fp16 is zero
- */
-#define FP16_IS_ZERO(x)                (((x) & FP16_ABS_MAX) == 0)
-/**
- * @ingroup fp16 special value judgment
- * @brief   whether a fp16 is a denormalized value
- */
-#define FP16_IS_DENORM(x)              ((((x) & FP16_EXP_MASK) == 0))
-/**
- * @ingroup fp16 special value judgment
- * @brief   whether a fp16 is infinite
- */
-#define FP16_IS_INF(x)                 (((x) & FP16_ABS_MAX) == FP16_ABS_MAX)
-/**
- * @ingroup fp16 special value judgment
- * @brief   whether a fp16 is NaN
- */
-#define FP16_IS_NAN(x)                 ((((x) & FP16_EXP_MASK) == FP16_EXP_MASK) && ((x) & FP16_MAN_MASK))
-/**
- * @ingroup fp16 special value judgment
- * @brief   whether a fp16 is invalid
- */
-#define FP16_IS_INVALID(x)               (((x) & FP16_EXP_MASK) == FP16_EXP_MASK)
 /**
  * @ingroup fp32 basic parameter
  * @brief   fp32 exponent bias
@@ -193,37 +161,6 @@ static constexpr int32_t FP32_MAX_EXP = 0xFF;
  * @brief   maximum mantissa value of fp32    (1111 1111 1111 1111 1111 111)
  */
 static constexpr uint32_t FP32_MAX_MAN = 0x7FFFFFU;
-/**
- * @ingroup fp32 special value judgment
- * @brief   whether a fp32 is NaN
- */
-#define FP32_IS_NAN(x)                 ((((x) & FP32_EXP_MASK) == FP32_EXP_MASK) && ((x) & FP32_MAN_MASK))
-/**
- * @ingroup fp32 special value judgment
- * @brief   whether a fp32 is infinite
- */
-#define FP32_IS_INF(x)                 ((((x) & FP32_EXP_MASK) == FP32_EXP_MASK) && (!((x) & FP32_MAN_MASK)))
-/**
- * @ingroup fp32 special value judgment
- * @brief   whether a fp32 is a denormalized value
- */
-#define FP32_IS_DENORM(x)              ((((x) & FP32_EXP_MASK) == 0))
-/**
- * @ingroup fp32 basic operator
- * @brief   get sign of fp32
- */
-#define FP32_EXTRAC_SIGN(x)            (((x) >> FP32_SIGN_INDEX) & 1)
-/**
- * @ingroup fp32 basic operator
- * @brief   get exponent of fp16
- */
-#define FP32_EXTRAC_EXP(x)             (((x) & FP32_EXP_MASK) >> FP32_MAN_LEN)
-/**
- * @ingroup fp32 basic operator
- * @brief   get mantissa of fp16
- */
-#define FP32_EXTRAC_MAN(x)             \
-    (((x) & FP32_MAN_MASK) | (((((x) >> FP32_MAN_LEN) & FP32_MAX_EXP) > 0 ? 1 : 0) * FP32_MAN_HIDE_BIT))
 /**
  * @ingroup fp32 basic operator
  * @brief   constructor of fp32 from sign exponent and mantissa
@@ -285,17 +222,6 @@ static constexpr int32_t FP64_MAX_EXP = 0x07FF;
  * @brief   maximum mantissa value of fp64  (111?-?-(total 52bits 1))
  */
 static constexpr uint64_t FP64_MAX_MAN = 0xFFFFFFFFFFFU;
-/**
- * @ingroup fp64 special value judgment
- * @brief   whether a fp64 is NaN
- */
-#define FP64_IS_NAN(x)                 ((((x) & FP64_EXP_MASK) == FP64_EXP_MASK) && ((x) & FP64_MAN_MASK))
-/**
- * @ingroup fp64 special value judgment
- * @brief   whether a fp64 is infinite
- */
-#define FP64_IS_INF(x)                 ((((x) & FP64_EXP_MASK) == FP64_EXP_MASK) && (!((x) & FP64_MAN_MASK)))
-
 /**
  * @ingroup integer special value judgment
  * @brief   maximum positive value of int8_t            (0111 1111)
