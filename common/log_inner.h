@@ -453,6 +453,6 @@ public:
             ACL_LOG_INFO("[%d] is equal to [%d]", leftValue, rightValue); \
         } \
     } \
-    while (0)
+    while (false)
 
 #endif // ACL_COMMON_LOG_H_

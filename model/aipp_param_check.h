@@ -24,9 +24,11 @@
 #include "common/ge_types.h"
 #include "model_desc_internal.h"
 
+namespace acl {
+aclError AippScfSizeCheck(const aclmdlAIPP *aippParmsSet, size_t batchIndex);
 uint64_t GetSrcImageSize(const aclmdlAIPP *aippParmsSet);
-aclError AippParamsCheck(const aclmdlAIPP *aippParmsSet, std::string socVersion);
-aclError GetAippOutputHW(const aclmdlAIPP *aippParmsSet, int32_t batchIndex, std::string socVersion,
+aclError AippParamsCheck(const aclmdlAIPP *aippParmsSet, const std::string &socVersion);
+aclError GetAippOutputHW(const aclmdlAIPP *aippParmsSet, size_t batchIndex, const std::string &socVersion,
                          int32_t &aippOutputW, int32_t &aippOutputH);
-
+} // namespace acl
 #endif // AIPP_PARAM_CHECK_H_
