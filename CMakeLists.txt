@@ -251,6 +251,7 @@ if(NOT ENABLE_OPEN_SRC)
     $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/abl/adump/external>
     $<$<NOT:$<BOOL:${ENABLE_OPEN_SRC}>>:${TOP_DIR}/inc/driver>
     ####blue zone####
+
     $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/>
     $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/metadef/inc>
     $<$<BOOL:${ENABLE_OPEN_SRC}>:${BASE_DIR}/third_party/inc/graphengine/inc>
