@@ -243,7 +243,7 @@ const char *aclGetRecentErrMsg()
     thread_local static std::string aclRecentErrMsg;
     aclRecentErrMsg = ErrorManager::GetInstance().GetErrorMessage();
     if (aclRecentErrMsg.empty()) {
-        ACL_LOG_INNER_ERROR("get error message failed");
+        ACL_LOG_WARN("get error message is empty");
         return nullptr;
     }
     ACL_LOG_INFO("execute aclGetRecentErrMsg successfully.");
