@@ -21,7 +21,7 @@ aclError aclrtSetGroup(int32_t groupId)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_LOG_INFO("start to execute aclrtSetGroup, groupId is %d.", groupId);
-    rtError_t rtErr = rtSetGroup(groupId);
+    const rtError_t rtErr = rtSetGroup(groupId);
     if (rtErr != RT_ERROR_NONE) {
         ACL_LOG_CALL_ERROR("set group failed, runtime result = %d, groupId = %d",
             static_cast<int32_t>(rtErr), groupId);
@@ -37,7 +37,7 @@ aclError aclrtGetGroupCount(uint32_t *count)
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_LOG_INFO("start to execute aclrtGetGroupCount");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(count);
-    rtError_t rtErr = rtGetGroupCount(count);
+    const rtError_t rtErr = rtGetGroupCount(count);
     if (rtErr != RT_ERROR_NONE) {
         ACL_LOG_CALL_ERROR("get group number failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
@@ -51,13 +51,13 @@ aclrtGroupInfo *aclrtCreateGroupInfo()
 {
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_GROUP_INFO);
     ACL_LOG_INFO("start to execute aclrtCreateGroupInfo");
-    uint32_t count = 0;
-    rtError_t rtErr = rtGetGroupCount(&count);
+    uint32_t count = 0U;
+    const rtError_t rtErr = rtGetGroupCount(&count);
     if (rtErr != RT_ERROR_NONE) {
         ACL_LOG_CALL_ERROR("get group number failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return nullptr;
     }
-    if (count == 0) { // 0 represents that no group
+    if (count == 0U) { // 0 represents that no group
         ACL_LOG_WARN("group number is 0, no memory allocation");
         return nullptr;
     }
@@ -91,7 +91,7 @@ aclError aclrtGetAllGroupInfo(aclrtGroupInfo *groupInfo)
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_LOG_INFO("start to execute aclrtGetAllGroupInfo");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(groupInfo);
-    uint32_t count = 0;
+    uint32_t count = 0U;
     rtError_t rtErr = rtGetGroupCount(&count);
     if (rtErr != RT_ERROR_NONE) {
         ACL_LOG_CALL_ERROR("get group number failed, runtime result = %d", static_cast<int32_t>(rtErr));
@@ -119,7 +119,7 @@ static aclError FillAttrValue(const void *src, size_t srcLen, void *dst, size_t 
         ACL_LOG_INNER_ERROR("attr real length = %zu is larger than input length = %zu", srcLen, dstLen);
         return ACL_ERROR_INVALID_PARAM;
     }
-    auto ret = memcpy_s(dst, dstLen, src, srcLen);
+    const auto ret = memcpy_s(dst, dstLen, src, srcLen);
     if (ret != EOK) {
         ACL_LOG_INNER_ERROR("call memcpy_s failed, result = %d, srcLen = %zu, dstLen = %zu", ret, srcLen, dstLen);
         return ACL_ERROR_FAILURE;
@@ -137,8 +137,8 @@ aclError aclrtGetGroupInfoDetail(const aclrtGroupInfo *groupInfo, int32_t groupI
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(groupInfo);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attrValue);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(paramRetSize);
-    uint32_t count = 0;
-    rtError_t rtErr = rtGetGroupCount(&count);
+    uint32_t count = 0U;
+    const rtError_t rtErr = rtGetGroupCount(&count);
     if (rtErr != RT_ERROR_NONE) {
         ACL_LOG_CALL_ERROR("get group number failed, runtime result = %d", static_cast<int32_t>(rtErr));
         return ACL_GET_ERRCODE_RTS(rtErr);
