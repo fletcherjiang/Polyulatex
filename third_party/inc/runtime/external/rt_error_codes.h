@@ -11,7 +11,7 @@
 #ifndef __INC_EXTERNEL_RT_ERROR_CODES_H__
 #define __INC_EXTERNEL_RT_ERROR_CODES_H__
 
-#include <stddef.h>
+#include <cstddef>
 
 #ifdef __cplusplus
 extern "C" {
