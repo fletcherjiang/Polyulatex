@@ -106,7 +106,7 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
         }
         ACL_LOG_DEBUG("Use storageDims to construct GeShape in op execute");
         ge::GeTensorDesc tensorDesc;
-        if (geFormat != ge::FORMAT_RESERVED && geOriginFormat != geFormat) {
+        if ((geFormat != ge::FORMAT_RESERVED) && (geOriginFormat != geFormat)) {
             ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are not equal",
                 static_cast<int32_t>(geOriginFormat), static_cast<int32_t>(geFormat));
             tensorDesc.SetShape(ge::GeShape(aclOp.inputDesc[i]->storageDims));
@@ -151,7 +151,7 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
 
         ACL_LOG_DEBUG("Use storageDims to construct GeShape in op execute");
         ge::GeTensorDesc tensorDesc;
-        if (geFormat != ge::FORMAT_RESERVED && geOriginFormat != geFormat) {
+        if ((geFormat != ge::FORMAT_RESERVED) && (geOriginFormat != geFormat)) {
             ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are not equal",
                 static_cast<int32_t>(geOriginFormat), static_cast<int32_t>(geFormat));
             tensorDesc.SetShape(ge::GeShape(aclOp.outputDesc[i]->storageDims));
