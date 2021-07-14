@@ -53,7 +53,7 @@ private:
     HashMap hashMap_;
     ModelMap entries_;
     mutable std::mutex mutex_;
-    uint64_t cnt{0};
+    uint64_t cnt{0U};
     uint64_t maxOpNum{DEFAULT_MAX_OPQUEUE_NUM};
 };
 
@@ -65,11 +65,11 @@ std::string AclOpMap<T>::TensorDescArr2Str(int32_t num, const aclTensorDesc *con
         return "";
     }
     string descStr;
-    descStr.append(std::to_string(num));
+    (void)descStr.append(std::to_string(num));
     descStr.push_back('~');
     for (int32_t i = 0; i < num; ++i) {
         ACL_REQUIRES_NOT_NULL_RET_STR(descArr[i]);
-        descStr.append(descArr[i]->GetKey());
+        (void)descStr.append(descArr[i]->GetKey());
         descStr.push_back('|');
     }
     return descStr;
@@ -82,8 +82,8 @@ aclError AclOpMap<T>::Aging(T &agingT)
     typename InputMap::iterator itInputMin;
     typename OutputMap::iterator itOutputMin;
     typename AttrMap::iterator itAttrMin;
-    size_t idx = 0;
-    uint64_t timestampMin = ULLONG_MAX;
+    size_t idx = 0U;
+    uint64_t timestampMin = static_cast<uint64_t>(ULLONG_MAX);
     bool found = false;
     for (auto itType = entries_.begin(); itType != entries_.end(); ++itType) {
         string typeStr = itType->first;
@@ -96,7 +96,7 @@ aclError AclOpMap<T>::Aging(T &agingT)
                 auto &attrMap = itOutput->second;
                 for (auto itAttr = attrMap.begin(); itAttr != attrMap.end(); ++itAttr) {
                     auto &opVec = itAttr->second;
-                    for (size_t i = 0; i < opVec.size(); ++i) {
+                    for (size_t i = 0U; i < opVec.size(); ++i) {
                         if (opVec[i].second->timestamp < timestampMin) {
                             timestampMin = opVec[i].second->timestamp;
                             itTypeMin = itType;
@@ -124,16 +124,16 @@ aclError AclOpMap<T>::Aging(T &agingT)
     }
     agingT = modelVec[idx].second;
     ACL_LOG_INFO("AclOpMap::Aging model in model map success, time stamp is %lu", agingT->timestamp);
-    modelVec.erase(modelVec.begin() + idx);
+    (void)modelVec.erase(modelVec.begin() + idx);
     --cnt;
     if (modelVec.empty()) {
-        itOutputMin->second.erase(itAttrMin);
+        (void)itOutputMin->second.erase(itAttrMin);
         if (itOutputMin->second.empty()) {
-            itInputMin->second.erase(itOutputMin);
+            (void)itInputMin->second.erase(itOutputMin);
             if (itInputMin->second.empty()) {
-                itTypeMin->second.erase(itInputMin);
+                (void)itTypeMin->second.erase(itInputMin);
                 if (entries_[itTypeMin->first].empty()) {
-                    entries_.erase(itTypeMin);
+                    (void)entries_.erase(itTypeMin);
                 }
             }
         }
@@ -148,7 +148,7 @@ aclError AclOpMap<T>::Aging(T &agingT)
                 ACL_LOG_INFO("AclOpMap::Aging model in hash map success, hash seed is %zu, hash time "
                              "stamp is %zu, aging time stamp is %zu",
                              hashMapIter->first, (*vecIter)->timestamp, agingT->timestamp);
-                hashMapIter->second.erase(vecIter);
+                (void)hashMapIter->second.erase(vecIter);
                 foundHash = true;
                 break;
             }
@@ -156,7 +156,7 @@ aclError AclOpMap<T>::Aging(T &agingT)
         if (foundHash && hashMapIter->second.empty()) {
             ACL_LOG_INFO("AclOpMap::After delete model, hash map empty while seed is %zu, delete seed in HashMap", 
                 hashMapIter->first);
-            hashMap_.erase(hashMapIter);
+            (void)hashMap_.erase(hashMapIter);
             break;
         }
     }
@@ -171,7 +171,7 @@ aclError AclOpMap<T>::Aging(T &agingT)
 template<typename T>
 void AclOpMap<T>::Updatetimestamp(T &entry)
 {
-    if (entry->timestamp == ULLONG_MAX) {
+    if (entry->timestamp == static_cast<uint64_t>(ULLONG_MAX)) {
         ACL_LOG_INFO("Updatetimestamp IN, no need to update timestamp");
         return;
     }
@@ -221,7 +221,7 @@ aclError AclOpMap<T>::AddMemAndAging(std::vector<std::pair<aclopAttr, T>> &model
     ACL_LOG_INFO("AclOpMap::Insert op into HashMap success, seed = %zu", seed);
 
     ++cnt;
-    if ((entry->timestamp == ULLONG_MAX) || (cnt <= maxOpNum)) {
+    if ((entry->timestamp == static_cast<uint64_t>(ULLONG_MAX)) || (cnt <= maxOpNum)) {
         ACL_LOG_INFO("AclOpMap::AddMemAndAging in, cnt is %llu, maxOpNum is %llu, no need aging", cnt, maxOpNum);
         return ACL_SUCCESS;
     }
@@ -236,7 +236,7 @@ aclError AclOpMap<T>::Insert(const AclOp &op, const T &entry, T &agingT)
     ACL_LOG_DEBUG("AclOpMap::Insert IN, op = %s", op.DebugString().c_str());
     string inputDescStr = TensorDescArr2Str(op.numInputs, op.inputDesc);
     string outputDescStr = TensorDescArr2Str(op.numOutputs, op.outputDesc);
-    size_t digest = 0;
+    size_t digest = 0U;
     auto opAttr = op.opAttr;
     aclopAttr emptyAttr;
     if (op.opAttr != nullptr) {
@@ -253,7 +253,7 @@ aclError AclOpMap<T>::Insert(const AclOp &op, const T &entry, T &agingT)
         digest = attr_utils::AttrMapToDigest(emptyAttr.Attrs());
         opAttr = &emptyAttr;
     }
-    size_t seed = 0;
+    size_t seed = 0U;
     if (hash_utils::GetAclOpHash(op, digest, seed) != ACL_SUCCESS) {
         ACL_LOG_ERROR("[Check][GetAclOpHash]GetAclOpHash failed, seed = %zu, op = %s",
             seed, op.DebugString().c_str());
@@ -273,7 +273,7 @@ template<typename T>
 aclError AclOpMap<T>::Get(const AclOp &op, T &entry, bool needUpdateTimestamp)
 {
     auto opAttr = op.opAttr;
-    size_t digest = 0;
+    size_t digest = 0U;
     aclopAttr emptyAttr;
     if (opAttr != nullptr) {
         digest = op.opAttr->GetDigest();
@@ -288,7 +288,7 @@ aclError AclOpMap<T>::Get(const AclOp &op, T &entry, bool needUpdateTimestamp)
         }
         opAttr = &emptyAttr;
     }
-    size_t seed = 0;
+    size_t seed = 0U;
     ACL_REQUIRES_OK(hash_utils::GetAclOpHash(op, digest, seed));
     std::lock_guard<std::mutex> lk(mutex_);
     auto iter = hashMap_.find(seed);
@@ -296,7 +296,7 @@ aclError AclOpMap<T>::Get(const AclOp &op, T &entry, bool needUpdateTimestamp)
         ACL_LOG_WARN("Get op from aclOpMap failed due to hashMap_ is empty when seed = %zu, op = %s",
             seed, op.DebugString().c_str());
         return ACL_ERROR_OP_NOT_FOUND;
-    } else if (iter->second.size() == 1) {
+    } else if (iter->second.size() == 1U) {
         if (needUpdateTimestamp) {
             Updatetimestamp(iter->second.back());
         }
@@ -343,7 +343,7 @@ aclError AclOpMap<T>::Get(const AclOp &op, T &entry, bool needUpdateTimestamp)
         auto iter3 = filteredByOutputs.find(digest);
         if (iter3 == filteredByOutputs.end()) {
             ACL_LOG_WARN("Match attr by digest failed. user input attr = %s",
-                opAttr == nullptr ? "None" : opAttr->DebugString().c_str());
+                opAttr == nullptr ? "None" : (opAttr->DebugString().c_str()));
             return ACL_ERROR_OP_ATTR_NOT_MATCH;
         }
 
@@ -358,7 +358,7 @@ aclError AclOpMap<T>::Get(const AclOp &op, T &entry, bool needUpdateTimestamp)
 
         if (matchedByAttr == nullptr) {
             ACL_LOG_WARN("Match op attr or constData failed. opType = %s, attr = %s",
-                opType.c_str(), opAttr == nullptr ? "None" : opAttr->DebugString().c_str());
+                opType.c_str(), opAttr == nullptr ? "None" : (opAttr->DebugString().c_str()));
             return ACL_ERROR_OP_ATTR_NOT_MATCH;
         }
         if (needUpdateTimestamp) {
