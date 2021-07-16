@@ -35,13 +35,13 @@ aclError OpKernelSelector::InsertAclop2KernelDesc(const AclOp &aclOp, std::share
     ACL_REQUIRES_NOT_NULL(desc);
     desc->opType = aclOp.opType;
 
-    for (int i = 0; i < aclOp.numInputs; ++i) {
+    for (int32_t i = 0; i < aclOp.numInputs; ++i) {
         ACL_REQUIRES_NOT_NULL(aclOp.inputDesc[i]);
         desc->inputDescArr.emplace_back(*(aclOp.inputDesc[i]));
     }
     ACL_LOG_DEBUG("Insert inputDescArr success!");
     
-    for (int i = 0; i < aclOp.numOutputs; ++i) {
+    for (int32_t i = 0; i < aclOp.numOutputs; ++i) {
         ACL_REQUIRES_NOT_NULL(aclOp.outputDesc[i]);
         desc->outputDescArr.emplace_back(*(aclOp.outputDesc[i]));
     }
@@ -50,7 +50,7 @@ aclError OpKernelSelector::InsertAclop2KernelDesc(const AclOp &aclOp, std::share
     // if aclOp.opAttr is nullptr, desc->opAttr is a empty attr object
     if (aclOp.opAttr != nullptr) {
         for (auto attrVal : aclOp.opAttr->Attrs()) {
-            desc->opAttr.EmplaceAttr(attrVal.first, attrVal.second);
+            (void)desc->opAttr.EmplaceAttr(attrVal.first, attrVal.second);
         }
     }
     ACL_LOG_DEBUG("Insert attr success!");
