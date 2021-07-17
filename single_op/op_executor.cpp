@@ -106,7 +106,7 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
         }
         ACL_LOG_DEBUG("Use storageDims to construct GeShape in op execute");
         ge::GeTensorDesc tensorDesc;
-        if (geFormat != ge::FORMAT_RESERVED && geOriginFormat != geFormat) {
+        if ((geFormat != ge::FORMAT_RESERVED) && (geOriginFormat != geFormat)) {
             ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are not equal",
                 static_cast<int32_t>(geOriginFormat), static_cast<int32_t>(geFormat));
             tensorDesc.SetShape(ge::GeShape(aclOp.inputDesc[i]->storageDims));
@@ -151,7 +151,7 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
 
         ACL_LOG_DEBUG("Use storageDims to construct GeShape in op execute");
         ge::GeTensorDesc tensorDesc;
-        if (geFormat != ge::FORMAT_RESERVED && geOriginFormat != geFormat) {
+        if ((geFormat != ge::FORMAT_RESERVED) && (geOriginFormat != geFormat)) {
             ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are not equal",
                 static_cast<int32_t>(geOriginFormat), static_cast<int32_t>(geFormat));
             tensorDesc.SetShape(ge::GeShape(aclOp.outputDesc[i]->storageDims));
@@ -186,7 +186,7 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
 
     if (aclOp.exeucteType == ACL_OP_EXECUTE_V2) {
         ACL_LOG_INFO("Begin to update outputDesc");
-        for (size_t i = 0; i < outputDesc.size(); ++i) {
+        for (size_t i = 0U; i < outputDesc.size(); ++i) {
             ge::GeShape outputShape = outputDesc[i].GetShape();
             std::vector<int64_t> outputDims = outputShape.GetDims();
             ACL_LOG_INFO("update outputDesc[%zu] dims is [%s]", i, string_utils::VectorToString(outputDims).c_str());
@@ -315,7 +315,7 @@ aclError OpExecutor::ExecuteAsync(OpHandle &opHandle,
                 }
 
                 // Just for protection. Preventing from cache grows to large.
-                if (cachedExecutors.size() > MAX_CACHED_NUM) {
+                if (cachedExecutors.size() > static_cast<size_t>(MAX_CACHED_NUM)) {
                     auto toErase = cachedExecutors.begin();
                     ACL_LOG_WARN("cache[%zu] reaches max size[%zu], evict one object. stream = %p",
                         cachedExecutors.size(), MAX_CACHED_NUM, toErase->first);
@@ -344,7 +344,7 @@ aclError OpExecutor::ExecuteAsync(OpHandle &opHandle,
                 }
 
                 // Just for protection. Preventing from cache grows to large.
-                if (cachedExecutors.size() > MAX_CACHED_NUM) {
+                if (cachedExecutors.size() > static_cast<size_t>(MAX_CACHED_NUM)) {
                     auto toErase = cachedExecutors.begin();
                     ACL_LOG_INFO("cache[%zu] reaches max size[%zu], evict one object. stream = %p",
                         cachedExecutors.size(), MAX_CACHED_NUM, toErase->first);

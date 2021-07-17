@@ -17,7 +17,7 @@
 namespace acl {
 namespace attr_utils {
 namespace {
-constexpr size_t DEFAULT_STRING_SIZE = 32u;
+constexpr size_t DEFAULT_STRING_LEN = 32U;
 constexpr float FLOAT_DELTA = 1e-6;
 }
 
@@ -63,13 +63,13 @@ std::string ListAttrToString<bool>(const ge::GeAttrValue &attrVal)
     (void)attrVal.GetValue<std::vector<bool>>(values);
     ss << '[';
     const auto size = values.size();
-    for (size_t i = 0u; i < size; ++i) {
+    for (size_t i = 0U; i < size; ++i) {
         if (values[i]) {
             ss << "True";
         } else {
             ss << "False";
         }
-        if (i != (size - 1u)) {
+        if (i != (size - 1U)) {
             ss << ", ";
         }
     }
@@ -250,7 +250,7 @@ std::string AttrMapToString(const std::map<std::string, ge::GeAttrValue> &attrMa
     std::stringstream ss;
     ss << "{";
     const size_t size = attrMap.size();
-    size_t cnt = 0u;
+    size_t cnt = 0U;
     for (auto &attr : attrMap) {
         ss << attr.first << " = " << GeAttrValueToString(attr.second);
         cnt++;
@@ -265,11 +265,11 @@ std::string AttrMapToString(const std::map<std::string, ge::GeAttrValue> &attrMa
 size_t AttrMapToDigest(const std::map<std::string, ge::GeAttrValue> &attrMap)
 {
     if (attrMap.empty()) {
-        return 0u;
+        return 0U;
     }
 
     std::string digest;
-    digest.reserve(DEFAULT_STRING_SIZE);
+    digest.reserve(DEFAULT_STRING_LEN);
     for (auto &attr : attrMap) {
         GeAttrValueToStringForDigest(digest, attr.second);
     }
@@ -316,7 +316,7 @@ bool IsListFloatEquals(const vector<float> &lhsValue, const vector<float> &rhsVa
         return false;
     }
 
-    for (size_t i = 0u; i < lhsValue.size(); ++i) {
+    for (size_t i = 0U; i < lhsValue.size(); ++i) {
         const float val1 = lhsValue[i];
         const float val2 = rhsValue[i];
         if (fabsf(val1 - val2) > FLOAT_DELTA) {
@@ -392,9 +392,9 @@ bool CheckValRange(const std::vector<std::vector<T>> &valueRange, const std::vec
         ACL_LOG_WARN("input data size [%zu] must be equal to value range size [%zu]", data.size(), valueRange.size());
         return false;
     }
-    for (size_t i = 0u; i < valueRange.size(); ++i) {
+    for (size_t i = 0U; i < valueRange.size(); ++i) {
         // 2 is range size
-        if (valueRange[i].size() != 2u) {
+        if (valueRange[i].size() != 2U) {
             ACL_LOG_WARN("range size must be 2");
             return false;
         }
@@ -414,7 +414,7 @@ bool CheckValExact(const std::vector<T> &valueRange, const std::vector<T> &data)
         ACL_LOG_WARN("input data size [%zu] must be equal to value range size [%zu]", data.size(), valueRange.size());
         return false;
     }
-    for (size_t i = 0u; i < valueRange.size(); ++i) {
+    for (size_t i = 0U; i < valueRange.size(); ++i) {
         ACL_LOG_DEBUG("valeRange is %s, value is %s", std::to_string(valueRange[i]).c_str(),
                       std::to_string(data[i]).c_str());
         if (valueRange[i] != data[i]) {
@@ -427,7 +427,7 @@ bool CheckValExact(const std::vector<T> &valueRange, const std::vector<T> &data)
 template<typename T1, typename T2>
 void SetInputValue(const aclDataBuffer *const dataBuffer, std::vector<T1> &inputData)
 {
-    for (size_t i = 0u; i < (dataBuffer->length / sizeof(T2)); ++i) {
+    for (size_t i = 0U; i < (dataBuffer->length / sizeof(T2)); ++i) {
         inputData.push_back(static_cast<T1>(*(reinterpret_cast<const T2 *>(dataBuffer->data) + i)));
     }
     return;
@@ -441,7 +441,7 @@ bool GetInputData(const aclDataBuffer *const dataBuffer, const aclDataType dataT
             SetInputValue<float, float>(dataBuffer, inputFloatData);
             break;
         case ACL_FLOAT16:
-            for (size_t i = 0u; i < (dataBuffer->length / sizeof(aclFloat16)); ++i) {
+            for (size_t i = 0U; i < (dataBuffer->length / sizeof(aclFloat16)); ++i) {
                 inputFloatData.push_back(
                     aclFloat16ToFloat(*(reinterpret_cast<const aclFloat16 *>(dataBuffer->data) + i)));
             }
@@ -562,7 +562,7 @@ bool CheckFloatValueRange(const std::map<AttrRangeType, ge::GeAttrValue> &valueR
 }
 
 bool ValueRangeCheck(const std::map<AttrRangeType, ge::GeAttrValue> &valueRange,
-                     const aclDataBuffer *const dataBuffer, const aclDataType dataType)
+                     const aclDataBuffer *const dataBuffer, aclDataType dataType)
 {
     // value is not nullptr
     if (dataBuffer->data == nullptr) {
@@ -623,11 +623,11 @@ bool OpAttrEquals(const aclopAttr *const lhs, const aclopAttr *const rhs)
 
     ACL_LOG_INFO("begin to compare constBuf");
     const auto constStrLeft = lhs->GetConstBuf();
-    for (size_t i = 0u; i < constStrLeft.size(); ++i) {
+    for (size_t i = 0U; i < constStrLeft.size(); ++i) {
         ACL_LOG_INFO("the %zu constBuf is %s in constStrLeft", i, constStrLeft[i].c_str());
     }
     const auto constStrRight = rhs->GetConstBuf();
-    for (size_t i = 0u; i < constStrRight.size(); ++i) {
+    for (size_t i = 0U; i < constStrRight.size(); ++i) {
         ACL_LOG_INFO("the %zu constBuf is %s in constStrRight", i, constStrRight[i].c_str());
     }
     if (constStrLeft != constStrRight) {
@@ -647,7 +647,8 @@ uint64_t GetCurrentTimestamp()
         ACL_LOG_WARN("Func mmGetTimeOfDay failed, ret = %d", ret);
     }
     // 1000000: seconds to microseconds
-    const uint64_t total_use_time = static_cast<uint64_t>(tv.tv_usec) + (static_cast<uint64_t>(tv.tv_sec)) * 1000000u;
+    const uint64_t total_use_time = static_cast<uint64_t>(tv.tv_usec) +
+        ((static_cast<uint64_t>(tv.tv_sec)) * 1000000U);
     return total_use_time;
 }
 
@@ -656,11 +657,11 @@ static bool ConstToAttr(const vector<aclTensorDesc> &tensorDesc,
 {
     for (auto &desc : tensorDesc) {
         if (desc.isConst) {
-            if ((desc.constDataBuf != nullptr) && (desc.constDataLen <= 0u)) {
+            if ((desc.constDataBuf != nullptr) && (desc.constDataLen <= 0U)) {
                 ACL_LOG_INNER_ERROR("[Check][constDataBuf]constDataBuf is not nullptr and dataLen is <= 0");
                 return false;
             }
-            if ((desc.constDataBuf == nullptr) && (desc.constDataLen > 0u)) {
+            if ((desc.constDataBuf == nullptr) && (desc.constDataLen > 0U)) {
                 ACL_LOG_INNER_ERROR("[Check][constDataBuf]constDataBuf is nullptr and dataLen is > 0");
                 return false;
             }
@@ -688,7 +689,7 @@ bool SaveConstToAttr(OpModelDef &modelDef)
         return false;
     }
     // opAttr is not nullptr
-    for (size_t i = 0u; i < constStr.size(); ++i) {
+    for (size_t i = 0U; i < constStr.size(); ++i) {
         ACL_LOG_INFO("Get the [%zu] constBuf is [%s] to emplace emptyAttr", i, constStr[i].c_str());
         modelDef.opAttr.EmplaceConstBuf(constStr[i]);
     }
@@ -700,13 +701,13 @@ static bool ConstToAttr(const int32_t tensorNum,
                         std::vector<std::string> &constStr)
 {
     for (int32_t i = 0; i < tensorNum; ++i) {
-        const aclTensorDesc *desc = tensorDesc[i];
+        const aclTensorDesc *const desc = tensorDesc[i];
         if (desc->isConst) {
-            if ((desc->constDataBuf != nullptr) && (desc->constDataLen <= 0u)) {
+            if ((desc->constDataBuf != nullptr) && (desc->constDataLen <= 0U)) {
                 ACL_LOG_INNER_ERROR("[Check][constDataBuf]constDataBuf is not nullptr and dataLen is <= 0");
                 return false;
             }
-            if ((desc->constDataBuf == nullptr) && (desc->constDataLen > 0u)) {
+            if ((desc->constDataBuf == nullptr) && (desc->constDataLen > 0U)) {
                 ACL_LOG_INNER_ERROR("[Check][constDataBuf]constDataBuf is nullptr and dataLen is > 0");
                 return false;
             }
@@ -735,7 +736,7 @@ bool SaveConstToAttr(const AclOp &opDesc, aclopAttr *opAttr)
     }
     // opAttr is not nullptr
     opAttr->ClearConstBuf();
-    for (size_t i = 0u; i < constStr.size(); ++i) {
+    for (size_t i = 0U; i < constStr.size(); ++i) {
         ACL_LOG_INFO("Get the [%zu] constBuf is [%s] to emplace emptyAttr", i, constStr[i].c_str());
         opAttr->EmplaceConstBuf(constStr[i]);
     }
