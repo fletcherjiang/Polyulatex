@@ -139,7 +139,7 @@ aclError AclOpMap<T>::Aging(T &agingT)
         }
     }
 
-    // remove model in hash map while time stamp in hash map is equal to model map 
+    // remove model in hash map while time stamp in hash map is equal to model map
     bool foundHash = false;
     for (auto hashMapIter = hashMap_.begin(); hashMapIter != hashMap_.end(); ++hashMapIter) {
         for (auto vecIter = hashMapIter->second.begin(); vecIter != hashMapIter->second.end(); ++vecIter) {
@@ -154,7 +154,7 @@ aclError AclOpMap<T>::Aging(T &agingT)
             }
         }
         if (foundHash && hashMapIter->second.empty()) {
-            ACL_LOG_INFO("AclOpMap::After delete model, hash map empty while seed is %zu, delete seed in HashMap", 
+            ACL_LOG_INFO("AclOpMap::After delete model, hash map empty while seed is %zu, delete seed in HashMap",
                 hashMapIter->first);
             (void)hashMap_.erase(hashMapIter);
             break;
@@ -367,7 +367,6 @@ aclError AclOpMap<T>::Get(const AclOp &op, T &entry, bool needUpdateTimestamp)
         entry = *matchedByAttr;
         return ACL_SUCCESS;
     }
-    
 }
 } // namespace acl
 

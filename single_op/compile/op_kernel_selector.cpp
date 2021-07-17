@@ -40,7 +40,6 @@ aclError OpKernelSelector::InsertAclop2KernelDesc(const AclOp &aclOp, std::share
         desc->inputDescArr.emplace_back(*(aclOp.inputDesc[i]));
     }
     ACL_LOG_DEBUG("Insert inputDescArr success!");
-    
     for (int32_t i = 0; i < aclOp.numOutputs; ++i) {
         ACL_REQUIRES_NOT_NULL(aclOp.outputDesc[i]);
         desc->outputDescArr.emplace_back(*(aclOp.outputDesc[i]));
