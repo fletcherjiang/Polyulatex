@@ -7,6 +7,7 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
+
 #include "tensor_data_transfer.h"
 #include <map>
 #include <mutex>
@@ -793,8 +794,7 @@ aclError acltdtSendTensor(const acltdtChannelHandle *handle, const acltdtDataset
             "it can only be set to -1, timeout[%d].", timeout);
         std::string errMsg = acl::AclErrorLogManager::FormatStr("it can only be set to -1, timeout[%d].", timeout);
         acl::AclErrorLogManager::ReportInputError(acl::UNSUPPORTED_FEATURE_MSG,
-            std::vector<std::string>({"feature", "reason"}), std::vector<std::string>({"timeout",
-            errMsg}));
+            std::vector<std::string>({"feature", "reason"}), std::vector<std::string>({"timeout", errMsg}));
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -910,5 +910,3 @@ aclError acltdtReceiveTensor(const acltdtChannelHandle *handle, acltdtDataset *d
         handle->devId, handle->name.c_str());
     return ACL_SUCCESS;
 }
-
-

@@ -55,7 +55,7 @@ namespace acl {
             ACL_REQUIRES_OK(GetDstInfo(deviceId, CP_PID, cpPid));
             eventSum.pid = cpPid;
             eventSum.grpId = 0;
-            eventSum.eventId = RT_MQ_SCHED_EVENT_QS_MSG; //DRV EVENT_ID
+            eventSum.eventId = RT_MQ_SCHED_EVENT_QS_MSG;
             eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
             ack.buf = reinterpret_cast<char *>(&qsRsp);
             ack.bufLen = sizeof(qsRsp);
@@ -98,7 +98,7 @@ namespace acl {
             }
             mmSleep(1); // sleep 1ms
             endTime = GetTimestamp();
-            continueFlag = !continueFlag && ((endTime - startTime) <= (static_cast<uint64_t>(timeout) * 10000));
+            continueFlag = !continueFlag && ((endTime - startTime) <= (static_cast<uint64_t>(timeout) * MSEC_TO_USEC));
         } while (continueFlag);
         rtMemQueueShareAttr_t attr = {0};
         attr.manage = permission & ACL_TDT_QUEUE_PERMISSION_MANAGE;
@@ -119,7 +119,7 @@ namespace acl {
         int32_t deviceId = 0;
         GET_CURRENT_DEVICE_ID(deviceId);
         std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
-        ACL_REQUIRES_CALL_RTS_OK(rtMemQueueAttach(deviceId, qid, timeout), rtMemQueueAttach);
+        ACL_REQUIRES_CALL_RTS_OK(rtMemQueueAttach(deviceId, qid, timeout * MSEC_TO_USEC), rtMemQueueAttach);
         ACL_LOG_INFO("start to query qid %u permisiion", qid);
         rtMemQueueShareAttr_t attr = {0};
         ACL_REQUIRES_CALL_RTS_OK(GetQueuePermission(deviceId, qid, attr), GetQueuePermission);
@@ -149,7 +149,7 @@ namespace acl {
         bqs::QsProcMsgRsp qsRsp = {0};
         eventSum.pid = dstPid;
         eventSum.grpId = 0;
-        eventSum.eventId = RT_MQ_SCHED_EVENT_QS_MSG; //drv EVENT_ID
+        eventSum.eventId = RT_MQ_SCHED_EVENT_QS_MSG;
         eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
         ack.buf = reinterpret_cast<char *>(&qsRsp);
         ack.bufLen = sizeof(qsRsp);
@@ -167,7 +167,7 @@ namespace acl {
     {
         ACL_REQUIRES_NOT_NULL(qRouteList);
         ACL_LOG_INFO("Start to acltdtUnBindQueueRoutes, queue route is %zu", qRouteList->routeList.size());
-         int32_t deviceId = 0;
+        int32_t deviceId = 0;
         GET_CURRENT_DEVICE_ID(deviceId);
         // get dst pid
         int32_t dstPid = 0;
@@ -177,17 +177,19 @@ namespace acl {
         bqs::QsProcMsgRsp qsRsp = {0};
         eventSum.pid = dstPid;
         eventSum.grpId = 0;
-        eventSum.eventId = RT_MQ_SCHED_EVENT_QS_MSG; //drv EVENT_ID
+        eventSum.eventId = RT_MQ_SCHED_EVENT_QS_MSG;
         eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
         ack.buf = reinterpret_cast<char *>(&qsRsp);
         ack.bufLen = sizeof(qsRsp);
         std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
         ACL_REQUIRES_OK(SendBindUnbindMsg(qRouteList, deviceId, false, false, eventSum, ack));
-        ACL_LOG_INFO("Successfully to execute acltdtUnBindQueueRoutes, queue route is %zu", qRouteList->routeList.size());
+        ACL_LOG_INFO("Successfully to execute acltdtUnBindQueueRoutes, queue route is %zu",
+                     qRouteList->routeList.size());
         return ACL_SUCCESS;
     }
 
-    aclError QueueProcessorHost::acltdtQueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo, acltdtQueueRouteList *qRouteList)
+    aclError QueueProcessorHost::acltdtQueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo,
+                                                        acltdtQueueRouteList *qRouteList)
     {
         ACL_REQUIRES_NOT_NULL(queryInfo);
         ACL_REQUIRES_NOT_NULL(qRouteList);
@@ -202,7 +204,7 @@ namespace acl {
         bqs::QsProcMsgRsp qsRsp = {0};
         eventSum.pid = dstPid;
         eventSum.grpId = 0;
-        eventSum.eventId = RT_MQ_SCHED_EVENT_QS_MSG; //DRV EVENT_ID
+        eventSum.eventId = RT_MQ_SCHED_EVENT_QS_MSG;
         eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
         ack.buf = reinterpret_cast<char *>(&qsRsp);
         ack.bufLen = sizeof(qsRsp);
@@ -212,5 +214,4 @@ namespace acl {
         ACL_REQUIRES_OK(QueryQueueRoutes(queryInfo, deviceId, false, routeNum, eventSum, ack, qRouteList));
         return ACL_SUCCESS;
     }
-
 }

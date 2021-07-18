@@ -18,32 +18,32 @@ namespace acl {
 class QueueProcessorMdc : public QueueProcessor
 {
 public:
-    aclError acltdtCreateQueue(const acltdtQueueAttr *attr, uint32_t *queueId);
+    aclError acltdtCreateQueue(const acltdtQueueAttr *attr, uint32_t *queueId) override;
 
-    aclError acltdtDestroyQueue(uint32_t queueId);
+    aclError acltdtDestroyQueue(uint32_t queueId) override;
 
-    aclError acltdtEnqueue(uint32_t queueId, acltdtBuf buf, int32_t timeout);
+    aclError acltdtEnqueue(uint32_t queueId, acltdtBuf buf, int32_t timeout) override;
 
-    aclError acltdtDequeue(uint32_t queueId, acltdtBuf *buf, int32_t timeout);
+    aclError acltdtDequeue(uint32_t queueId, acltdtBuf *buf, int32_t timeout) override;
 
-    aclError acltdtGrantQueue(uint32_t queueId, int32_t pid, uint32_t flag, int32_t timeout);
+    aclError acltdtGrantQueue(uint32_t queueId, int32_t pid, uint32_t flag, int32_t timeout) override;
 
-    aclError acltdtAttachQueue(uint32_t queueId, int32_t timeout, uint32_t *flag);
+    aclError acltdtAttachQueue(uint32_t queueId, int32_t timeout, uint32_t *flag) override;
 
-    aclError acltdtBindQueueRoutes(acltdtQueueRouteList *qRouteList);
+    aclError acltdtBindQueueRoutes(acltdtQueueRouteList *qRouteList) override;
 
-    aclError acltdtUnbindQueueRoutes(acltdtQueueRouteList *qRouteList);
+    aclError acltdtUnbindQueueRoutes(acltdtQueueRouteList *qRouteList) override;
 
     aclError GrantQueue2Cp(int32_t deviceId, uint32_t qid);
 
     aclError acltdtQueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo,
-                                                        acltdtQueueRouteList *qRouteList);
+                                    acltdtQueueRouteList *qRouteList) override;
 
-    aclError acltdtAllocBuf(size_t size, acltdtBuf *buf);
+    aclError acltdtAllocBuf(size_t size, acltdtBuf *buf) override;
 
-    aclError acltdtFreeBuf(acltdtBuf buf);
+    aclError acltdtFreeBuf(acltdtBuf buf) override;
 
-    aclError acltdtGetBufData(const acltdtBuf buf, void **dataPtr, size_t *size);
+    aclError acltdtGetBufData(const acltdtBuf buf, void **dataPtr, size_t *size) override;
 
     QueueProcessorMdc() = default;
     ~QueueProcessorMdc() = default;

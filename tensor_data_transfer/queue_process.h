@@ -29,6 +29,7 @@ enum PID_QUERY_TYPE {
 };
 
 constexpr int32_t BQS_QUERY_TYPE_SRC_OR_DST = 3;
+constexpr int32_t MSEC_TO_USEC = 1000;
 
 using QueueDataMutexPtr = std::shared_ptr<QueueDataMutex>;
 

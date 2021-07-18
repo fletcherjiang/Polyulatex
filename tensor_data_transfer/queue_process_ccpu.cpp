@@ -121,7 +121,7 @@ namespace acl {
             return ACL_ERROR_FAILURE;
         }
         std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
-        ACL_REQUIRES_CALL_RTS_OK(rtMemQueueAttach(deviceId, qid, timeout * 1000), rtMemQueueAttach);
+        ACL_REQUIRES_CALL_RTS_OK(rtMemQueueAttach(deviceId, qid, timeout * MSEC_TO_USEC), rtMemQueueAttach);
         ACL_LOG_INFO("start to query qid %u permisiion", qid);
         rtMemQueueShareAttr_t attr = {0};
         ACL_REQUIRES_CALL_RTS_OK(GetQueuePermission(deviceId, qid, attr), GetQueuePermission);
@@ -149,7 +149,7 @@ namespace acl {
         bqs::QsProcMsgRsp qsRsp = {0};
         eventSum.pid = dstPid;
         eventSum.grpId = bqs::BINDQUEUEGRPID;
-        eventSum.eventId = RT_MQ_SCHED_EVENT_QS_MSG; //qs EVENT_ID
+        eventSum.eventId = RT_MQ_SCHED_EVENT_QS_MSG;
         eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
         ack.buf = reinterpret_cast<char *>(&qsRsp);
         ack.bufLen = sizeof(qsRsp);
@@ -176,17 +176,19 @@ namespace acl {
         bqs::QsProcMsgRsp qsRsp = {0};
         eventSum.pid = dstPid;
         eventSum.grpId = bqs::BINDQUEUEGRPID;
-        eventSum.eventId = RT_MQ_SCHED_EVENT_QS_MSG; //drv EVENT_ID
+        eventSum.eventId = RT_MQ_SCHED_EVENT_QS_MSG;
         eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
         ack.buf = reinterpret_cast<char *>(&qsRsp);
         ack.bufLen = sizeof(qsRsp);
         std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
         ACL_REQUIRES_OK(SendBindUnbindMsg(qRouteList, deviceId, false, true, eventSum, ack));
-        ACL_LOG_INFO("Successfully to execute acltdtUnBindQueueRoutes, queue route is %zu", qRouteList->routeList.size());
+        ACL_LOG_INFO("Successfully to execute acltdtUnBindQueueRoutes, queue route is %zu",
+                     qRouteList->routeList.size());
         return ACL_SUCCESS;
     }
 
-    aclError QueueProcessorCcpu::acltdtQueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo, acltdtQueueRouteList *qRouteList)
+    aclError QueueProcessorCcpu::acltdtQueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo,
+                                                        acltdtQueueRouteList *qRouteList)
     {
         ACL_REQUIRES_NOT_NULL(queryInfo);
         ACL_REQUIRES_NOT_NULL(qRouteList);
@@ -200,7 +202,7 @@ namespace acl {
         bqs::QsProcMsgRsp qsRsp = {0};
         eventSum.pid = dstPid;
         eventSum.grpId = bqs::BINDQUEUEGRPID;
-        eventSum.eventId = RT_MQ_SCHED_EVENT_QS_MSG; //qs EVENT_ID
+        eventSum.eventId = RT_MQ_SCHED_EVENT_QS_MSG;
         eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
         ack.buf = reinterpret_cast<char *>(&qsRsp);
         ack.bufLen = sizeof(qsRsp);

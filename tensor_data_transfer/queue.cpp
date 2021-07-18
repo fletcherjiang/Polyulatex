@@ -7,6 +7,7 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
+
 #include "queue.h"
 #include <mutex>
 #include <map>
@@ -104,7 +105,7 @@ aclError acltdtAttachQueue(uint32_t qid, int32_t timeout, uint32_t *permission)
     auto& qManager = acl::QueueManager::GetInstance();
     auto processor = qManager.GetQueueProcessor();
     ACL_REQUIRES_NOT_NULL_WITH_INNER_REPORT(processor);
-    ACL_REQUIRES_OK(processor->acltdtAttachQueue(qid, timeout * 1000, permission));
+    ACL_REQUIRES_OK(processor->acltdtAttachQueue(qid, timeout, permission));
     return ACL_SUCCESS;
 }
 
@@ -137,21 +138,24 @@ aclError CheckQueueRouteQueryInfo(const acltdtQueueRouteQueryInfo *queryInfo)
     switch (queryInfo->mode) {
         case ACL_TDT_QUEUE_ROUTE_QUERY_SRC: {
             if (!queryInfo->isConfigSrc) {
-                ACL_LOG_ERROR("src qid must be set in acltdtQueueRouteQueryInfo, please use acltdtSetQueueRouteQueryInfo");
+                ACL_LOG_ERROR("src qid must be set in acltdtQueueRouteQueryInfo,"
+                              "please use acltdtSetQueueRouteQueryInfo");
                 return ACL_ERROR_INVALID_PARAM;
             }
             break;
         }
         case ACL_TDT_QUEUE_ROUTE_QUERY_DST: {
             if (!queryInfo->isConfigDst) {
-                ACL_LOG_ERROR("dst qid must be set in acltdtQueueRouteQueryInfo, please use acltdtSetQueueRouteQueryInfo");
+                ACL_LOG_ERROR("dst qid must be set in acltdtQueueRouteQueryInfo,"
+                              "please use acltdtSetQueueRouteQueryInfo");
                 return ACL_ERROR_INVALID_PARAM;
             }
             break;
         }
         case ACL_TDT_QUEUE_ROUTE_QUERY_SRC_AND_DST: {
             if ((!queryInfo->isConfigSrc) || (!queryInfo->isConfigDst)) {
-                ACL_LOG_ERROR("src and dst qid must be set in acltdtQueueRouteQueryInfo, please use acltdtSetQueueRouteQueryInfo");
+                ACL_LOG_ERROR("src and dst qid must be set in acltdtQueueRouteQueryInfo,"
+                              "please use acltdtSetQueueRouteQueryInfo");
                 return ACL_ERROR_INVALID_PARAM;
             }
             break;
@@ -383,8 +387,8 @@ aclError acltdtGetQueueRoute(const acltdtQueueRouteList *routeList,
     return ACL_SUCCESS;
 }
 
- acltdtQueueRouteQueryInfo* acltdtCreateQueueRouteQueryInfo()
- {
+acltdtQueueRouteQueryInfo* acltdtCreateQueueRouteQueryInfo()
+{
     ACL_STAGES_REG(acl::ACL_STAGE_QUEUE, acl::ACL_STAGE_DEFAULT);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ROUTE_QUERY);
     acltdtQueueRouteQueryInfo *info = new(std::nothrow) acltdtQueueRouteQueryInfo();
@@ -394,7 +398,7 @@ aclError acltdtGetQueueRoute(const acltdtQueueRouteList *routeList,
     info->isConfigSrc = false;
     info->isConfigMode = false;
     return info;
- }
+}
 
 aclError acltdtDestroyQueueRouteQueryInfo(const acltdtQueueRouteQueryInfo *param)
 {
