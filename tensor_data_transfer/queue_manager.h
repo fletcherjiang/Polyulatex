@@ -1,7 +1,7 @@
 /**
 * @file queue_manager.h
 *
-* Copyright (C) Huawei Technologies Co., Ltd. 2019-2020. All Rights Reserved.
+* Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 *
 * This program is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -18,7 +18,14 @@
 #include "queue.h"
 
 namespace acl {
-using QueueProcessorPtr = std::shared_ptr<QueueProcessor>;
+using QueueProcessorPtr = std::unique_ptr<QueueProcessor>;
+
+enum RunEnv {
+    ACL_ACL_ENV_UNKNOWN = -1,
+    ACL_ENV_HOST = 0,
+    ACL_ENV_DEVICE_CCPU = 1,
+    ACL_ENV_DEVICE_MDC = 2,
+};
 
 class QueueManager {
 public:
@@ -32,9 +39,9 @@ public:
      * Get queue processor
      * @return queueProcessorPtr queue processor pointer
      */
-    QueueProcessorPtr GetQueueProcessor();
+    QueueProcessor *GetQueueProcessor();
 
-    static aclError GetRunningEnv(RunEnv &runEnv);
+    static aclError GetRunningEnv(RunEnv &runningEnv);
 
     QueueManager() = default;
 

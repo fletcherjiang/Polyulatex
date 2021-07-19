@@ -1,7 +1,7 @@
 /**
 * @file queue_processor.h
 *
-* Copyright (C) Huawei Technologies Co., Ltd. 2019-2020. All Rights Reserved.
+* Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 *
 * This program is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -29,6 +29,7 @@ enum PID_QUERY_TYPE {
 };
 
 constexpr int32_t BQS_QUERY_TYPE_SRC_OR_DST = 3;
+constexpr int32_t MSEC_TO_USEC = 1000;
 
 using QueueDataMutexPtr = std::shared_ptr<QueueDataMutex>;
 

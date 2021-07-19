@@ -1,7 +1,7 @@
 /**
 * @file queue_process.cpp
 *
-* Copyright (C) Huawei Technologies Co., Ltd. 2019-2020. All Rights Reserved.
+* Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 *
 * This program is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -87,7 +87,7 @@ namespace acl {
             }
             mmSleep(1); // sleep 1ms
             endTime = GetTimestamp();
-            continueFlag = !continueFlag && ((endTime - startTime) <= (static_cast<uint64_t>(timeout) * 10000));
+            continueFlag = !continueFlag && ((endTime - startTime) <= (static_cast<uint64_t>(timeout) * MSEC_TO_USEC));
         } while (continueFlag);
         return ACL_ERROR_FAILURE;
     }
@@ -112,7 +112,7 @@ namespace acl {
             }
             mmSleep(1); // sleep 1ms
             endTime = GetTimestamp();
-            continueFlag = !continueFlag && ((endTime - startTime) <= (static_cast<uint64_t>(timeout) * 10000));
+            continueFlag = !continueFlag && ((endTime - startTime) <= (static_cast<uint64_t>(timeout) * MSEC_TO_USEC));
         } while (continueFlag);
         return ACL_ERROR_FAILURE;
     }
@@ -226,7 +226,9 @@ namespace acl {
         }
     }
 
-    aclError QueueProcessor::SendConnectQsMsg(int32_t deviceId, rtEschedEventSummary_t &eventSum, rtEschedEventReply_t &ack)
+    aclError QueueProcessor::SendConnectQsMsg(int32_t deviceId,
+                                              rtEschedEventSummary_t &eventSum,
+                                              rtEschedEventReply_t &ack)
     {
         // send contact msg
         ACL_LOG_INFO("start to send contact msg");
@@ -404,7 +406,8 @@ namespace acl {
         FreeBuf(devPtr, mBuf, isMbufAlloc);
         devPtr = nullptr;
         mBuf = nullptr;
-        ACL_LOG_INFO("Successfully to execute acltdtQueryQueueRoutes, queue route is %zu", qRouteList->routeList.size());
+        ACL_LOG_INFO("Successfully to execute acltdtQueryQueueRoutes, queue route is %zu",
+                     qRouteList->routeList.size());
         return ACL_SUCCESS;
     }
 

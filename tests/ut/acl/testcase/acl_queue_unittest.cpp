@@ -26,7 +26,7 @@ using namespace std;
 using namespace acl;
 
 namespace acl {
-    int32_t i = 0;
+    extern aclError CheckQueueRouteQueryInfo(const acltdtQueueRouteQueryInfo *queryInfo);
 }
 
 class UTEST_QUEUE : public testing::Test
