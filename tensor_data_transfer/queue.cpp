@@ -1,7 +1,7 @@
 /**
 * @file queue.cpp
 *
-* Copyright (C) Huawei Technologies Co., Ltd. 2019-2020. All Rights Reserved.
+* Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 *
 * This program is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -21,7 +21,7 @@
 #include "aicpu/queue_schedule/qs_client.h"
 
 namespace {
-    constexpr uint32_t DEFAULT_QUEU_DEPTH = 2;
+    constexpr uint32_t DEFAULT_QUEU_DEPTH = 2U;
     aclError CopyParam(const void *src, size_t srcLen, void *dst, size_t dstLen, size_t *realCopySize = nullptr)
     {
         ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(src);
@@ -38,6 +38,47 @@ namespace {
         }
         if (realCopySize != nullptr) {
             *realCopySize = srcLen;
+        }
+        return ACL_SUCCESS;
+    }
+}
+
+namespace acl {
+    aclError CheckQueueRouteQueryInfo(const acltdtQueueRouteQueryInfo *queryInfo)
+    {
+        if (!queryInfo->isConfigMode) {
+            ACL_LOG_ERROR("mode must be set in acltdtQueueRouteQueryInfo, please use acltdtSetQueueRouteQueryInfo");
+            return ACL_ERROR_INVALID_PARAM;
+        }
+        switch (queryInfo->mode) {
+            case ACL_TDT_QUEUE_ROUTE_QUERY_SRC: {
+                if (!queryInfo->isConfigSrc) {
+                    ACL_LOG_ERROR("src qid must be set in acltdtQueueRouteQueryInfo,"
+                                "please use acltdtSetQueueRouteQueryInfo");
+                    return ACL_ERROR_INVALID_PARAM;
+                }
+                break;
+            }
+            case ACL_TDT_QUEUE_ROUTE_QUERY_DST: {
+                if (!queryInfo->isConfigDst) {
+                    ACL_LOG_ERROR("dst qid must be set in acltdtQueueRouteQueryInfo,"
+                                "please use acltdtSetQueueRouteQueryInfo");
+                    return ACL_ERROR_INVALID_PARAM;
+                }
+                break;
+            }
+            case ACL_TDT_QUEUE_ROUTE_QUERY_SRC_AND_DST: {
+                if ((!queryInfo->isConfigSrc) || (!queryInfo->isConfigDst)) {
+                    ACL_LOG_ERROR("src and dst qid must be set in acltdtQueueRouteQueryInfo,"
+                                "please use acltdtSetQueueRouteQueryInfo");
+                    return ACL_ERROR_INVALID_PARAM;
+                }
+                break;
+            }
+            default: {
+                ACL_LOG_INNER_ERROR("[Check][Type]unkown mode %d.", queryInfo->mode);
+                return ACL_ERROR_INVALID_PARAM;
+            }
         }
         return ACL_SUCCESS;
     }
@@ -129,52 +170,13 @@ aclError acltdtUnbindQueueRoutes(acltdtQueueRouteList *qRouteList)
     return ACL_SUCCESS;
 }
 
-aclError CheckQueueRouteQueryInfo(const acltdtQueueRouteQueryInfo *queryInfo)
-{
-    if (!queryInfo->isConfigMode) {
-        ACL_LOG_ERROR("mode must be set in acltdtQueueRouteQueryInfo, please use acltdtSetQueueRouteQueryInfo");
-        return ACL_ERROR_INVALID_PARAM;
-    }
-    switch (queryInfo->mode) {
-        case ACL_TDT_QUEUE_ROUTE_QUERY_SRC: {
-            if (!queryInfo->isConfigSrc) {
-                ACL_LOG_ERROR("src qid must be set in acltdtQueueRouteQueryInfo,"
-                              "please use acltdtSetQueueRouteQueryInfo");
-                return ACL_ERROR_INVALID_PARAM;
-            }
-            break;
-        }
-        case ACL_TDT_QUEUE_ROUTE_QUERY_DST: {
-            if (!queryInfo->isConfigDst) {
-                ACL_LOG_ERROR("dst qid must be set in acltdtQueueRouteQueryInfo,"
-                              "please use acltdtSetQueueRouteQueryInfo");
-                return ACL_ERROR_INVALID_PARAM;
-            }
-            break;
-        }
-        case ACL_TDT_QUEUE_ROUTE_QUERY_SRC_AND_DST: {
-            if ((!queryInfo->isConfigSrc) || (!queryInfo->isConfigDst)) {
-                ACL_LOG_ERROR("src and dst qid must be set in acltdtQueueRouteQueryInfo,"
-                              "please use acltdtSetQueueRouteQueryInfo");
-                return ACL_ERROR_INVALID_PARAM;
-            }
-            break;
-        }
-        default: {
-            ACL_LOG_INNER_ERROR("[Check][Type]unkown mode %d.", queryInfo->mode);
-            return ACL_ERROR_INVALID_PARAM;
-        }
-    }
-    return ACL_SUCCESS;
-}
-
 aclError acltdtQueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo, acltdtQueueRouteList *qRouteList)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_QUEUE, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(qRouteList);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(queryInfo);
     qRouteList->routeList.clear();
-    ACL_REQUIRES_OK(CheckQueueRouteQueryInfo(queryInfo));
+    ACL_REQUIRES_OK(acl::CheckQueueRouteQueryInfo(queryInfo));
     auto& qManager = acl::QueueManager::GetInstance();
     auto processor = qManager.GetQueueProcessor();
     ACL_REQUIRES_NOT_NULL_WITH_INNER_REPORT(processor);
@@ -221,11 +223,11 @@ acltdtQueueAttr* acltdtCreateQueueAttr()
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ATTR);
     acltdtQueueAttr *attr = new(std::nothrow) acltdtQueueAttr();
     ACL_REQUIRES_NOT_NULL_RET_NULL_INPUT_REPORT(attr);
-    (void)memset_s(attr->name, RT_MQ_MAX_NAME_LEN, 0, RT_MQ_MAX_NAME_LEN);
-    attr->depth = DEFAULT_QUEU_DEPTH;
-    attr->workMode = RT_MQ_MODE_DEFAULT;
+    (void)memset_s(attr->name, static_cast<size_t>(RT_MQ_MAX_NAME_LEN), 0, static_cast<size_t>(RT_MQ_MAX_NAME_LEN));
+    attr->depth = static_cast<uint32_t>(DEFAULT_QUEU_DEPTH);
+    attr->workMode = static_cast<uint32_t>(RT_MQ_MODE_DEFAULT);
     attr->flowCtrlFlag = false;
-    attr->flowCtrlDropTime = 0;
+    attr->flowCtrlDropTime = 0U;
     attr->overWriteFlag = false;
     ACL_ADD_APPLY_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ATTR);
     return attr;
@@ -244,66 +246,64 @@ aclError acltdtDestroyQueueAttr(const acltdtQueueAttr *attr)
 aclError acltdtSetQueueAttr(acltdtQueueAttr *attr,
                             acltdtQueueAttrType type,
                             size_t len,
-                            const void *value)
+                            const void *param)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_QUEUE, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attr);
-    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(value);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(param);
     switch (type) {
         case ACL_TDT_QUEUE_NAME_PTR: {
                 char *tmp = nullptr;
-                ACL_REQUIRES_OK(CopyParam(value, len, static_cast<void *>(&tmp), sizeof(size_t)));
-                if (strlen(tmp) + 1 > RT_MQ_MAX_NAME_LEN) {
-                    ACL_LOG_ERROR("queue name len [%zu] can not be larger than %u",
-                                  strlen(tmp) + 1, RT_MQ_MAX_NAME_LEN);
+                ACL_REQUIRES_OK(CopyParam(param, len, static_cast<void *>(&tmp), sizeof(size_t)));
+                if ((strlen(tmp) + 1) > static_cast<uint64_t>(RT_MQ_MAX_NAME_LEN)) {
+                    ACL_LOG_ERROR("queue name len [%zu] can not be larger than %d",
+                                  (strlen(tmp) + 1), RT_MQ_MAX_NAME_LEN);
                     return ACL_ERROR_INVALID_PARAM;
                 }
-                return CopyParam(tmp, strlen(tmp) + 1, static_cast<void *>(attr->name), RT_MQ_MAX_NAME_LEN);
+                return CopyParam(tmp, (strlen(tmp) + 1), static_cast<void *>(attr->name), RT_MQ_MAX_NAME_LEN);
             }
         case ACL_TDT_QUEUE_DEPTH_UINT32:
-            return CopyParam(value, len, static_cast<void *>(&attr->depth), sizeof(uint32_t));
+            return CopyParam(param, len, static_cast<void *>(&attr->depth), sizeof(uint32_t));
         default: {
             ACL_LOG_INNER_ERROR("[Check][Type]unkown acltdtQueueAttrType %d.", type);
             return ACL_ERROR_INVALID_PARAM;
         }
     }
-    return ACL_SUCCESS;
 }
 
 aclError acltdtGetQueueAttr(const acltdtQueueAttr *attr,
                             acltdtQueueAttrType type,
                             size_t len,
                             size_t *paramRetSize,
-                            void *value)
+                            void *param)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_QUEUE, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attr);
-    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(value);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(param);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(paramRetSize);
     ACL_LOG_INFO("start to get queue attr, type is %d, len is %zu", type, len);
     switch (type) {
         case ACL_TDT_QUEUE_NAME_PTR: {
                 const char *tmp = &attr->name[0];
-                return CopyParam(static_cast<const void *>(&tmp), sizeof(size_t), value, len, paramRetSize);
+                return CopyParam(static_cast<const void *>(&tmp), sizeof(size_t), param, len, paramRetSize);
             }
         case ACL_TDT_QUEUE_DEPTH_UINT32:
-            return CopyParam(static_cast<const void *>(&attr->depth), sizeof(uint32_t), value, len, paramRetSize);
+            return CopyParam(static_cast<const void *>(&attr->depth), sizeof(uint32_t), param, len, paramRetSize);
         default: {
             ACL_LOG_INNER_ERROR("[Check][Type]unkown acltdtQueueAttrType %d.", type);
             return ACL_ERROR_INVALID_PARAM;
         }
     }
-    return ACL_SUCCESS;
 }
 
-acltdtQueueRoute* acltdtCreateQueueRoute(uint32_t srcQid, uint32_t dstQid)
+acltdtQueueRoute* acltdtCreateQueueRoute(uint32_t srcId, uint32_t dstId)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_QUEUE, acl::ACL_STAGE_DEFAULT);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ROUTE);
     acltdtQueueRoute *route = new(std::nothrow) acltdtQueueRoute();
     ACL_REQUIRES_NOT_NULL_RET_NULL_INPUT_REPORT(route);
-    route->srcId = srcQid;
-    route->dstId = dstQid;
+    route->srcId = srcId;
+    route->dstId = dstId;
     route->status = 0;
     ACL_ADD_APPLY_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ROUTE);
     return route;
@@ -342,7 +342,6 @@ aclError acltdtGetQueueRouteParam(const acltdtQueueRoute *route,
             return ACL_ERROR_INVALID_PARAM;
         }
     }
-    return ACL_SUCCESS;
 }
 
 acltdtQueueRouteList* acltdtCreateQueueRouteList()
@@ -400,12 +399,12 @@ acltdtQueueRouteQueryInfo* acltdtCreateQueueRouteQueryInfo()
     return info;
 }
 
-aclError acltdtDestroyQueueRouteQueryInfo(const acltdtQueueRouteQueryInfo *param)
+aclError acltdtDestroyQueueRouteQueryInfo(const acltdtQueueRouteQueryInfo *info)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_QUEUE, acl::ACL_STAGE_DEFAULT);
-    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(param);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(info);
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ROUTE_QUERY);
-    ACL_DELETE_AND_SET_NULL(param);
+    ACL_DELETE_AND_SET_NULL(info);
     ACL_ADD_RELEASE_SUCCESS_COUNT(ACL_STATISTICS_CREATE_DESTROY_QUEUE_ROUTE_QUERY);
     return ACL_SUCCESS;
 }
@@ -445,5 +444,4 @@ aclError acltdtSetQueueRouteQueryInfo(acltdtQueueRouteQueryInfo *param,
             return ACL_ERROR_INVALID_PARAM;
         }
     }
-    return ACL_SUCCESS;
 }

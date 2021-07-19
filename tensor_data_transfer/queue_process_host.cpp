@@ -1,7 +1,7 @@
 /**
 * @file queue_process_host.cpp
 *
-* Copyright (C) Huawei Technologies Co., Ltd. 2019-2020. All Rights Reserved.
+* Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 *
 * This program is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -42,7 +42,7 @@ namespace acl {
     aclError QueueProcessorHost::acltdtDestroyQueue(uint32_t qid)
     {
         int32_t deviceId = 0;
-        GET_CURRENT_DEVICE_ID(deviceId);
+        ACL_REQUIRES_CALL_RTS_OK(rtGetDevice(&deviceId), rtGetDevice);
         // get qs id
         int32_t qsPid = 0;
         size_t routeNum = 0;
@@ -80,7 +80,7 @@ namespace acl {
             return ACL_ERROR_INVALID_PARAM;
         };
         int32_t deviceId = 0;
-        GET_CURRENT_DEVICE_ID(deviceId);
+        ACL_REQUIRES_CALL_RTS_OK(rtGetDevice(&deviceId), rtGetDevice);
         uint64_t startTime = GetTimestamp();
         uint64_t endTime = 0;
         int32_t cpPid;
@@ -117,7 +117,7 @@ namespace acl {
                      qid, *permission, timeout);
         ACL_REQUIRES_NOT_NULL(permission);
         int32_t deviceId = 0;
-        GET_CURRENT_DEVICE_ID(deviceId);
+        ACL_REQUIRES_CALL_RTS_OK(rtGetDevice(&deviceId), rtGetDevice);
         std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
         ACL_REQUIRES_CALL_RTS_OK(rtMemQueueAttach(deviceId, qid, timeout * MSEC_TO_USEC), rtMemQueueAttach);
         ACL_LOG_INFO("start to query qid %u permisiion", qid);
@@ -139,7 +139,7 @@ namespace acl {
         ACL_REQUIRES_NOT_NULL(qRouteList);
         ACL_LOG_INFO("Start to acltdtBindQueueRoutes, queue route is %zu", qRouteList->routeList.size());
         int32_t deviceId = 0;
-        GET_CURRENT_DEVICE_ID(deviceId);
+        ACL_REQUIRES_CALL_RTS_OK(rtGetDevice(&deviceId), rtGetDevice);
         ACL_REQUIRES_OK(InitQueueSchedule(deviceId));
         // get dst pid
         int32_t dstPid = 0;
@@ -168,7 +168,7 @@ namespace acl {
         ACL_REQUIRES_NOT_NULL(qRouteList);
         ACL_LOG_INFO("Start to acltdtUnBindQueueRoutes, queue route is %zu", qRouteList->routeList.size());
         int32_t deviceId = 0;
-        GET_CURRENT_DEVICE_ID(deviceId);
+        ACL_REQUIRES_CALL_RTS_OK(rtGetDevice(&deviceId), rtGetDevice);
         // get dst pid
         int32_t dstPid = 0;
         ACL_REQUIRES_OK(GetDstInfo(deviceId, CP_PID, dstPid));
@@ -195,7 +195,7 @@ namespace acl {
         ACL_REQUIRES_NOT_NULL(qRouteList);
         ACL_LOG_INFO("Start to acltdtQueryQueueRoutes");
         int32_t deviceId = 0;
-        GET_CURRENT_DEVICE_ID(deviceId);
+        ACL_REQUIRES_CALL_RTS_OK(rtGetDevice(&deviceId), rtGetDevice);
         // get dst id
         int32_t dstPid = 0;
         ACL_REQUIRES_OK(GetDstInfo(deviceId, CP_PID, dstPid));
