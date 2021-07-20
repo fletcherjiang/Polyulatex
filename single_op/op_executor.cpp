@@ -26,8 +26,8 @@ constexpr int32_t MAX_CACHED_NUM = 128;
 
 aclError OpExecutor::DoExecuteAsync(ge::SingleOp *singleOp,
                                     const AclOp &aclOp,
-                                    const aclDataBuffer *const *inputs,
-                                    aclDataBuffer *const *outputs,
+                                    const aclDataBuffer *const inputs[],
+                                    aclDataBuffer *const outputs[],
                                     bool executeWithExactModel)
 {
     std::vector<ge::DataBuffer> inputVec;
@@ -103,25 +103,25 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
         ge::Format geOriginFormat = ge::FORMAT_RESERVED;
         if (aclOp.inputDesc[i]->format != ACL_FORMAT_UNDEFINED) {
             geOriginFormat = static_cast<::ge::Format>(aclOp.inputDesc[i]->format);
-        } 
+        }
         ACL_LOG_DEBUG("Use storageDims to construct GeShape in op execute");
         ge::GeTensorDesc tensorDesc;
         if (geFormat != ge::FORMAT_RESERVED && geOriginFormat != geFormat) {
-            ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are not equal", 
+            ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are not equal",
                 static_cast<int32_t>(geOriginFormat), static_cast<int32_t>(geFormat));
-            tensorDesc.SetShape(ge::GeShape(aclOp.inputDesc[i]->storageDims));     
-            tensorDesc.SetFormat(geFormat); 
-            tensorDesc.SetOriginShape(ge::GeShape(aclOp.inputDesc[i]->dims));                  
+            tensorDesc.SetShape(ge::GeShape(aclOp.inputDesc[i]->storageDims));
+            tensorDesc.SetFormat(geFormat);
+            tensorDesc.SetOriginShape(ge::GeShape(aclOp.inputDesc[i]->dims));
         } else {
-            ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are equal", 
+            ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are equal",
                 static_cast<int32_t>(geOriginFormat), static_cast<int32_t>(geFormat));
-            tensorDesc.SetShape(ge::GeShape(aclOp.inputDesc[i]->dims));      
-            tensorDesc.SetFormat(geOriginFormat); 
+            tensorDesc.SetShape(ge::GeShape(aclOp.inputDesc[i]->dims));
+            tensorDesc.SetFormat(geOriginFormat);
             tensorDesc.SetOriginShape(tensorDesc.GetShape());
-        }      
+        }
         tensorDesc.SetOriginFormat(geOriginFormat);
         tensorDesc.SetDataType(geDataType);
-        ge::AttrUtils::SetInt(tensorDesc, ge::ATTR_NAME_PLACEMENT, static_cast<int64_t>(aclOp.inputDesc[i]->memtype));
+        (void)ge::AttrUtils::SetInt(tensorDesc, ge::ATTR_NAME_PLACEMENT, static_cast<int64_t>(aclOp.inputDesc[i]->memtype));
         inputDesc.emplace_back(std::move(tensorDesc));
 
         ge::DataBuffer buffer;
@@ -147,28 +147,27 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
         ge::Format geOriginFormat = ge::FORMAT_RESERVED;
         if (aclOp.outputDesc[i]->format != ACL_FORMAT_UNDEFINED) {
             geOriginFormat = static_cast<::ge::Format>(aclOp.outputDesc[i]->format);
-        } 
+        }
 
         ACL_LOG_DEBUG("Use storageDims to construct GeShape in op execute");
         ge::GeTensorDesc tensorDesc;
         if (geFormat != ge::FORMAT_RESERVED && geOriginFormat != geFormat) {
-            ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are not equal", 
+            ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are not equal",
                 static_cast<int32_t>(geOriginFormat), static_cast<int32_t>(geFormat));
-            tensorDesc.SetShape(ge::GeShape(aclOp.outputDesc[i]->storageDims));     
-            tensorDesc.SetFormat(geFormat);  
-            tensorDesc.SetOriginShape(ge::GeShape(aclOp.outputDesc[i]->dims));                
+            tensorDesc.SetShape(ge::GeShape(aclOp.outputDesc[i]->storageDims));
+            tensorDesc.SetFormat(geFormat);
+            tensorDesc.SetOriginShape(ge::GeShape(aclOp.outputDesc[i]->dims));
         } else {
-            ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are equal", 
+            ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are equal",
                 static_cast<int32_t>(geOriginFormat), static_cast<int32_t>(geFormat));
-            tensorDesc.SetShape(ge::GeShape(aclOp.outputDesc[i]->dims));      
-            tensorDesc.SetFormat(geOriginFormat); 
+            tensorDesc.SetShape(ge::GeShape(aclOp.outputDesc[i]->dims));
+            tensorDesc.SetFormat(geOriginFormat);
             tensorDesc.SetOriginShape(tensorDesc.GetShape());
-        }    
+        }
 
         tensorDesc.SetOriginFormat(geOriginFormat);
         tensorDesc.SetDataType(geDataType);
-        
-        ge::AttrUtils::SetInt(tensorDesc, ge::ATTR_NAME_PLACEMENT, static_cast<int64_t>(aclOp.outputDesc[i]->memtype));
+        (void)ge::AttrUtils::SetInt(tensorDesc, ge::ATTR_NAME_PLACEMENT, static_cast<int64_t>(aclOp.outputDesc[i]->memtype));
         outputDesc.emplace_back(std::move(tensorDesc));
 
         ge::DataBuffer buffer;
@@ -233,8 +232,8 @@ ge::DynamicSingleOp *OpExecutor::LoadDynamicSingleOp(const OpModel &modelInfo, a
 }
 
 aclError OpExecutor::ExecuteAsync(const AclOp &aclOp,
-                                  const aclDataBuffer *const *inputs,
-                                  aclDataBuffer *const *outputs,
+                                  const aclDataBuffer *const inputs[],
+                                  aclDataBuffer *const outputs[],
                                   aclrtStream stream)
 {
     if (OpKernelSelector::GetInstance().HasSelectFunc(aclOp.opType)) {
@@ -262,7 +261,7 @@ aclError OpExecutor::ExecuteAsync(const AclOp &aclOp,
         ACL_LOG_INFO("opType = %s has been matched in the  op compile phase", aclOp.opType.c_str());
     }
 
-    bool isExactModel = (opModel.isStaticModelWithFuzzCompile == 0) ? true : false;
+    bool isExactModel = (opModel.isStaticModelWithFuzzCompile == 0U) ? true : false;
     if (isDynamic) {
         ACL_LOG_INFO("begin to load dynamic model. model = %s", opModel.name.c_str());
         auto executor = LoadDynamicSingleOp(opModel, stream);
@@ -283,8 +282,8 @@ aclError OpExecutor::ExecuteAsync(const AclOp &aclOp,
 }
 
 aclError OpExecutor::ExecuteAsync(OpHandle &opHandle,
-                                  const aclDataBuffer *const *inputs,
-                                  aclDataBuffer *const *outputs,
+                                  const aclDataBuffer *const inputs[],
+                                  aclDataBuffer *const outputs[],
                                   aclrtStream stream)
 {
     if (opHandle.kernelDesc != nullptr) {
@@ -320,11 +319,11 @@ aclError OpExecutor::ExecuteAsync(OpHandle &opHandle,
                     auto toErase = cachedExecutors.begin();
                     ACL_LOG_WARN("cache[%zu] reaches max size[%zu], evict one object. stream = %p",
                         cachedExecutors.size(), MAX_CACHED_NUM, toErase->first);
-                    cachedExecutors.erase(toErase);
+                    (void)cachedExecutors.erase(toErase);
                 }
 
                 ACL_LOG_INFO("cache operator executor. model = %s, stream = %p", opHandle.opModel.name.c_str(), stream);
-                opHandle.cachedDynamicOperators.emplace(stream, singleOp);
+                (void)opHandle.cachedDynamicOperators.emplace(stream, singleOp);
             }
         }
         ret = DoExecuteAsync(singleOp, opHandle.aclOp, inputs, outputs);
@@ -349,11 +348,11 @@ aclError OpExecutor::ExecuteAsync(OpHandle &opHandle,
                     auto toErase = cachedExecutors.begin();
                     ACL_LOG_INFO("cache[%zu] reaches max size[%zu], evict one object. stream = %p",
                         cachedExecutors.size(), MAX_CACHED_NUM, toErase->first);
-                    cachedExecutors.erase(toErase);
+                    (void)cachedExecutors.erase(toErase);
                 }
 
                 ACL_LOG_INFO("cache operator executor. model = %s, stream = %p", opHandle.opModel.name.c_str(), stream);
-                opHandle.cachedOperators.emplace(stream, singleOp);
+                (void)opHandle.cachedOperators.emplace(stream, singleOp);
             }
         }
         ret = DoExecuteAsync(singleOp, opHandle.aclOp, inputs, outputs);

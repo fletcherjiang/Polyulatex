@@ -766,7 +766,7 @@ static aclError GetAndCheckAippOutputShape(const uint32_t modelId, const aclmdlD
     int64_t mdlOriH = 0;
     int64_t mdlOriW = 0;
     int64_t mdlOriN = 0;
-    const aclError result = GetAippOutputHW(aippParmsSet, 0, GetSocVersion(), aippOutputW, aippOutputH);
+    const aclError result = acl::GetAippOutputHW(aippParmsSet, 0, GetSocVersion(), aippOutputW, aippOutputH);
     if (result != ACL_SUCCESS) {
         return result;
     }
@@ -811,7 +811,7 @@ static aclError GetAndCheckAippParams(const uint32_t modelId, const aclmdlDesc &
         const uint32_t relatedInputRank = aippParams.related_input_rank;
         const uint64_t maxSrcImageSize = static_cast<uint64_t>(aippParams.max_src_image_size);
         // check max_src_image_size
-        const uint64_t size = GetSrcImageSize(aippParmsSet);
+        const uint64_t size = acl::GetSrcImageSize(aippParmsSet);
         ACL_LOG_INFO("Input SrcImageSize = %lu", size);
         if (size > maxSrcImageSize) {
             ACL_LOG_ERROR("[Check][Size]the dynamic aipp size[%lu] is bigger than max_src_image_size[%lu]",
@@ -831,7 +831,7 @@ static aclError GetAndCheckAippParams(const uint32_t modelId, const aclmdlDesc &
         ACL_LOG_INFO("current used model is old");
     }
 
-    return AippParamsCheck(aippParmsSet, GetSocVersion());
+    return acl::AippParamsCheck(aippParmsSet, GetSocVersion());
 }
 
 static aclError CheckAippDataIndex(const uint32_t modelId, const size_t idx, const aclmdlDesc* modelDesc)

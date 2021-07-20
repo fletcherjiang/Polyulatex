@@ -12,6 +12,7 @@
 
 using namespace testing;
 using namespace std;
+using namespace acl;
 
 class UTEST_ACL_Model : public testing::Test
 {
@@ -1539,7 +1540,7 @@ TEST_F(UTEST_ACL_Model, AippParamsCheck)
 
     //InputFormat not setted
     (void)GetSrcImageSize(aippDynamicSet);
-    ret = AippParamsCheck(aippDynamicSet, "Ascend310");
+    ret = ::AippParamsCheck(aippDynamicSet, "Ascend310");
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
 
     //aipp not support Ascend910
@@ -2323,7 +2324,6 @@ TEST_F(UTEST_ACL_Model, aclmdlGetFirstAippInfoTest)
     EXPECT_EQ(ret, ACL_SUCCESS);
 }
 
-extern aclError AippScfSizeCheck(const aclmdlAIPP *aippParmsSet, int32_t batchIndex);
 TEST_F(UTEST_ACL_Model, AippScfSizeCheckTest)
 {
     uint32_t batchNumber = 10;

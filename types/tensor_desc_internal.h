@@ -37,8 +37,8 @@ struct aclDataBuffer {
 };
 
 struct ACL_FUNC_VISIBILITY aclTensorDesc {
-    aclTensorDesc(const aclDataType dataType, const std::initializer_list<int64_t> shape, aclFormat format);
-    aclTensorDesc(const aclDataType dataType, size_t numDims, const int64_t* const dims, aclFormat format);
+    aclTensorDesc(aclDataType dataType, std::initializer_list<int64_t> shape, aclFormat format);
+    aclTensorDesc(aclDataType dataType, size_t numDims, const int64_t* const dims, aclFormat format);
     aclTensorDesc(const aclTensorDesc &tensorDesc);
     aclTensorDesc() = default;
     ~aclTensorDesc() = default;
@@ -76,7 +76,7 @@ struct ACL_FUNC_VISIBILITY aclTensorDesc {
     void UpdateTensorShapeRange(const std::vector<std::pair<int64_t, int64_t>> &ranges);
     bool CheckConstTensor(bool needCheckHostMem) const;
 
-    bool operator==(const aclTensorDesc *other);
+    bool operator==(const aclTensorDesc* const other);
 
 private:
     mutable std::string cachedKey;

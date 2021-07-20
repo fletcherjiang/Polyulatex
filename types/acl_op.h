@@ -40,8 +40,8 @@ struct ACL_FUNC_VISIBILITY AclOp {
     AclOp &operator=(const AclOp &aclOp);
 
     std::string opType;
-    int numInputs = 0;
-    int numOutputs = 0;
+    int32_t numInputs = 0;
+    int32_t numOutputs = 0;
     const aclTensorDesc * const *inputDesc = nullptr;
     const aclTensorDesc * const *outputDesc = nullptr;
     const aclDataBuffer *const *inputs = nullptr;
