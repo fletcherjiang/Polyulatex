@@ -490,7 +490,3 @@ uint64_t GetSrcImageSize(const aclmdlAIPP *aippParmsSet)
     return size;
 }
 } // namspace al
-
-
-
-

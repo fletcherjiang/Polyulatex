@@ -43,7 +43,8 @@ aclError OpCompileService::SetCompileStrategy(CompileStrategy strategy,
     }
 
     if (strategy != NATIVE_COMPILER && strategy != REMOTE_COMPILER) {
-        ACL_LOG_INNER_ERROR("[Check][Strategy]The current compile strategy[%d] is invalid.", static_cast<int32_t>(strategy));
+        ACL_LOG_INNER_ERROR("[Check][Strategy]The current compile strategy[%d] is invalid.",
+            static_cast<int32_t>(strategy));
         return ACL_ERROR_INVALID_PARAM;
     }
 

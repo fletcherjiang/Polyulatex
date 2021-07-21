@@ -235,8 +235,7 @@ namespace acl {
                 "dump_path is larger than MAX_DUMP_PATH_LENGTH[%d]", MAX_DUMP_PATH_LENGTH);
             acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
                 std::vector<std::string>({"param", "value", "reason"}),
-                std::vector<std::string>({"dump_path",
-                std::to_string(config.dumpPath.length()), errMsg}));
+                std::vector<std::string>({"dump_path", std::to_string(config.dumpPath.length()), errMsg}));
             return false;
         }
 
@@ -249,8 +248,7 @@ namespace acl {
                     config.dumpPath.c_str());
                 acl::AclErrorLogManager::ReportInputError(acl::INVALID_PATH_MSG,
                     std::vector<std::string>({"path", "reason"}),
-                    std::vector<std::string>({"dump_path",
-                    "is invalid directory"}));
+                    std::vector<std::string>({"dump_path", "is invalid directory"}));
                 return false;
             }
         } else {
@@ -262,8 +260,7 @@ namespace acl {
                     "mmRealPath return %d", config.dumpPath.c_str(), ret);
                 acl::AclErrorLogManager::ReportInputError(acl::INVALID_PATH_MSG,
                     std::vector<std::string>({"path", "reason"}),
-                    std::vector<std::string>({config.dumpPath,
-                    "cannot convert to realpath"}));
+                    std::vector<std::string>({config.dumpPath, "cannot convert to realpath"}));
                 return false;
             }
             uint32_t accessMode = static_cast<uint32_t>(M_R_OK) | static_cast<uint32_t>(M_W_OK);
@@ -300,8 +297,7 @@ namespace acl {
                 "is not exist");
             acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
                 std::vector<std::string>({"param", "value", "reason"}),
-                std::vector<std::string>({"dump_path or dump_list", "",
-                "field is not exist"}));
+                std::vector<std::string>({"dump_path or dump_list", "", "field is not exist"}));
             return false;
         }
 
@@ -330,8 +326,7 @@ namespace acl {
                 "input/output/all", dumpMode.c_str());
             acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
                 std::vector<std::string>({"param", "value", "reason"}),
-                std::vector<std::string>({"dump_mode", dumpMode,
-                "only supports input/output/all"}));
+                std::vector<std::string>({"dump_mode", dumpMode, "only supports input/output/all"}));
             return false;
         }
 
@@ -448,7 +443,8 @@ aclError aclmdlInitDump()
     }
 
     if (acl::AclDump::GetInstance().GetAclDumpFlag()) {
-        ACL_LOG_INNER_ERROR("[Check][AclDumpFlag]aclmdlInitDump is not support because already execute aclInit init dump");
+        ACL_LOG_INNER_ERROR("[Check][AclDumpFlag]aclmdlInitDump is not support because already execute "
+            "aclInit init dump");
         return ACL_ERROR_DUMP_ALREADY_RUN;
     }
 
@@ -527,7 +523,8 @@ aclError aclmdlFinalizeDump()
     ACL_LOG_INFO("start to execute aclmdlFinalizeDump.");
     ACL_STAGES_REG(acl::ACL_STAGE_DUMP, acl::ACL_STAGE_DEFAULT);
     if (!GetAclInitFlag()) {
-        ACL_LOG_INNER_ERROR("[Check][AclInitFlag]aclmdlFinalizeDump is not support because it does not execute aclInit");
+        ACL_LOG_INNER_ERROR("[Check][AclInitFlag]aclmdlFinalizeDump is not support because it does not "
+            "execute aclInit");
         return ACL_ERROR_UNINITIALIZE;
     }
 

@@ -2263,7 +2263,8 @@ aclError aclvdecSetChannelDescEnType(aclvdecChannelDesc *channelDesc, acldvppStr
 
     if (enType < H265_MAIN_LEVEL) {
         ACL_LOG_ERROR("unsupported enType, enType = %u", enType);
-        std::string errMsg = acl::AclErrorLogManager::FormatStr("cannot less than %d", static_cast<int32_t>(H265_MAIN_LEVEL));
+        std::string errMsg = acl::AclErrorLogManager::FormatStr("cannot less than %d",
+        static_cast<int32_t>(H265_MAIN_LEVEL));
         const char *argList[] = {"feature", "reason"};
         const char *argVal[] = {"enType", errMsg.c_str()};
         acl::AclErrorLogManager::ReportInputErrorWithChar(acl::UNSUPPORTED_FEATURE_MSG,

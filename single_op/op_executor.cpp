@@ -254,7 +254,8 @@ aclError OpExecutor::ExecuteAsync(const AclOp &aclOp,
 
     if (!aclOp.isMatched) {
         ACL_REQUIRES_OK(OpModelManager::GetInstance().MatchOpModel(aclOp, opModel, isDynamic));
-        ACL_LOG_DEBUG("match opModel success, opType = %s, isDynamic = %d", aclOp.opType.c_str(), static_cast<int32_t>(isDynamic));
+        ACL_LOG_DEBUG("match opModel success, opType = %s, isDynamic = %d", aclOp.opType.c_str(),
+            static_cast<int32_t>(isDynamic));
     } else {
         opModel = aclOp.opModel;
         isDynamic = aclOp.isDynamic;
@@ -381,7 +382,8 @@ aclError OpExecutor::CreateOpHandle(const AclOp &aclOp, OpHandle **handle)
 
     if (handlePtr->kernelDesc == nullptr) {
         ACL_REQUIRES_OK(OpModelManager::GetInstance().MatchOpModel(aclOp, handlePtr->opModel, isDynamic));
-        ACL_LOG_INFO("Match opModel success, opType = %s, isDynamic = %d", aclOp.opType.c_str(), static_cast<int32_t>(isDynamic));
+        ACL_LOG_INFO("Match opModel success, opType = %s, isDynamic = %d", aclOp.opType.c_str(),
+            static_cast<int32_t>(isDynamic));
     }
     handlePtr->isDynamic = isDynamic;
     *handle = handlePtr.release();

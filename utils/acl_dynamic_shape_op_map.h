@@ -122,7 +122,7 @@ aclError AclShapeRangeMap<T>::Aging(T &agingT)
                     for (auto itRange = rangeMap.begin(); itRange != rangeMap.end(); ++itRange) {
                         const string rangeStr = itRange->first;
                         auto &opVec = itRange->second;
-                        for (int32_t i = 0; i < opVec.size(); ++i) {
+                        for (size_t i = 0; i < opVec.size(); ++i) {
                             if (opVec[i].second->timestamp < timestampMin) {
                                 timestampMin = opVec[i].second->timestamp;
                                 itTypeMin = itType;
@@ -231,7 +231,7 @@ aclError AclShapeRangeMap<T>::AddMemAndAging(std::vector<std::pair<aclopAttr, T>
 template<typename T>
 bool AclShapeRangeMap<T>::CheckValueRange(const AclOp &aclOp, T &entry)
 {
-    for (int32_t i = 0; i < entry->inputDescArr.size(); ++i) {
+    for (size_t i = 0; i < entry->inputDescArr.size(); ++i) {
         if ((entry->inputDescArr[i].IsHostMemTensor()) && (!entry->inputDescArr[i].valueRange.empty())) {
             ACL_LOG_INFO("the input [%d] needs to check value range", i);
             if (!attr_utils::ValueRangeCheck(entry->inputDescArr[i].valueRange,
@@ -241,7 +241,7 @@ bool AclShapeRangeMap<T>::CheckValueRange(const AclOp &aclOp, T &entry)
             }
         }
     }
-    for (int32_t i = 0; i < entry->outputDescArr.size(); ++i) {
+    for (size_t i = 0; i < entry->outputDescArr.size(); ++i) {
         if ((entry->outputDescArr[i].IsHostMemTensor()) && (!entry->outputDescArr[i].valueRange.empty())) {
             ACL_LOG_INFO("the output [%d] needs to check value range", i);
             if (!attr_utils::ValueRangeCheck(entry->outputDescArr[i].valueRange,

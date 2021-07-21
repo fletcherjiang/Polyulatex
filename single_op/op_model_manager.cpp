@@ -419,8 +419,7 @@ aclError OpModelManager::SetTensorConst(aclTensorDesc *desc, const aclDataBuffer
             length);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
-            std::vector<std::string>({"length of const hostMem",
-            std::to_string(length), "length < 0"}));
+            std::vector<std::string>({"length of const hostMem", std::to_string(length), "length < 0"}));
         return ACL_ERROR_INVALID_PARAM;
     }
     desc->isConst = true;

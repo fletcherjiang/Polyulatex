@@ -78,10 +78,9 @@ aclError OpKernelRegistry::Register(std::unique_ptr<OpKernelRegistration> &&regi
         registration->kernelName.c_str(), static_cast<uint32_t>(FUNC_MODE_NORMAL));
     if (rtRet != RT_ERROR_NONE) {
         rtDevBinaryUnRegister(binHandle);
-        ACL_LOG_CALL_ERROR("[Register][Dev]rtFunctionRegister failed. bin key = %s, kernel name = %s, runtime result = %d",
-                      registration->stubName.c_str(),
-                      registration->kernelName.c_str(),
-                      static_cast<int32_t>(rtRet));
+        ACL_LOG_CALL_ERROR("[Register][Dev]rtFunctionRegister failed. bin key = %s, kernel name = %s, "
+            "runtime result = %d", registration->stubName.c_str(), registration->kernelName.c_str(),
+            static_cast<int32_t>(rtRet));
         return ACL_GET_ERRCODE_RTS(rtRet);
     }
 
