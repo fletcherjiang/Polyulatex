@@ -256,6 +256,9 @@ TEST_F(UTEST_ACL_OpCompiler, SetCompileStrategyTest)
     OpCompileService service;
     service.creators_.clear();
     EXPECT_EQ(service.SetCompileStrategy(NATIVE_COMPILER, options), ACL_ERROR_COMPILER_NOT_REGISTERED);
+
+    CompileStrategy strategy = CompileStrategy(3);
+    EXPECT_EQ(service.SetCompileStrategy(strategy, options), ACL_ERROR_INVALID_PARAM);
 }
 
 TEST_F(UTEST_ACL_OpCompiler, aclSetCompileoptTest)
