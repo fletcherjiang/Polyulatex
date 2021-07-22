@@ -1727,9 +1727,8 @@ aclError acldvppGetChannelDescParam(const acldvppChannelDesc *channelDesc,
             argList, argVal, 3);
         return ACL_ERROR_INVALID_PARAM;
     }
-    return g_dvppGetParamFuncMap[paramType](channelDesc, length, paramRetSize, param);;
+    return g_dvppGetParamFuncMap[paramType](channelDesc, length, paramRetSize, param);
 }
-
 
 uint32_t aclvencGetChannelDescBufSize(const aclvencChannelDesc *channelDesc)
 {
@@ -2082,7 +2081,7 @@ aclError acldvppSetBorderConfigValue(acldvppBorderConfig *borderConfig, uint32_t
 aclError acldvppSetBorderConfigBorderType(acldvppBorderConfig *borderConfig, acldvppBorderType borderType)
 {
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(borderConfig);
-    borderConfig->dvppBorderConfig.borderType = static_cast<uint32_t>(borderType);;
+    borderConfig->dvppBorderConfig.borderType = static_cast<uint32_t>(borderType);
     return ACL_SUCCESS;
 }
 
