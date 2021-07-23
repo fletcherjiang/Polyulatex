@@ -2121,3 +2121,16 @@ TEST_F(DvppTest, aclvencV200_ValidateDvppResizeConfigTest)
     v200.ValidateDvppResizeConfig(config);
     acldvppDestroyResizeConfig(config);
 }
+
+TEST_F(DvppTest, acldvppGetChannelDescParamTest)
+{
+    acl::dvpp::ImageProcessorV200 v200(ACL_HOST);
+    const acldvppChannelDesc *channelDesc = acldvppCreateChannelDesc();
+    acldvppChannelDescParamType paramType = ACL_DVPP_CSC_MATRIX_UINT32;
+    size_t length = 1;
+    size_t paramRetSize = 1;
+    uint32_t temp = 1;
+    void *param = static_cast<void *>(&temp);
+    aclError ret = acldvppGetChannelDescParam(channelDesc, paramType, length, &paramRetSize, param);
+    EXPECT_EQ(ret, ACL_ERROR_FEATURE_UNSUPPORTED);
+}

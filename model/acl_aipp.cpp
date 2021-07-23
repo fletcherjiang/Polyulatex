@@ -153,7 +153,7 @@ struct Fp16Type {
             }
         }
 
-        if ((0x8FU >= eF) && (eF > 0x70U)) {
+        if ((eF <= 0x8FU) && (eF > 0x70U)) {
             // Regular case with no overflow or underflow
             eRet = static_cast<int16_t>(eF - 0x70U);
             needRound = IsRoundOne(static_cast<uint64_t>(mF), static_cast<uint16_t>(mLenDelta));

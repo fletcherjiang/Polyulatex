@@ -63,7 +63,8 @@ aclError AclProfilingManager::UnInit()
         return ACL_ERROR_PROFILING_FAILURE;
     }
 
-    int32_t result = reporterCallback_(static_cast<uint32_t>(MSPROF_MODULE_ACL), static_cast<uint32_t>(MSPROF_REPORTER_UNINIT), nullptr, 0);
+    int32_t result = reporterCallback_(static_cast<uint32_t>(MSPROF_MODULE_ACL),
+        static_cast<uint32_t>(MSPROF_REPORTER_UNINIT), nullptr, 0);
     if (result != MSPROF_ERROR_NONE) {
         ACL_LOG_CALL_ERROR("[Uninit][ProfEngine]Uninit profiling engine failed, result = %d", result);
         return ACL_ERROR_PROFILING_FAILURE;
@@ -83,7 +84,8 @@ aclError AclProfilingManager::ProfilingData(ReporterData &data)
     if (reporterCallback_ == nullptr) {
         return ACL_ERROR_PROFILING_FAILURE;
     } else {
-        if (reporterCallback_(static_cast<uint32_t>(MSPROF_MODULE_ACL), static_cast<uint32_t>(MSPROF_REPORTER_REPORT), &data, sizeof(ReporterData)) != 0) {
+        if (reporterCallback_(static_cast<uint32_t>(MSPROF_MODULE_ACL), static_cast<uint32_t>(MSPROF_REPORTER_REPORT),
+            &data, sizeof(ReporterData)) != 0) {
             return ACL_ERROR_PROFILING_FAILURE;
         }
     }
@@ -160,7 +162,8 @@ aclError AclProfilingManager::QueryHashValue(const char *funcName, int &deviceId
     return ACL_SUCCESS;
 }
 
-AclProfilingReporter::AclProfilingReporter(const char *funcName, MsprofAclApiType funcType) : funcName_(funcName), funcType_(funcType) 
+AclProfilingReporter::AclProfilingReporter(const char *funcName, MsprofAclApiType funcType) :
+    funcName_(funcName), funcType_(funcType) 
 {
     if (AclProfilingManager::GetInstance().AclProfilingIsRun()) {
         if (aclrtGetDevice(&deviceId_) != ACL_SUCCESS) {

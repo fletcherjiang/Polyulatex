@@ -54,8 +54,7 @@ aclError aclopCompile(const char *opType,
             static_cast<int32_t>(compileFlag));
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
-            std::vector<std::string>({"compile type", std::to_string(compileFlag),
-            "not in range"}));
+            std::vector<std::string>({"compile type", std::to_string(compileFlag), "not in range"}));
         return ACL_ERROR_API_NOT_SUPPORT;
     }
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(opType);

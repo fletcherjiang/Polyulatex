@@ -180,8 +180,7 @@ aclError aclopExecWithHandle(aclopHandle *handle,
         std::string errMsg = acl::AclErrorLogManager::FormatStr("input num mismatch: expect %d", opHandle.numInputs);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
-            std::vector<std::string>({"input num", std::to_string(numInputs),
-            errMsg}));
+            std::vector<std::string>({"input num", std::to_string(numInputs), errMsg}));
         return ACL_ERROR_OP_INPUT_NOT_MATCH;
     }
 
@@ -588,8 +587,7 @@ static aclError AddDataInput(aclTensorDesc *inputDesc,
         ACL_LOG_ERROR("[Check][TensorSize]tensorSize must be positive, tensorSize = %zu", tensorSize);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
-            std::vector<std::string>({"tensorSize", std::to_string(tensorSize),
-            "must be positive"}));
+            std::vector<std::string>({"tensorSize", std::to_string(tensorSize), "must be positive"}));
         return ACL_ERROR_INVALID_PARAM;
     }
     auto args = std::unique_ptr<uint8_t[]>(new(std::nothrow) uint8_t[tensorSize]);

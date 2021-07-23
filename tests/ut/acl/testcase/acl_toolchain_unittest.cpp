@@ -145,6 +145,9 @@ TEST_F(UTEST_ACL_toolchain, dumpParamTest)
     ret = aclmdlSetDump("../tests/ut/acl/json/testDump16.json");
     EXPECT_NE(ret, ACL_SUCCESS);
 
+    ret = aclmdlSetDump("../tests/ut/acl/json/testDump17.json");
+    EXPECT_NE(ret, ACL_SUCCESS);
+
     // aclInit dump
     ret = aclDump.HandleDumpConfig("../tests/ut/acl/json/dumpConfig.json");
     EXPECT_EQ(ret, ACL_SUCCESS);

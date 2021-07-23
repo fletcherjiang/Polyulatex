@@ -250,7 +250,8 @@ namespace acl {
             }
             valCpyRet = CopyDvppPicDescAsync(outputDesc, ACL_MEMCPY_HOST_TO_DEVICE, stream);
             if (valCpyRet != ACL_SUCCESS) {
-                ACL_LOG_INNER_ERROR("[Copy][PicDesc]copy equalize hist output pic desc failed, result = %d.", valCpyRet);
+                ACL_LOG_INNER_ERROR("[Copy][PicDesc]copy equalize hist output pic desc failed, result = %d.",
+                    valCpyRet);
                 return valCpyRet;
             }
         }

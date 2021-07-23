@@ -73,7 +73,8 @@ aclError aclmdlDestroyDesc(aclmdlDesc *modelDesc)
     return ACL_SUCCESS;
 }
 
-static aclError ParseBatchInfo(aclmdlDesc * const modelDesc, const int32_t dynamicType, const vector<vector<int64_t>> &batchInfo)
+static aclError ParseBatchInfo(aclmdlDesc * const modelDesc, const int32_t dynamicType,
+    const vector<vector<int64_t>> &batchInfo)
 {
     uint32_t modelId = modelDesc->modelId;
     if (dynamicType == static_cast<int32_t>(ge::DYNAMIC_DIMS)) { // dynamic dims, size can be [1, 4]
@@ -1408,10 +1409,9 @@ aclError aclmdlGetCurOutputDims(const aclmdlDesc *modelDesc, size_t idx, aclmdlI
                 aclRet, idx, modelId);
         }
         return aclRet;
-    }else {
+    } else {
         ;
     }
-
 
     size_t curGearIndex = 0U;
     std::vector<uint64_t> shapeInfo;
@@ -1936,7 +1936,7 @@ static const char *TransTensorNameToReal(const aclmdlDesc *modelDesc, const stri
                 return nullptr;
             }
             return modelDesc->outputDesc[idex].name.c_str();
-        } else{
+        } else {
             ;
         }
     }

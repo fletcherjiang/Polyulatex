@@ -41,7 +41,8 @@ namespace acl {
                                  const_cast<char *>(config.c_str()),
                                  static_cast<uint32_t>(config.size()));
                 if (ret != MSPROF_ERROR_NONE) {
-                    ACL_LOG_CALL_ERROR("[Init][Profiling]handle json config of profiling failed, profiling result = %d", ret);
+                    ACL_LOG_CALL_ERROR("[Init][Profiling]handle json config of profiling failed, profiling "
+                        "result = %d", ret);
                     return ACL_ERROR_INVALID_PARAM;
                 }
             } else {
@@ -49,7 +50,8 @@ namespace acl {
                                  const_cast<char *>(config.c_str()),
                                  static_cast<uint32_t>(config.size()));
                 if (ret != MSPROF_ERROR_NONE) {
-                    ACL_LOG_CALL_ERROR("[Init][Profiling]handle env config of profiling failed, profiling result = %d", ret);
+                    ACL_LOG_CALL_ERROR("[Init][Profiling]handle env config of profiling failed, profiling "
+                        "result = %d", ret);
                     return ACL_ERROR_INVALID_PARAM;
                 }
             }
@@ -195,7 +197,7 @@ aclError aclMsprofCtrlHandle(uint32_t dataType, void* data, uint32_t dataLen)
         if (ret != ACL_SUCCESS) {
             ACL_LOG_INNER_ERROR("[Process][ProfSwitch]failed to call aclProcessProfData, result is %u", ret);
             return ret;
-       }
+        }
     } else {
         ACL_LOG_WARN("get unsupported dataType %u while processing profiling data", dataType);
     }
