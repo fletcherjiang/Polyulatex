@@ -46,7 +46,8 @@ aclError AclProfilingManager::Init()
         return ACL_ERROR_PROFILING_FAILURE;
     }
 
-    int32_t result = reporterCallback_(static_cast<uint32_t>(MSPROF_MODULE_ACL), static_cast<uint32_t>(MSPROF_REPORTER_INIT), nullptr, 0);
+    int32_t result = reporterCallback_(static_cast<uint32_t>(MSPROF_MODULE_ACL),
+        static_cast<uint32_t>(MSPROF_REPORTER_INIT), nullptr, 0);
     if (result != 0) {
         ACL_LOG_INNER_ERROR("[Init][ProfEngine]init acl profiling engine failed, result = %d", result);
         return ACL_ERROR_PROFILING_FAILURE;
@@ -162,8 +163,9 @@ aclError AclProfilingManager::QueryHashValue(const char *funcName, int &deviceId
     return ACL_SUCCESS;
 }
 
-AclProfilingReporter::AclProfilingReporter(const char *funcName, MsprofAclApiType funcType) :
-    funcName_(funcName), funcType_(funcType) 
+AclProfilingReporter::AclProfilingReporter(const char *funcName, MsprofAclApiType funcType)
+    : funcName_(funcName),
+    funcType_(funcType)
 {
     if (AclProfilingManager::GetInstance().AclProfilingIsRun()) {
         if (aclrtGetDevice(&deviceId_) != ACL_SUCCESS) {
@@ -236,7 +238,7 @@ AclProfilingReporter::~AclProfilingReporter()
 
         mmPid_t pid = static_cast<mmPid_t>(mmGetPid());
         int32_t tid = mmGetTid();
-        //magic number is "5A5A" and tag is 0 for acl
+        // magic number is "5A5A" and tag is 0 for acl
         MsprofAclProfData profData{MSPROF_DATA_HEAD_MAGIC_NUM, 0};
         profData.apiType = static_cast<uint32_t>(funcType_);
         profData.apiHashValue = hashId;

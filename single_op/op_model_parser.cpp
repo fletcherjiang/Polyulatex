@@ -315,8 +315,8 @@ static aclError ParseConstTensor(const ge::GeTensorDesc &tensorDesc, aclTensorDe
         ACL_DELETE_ARRAY_AND_SET_NULL(constData);
         return ACL_ERROR_PARSE_MODEL;
     }
-    outputDesc.constDataBuf.reset(constData, [](const char *ptr)
-        { delete[]ptr; ACL_LOG_DEBUG("delete const data in ParseConstTensor"); });
+    outputDesc.constDataBuf.reset(constData,
+        [](const char *ptr){ delete[]ptr; ACL_LOG_DEBUG("delete const data in ParseConstTensor"); });
 
     ACL_LOG_INFO("parse constDataLen is %zu", constDataLen);
     outputDesc.isConst = true;

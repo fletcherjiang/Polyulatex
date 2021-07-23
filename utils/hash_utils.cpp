@@ -12,7 +12,6 @@
 
 namespace acl {
 namespace hash_utils {
-
 // use aclTensorDesc to calculate a hash seed according to HashCombine function
 aclError GetTensorDescHash(const int32_t num, const aclTensorDesc *const descArr[], size_t &seed)
 {
@@ -71,6 +70,5 @@ aclError GetAclOpHash(const AclOp &aclOp, const size_t &attrDigest, size_t &seed
 
     return ACL_SUCCESS;
 }
-
-}
-}
+} // namespace hash_utils
+} // namespace acl

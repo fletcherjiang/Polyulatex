@@ -461,8 +461,8 @@ aclError aclmdlSetAIPPPaddingParams(aclmdlAIPP *aippParmsSet, int8_t paddingSwit
             "than or equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
         const std::string errMsg = acl::AclErrorLogManager::FormatStr("batch_index (%lu) is greater "
             "than or equal to batch_number (%lu)", batchIndex, aippBatchParaSize);
-        acl::AclErrorLogManager::ReportInputError(acl::INVALID_AIPP_MSG, std::vector<std::string>({"param",
-            "reason"}), std::vector<std::string>({"batch_index", errMsg}));
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_AIPP_MSG, std::vector<std::string>({"param", "reason"}),
+        std::vector<std::string>({"batch_index", errMsg}));
         return ACL_ERROR_INVALID_PARAM;
     }
     ACL_CHECK_RANGE_INT(paddingSwitch, AIPP_SWITCH_OFF, AIPP_SWITCH_ON);

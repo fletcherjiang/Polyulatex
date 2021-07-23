@@ -194,7 +194,7 @@ template<>
 void ListAttrToStringForDigest<string>(std::string &buffer, const ge::GeAttrValue &attrVal)
 {
     std::vector<string> values;
-    (void)attrVal.GetValue<vector<string>>(values);
+    (void)(attrVal.GetValue<vector<string>>(values));
     for (const string &str : values) {
         (void)buffer.append(str);
         buffer.push_back(',');
@@ -305,8 +305,8 @@ bool AttrListValueEquals(const ge::GeAttrValue &lhs, const ge::GeAttrValue &rhs)
 {
     vector<T> lhsValue;
     vector<T> rhsValue;
-    (void)lhs.GetValue<vector<T>>(lhsValue);
-    (void)rhs.GetValue<vector<T>>(rhsValue);
+    (void)(lhs.GetValue<vector<T>>(lhsValue));
+    (void)(rhs.GetValue<vector<T>>(rhsValue));
     return lhsValue == rhsValue;
 }
 
