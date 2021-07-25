@@ -1289,6 +1289,9 @@ TEST_F(UTEST_ACL_Model, aclmdlSetInputAIPP)
     EXPECT_EQ(ret, ACL_SUCCESS);
     ret = aclmdlSetAIPPPaddingParams(aippDynamicSet, 1, 0, 0, 0, 0, 0);
     EXPECT_EQ(ret, ACL_SUCCESS);
+
+    ret = aclmdlSetAIPPPaddingParams(aippDynamicSet, 1, 0, 0, 0, 0, 10);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
     aclmdlDataset *dataset = aclmdlCreateDataset();
     aclDataBuffer *buffer = aclCreateDataBuffer((void*)0x1, 1);
     ret = aclmdlAddDatasetBuffer(dataset, buffer);

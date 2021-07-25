@@ -30,7 +30,8 @@ aclopCompileFunc OpKernelSelector::GetSelectFunc(const std::string &opType)
     return func;
 }
 
-aclError OpKernelSelector::InsertAclop2KernelDesc(const AclOp &aclOp, std::shared_ptr<OpKernelDesc> desc) {
+aclError OpKernelSelector::InsertAclop2KernelDesc(const AclOp &aclOp, std::shared_ptr<OpKernelDesc> desc)
+{
     ACL_LOG_DEBUG("start InsertAclop2KernelDesc");
     ACL_REQUIRES_NOT_NULL(desc);
     desc->opType = aclOp.opType;

@@ -568,7 +568,6 @@ static void AddOpDesc(aclTensorDesc *tensorDesc, ge::OpDescPtr &opDesc, bool isI
             (void)opDesc->AddInputDesc(geTensorDesc);
         } else {
             (void)opDesc->AddOutputDesc(geTensorDesc);
-
         }
     }
 }

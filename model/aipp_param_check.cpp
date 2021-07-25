@@ -489,4 +489,4 @@ uint64_t GetSrcImageSize(const aclmdlAIPP *aippParmsSet)
     ACL_LOG_INFO("Input SrcImageSize = %lu, cce_InputFormat = %d", size, static_cast<int32_t>(inputFormat));
     return size;
 }
-} // namspace al
+} // namespace acl

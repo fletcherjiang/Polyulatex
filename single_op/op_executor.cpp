@@ -121,7 +121,8 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
         }
         tensorDesc.SetOriginFormat(geOriginFormat);
         tensorDesc.SetDataType(geDataType);
-        (void)ge::AttrUtils::SetInt(tensorDesc, ge::ATTR_NAME_PLACEMENT, static_cast<int64_t>(aclOp.inputDesc[i]->memtype));
+        (void)ge::AttrUtils::SetInt(tensorDesc, ge::ATTR_NAME_PLACEMENT,
+            static_cast<int64_t>(aclOp.inputDesc[i]->memtype));
         inputDesc.emplace_back(std::move(tensorDesc));
 
         ge::DataBuffer buffer;
@@ -167,7 +168,8 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
 
         tensorDesc.SetOriginFormat(geOriginFormat);
         tensorDesc.SetDataType(geDataType);
-        (void)ge::AttrUtils::SetInt(tensorDesc, ge::ATTR_NAME_PLACEMENT, static_cast<int64_t>(aclOp.outputDesc[i]->memtype));
+        (void)ge::AttrUtils::SetInt(tensorDesc, ge::ATTR_NAME_PLACEMENT,
+            static_cast<int64_t>(aclOp.outputDesc[i]->memtype));
         outputDesc.emplace_back(std::move(tensorDesc));
 
         ge::DataBuffer buffer;
@@ -334,7 +336,7 @@ aclError OpExecutor::ExecuteAsync(OpHandle &opHandle,
         ge::SingleOp *singleOp = nullptr;
         {
             std::lock_guard<std::mutex> lk(opHandle.mutexForStatic);
-            auto it = opHandle.cachedOperators.find(stream);
+            auto it = cachedExecutors.find(stream);
             if (it != cachedExecutors.end()) {
                 singleOp = it->second;
             } else {
