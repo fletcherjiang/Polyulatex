@@ -40,10 +40,10 @@ namespace {
     const std::string ACL_DUMP_MODE = "dump_mode";
     const std::string ACL_DUMP_OP_SWITCH = "dump_op_switch";
     const std::string ACL_DUMP = "dump";
-    const int ADX_ERROR_NONE = 0;
-    const int MAX_IPV4_ADDRESS_LENGTH = 4;
-    const int MAX_DUMP_PATH_LENGTH = 512;
-    const int MAX_IPV4_ADDRESS_VALUE = 255;
+    const int32_t ADX_ERROR_NONE = 0;
+    const int32_t MAX_IPV4_ADDRESS_LENGTH = 4;
+    const int32_t MAX_DUMP_PATH_LENGTH = 512;
+    const int32_t MAX_IPV4_ADDRESS_VALUE = 255;
 }
 
 namespace acl {
@@ -137,13 +137,12 @@ namespace acl {
             acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
                 std::vector<std::string>({"param", "value", "reason"}),
                 std::vector<std::string>({"dump config", "", "dump_list field is null and "
-                "dump_op_switch is off in config"}));            
+                "dump_op_switch is off in config"}));
             return false;
         }
-
-        bool isValidDumpList = false;
         // if dump_op_switch is off and dump_list is not null but all field illegal, can't send dump config
         if (dumpOpSwitch == ACL_DUMP_STATUS_SWITCH_OFF) {
+            bool isValidDumpList = false;
             for (size_t i = 0; i < dumpList.size(); ++i) {
                 if (dumpList[i].modelName.empty()) {
                     continue;
@@ -173,8 +172,9 @@ namespace acl {
         const std::string pathWhiteList = "-=[];\\,./!@#$%^&*()_+{}:?";
         size_t len = dumpPath.length();
         for (size_t i = 0; i < len; ++i) {
-            if (!std::islower(dumpPath[i]) && !std::isupper(dumpPath[i]) && !std::isdigit(dumpPath[i]) &&
-                pathWhiteList.find(dumpPath[i]) == std::string::npos) {
+            int32_t tmpChar = static_cast<int32_t>(dumpPath[i]);
+            if ((std::islower(tmpChar) == 0) && (std::isupper(tmpChar) == 0) && (std::isdigit(tmpChar) == 0) &&
+                (pathWhiteList.find(dumpPath[i]) == std::string::npos)) {
                 ACL_LOG_ERROR("[Check][PathWhiteList]invalid dump_path [%s] in dump config at "
                     "location %zu", dumpPath.c_str(), i);
                 std::string errMsg = acl::AclErrorLogManager::FormatStr("dump config at location %zu", i);
@@ -196,7 +196,7 @@ namespace acl {
         size_t colonPos = config.dumpPath.find_first_of(":");
         if (colonPos != std::string::npos) {
             ACL_LOG_INFO("dump_path field contains ip address.");
-            if (colonPos + 1 == config.dumpPath.size()) {
+            if ((colonPos + 1) == config.dumpPath.size()) {
                 ACL_LOG_ERROR("[Check][colonPos]dump_path field is invalid");
                 acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
                     std::vector<std::string>({"param", "value", "reason"}),
@@ -208,7 +208,7 @@ namespace acl {
             std::vector<std::string> ipRet = Split(ipAddress, ".");
             if (ipRet.size() == MAX_IPV4_ADDRESS_LENGTH) {
                 for (auto ret : ipRet) {
-                    if (atoi(ret.c_str()) < 0 || atoi(ret.c_str()) > MAX_IPV4_ADDRESS_VALUE) {
+                    if ((atoi(ret.c_str()) < 0) || (atoi(ret.c_str())) > MAX_IPV4_ADDRESS_VALUE) {
                         ACL_LOG_WARN("ip address[%s] is invalid in dump_path field", ipAddress.c_str());
                         return false;
                     }
@@ -235,8 +235,7 @@ namespace acl {
                 "dump_path is larger than MAX_DUMP_PATH_LENGTH[%d]", MAX_DUMP_PATH_LENGTH);
             acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
                 std::vector<std::string>({"param", "value", "reason"}),
-                std::vector<std::string>({"dump_path",
-                std::to_string(config.dumpPath.length()), errMsg}));
+                std::vector<std::string>({"dump_path", std::to_string(config.dumpPath.length()), errMsg}));
             return false;
         }
 
@@ -249,8 +248,7 @@ namespace acl {
                     config.dumpPath.c_str());
                 acl::AclErrorLogManager::ReportInputError(acl::INVALID_PATH_MSG,
                     std::vector<std::string>({"path", "reason"}),
-                    std::vector<std::string>({"dump_path",
-                    "is invalid directory"}));
+                    std::vector<std::string>({"dump_path", "is invalid directory"}));
                 return false;
             }
         } else {
@@ -262,12 +260,11 @@ namespace acl {
                     "mmRealPath return %d", config.dumpPath.c_str(), ret);
                 acl::AclErrorLogManager::ReportInputError(acl::INVALID_PATH_MSG,
                     std::vector<std::string>({"path", "reason"}),
-                    std::vector<std::string>({config.dumpPath,
-                    "cannot convert to realpath"}));
+                    std::vector<std::string>({config.dumpPath, "cannot convert to realpath"}));
                 return false;
             }
-
-            if (mmAccess2(trustedPath, M_R_OK | M_W_OK) != EN_OK) {
+            uint32_t accessMode = static_cast<uint32_t>(M_R_OK) | static_cast<uint32_t>(M_W_OK);
+            if (mmAccess2(trustedPath, static_cast<INT32>(accessMode)) != EN_OK) {
                 ACL_LOG_ERROR("[Check][Permisssion]the dump result path[%s] does't have read and "
                     "write permisssion", trustedPath);
                 acl::AclErrorLogManager::ReportInputError(acl::INVALID_PATH_MSG,
@@ -300,8 +297,7 @@ namespace acl {
                 "is not exist");
             acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
                 std::vector<std::string>({"param", "value", "reason"}),
-                std::vector<std::string>({"dump_path or dump_list", "",
-                "field is not exist"}));
+                std::vector<std::string>({"dump_path or dump_list", "", "field is not exist"}));
             return false;
         }
 
@@ -330,8 +326,7 @@ namespace acl {
                 "input/output/all", dumpMode.c_str());
             acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
                 std::vector<std::string>({"param", "value", "reason"}),
-                std::vector<std::string>({"dump_mode", dumpMode,
-                "only supports input/output/all"}));
+                std::vector<std::string>({"dump_mode", dumpMode, "only supports input/output/all"}));
             return false;
         }
 
@@ -344,9 +339,9 @@ namespace acl {
         return true;
     }
 
-    aclError ConvertDumpConfig(const nlohmann::json &js, ge::DumpConfig &dumpConfig)
+    aclError ConvertDumpCfg(const nlohmann::json &js, ge::DumpConfig &dumpConfig)
     {
-        ACL_LOG_INFO("start to execute ConvertDumpConfig.");
+        ACL_LOG_INFO("start to execute ConvertDumpCfg.");
         if (!IsValidDumpConfig(js)) {
             ACL_LOG_INNER_ERROR("[Check][DumpConfig]dump config is invalid");
             return ACL_ERROR_INVALID_DUMP_CONFIG;
@@ -370,8 +365,8 @@ namespace acl {
                 continue;
             }
             modelDumpConfig.model_name = config.dumpList[i].modelName;
-            for (size_t index = 0; index < config.dumpList[i].layer.size(); ++index) {
-                modelDumpConfig.layers.emplace_back(config.dumpList[i].layer[index]);
+            for (size_t idx = 0; idx < config.dumpList[i].layer.size(); ++idx) {
+                modelDumpConfig.layers.emplace_back(config.dumpList[i].layer[idx]);
             }
             dumpConfig.dump_list.emplace_back(modelDumpConfig);
         }
@@ -388,7 +383,7 @@ namespace acl {
         ACL_LOG_INFO("start to execute HandleDumpCommand.");
         ge::GeExecutor geExecutor;
         nlohmann::json js;
-        int adxRet = AdxDataDumpServerInit();
+        int32_t adxRet = AdxDataDumpServerInit();
         if (adxRet != ADX_ERROR_NONE) {
             ACL_LOG_INNER_ERROR("[AdxDataDumpServer][Init]dump server run failed, adx result = %d", adxRet);
             return ACL_ERROR_INTERNAL_ERROR;
@@ -409,8 +404,7 @@ namespace acl {
     {
         ACL_LOG_INFO("start to execute HandleDumpConfig.");
         nlohmann::json js;
-        acl::JsonParser jsonParser;
-        aclError ret = jsonParser.ParseJsonFromFile(configPath, js, nullptr, nullptr);
+        aclError ret = acl::JsonParser::ParseJsonFromFile(configPath, js, nullptr, nullptr);
         if (ret != ACL_SUCCESS) {
             ACL_LOG_INNER_ERROR("[Parse][JsonFromFile]parse dump config from file[%s] failed, result = %d",
                 configPath, ret);
@@ -419,7 +413,7 @@ namespace acl {
         try {
             if (js.find(ACL_DUMP) != js.end()) {
                 ge::DumpConfig dumpConfig;
-                ret = acl::ConvertDumpConfig(js, dumpConfig);
+                ret = acl::ConvertDumpCfg(js, dumpConfig);
                 if (ret != ACL_SUCCESS) {
                     ACL_LOG_INNER_ERROR("[Convert][DumpConfig]convert to ge dump config file failed, "
                         "result = %d", ret);
@@ -449,7 +443,8 @@ aclError aclmdlInitDump()
     }
 
     if (acl::AclDump::GetInstance().GetAclDumpFlag()) {
-        ACL_LOG_INNER_ERROR("[Check][AclDumpFlag]aclmdlInitDump is not support because already execute aclInit init dump");
+        ACL_LOG_INNER_ERROR("[Check][AclDumpFlag]aclmdlInitDump is not support because already execute "
+            "aclInit init dump");
         return ACL_ERROR_DUMP_ALREADY_RUN;
     }
 
@@ -460,7 +455,7 @@ aclError aclmdlInitDump()
         return ACL_ERROR_REPEAT_INITIALIZE;
     }
 
-    int adxRet = AdxDataDumpServerInit();
+    int32_t adxRet = AdxDataDumpServerInit();
     if (adxRet != ADX_ERROR_NONE) {
         ACL_LOG_CALL_ERROR("[AdxDataDumpServer][Init]dump server run failed, adx result = %d", adxRet);
         return ACL_ERROR_INTERNAL_ERROR;
@@ -495,8 +490,7 @@ aclError aclmdlSetDump(const char *dumpCfgPath)
     ge::GeExecutor geExecutor;
     nlohmann::json js;
     ge::DumpConfig dumpConfig;
-    acl::JsonParser jsonParser;
-    aclError ret = jsonParser.ParseJsonFromFile(dumpCfgPath, js, nullptr, nullptr);
+    aclError ret = acl::JsonParser::ParseJsonFromFile(dumpCfgPath, js, nullptr, nullptr);
     if (ret != ACL_SUCCESS) {
         ACL_LOG_INNER_ERROR("[Parse][JsonFromFile]parse dump config from file[%s] failed, result = %d",
             dumpCfgPath, ret);
@@ -504,7 +498,7 @@ aclError aclmdlSetDump(const char *dumpCfgPath)
     }
 
     try {
-        ret = acl::ConvertDumpConfig(js, dumpConfig);
+        ret = acl::ConvertDumpCfg(js, dumpConfig);
         if (ret != ACL_SUCCESS) {
             ACL_LOG_INNER_ERROR("[Convert][DumpConfig]convert to ge dump config file failed, result = %d", ret);
             return ACL_ERROR_INVALID_DUMP_CONFIG;
@@ -529,7 +523,8 @@ aclError aclmdlFinalizeDump()
     ACL_LOG_INFO("start to execute aclmdlFinalizeDump.");
     ACL_STAGES_REG(acl::ACL_STAGE_DUMP, acl::ACL_STAGE_DEFAULT);
     if (!GetAclInitFlag()) {
-        ACL_LOG_INNER_ERROR("[Check][AclInitFlag]aclmdlFinalizeDump is not support because it does not execute aclInit");
+        ACL_LOG_INNER_ERROR("[Check][AclInitFlag]aclmdlFinalizeDump is not support because it does not "
+            "execute aclInit");
         return ACL_ERROR_UNINITIALIZE;
     }
 
@@ -552,7 +547,7 @@ aclError aclmdlFinalizeDump()
         }
 
         // interrupt dump server
-        int adxRet = AdxDataDumpServerUnInit();
+        int32_t adxRet = AdxDataDumpServerUnInit();
         if (adxRet != ADX_ERROR_NONE) {
             ACL_LOG_CALL_ERROR("[AdxDataDumpServer][UnInit]generate dump file failed in disk, adx result = %d", adxRet);
             return ACL_ERROR_INTERNAL_ERROR;

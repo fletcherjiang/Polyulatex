@@ -136,11 +136,11 @@ static aclError UpdateTensorAttrs(std::vector<aclTensorDesc> &tensorDescs,
             tensorNum, tensorDescs.size());
         return ACL_ERROR_PARSE_MODEL;
     }
+    size_t idx = 0;
     for (size_t i = 0u; i < tensorSupportAttrs.size(); ++i) {
         ge::GeAttrValue::NAMED_ATTRS supportAttr = tensorSupportAttrs[i];
         ge::GeAttrValue::LIST_NAMED_ATTRS tensorAttrs;
         (void)ge::AttrUtils::GetListNamedAttrs(supportAttr, "tensor", tensorAttrs);
-        size_t idx = 0;
         for (size_t k = 0; k < tensorAttrs.size(); ++k) {
             ge::GeAttrValue::NAMED_ATTRS tensorAttr = tensorAttrs[k];
 
@@ -315,8 +315,8 @@ static aclError ParseConstTensor(const ge::GeTensorDesc &tensorDesc, aclTensorDe
         ACL_DELETE_ARRAY_AND_SET_NULL(constData);
         return ACL_ERROR_PARSE_MODEL;
     }
-    outputDesc.constDataBuf.reset(constData, [](const char *ptr)
-        { delete[]ptr; ACL_LOG_DEBUG("delete const data in ParseConstTensor"); });
+    outputDesc.constDataBuf.reset(constData,
+        [](const char *ptr){ delete[]ptr; ACL_LOG_DEBUG("delete const data in ParseConstTensor"); });
 
     ACL_LOG_INFO("parse constDataLen is %zu", constDataLen);
     outputDesc.isConst = true;

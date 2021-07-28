@@ -103,7 +103,7 @@ namespace {
                 valueSize, sizeof(void *));
             return ACL_ERROR_INVALID_PARAM;
         }
-        void *val = *static_cast<void **>(const_cast<void *>(attrValue));
+        void *val = *static_cast<void * const *>(attrValue);
         ACL_REQUIRES_NOT_NULL(val);
         ACL_LOG_INFO("successfully execute CheckMdlLoadPtrAttrEx");
         return ACL_SUCCESS;

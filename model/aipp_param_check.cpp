@@ -12,14 +12,15 @@
 #include "utils/math_utils.h"
 
 namespace {
-    constexpr uint32_t TWO_CHANNEL = 2;
-    constexpr uint32_t THREE_CHANNEL = 3;
-    constexpr uint32_t FOUR_CHANNEL = 4;
-    constexpr uint32_t MULTIPLE = 16;
+    constexpr uint32_t TWO_CHANNEL = 2U;
+    constexpr uint32_t THREE_CHANNEL = 3U;
+    constexpr uint32_t FOUR_CHANNEL = 4U;
+    constexpr uint32_t MULTIPLE = 16U;
     std::set<std::string> socVersionForLhisi = {"Hi3796CV300ES", "Hi3796CV300CS", "SD3403"};
 }
 
-aclError AippInputFormatCheck(enum CceAippInputFormat inputFormat, std::string socVersion)
+namespace acl {
+static aclError AippInputFormatCheck(enum CceAippInputFormat inputFormat, const std::string &socVersion)
 {
     bool flag = false;
     if (inputFormat < CCE_YUV420SP_U8) {
@@ -60,8 +61,8 @@ aclError AippInputFormatCheck(enum CceAippInputFormat inputFormat, std::string s
     return ACL_SUCCESS;
 }
 
-aclError AippSrcImageSizeCheck(enum CceAippInputFormat inputFormat,
-                               int32_t srcImageSizeW, int32_t srcImageSizeH, std::string socVersion)
+static aclError AippSrcImageSizeCheck(enum CceAippInputFormat inputFormat,
+                                      int32_t srcImageSizeW, int32_t srcImageSizeH, const std::string &socVersion)
 {
     bool flag = false;
     flag = ((srcImageSizeW == 0) || (srcImageSizeH == 0));
@@ -70,18 +71,20 @@ aclError AippSrcImageSizeCheck(enum CceAippInputFormat inputFormat,
         return ACL_ERROR_INVALID_PARAM;
     }
 
-    flag = ((inputFormat == CCE_YUV422SP_U8) || (inputFormat == CCE_YUYV_U8));
     if (inputFormat == CCE_YUV420SP_U8) {
         // determine whether it is even
-        flag = ((srcImageSizeW % 2 != 0) || (srcImageSizeH % 2 != 0));
+        flag = (((srcImageSizeW % 2) != 0) || ((srcImageSizeH % 2) != 0));
         if (flag) {
             ACL_LOG_INNER_ERROR("[Check][Params]srcImageSizeH[%d] and srcImageSizeW[%d] must be even for YUV420SP_U8!",
                 srcImageSizeH, srcImageSizeW);
             return ACL_ERROR_INVALID_PARAM;
         }
-    } else if (flag) {
+    }
+
+    flag = ((inputFormat == CCE_YUV422SP_U8) || (inputFormat == CCE_YUYV_U8));
+    if (flag) {
         // determine whether it is even
-        if (srcImageSizeW % 2 != 0) {
+        if ((srcImageSizeW % 2) != 0) {
             ACL_LOG_INNER_ERROR("[Check][Params]srcImageSizeW[%d] must be even for YUV422SP_U8 and YUYV_U8!",
                 srcImageSizeW);
             return ACL_ERROR_INVALID_PARAM;
@@ -103,7 +106,7 @@ aclError AippSrcImageSizeCheck(enum CceAippInputFormat inputFormat,
         flag = ((inputFormat == CCE_ARGB8888_U8) || (inputFormat == CCE_XRGB8888_U8) ||
             (inputFormat == CCE_AYUV444_U8));
         if (flag) {
-            if ((srcImageSizeW * static_cast<int32_t>(FOUR_CHANNEL)) % MULTIPLE != 0) {
+            if (((srcImageSizeW * static_cast<int32_t>(FOUR_CHANNEL)) % static_cast<int32_t>(MULTIPLE)) != 0) {
                 ACL_LOG_INNER_ERROR("[Check][Params]srcImageSizeW*4 must be multiples of 16!");
                 return ACL_ERROR_INVALID_PARAM;
             }
@@ -111,7 +114,7 @@ aclError AippSrcImageSizeCheck(enum CceAippInputFormat inputFormat,
 
         flag = (inputFormat == CCE_RGB888_U8);
         if (flag) {
-            if ((srcImageSizeW * static_cast<int32_t>(THREE_CHANNEL)) % static_cast<int32_t>(MULTIPLE) != 0) {
+            if (((srcImageSizeW * static_cast<int32_t>(THREE_CHANNEL)) % static_cast<int32_t>(MULTIPLE)) != 0) {
                 ACL_LOG_INNER_ERROR("[Check][Params]srcImageSizeW*3 must be multiples of 16!");
                 return ACL_ERROR_INVALID_PARAM;
             }
@@ -119,7 +122,7 @@ aclError AippSrcImageSizeCheck(enum CceAippInputFormat inputFormat,
 
         flag = (inputFormat == CCE_YUYV_U8);
         if (flag) {
-            if ((srcImageSizeW * static_cast<int32_t>(TWO_CHANNEL)) % static_cast<int32_t>(MULTIPLE) != 0) {
+            if (((srcImageSizeW * static_cast<int32_t>(TWO_CHANNEL)) % static_cast<int32_t>(MULTIPLE)) != 0) {
                 ACL_LOG_INNER_ERROR("[Check][Params]srcImageSizeW*2 must be multiples of 16!");
                 return ACL_ERROR_INVALID_PARAM;
             }
@@ -129,9 +132,9 @@ aclError AippSrcImageSizeCheck(enum CceAippInputFormat inputFormat,
     return ACL_SUCCESS;
 }
 
-aclError AippScfSizeCheck(const aclmdlAIPP *aippParmsSet, int32_t batchIndex)
+aclError AippScfSizeCheck(const aclmdlAIPP *aippParmsSet, size_t batchIndex)
 {
-    if (aippParmsSet->aippBatchPara.size() == 0) {
+    if (aippParmsSet->aippBatchPara.empty()) {
         ACL_LOG_INNER_ERROR("[Check][Params]the size of aippBatchPara can't be zero");
         return ACL_ERROR_INVALID_PARAM;
     }
@@ -195,17 +198,17 @@ aclError AippScfSizeCheck(const aclmdlAIPP *aippParmsSet, int32_t batchIndex)
         return ACL_ERROR_INVALID_PARAM;
     }
 
-    float scfRatio = (scfOutputSizeW * 1.0) / scfInputSizeW;
+    float scfRatio = (static_cast<float>(scfOutputSizeW) * 1.0f) / scfInputSizeW;
     // scf factor is within [1/16, 16]
-    flag = ((scfRatio < (1.0 / 16)) || (scfRatio > 16));
+    flag = ((scfRatio < (1.0f / 16.0f)) || (scfRatio > 16.0f));
     if (flag) {
         ACL_LOG_INNER_ERROR("[Check][Params]resize_output_w/resize_input_w[%f] should be within [1/16, 16]!", scfRatio);
         return ACL_ERROR_INVALID_PARAM;
     }
 
-    scfRatio = (scfOutputSizeH * 1.0) / scfInputSizeH;
+    scfRatio = (static_cast<float>(scfOutputSizeH) * 1.0f) / scfInputSizeH;
     // scf factor is within [1/16, 16]
-    flag = ((scfRatio < (1.0 / 16)) || (scfRatio > 16));
+    flag = ((scfRatio < (1.0f / 16.0f)) || (scfRatio > 16.0f));
     if (flag) {
         ACL_LOG_INNER_ERROR("[Check][Params]resize_output_h/resize_input_h[%f] should be within [1/16, 16]!", scfRatio);
         return ACL_ERROR_INVALID_PARAM;
@@ -214,9 +217,9 @@ aclError AippScfSizeCheck(const aclmdlAIPP *aippParmsSet, int32_t batchIndex)
     return ACL_SUCCESS;
 }
 
-aclError AippCropSizeCheck(const aclmdlAIPP *aippParmsSet, std::string &socVersion, int32_t batchIndex)
+static aclError AippCropSizeCheck(const aclmdlAIPP *aippParmsSet, const std::string &socVersion, size_t batchIndex)
 {
-    if (aippParmsSet->aippBatchPara.size() == 0) {
+    if (aippParmsSet->aippBatchPara.empty()) {
         ACL_LOG_INNER_ERROR("[Check][Params]the size of aippBatchPara can't be zero");
         return ACL_ERROR_INVALID_PARAM;
     }
@@ -229,44 +232,45 @@ aclError AippCropSizeCheck(const aclmdlAIPP *aippParmsSet, std::string &socVersi
     int32_t cropSizeW = aippParmsSet->aippBatchPara[batchIndex].cropSizeW;
     int32_t cropSizeH = aippParmsSet->aippBatchPara[batchIndex].cropSizeH;
 
-    if (cropStartPosW + cropSizeW > srcImageSizeW) {
+    if ((cropStartPosW + cropSizeW) > srcImageSizeW) {
         ACL_LOG_INNER_ERROR("[Check][Params]the sum of cropStartPosW[%d] and cropSizeW[%d] is larger than "
             "srcImageSizeW[%d]", cropStartPosW, cropSizeW, srcImageSizeW);
         return ACL_ERROR_INVALID_PARAM;
     }
 
-    if (cropStartPosH + cropSizeH > srcImageSizeH) {
+    if ((cropStartPosH + cropSizeH) > srcImageSizeH) {
         ACL_LOG_INNER_ERROR("[Check][Params]the sum of cropStartPosH[%d] and cropSizeH[%d] is "
             "larger than or equal to srcImageSizeH[%d]", cropStartPosH, cropSizeH, srcImageSizeH);
         return ACL_ERROR_INVALID_PARAM;
     }
 
-    enum CceAippInputFormat inputFormat = (enum CceAippInputFormat)aippParmsSet->aippParms.inputFormat;
+    enum CceAippInputFormat inputFormat = static_cast<enum CceAippInputFormat>(aippParmsSet->aippParms.inputFormat);
     bool flag = false;
     bool isLhisi = (socVersionForLhisi.find(socVersion) != socVersionForLhisi.end());
     if (inputFormat == CCE_YUV420SP_U8) {
         // determine whether it is even
-        flag = ((cropStartPosW % 2 != 0) || (cropStartPosH % 2 != 0));
+        flag = (((cropStartPosW % 2) != 0) || ((cropStartPosH % 2) != 0));
         if (flag) {
             ACL_LOG_INNER_ERROR("[Check][Params]cropStartPosW[%d], cropStartPosH[%d] must be even for YUV420SP_U8!",
                 cropStartPosW, cropStartPosH);
             return ACL_ERROR_INVALID_PARAM;
         }
-        flag = isLhisi && ((cropSizeW % 2 != 0) || (cropSizeH % 2 != 0));
+        flag = isLhisi && (((cropSizeW % 2) != 0) || ((cropSizeH % 2) != 0));
         if (flag) {
             ACL_LOG_INNER_ERROR("[Check][Params]cropSizeW[%d] and cropSizeH[%d] must be even for YUV420SP_U8!",
                 cropSizeW, cropSizeH);
             return ACL_ERROR_INVALID_PARAM;
         }
-    } else if ((inputFormat == CCE_YUV422SP_U8) || (inputFormat == CCE_YUYV_U8)) {
+    }
+    if ((inputFormat == CCE_YUV422SP_U8) || (inputFormat == CCE_YUYV_U8)) {
         // determine whether it is even
-        flag = (cropStartPosW % 2 != 0);
+        flag = ((cropStartPosW % 2) != 0);
         if (flag) {
             ACL_LOG_INNER_ERROR("[Check][Params]cropStartPosW[%d] must be even for YUV422SP_U8 and YUYV_U8!",
                 cropStartPosW);
             return ACL_ERROR_INVALID_PARAM;
         }
-        flag = isLhisi && (cropSizeW % 2 != 0);
+        flag = isLhisi && ((cropSizeW % 2) != 0);
         if (flag) {
             ACL_LOG_INNER_ERROR("[Check][Params]cropSizeW[%d] must be even for YUV422SP_U8 and YUYV_U8!", cropSizeW);
             return ACL_ERROR_INVALID_PARAM;
@@ -277,10 +281,10 @@ aclError AippCropSizeCheck(const aclmdlAIPP *aippParmsSet, std::string &socVersi
 }
 
 
-aclError GetAippOutputHW(const aclmdlAIPP *aippParmsSet, int32_t batchIndex, std::string socVersion,
+aclError GetAippOutputHW(const aclmdlAIPP *aippParmsSet, size_t batchIndex, const std::string &socVersion,
                          int32_t &aippOutputW, int32_t &aippOutputH)
 {
-    if (aippParmsSet->aippBatchPara.size() == 0) {
+    if (aippParmsSet->aippBatchPara.empty()) {
         ACL_LOG_INNER_ERROR("[Check][Params]aippParmsSet->aippBatchPara is empty!");
         return ACL_ERROR_INVALID_PARAM;
     }
@@ -302,9 +306,6 @@ aclError GetAippOutputHW(const aclmdlAIPP *aippParmsSet, int32_t batchIndex, std
     int32_t paddingSizeLeft = aippParmsSet->aippBatchPara[batchIndex].paddingSizeLeft;
     int32_t paddingSizeRight = aippParmsSet->aippBatchPara[batchIndex].paddingSizeRight;
 
-    aippOutputW = srcImageSizeW;
-    aippOutputH = srcImageSizeH;
-
     if (cropSwitch == 1) {
         aippOutputW = cropSizeW;
         aippOutputH = cropSizeH;
@@ -316,6 +317,9 @@ aclError GetAippOutputHW(const aclmdlAIPP *aippParmsSet, int32_t batchIndex, std
     } else if (scfSwitch == 1) {
         aippOutputW = scfOutputSizeW;
         aippOutputH = scfOutputSizeH;
+    } else {
+        aippOutputW = srcImageSizeW;
+        aippOutputH = srcImageSizeH;
     }
 
     if (paddingSwitch == 1) {
@@ -335,13 +339,15 @@ aclError GetAippOutputHW(const aclmdlAIPP *aippParmsSet, int32_t batchIndex, std
                     "4096 for Hi3796CV300ES, Hi3796CV300CS, SD3403", aippOutputW);
                 return ACL_ERROR_INVALID_PARAM;
             }
+        } else {
+            ACL_LOG_INFO("no need to check aipp output width.");
         }
     }
 
     return ACL_SUCCESS;
 }
 
-static aclError AippDynamicBatchParaCheck(const aclmdlAIPP *aippParmsSet, std::string socVersion)
+static aclError AippDynamicBatchParaCheck(const aclmdlAIPP *aippParmsSet, const std::string &socVersion)
 {
     int8_t scfSwitch = 0;
     int8_t cropSwitch = 0;
@@ -366,7 +372,7 @@ static aclError AippDynamicBatchParaCheck(const aclmdlAIPP *aippParmsSet, std::s
                 return ACL_ERROR_INVALID_PARAM;
             }
 
-            result = AippScfSizeCheck(aippParmsSet, static_cast<int32_t>(i));
+            result = AippScfSizeCheck(aippParmsSet, static_cast<size_t>(i));
             if (result != ACL_SUCCESS) {
                 return result;
             }
@@ -374,20 +380,20 @@ static aclError AippDynamicBatchParaCheck(const aclmdlAIPP *aippParmsSet, std::s
 
         cropSwitch = aippParmsSet->aippBatchPara[i].cropSwitch;
         if (cropSwitch == 1) {
-            result = AippCropSizeCheck(aippParmsSet, socVersion, static_cast<int32_t>(i));
+            result = AippCropSizeCheck(aippParmsSet, socVersion, static_cast<size_t>(i));
             if (result != ACL_SUCCESS) {
                 return result;
             }
         }
 
-        result = GetAippOutputHW(aippParmsSet, static_cast<int32_t>(i), socVersion, aippBatchOutputW, aippBatchOutputH);
+        result = GetAippOutputHW(aippParmsSet, static_cast<size_t>(i), socVersion, aippBatchOutputW, aippBatchOutputH);
         if (result != ACL_SUCCESS) {
             return result;
         }
 
         flag = ((aippBatchOutputW != aippFirstOutputW) || (aippBatchOutputH != aippFirstOutputH));
         if (flag) {
-            ACL_LOG_INNER_ERROR("[Check][Params]the %d batch output size must be equal to the first "
+            ACL_LOG_INNER_ERROR("[Check][Params]the %lu batch output size must be equal to the first "
                 "batch aipp output size! aippBatchOutputW = %d, aippBatchOutputH = %d, aippFirstOutputW = %d, "
                 "aippFirstOutputH = %d.", (i + 1), aippBatchOutputW, aippBatchOutputH, aippFirstOutputW,
                 aippFirstOutputH);
@@ -398,12 +404,12 @@ static aclError AippDynamicBatchParaCheck(const aclmdlAIPP *aippParmsSet, std::s
     return ACL_SUCCESS;
 }
 
-aclError AippParamsCheck(const aclmdlAIPP *aippParmsSet, std::string socVersion)
+aclError AippParamsCheck(const aclmdlAIPP *aippParmsSet, const std::string &socVersion)
 {
     ACL_LOG_INFO("start to execute aclAippParamsCheck");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(aippParmsSet);
 
-    enum CceAippInputFormat inputFormat = (enum CceAippInputFormat)aippParmsSet->aippParms.inputFormat;
+    enum CceAippInputFormat inputFormat = static_cast<enum CceAippInputFormat>(aippParmsSet->aippParms.inputFormat);
     aclError result = AippInputFormatCheck(inputFormat, socVersion);
     if (result != ACL_SUCCESS) {
         return result;
@@ -441,9 +447,9 @@ uint64_t GetSrcImageSize(const aclmdlAIPP *aippParmsSet)
 {
     ACL_REQUIRES_NOT_NULL(aippParmsSet);
 
-    enum CceAippInputFormat inputFormat = (enum CceAippInputFormat)aippParmsSet->aippParms.inputFormat;
-    uint64_t srcImageSizeW = (uint64_t)aippParmsSet->aippParms.srcImageSizeW;
-    uint64_t srcImageSizeH = (uint64_t)aippParmsSet->aippParms.srcImageSizeH;
+    enum CceAippInputFormat inputFormat = static_cast<enum CceAippInputFormat>(aippParmsSet->aippParms.inputFormat);
+    uint64_t srcImageSizeW = static_cast<uint64_t>(aippParmsSet->aippParms.srcImageSizeW);
+    uint64_t srcImageSizeH = static_cast<uint64_t>(aippParmsSet->aippParms.srcImageSizeH);
     uint64_t batch = aippParmsSet->batchSize;
     uint64_t size = 0;
 
@@ -476,13 +482,11 @@ uint64_t GetSrcImageSize(const aclmdlAIPP *aippParmsSet)
     } else if (inputFormat == CCE_RAW24) {
         // RAW24, one pixel use uint32, 4 bytes
         ACL_CHECK_ASSIGN_SIZET_MULTI_RET_NUM(batch, srcImageSizeH * srcImageSizeW * 4, size);
+    } else {
+        ACL_LOG_INFO("no need to check assign size.");
     }
 
     ACL_LOG_INFO("Input SrcImageSize = %lu, cce_InputFormat = %d", size, static_cast<int32_t>(inputFormat));
     return size;
 }
-
-
-
-
-
+} // namespace acl

@@ -1,7 +1,7 @@
 /**
 * @file queue_processor_host.h
 *
-* Copyright (C) Huawei Technologies Co., Ltd. 2019-2020. All Rights Reserved.
+* Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 *
 * This program is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -18,24 +18,20 @@ namespace acl {
 class QueueProcessorHost : public QueueProcessor
 {
 public:
-    aclError acltdtCreateQueue(const acltdtQueueAttr *attr, uint32_t *queueId);
+    aclError acltdtCreateQueue(const acltdtQueueAttr *attr, uint32_t *queueId) override;
 
-    aclError acltdtDestroyQueue(uint32_t queueId);
+    aclError acltdtDestroyQueue(uint32_t queueId) override;
 
-    aclError acltdtEnqueue(uint32_t queueId, acltdtBuf *buf, int32_t timeout);
+    aclError acltdtGrantQueue(uint32_t qid, int32_t pid, uint32_t permission, int32_t timeout) override;
 
-    aclError acltdtDequeue(uint32_t queueId, acltdtBuf **buf, int32_t timeout);
+    aclError acltdtAttachQueue(uint32_t queueId, int32_t timeout, uint32_t *flag) override;
 
-    aclError acltdtGrantQueue(uint32_t qid, int32_t pid, uint32_t permission, int32_t timeout);
+    aclError acltdtBindQueueRoutes(acltdtQueueRouteList *qRouteList) override;
 
-    aclError acltdtAttachQueue(uint32_t queueId, int32_t timeout, uint32_t *flag);
-
-    aclError acltdtBindQueueRoutes(acltdtQueueRouteList *qRouteList);
-
-    aclError acltdtUnbindQueueRoutes(acltdtQueueRouteList *qRouteList);
+    aclError acltdtUnbindQueueRoutes(acltdtQueueRouteList *qRouteList) override;
 
     aclError acltdtQueryQueueRoutes(const acltdtQueueRouteQueryInfo *queryInfo,
-                                                        acltdtQueueRouteList *qRouteList);
+                                    acltdtQueueRouteList *qRouteList) override;
 
 
     QueueProcessorHost() = default;

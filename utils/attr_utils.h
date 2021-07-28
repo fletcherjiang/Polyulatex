@@ -38,7 +38,7 @@ ACL_FUNC_VISIBILITY bool OpAttrEquals(const aclopAttr *const lhs, const aclopAtt
 ACL_FUNC_VISIBILITY uint64_t GetCurrentTimestamp();
 
 bool ValueRangeCheck(const std::map<AttrRangeType, ge::GeAttrValue> &valueRange,
-                     const aclDataBuffer *dataBuffer, aclDataType dataType);
+                     const aclDataBuffer *const dataBuffer, aclDataType dataType);
 
 bool SaveConstToAttr(OpModelDef& modelDef);
 

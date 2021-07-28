@@ -1,7 +1,7 @@
 /**
 * @file queue_manager.cpp
 *
-* Copyright (C) Huawei Technologies Co., Ltd. 2019-2020. All Rights Reserved.
+* Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 *
 * This program is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,10 +24,10 @@ namespace acl {
         return instance;
     }
 
-    aclError QueueManager::GetRunningEnv(RunEnv &runEnv)
+    aclError QueueManager::GetRunningEnv(RunEnv &runningEnv)
     {
         // get acl run mode
-        if (runEnv != ACL_ACL_ENV_UNKNOWN) {
+        if (runningEnv != ACL_ACL_ENV_UNKNOWN) {
             return ACL_SUCCESS;
         }
         aclrtRunMode aclRunMode;
@@ -37,16 +37,16 @@ namespace acl {
             return getRunModeRet;
         }
         if (aclRunMode == ACL_HOST) {
-            runEnv = ACL_ENV_HOST;
+            runningEnv = ACL_ENV_HOST;
         } else if (aclRunMode == ACL_DEVICE) {
             // get env config
             const char *sharePoolPreConfig = std::getenv("SHAREGROUP_PRECONFIG");
             if (sharePoolPreConfig == nullptr) {
                 ACL_LOG_INFO("This is not share group preconfig");
-                runEnv = ACL_ENV_DEVICE_CCPU;
+                runningEnv = ACL_ENV_DEVICE_CCPU;
             } else {
                 ACL_LOG_INFO("This is share group preconfig");
-                runEnv = ACL_ENV_DEVICE_MDC;
+                runningEnv = ACL_ENV_DEVICE_MDC;
             }
         } else {
             ACL_LOG_INNER_ERROR("[Get][RunMode]get run mode failed, result = %d.", getRunModeRet);
@@ -55,21 +55,21 @@ namespace acl {
         return ACL_SUCCESS;
     }
 
-    QueueProcessorPtr QueueManager::GetQueueProcessor()
+    QueueProcessor *QueueManager::GetQueueProcessor()
     {
         if (queueProcessProc_ != nullptr) {
-            return queueProcessProc_;
+            return queueProcessProc_.get();
         }
         try {
             switch(env_) {
                 case ACL_ENV_HOST:
-                    queueProcessProc_ = std::shared_ptr<QueueProcessorHost>(new (std::nothrow)QueueProcessorHost());
+                    queueProcessProc_ = std::unique_ptr<QueueProcessorHost>(new (std::nothrow)QueueProcessorHost());
                     break;
                 case ACL_ENV_DEVICE_MDC:
-                    queueProcessProc_ = std::shared_ptr<QueueProcessorMdc>(new (std::nothrow)QueueProcessorMdc());
+                    queueProcessProc_ = std::unique_ptr<QueueProcessorMdc>(new (std::nothrow)QueueProcessorMdc());
                     break;
                 case ACL_ENV_DEVICE_CCPU:
-                    queueProcessProc_ = std::shared_ptr<QueueProcessorCcpu>(new (std::nothrow)QueueProcessorCcpu());
+                    queueProcessProc_ = std::unique_ptr<QueueProcessorCcpu>(new (std::nothrow)QueueProcessorCcpu());
                     break;
                 default:
                     ACL_LOG_INNER_ERROR("[Check][Runenv]check runenv failed.");
@@ -79,6 +79,6 @@ namespace acl {
             ACL_LOG_INNER_ERROR("[Define][Object]define object queue processor with unique_ptr failed.");
             return nullptr;
         }
-        return queueProcessProc_;
+        return queueProcessProc_.get();
     }
 }

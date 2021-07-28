@@ -10,7 +10,7 @@
 
 #include "acl/acl_rt.h"
 
-#include <string.h>
+#include <cstring>
 #include "runtime/dev.h"
 #include "runtime/context.h"
 #include "framework/executor/ge_executor.h"
@@ -27,33 +27,33 @@
 namespace {
     std::map<int32_t, uint64_t> g_deviceCounterMap;
     std::mutex g_deviceCounterMutex;
-}
-static void IncDeviceCounter(int32_t deviceId)
-{
-    std::unique_lock<std::mutex> lk(g_deviceCounterMutex);
-    auto iter = g_deviceCounterMap.find(deviceId);
-    if (iter == g_deviceCounterMap.end()) {
-        g_deviceCounterMap[deviceId] = 1;
-    } else {
-        ++iter->second;
-    }
-}
-
-static bool DecDeviceCounter(int32_t deviceId)
-{
-    std::unique_lock<std::mutex> lk(g_deviceCounterMutex);
-    auto iter = g_deviceCounterMap.find(deviceId);
-    if (iter != g_deviceCounterMap.end()) {
-        if (iter->second != 0) {
-            --iter->second;
-            if (iter->second == 0) {
-                return true;
-            }
+    void IncDeviceCounter(const int32_t deviceId)
+    {
+        std::unique_lock<std::mutex> lk(g_deviceCounterMutex);
+        auto iter = g_deviceCounterMap.find(deviceId);
+        if (iter == g_deviceCounterMap.end()) {
+            g_deviceCounterMap[deviceId] = 1;
+        } else {
+            ++iter->second;
         }
-    } else {
-        ACL_LOG_INFO("device %d has not been set.", deviceId);
     }
-    return false;
+
+    bool DecDeviceCounter(const int32_t deviceId)
+    {
+        std::unique_lock<std::mutex> lk(g_deviceCounterMutex);
+        auto iter = g_deviceCounterMap.find(deviceId);
+        if (iter != g_deviceCounterMap.end()) {
+            if (iter->second != 0) {
+                --iter->second;
+                if (iter->second == 0) {
+                    return true;
+                }
+            }
+        } else {
+            ACL_LOG_INFO("device %d has not been set.", deviceId);
+        }
+        return false;
+    }
 }
 
 aclError aclrtSetDevice(int32_t deviceId)
@@ -124,7 +124,7 @@ aclError aclrtResetDeviceWithoutTsdVXX(int32_t deviceId)
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_SET_RESET_DEVICE);
     ACL_LOG_INFO("start to execute aclrtResetDeviceWithoutTsdVXX, deviceId = %d.", deviceId);
     std::string socVersion = GetSocVersion();
-    if (0 != strncmp(socVersion.c_str(), "Ascend910", strlen("Ascend910"))) {
+    if (strncmp(socVersion.c_str(), "Ascend910", strlen("Ascend910")) != 0) {
         ACL_LOG_INNER_ERROR("The soc version is not Ascend910, not support");
         return ACL_ERROR_API_NOT_SUPPORT;
     }

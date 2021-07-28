@@ -68,12 +68,12 @@ std::string AclShapeRangeMap<T>::TensorDescArr2Str(int num, const aclTensorDesc 
         return "";
     }
     string descStr;
-    descStr.append(std::to_string(num));
+    (void)descStr.append(std::to_string(num));
     descStr.push_back('~');
     for (int32_t i = 0; i < num; ++i) {
         ACL_REQUIRES_NOT_NULL_RET_STR(descArr[i]);
         ACL_LOG_DEBUG("TensorDescArr2Str::descArr[%d] addr = %p", i, descArr[i]);
-        descStr.append(descArr[i]->GetKey());
+        (void)descStr.append(descArr[i]->GetKey());
         descStr.push_back('|');
     }
     return descStr;
@@ -87,11 +87,11 @@ std::string AclShapeRangeMap<T>::ShapeRangeArr2Str(int num, const aclTensorDesc 
         return "";
     }
     string descStr;
-    descStr.append(std::to_string(num));
+    (void)descStr.append(std::to_string(num));
     descStr.push_back('~');
     for (int32_t i = 0; i < num; ++i) {
         ACL_REQUIRES_NOT_NULL_RET_STR(descArr[i]);
-        descStr.append(descArr[i]->GetShapeKey());
+        (void)descStr.append(descArr[i]->GetShapeKey());
         descStr.push_back('|');
     }
     return descStr;
@@ -122,7 +122,7 @@ aclError AclShapeRangeMap<T>::Aging(T &agingT)
                     for (auto itRange = rangeMap.begin(); itRange != rangeMap.end(); ++itRange) {
                         const string rangeStr = itRange->first;
                         auto &opVec = itRange->second;
-                        for (int32_t i = 0; i < opVec.size(); ++i) {
+                        for (size_t i = 0; i < opVec.size(); ++i) {
                             if (opVec[i].second->timestamp < timestampMin) {
                                 timestampMin = opVec[i].second->timestamp;
                                 itTypeMin = itType;
@@ -153,25 +153,25 @@ aclError AclShapeRangeMap<T>::Aging(T &agingT)
     }
     agingT = model_vec[idx].second;
     ACL_LOG_INFO("AclShapeRangeMap::Aging model in model map success, time stamp is %lu", agingT->timestamp);
-    model_vec.erase(model_vec.begin() + idx);
+    (void)model_vec.erase(model_vec.begin() + idx);
     --cnt;
     if (model_vec.empty()) {
-        itAttrMin->second.erase(itRangeMin);
+        (void)itAttrMin->second.erase(itRangeMin);
         if (itAttrMin->second.empty()) {
-            itOutputMin->second.erase(itAttrMin);
+            (void)itOutputMin->second.erase(itAttrMin);
             if (itOutputMin->second.empty()) {
-                itInputMin->second.erase(itOutputMin);
+                (void)itInputMin->second.erase(itOutputMin);
                 if (itInputMin->second.empty()) {
-                    itTypeMin->second.erase(itInputMin);
+                    (void)itTypeMin->second.erase(itInputMin);
                     if (entries_[itTypeMin->first].empty()) {
-                        entries_.erase(itTypeMin);
+                        (void)entries_.erase(itTypeMin);
                     }
                 }
             }
         }
     }
 
-    // remove model in hash map while time stamp in hash map is equal to model map 
+    // remove model in hash map while time stamp in hash map is equal to model map
     bool foundHash = false;
     for (auto hashMapIter = hashMap_.begin(); hashMapIter != hashMap_.end(); ++hashMapIter) {
         for (auto vecIter = hashMapIter->second.begin(); vecIter != hashMapIter->second.end(); ++vecIter) {
@@ -179,7 +179,7 @@ aclError AclShapeRangeMap<T>::Aging(T &agingT)
             if ((*vecIter).get() == agingT.get())  {
                 ACL_LOG_INFO("AclShapeRangeMap::Aging model in hash map success, hash seed is %zu, hash time stamp is %zu, "
                     "aging time stamp is %zu", hashMapIter->first, (*vecIter)->timestamp, agingT->timestamp);
-                hashMapIter->second.erase(vecIter);
+                (void)hashMapIter->second.erase(vecIter);
                 foundHash = true;
                 break;
             }
@@ -187,7 +187,7 @@ aclError AclShapeRangeMap<T>::Aging(T &agingT)
         if (foundHash && hashMapIter->second.empty()) {
             ACL_LOG_INFO("AclShapeRangeMap::After delete model, hash map empty while seed is %zu, delete seed in HashMap", 
                 hashMapIter->first);
-            hashMap_.erase(hashMapIter);
+            (void)hashMap_.erase(hashMapIter);
             break;
         }
     }
@@ -231,7 +231,7 @@ aclError AclShapeRangeMap<T>::AddMemAndAging(std::vector<std::pair<aclopAttr, T>
 template<typename T>
 bool AclShapeRangeMap<T>::CheckValueRange(const AclOp &aclOp, T &entry)
 {
-    for (int32_t i = 0; i < entry->inputDescArr.size(); ++i) {
+    for (size_t i = 0; i < entry->inputDescArr.size(); ++i) {
         if ((entry->inputDescArr[i].IsHostMemTensor()) && (!entry->inputDescArr[i].valueRange.empty())) {
             ACL_LOG_INFO("the input [%d] needs to check value range", i);
             if (!attr_utils::ValueRangeCheck(entry->inputDescArr[i].valueRange,
@@ -241,7 +241,7 @@ bool AclShapeRangeMap<T>::CheckValueRange(const AclOp &aclOp, T &entry)
             }
         }
     }
-    for (int32_t i = 0; i < entry->outputDescArr.size(); ++i) {
+    for (size_t i = 0; i < entry->outputDescArr.size(); ++i) {
         if ((entry->outputDescArr[i].IsHostMemTensor()) && (!entry->outputDescArr[i].valueRange.empty())) {
             ACL_LOG_INFO("the output [%d] needs to check value range", i);
             if (!attr_utils::ValueRangeCheck(entry->outputDescArr[i].valueRange,

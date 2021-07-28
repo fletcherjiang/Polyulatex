@@ -20,6 +20,8 @@
 #define ACL_MODE_ID static_cast<int32_t>(ASCENDCL)
 #define APP_MODE_ID static_cast<int32_t>(APP)
 
+using char_t = char;
+
 namespace acl {
 const char *const INVALID_PARAM_MSG = "EH0001";
 const char *const INVALID_NULL_POINTER_MSG = "EH0002";
@@ -51,6 +53,11 @@ const char *const ACL_STAGE_MBUF = "MBUF";
 const char *const ACL_STAGE_DEFAULT = "DEFAULT";
 
 constexpr int32_t MAX_LOG_STRING = 1024;
+
+inline const char *const format_cast(const char_t *const src) {
+    return static_cast<const char *const>(src);
+}
+
 class ACL_FUNC_VISIBILITY AclLog {
 public:
     static bool IsLogOutputEnable(aclLogLevel logLevel);
@@ -84,43 +91,50 @@ public:
 #define ACL_LOG_INFO(fmt, ...)                                                                      \
     do {                                                                                            \
             if (acl::AclLog::IsLogOutputEnable(ACL_INFO)) {                                         \
-                printf("INFO %d %s:%s:%d: "#fmt "\n",acl:: AclLog::GetTid(), __FUNCTION__,       \
+                const char_t *const funcName = __FUNCTION__;                                        \
+                printf("INFO %d %s:%s:%d: "#fmt "\n",acl::AclLog::GetTid(), acl::format_cast(funcName), \
                     __FILE__, __LINE__, ##__VA_ARGS__);                                             \
             }                                                                                       \
     } while (false)
 #define ACL_LOG_DEBUG(fmt, ...)                                                                     \
     do {                                                                                            \
             if (acl::AclLog::IsLogOutputEnable(ACL_DEBUG)) {                                        \
-                printf("DEBUG %d %s:%s:%d: "#fmt "\n", acl::AclLog::GetTid(), __FUNCTION__,   \
+                const char_t *const funcName = __FUNCTION__;                                        \
+                printf("DEBUG %d %s:%s:%d: "#fmt "\n", acl::AclLog::GetTid(), acl::format_cast(funcName),\
                     __FILE__, __LINE__, ##__VA_ARGS__);                                             \
             }                                                                                       \
     } while (false)
 #define ACL_LOG_WARN(fmt, ...)                                                                      \
     do {                                                                                            \
             if (acl::AclLog::IsLogOutputEnable(ACL_WARNING)) {                                      \
-                printf("WARN %d %s:%s:%d: "#fmt "\n", acl::AclLog::GetTid(), __FUNCTION__,    \
+                const char_t *const funcName = __FUNCTION__;                                        \
+                printf("WARN %d %s:%s:%d: "#fmt "\n", acl::AclLog::GetTid(), acl::format_cast(funcName), \
                     __FILE__, __LINE__, ##__VA_ARGS__);                                             \
             }                                                                                       \
     } while (false)
 #define ACL_LOG_ERROR(fmt, ...)                                                                     \
     do {                                                                                            \
-            printf("ERROR %d %s:%s:%d: %s" fmt "\n", acl::AclLog::GetTid(), __FUNCTION__,       \
+            const char_t *const funcName = __FUNCTION__;                                        \
+            printf("ERROR %d %s:%s:%d: %s" fmt "\n", acl::AclLog::GetTid(), acl::format_cast(funcName),  \
                 __FILE__, __LINE__, acl::AclErrorLogManager::GetStagesHeader().c_str(), ##__VA_ARGS__);  \
     } while (false)
 #define ACL_LOG_INNER_ERROR(fmt, ...)                                                               \
     do {                                                                                            \
-            printf("ERROR %d %s:%s:%d: %s" fmt "\n", acl::AclLog::GetTid(), __FUNCTION__,             \
+            const char_t *const funcName = __FUNCTION__;                                        \
+            printf("ERROR %d %s:%s:%d: %s" fmt "\n", acl::AclLog::GetTid(), acl::format_cast(funcName),  \
                 __FILE__, __LINE__, acl::AclErrorLogManager::GetStagesHeader().c_str(), ##__VA_ARGS__); \
     } while (false)
 #define ACL_LOG_CALL_ERROR(fmt, ...)                                                                \
     do {                                                                                            \
-            printf("ERROR %d %s:%s:%d: %s" fmt "\n", acl::AclLog::GetTid(), __FUNCTION__,             \
+            const char_t *const funcName = __FUNCTION__;                                        \
+            printf("ERROR %d %s:%s:%d: %s" fmt "\n", acl::AclLog::GetTid(), acl::format_cast(funcName),  \
                 __FILE__, __LINE__, acl::AclErrorLogManager::GetStagesHeader().c_str(), ##__VA_ARGS__); \
     } while (false)
 #define ACL_LOG_EVENT(fmt, ...)                                                                     \
     do {                                                                                            \
             if (acl::AclLog::IsEventLogOutputEnable()) {                                            \
-                printf("EVENT %d %s:%s:%d: "#fmt "\n", acl::AclLog::GetTid(), __FUNCTION__,   \
+                const char_t *const funcName = __FUNCTION__;                                        \
+                printf("EVENT %d %s:%s:%d: "#fmt "\n", acl::AclLog::GetTid(), acl::format_cast(funcName),\
                     __FILE__, __LINE__, ##__VA_ARGS__);                                             \
             }                                                                                       \
     } while (false)
@@ -128,45 +142,52 @@ public:
 #define ACL_LOG_INFO(fmt, ...)                                                                      \
     do {                                                                                            \
             if (acl::AclLog::IsLogOutputEnable(ACL_INFO)) {                                         \
-                dlog_info(ACL_MODE_ID, "%d %s: " fmt,acl:: AclLog::GetTid(), __FUNCTION__,          \
+                const char_t *const funcName = __FUNCTION__;                                        \
+                dlog_info(ACL_MODE_ID, "%d %s: " fmt,acl:: AclLog::GetTid(), acl::format_cast(funcName), \
                     ##__VA_ARGS__);                                                                 \
             }                                                                                       \
     } while (false)
 #define ACL_LOG_DEBUG(fmt, ...)                                                                     \
     do {                                                                                            \
             if (acl::AclLog::IsLogOutputEnable(ACL_DEBUG)) {                                        \
-                dlog_debug(ACL_MODE_ID, "%d %s: " fmt, acl::AclLog::GetTid(), __FUNCTION__,         \
+                const char_t *const funcName = __FUNCTION__;                                        \
+                dlog_debug(ACL_MODE_ID, "%d %s: " fmt, acl::AclLog::GetTid(), acl::format_cast(funcName),\
                     ##__VA_ARGS__);                                                                 \
             }                                                                                       \
     } while (false)
 #define ACL_LOG_WARN(fmt, ...)                                                                      \
     do {                                                                                            \
             if (acl::AclLog::IsLogOutputEnable(ACL_WARNING)) {                                      \
-                dlog_warn(ACL_MODE_ID, "%d %s: " fmt, acl::AclLog::GetTid(), __FUNCTION__,          \
+                const char_t *const funcName = __FUNCTION__;                                        \
+                dlog_warn(ACL_MODE_ID, "%d %s: " fmt, acl::AclLog::GetTid(), acl::format_cast(funcName), \
                     ##__VA_ARGS__);                                                                 \
             }                                                                                       \
     } while (false)
 #define ACL_LOG_ERROR(fmt, ...)                                                                     \
     do {                                                                                            \
-            dlog_error(ACL_MODE_ID, "%d %s: %s" fmt, acl::AclLog::GetTid(), __FUNCTION__,           \
+            const char_t *const funcName = __FUNCTION__;                                        \
+            dlog_error(ACL_MODE_ID, "%d %s: %s" fmt, acl::AclLog::GetTid(), acl::format_cast(funcName),  \
                 acl::AclErrorLogManager::GetStagesHeader().c_str(), ##__VA_ARGS__);                 \
     } while (false)
 #define ACL_LOG_INNER_ERROR(fmt, ...)                                                               \
     do {                                                                                            \
-            dlog_error(ACL_MODE_ID, "%d %s: %s" fmt, acl::AclLog::GetTid(), __FUNCTION__,           \
+            const char_t *const funcName = __FUNCTION__;                                        \
+            dlog_error(ACL_MODE_ID, "%d %s: %s" fmt, acl::AclLog::GetTid(), acl::format_cast(funcName),  \
                 acl::AclErrorLogManager::GetStagesHeader().c_str(), ##__VA_ARGS__);                 \
             acl::AclErrorLogManager::ReportInnerError(fmt, ##__VA_ARGS__);                          \
     } while (false)
 #define ACL_LOG_CALL_ERROR(fmt, ...)                                                                \
     do {                                                                                            \
-            dlog_error(ACL_MODE_ID, "%d %s: %s" fmt, acl::AclLog::GetTid(), __FUNCTION__,           \
+            const char_t *const funcName = __FUNCTION__;                                        \
+            dlog_error(ACL_MODE_ID, "%d %s: %s" fmt, acl::AclLog::GetTid(), acl::format_cast(funcName),  \
                 acl::AclErrorLogManager::GetStagesHeader().c_str(), ##__VA_ARGS__);                 \
             acl::AclErrorLogManager::ReportCallError(fmt, ##__VA_ARGS__);                           \
     } while (false)
 #define ACL_LOG_EVENT(fmt, ...)                                                                     \
     do {                                                                                            \
             if (acl::AclLog::IsEventLogOutputEnable()) {                                            \
-                dlog_event(ACL_MODE_ID, "%d %s: " fmt, acl::AclLog::GetTid(), __FUNCTION__,         \
+                const char_t *const funcName = __FUNCTION__;                                        \
+                dlog_event(ACL_MODE_ID, "%d %s: " fmt, acl::AclLog::GetTid(), acl::format_cast(funcName),\
                     ##__VA_ARGS__);                                                                 \
             }                                                                                       \
     } while (false)
@@ -453,6 +474,6 @@ public:
             ACL_LOG_INFO("[%d] is equal to [%d]", leftValue, rightValue); \
         } \
     } \
-    while (0)
+    while (false)
 
 #endif // ACL_COMMON_LOG_H_

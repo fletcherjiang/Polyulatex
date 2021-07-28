@@ -72,7 +72,7 @@ aclError GetAlignedSize(size_t size, size_t &alignedSize);
 
 #define ACL_CHECK_ASSIGN_SIZET_MULTI(a, b, res)                      \
     do {                                                             \
-            aclError ret = acl::CheckSizeTMultiOverflow(a, b, res);  \
+            const aclError ret = acl::CheckSizeTMultiOverflow(a, b, res);  \
             if (ret != ACL_SUCCESS) {                             \
                 return ret;                                          \
             }                                                        \
@@ -80,7 +80,7 @@ aclError GetAlignedSize(size_t size, size_t &alignedSize);
 
 #define ACL_CHECK_ASSIGN_SIZET_MULTI_RET_NUM(a, b, res)                      \
     do {                                                             \
-            aclError ret = acl::CheckSizeTMultiOverflow(a, b, res);  \
+            const aclError ret = acl::CheckSizeTMultiOverflow(a, b, res);  \
             if (ret != ACL_SUCCESS) {                             \
                 return 0;                                          \
             }                                                       \
@@ -88,7 +88,7 @@ aclError GetAlignedSize(size_t size, size_t &alignedSize);
 
 #define ACL_CHECK_ASSIGN_UINT32_MULTI(a, b, res)                      \
     do {                                                             \
-            aclError ret = acl::CheckUint32MultiOverflow(a, b, res);  \
+            const aclError ret = acl::CheckUint32MultiOverflow(a, b, res);  \
             if (ret != ACL_SUCCESS) {                             \
                 return ret;                                          \
             }                                                        \
@@ -96,7 +96,7 @@ aclError GetAlignedSize(size_t size, size_t &alignedSize);
 
 #define ACL_CHECK_ASSIGN_INT32_ADD(a, b, res)                        \
     do {                                                             \
-            aclError ret = acl::CheckIntAddOverflow(a, b, res);      \
+            const aclError ret = acl::CheckIntAddOverflow(a, b, res);      \
             if (ret != ACL_SUCCESS) {                             \
                 return ret;                                          \
             }                                                        \
@@ -104,7 +104,7 @@ aclError GetAlignedSize(size_t size, size_t &alignedSize);
 
 #define ACL_CHECK_ASSIGN_SIZET_ADD(a, b, res)                       \
     do {                                                            \
-            aclError ret = acl::CheckSizeTAddOverflow(a, b, res);   \
+            const aclError ret = acl::CheckSizeTAddOverflow(a, b, res);   \
             if (ret != ACL_SUCCESS) {                            \
                 return ret;                                         \
             }                                                       \
@@ -112,7 +112,7 @@ aclError GetAlignedSize(size_t size, size_t &alignedSize);
 
 #define ACL_CHECK_ASSIGN_UINT32T_ADD(a, b, res)                       \
     do {                                                            \
-            aclError ret = acl::CheckUint32AddOverflow(a, b, res);   \
+            const aclError ret = acl::CheckUint32AddOverflow(a, b, res);   \
             if (ret != ACL_SUCCESS) {                            \
                 return ret;                                         \
             }                                                       \

@@ -180,8 +180,7 @@ aclError aclopExecWithHandle(aclopHandle *handle,
         std::string errMsg = acl::AclErrorLogManager::FormatStr("input num mismatch: expect %d", opHandle.numInputs);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
-            std::vector<std::string>({"input num", std::to_string(numInputs),
-            errMsg}));
+            std::vector<std::string>({"input num", std::to_string(numInputs), errMsg}));
         return ACL_ERROR_OP_INPUT_NOT_MATCH;
     }
 
@@ -295,7 +294,7 @@ aclError aclTransTensorDescFormat(const aclTensorDesc *srcDesc, aclFormat dstFor
     if (geRet != ge::SUCCESS) {
         ACL_LOG_CALL_ERROR("[Call][TransShape]invoke TransShape failed. ge result = %u",
             geRet);
-        return static_cast<int32_t>(ACL_GET_ERRCODE_GE(geRet));
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(geRet));
     }
 
     *dstDesc = aclCreateTensorDesc(srcDesc->dataType, static_cast<int32_t>(dstShape.size()),
@@ -477,7 +476,7 @@ static aclError LoadOpsProto()
     ge::graphStatus ret = ge::OperatorFactory::GetOpsTypeList(allOp);
     if (ret != ge::GRAPH_SUCCESS) {
         ACL_LOG_CALL_ERROR("[Get][OpsType]GetOpsTypeList failed.");
-        return static_cast<int32_t>(ACL_GET_ERRCODE_GE(ret));
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
     ACL_LOG_INFO("OpsTypeListSize is %zu", allOp.size());
     return ACL_SUCCESS;
@@ -497,7 +496,7 @@ static aclError UpdateOutPutDesc(ge::Operator inferOp, int numOutputs, aclTensor
         auto ret = inferOutputDesc.GetName(ascendString);
         if (ret != ge::GRAPH_SUCCESS) {
             ACL_LOG_CALL_ERROR("[Get][Name]the %d tensor GetName failed.", i);
-            return static_cast<int32_t>(ACL_GET_ERRCODE_GE(ret));
+            return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
         }
         std::string outputName;
         if (ascendString.GetString() != nullptr) {
@@ -508,7 +507,7 @@ static aclError UpdateOutPutDesc(ge::Operator inferOp, int numOutputs, aclTensor
         ret = inferOutputDesc.GetShapeRange(outputRange);
         if (ret != ge::GRAPH_SUCCESS) {
             ACL_LOG_CALL_ERROR("[Get][ShapeRange]the %d tensor GetShapeRange failed.", i);
-            return static_cast<int32_t>(ACL_GET_ERRCODE_GE(ret));
+            return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
         }
 
         // update outputDesc
@@ -569,7 +568,6 @@ static void AddOpDesc(aclTensorDesc *tensorDesc, ge::OpDescPtr &opDesc, bool isI
             (void)opDesc->AddInputDesc(geTensorDesc);
         } else {
             (void)opDesc->AddOutputDesc(geTensorDesc);
-
         }
     }
 }
@@ -588,8 +586,7 @@ static aclError AddDataInput(aclTensorDesc *inputDesc,
         ACL_LOG_ERROR("[Check][TensorSize]tensorSize must be positive, tensorSize = %zu", tensorSize);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
             std::vector<std::string>({"param", "value", "reason"}),
-            std::vector<std::string>({"tensorSize", std::to_string(tensorSize),
-            "must be positive"}));
+            std::vector<std::string>({"tensorSize", std::to_string(tensorSize), "must be positive"}));
         return ACL_ERROR_INVALID_PARAM;
     }
     auto args = std::unique_ptr<uint8_t[]>(new(std::nothrow) uint8_t[tensorSize]);
@@ -608,7 +605,7 @@ static aclError AddDataInput(aclTensorDesc *inputDesc,
     auto retConstInfer = constOp.InferShapeAndType();
     if (retConstInfer != ge::GRAPH_SUCCESS) {
         ACL_LOG_CALL_ERROR("the constOp inferShape failed. ge result = %u", retConstInfer);
-        return static_cast<int32_t>(ACL_GET_ERRCODE_GE(retConstInfer));
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(retConstInfer));
     }
     return ACL_SUCCESS;
 }
@@ -690,7 +687,7 @@ aclError aclopInferShape(const char *opType,
         ACL_LOG_CALL_ERROR("[Infer][ShapeAndType]the op:%s inferShape failed. ge result = %u",
             opType, retInfer);
         ACL_DELETE_ARRAY_AND_SET_NULL(constData);
-        return static_cast<int32_t>(ACL_GET_ERRCODE_GE(retInfer));
+        return ACL_GET_ERRCODE_GE(static_cast<int32_t>(retInfer));
     }
     for (size_t i = static_cast<uint64_t>(0); i < constOps.size(); ++i) {
         constOps[i].BreakConnect();

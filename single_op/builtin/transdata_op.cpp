@@ -15,8 +15,8 @@
 
 namespace {
 constexpr char const *OP_NAME_TRANSDATA = "TransData";
-constexpr int TRANSDATA_INPUT_NUM = 1;
-constexpr int TRANSDATA_OUTPUT_NUM = 1;
+constexpr int32_t TRANSDATA_INPUT_NUM = 1;
+constexpr int32_t TRANSDATA_OUTPUT_NUM = 1;
 
 const char *ATTR_SRC_FORMAT = "src_format";
 const char *ATTR_DST_FORMAT = "dst_format";
@@ -60,8 +60,8 @@ aclError aclopTransData(aclTensorDesc *srcDesc,
     ACL_REQUIRES_OK(GetFormatName(dstDesc->format, &dstFormat));
 
     aclopAttr opAttr;
-    aclopSetAttrString(&opAttr, ATTR_SRC_FORMAT, srcFormat);
-    aclopSetAttrString(&opAttr, ATTR_DST_FORMAT, dstFormat);
+    (void)aclopSetAttrString(&opAttr, ATTR_SRC_FORMAT, srcFormat);
+    (void)aclopSetAttrString(&opAttr, ATTR_DST_FORMAT, dstFormat);
     aclTensorDesc *inputDesc[TRANSDATA_INPUT_NUM] = {srcDesc};
     aclTensorDesc *outputDesc[TRANSDATA_OUTPUT_NUM] = {dstDesc};
     aclDataBuffer *inputs[TRANSDATA_INPUT_NUM] = {srcBuffer};
@@ -91,8 +91,8 @@ aclError aclopCreateHandleForTransData(aclTensorDesc *srcDesc,
     ACL_REQUIRES_OK(GetFormatName(dstDesc->format, &dstFormat));
 
     aclopAttr opAttr;
-    aclopSetAttrString(&opAttr, ATTR_SRC_FORMAT, srcFormat);
-    aclopSetAttrString(&opAttr, ATTR_DST_FORMAT, dstFormat);
+    (void)aclopSetAttrString(&opAttr, ATTR_SRC_FORMAT, srcFormat);
+    (void)aclopSetAttrString(&opAttr, ATTR_DST_FORMAT, dstFormat);
     const aclTensorDesc *inputDesc[TRANSDATA_INPUT_NUM] = {srcDesc};
     const aclTensorDesc *outputDesc[TRANSDATA_OUTPUT_NUM] = {dstDesc};
     return aclopCreateHandle(OP_NAME_TRANSDATA,
