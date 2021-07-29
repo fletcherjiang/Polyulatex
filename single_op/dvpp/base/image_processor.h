@@ -446,6 +446,23 @@ namespace acl {
                                                    acldvppPixelFormat outputPixelFormat,
                                                    uint32_t *decSize);
 
+        /**
+         * Get image width and height of png.
+         * @param data[in] image data in host memory
+         * @param size[in] the size of image data
+         * @param width[out] the width of image from image header
+         * @param height[out] the height of image from image header
+         * @param components [OUT]   the components of image from image header
+         * @param bitDepth [OUT]   the bit of image from image header
+         * @return ACL_SUCCESS for ok, others for fail
+         */
+        aclError GetPngImgInfo(const void *data,
+                               uint32_t dataSize,
+                               uint32_t *width,
+                               uint32_t *height,
+                               int32_t *components,
+                               uint32_t *bitDepth);
+
          /**
           * Get image width and height of png.
           * @param data[in] image data in host memory
@@ -459,7 +476,7 @@ namespace acl {
                                                  uint32_t dataSize,
                                                  uint32_t *width,
                                                  uint32_t *height,
-                                                 int32_t *components) = 0;
+                                                 int32_t *components);
 
         /**
          * Predict decode size of png image.
@@ -472,7 +489,7 @@ namespace acl {
         virtual aclError acldvppPngPredictDecSize(const void *data,
                                                   uint32_t dataSize,
                                                   acldvppPixelFormat outputPixelFormat,
-                                                  uint32_t *decSize) = 0;
+                                                  uint32_t *decSize);
 
         /**
          * Dvpp create channel desc.

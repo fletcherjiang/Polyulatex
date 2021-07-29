@@ -327,7 +327,8 @@ namespace aicpu {
         enum DvppChannelMode {
             DVPP_CHNMODE_VPC = 1,
             DVPP_CHNMODE_JPEGD = 2,
-            DVPP_CHNMODE_JPEGE = 4
+            DVPP_CHNMODE_JPEGE = 4,
+            DVPP_CHNMODE_PNGD = 8
         };
 
         // supported TLV Type

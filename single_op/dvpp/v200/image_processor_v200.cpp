@@ -994,7 +994,7 @@ namespace acl {
     {
         ACL_LOG_INFO("start to execute acldvppSetChannelDescMode.");
         ACL_REQUIRES_NOT_NULL(channelDesc);
-        if ((mode > (DVPP_CHNMODE_VPC | DVPP_CHNMODE_JPEGD | DVPP_CHNMODE_JPEGE)) ||
+        if ((mode > (DVPP_CHNMODE_VPC | DVPP_CHNMODE_JPEGD | DVPP_CHNMODE_JPEGE | DVPP_CHNMODE_PNGD)) ||
             (mode < DVPP_CHNMODE_VPC)) {
             ACL_LOG_ERROR("[Check][Params]the current mode[%u] is not support", mode);
             std::string errMsg = acl::AclErrorLogManager::FormatStr("the current mode[%u]",
@@ -1544,25 +1544,6 @@ namespace acl {
     {
         channelDesc->dvppWaitTaskType = EVENT_TASK;
         ACL_LOG_INFO("dvpp wait task type is event.");
-    }
-
-    aclError ImageProcessorV200::acldvppPngGetImageInfo(const void *data,
-                                                        uint32_t dataSize,
-                                                        uint32_t *width,
-                                                        uint32_t *height,
-                                                        int32_t *components)
-    {
-        ACL_LOG_INNER_ERROR("[Unsupport][Feature]get png image info is not supported in this version. Please check.");
-        return ACL_ERROR_FEATURE_UNSUPPORTED;
-    }
-
-    aclError ImageProcessorV200::acldvppPngPredictDecSize(const void *data,
-                                                          uint32_t dataSize,
-                                                          acldvppPixelFormat outputPixelFormat,
-                                                          uint32_t *decSize)
-    {
-        ACL_LOG_INNER_ERROR("[Unsupport][Feature]get png decode size is not supported in this version. Please check.");
-        return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
 
     size_t ImageProcessorV200::GetCmdlistBuffSize()
