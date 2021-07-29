@@ -599,6 +599,9 @@ TEST_F(UTEST_ACL_compatibility_enum_check, acldvppChannelMode)
 
     mode = (acldvppChannelMode)4;
     EXPECT_EQ(mode, DVPP_CHNMODE_JPEGE);
+
+    mode = (acldvppChannelMode)8;
+    EXPECT_EQ(mode, DVPP_CHNMODE_PNGD);
 }
 
 TEST_F(UTEST_ACL_compatibility_enum_check, acldvppBorderType)
