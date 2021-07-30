@@ -235,10 +235,15 @@ TEST_F(OpExecutorTest, TestResourceManager)
 TEST_F(OpExecutorTest, TestInitTbeTask)
 {
     OpKernelDesc desc;
+    ResourceManager *mng = new ResourceManager((void *)0x1234);
     TbeOpTask task(nullptr, 0);
     desc.workspaceSizes.resize(18);
-    StreamExecutor se(nullptr, nullptr);
-    se.InitTbeTask(desc, 0, 0, task);
+    StreamExecutor se(mng, nullptr);
+    ASSERT_EQ(se.InitTbeTask(desc, 0, 0, task), ACL_ERROR_INVALID_PARAM);
+    desc.workspaceSizes.clear();
+    desc.workspaceSizes.push_back(32);
+    ASSERT_EQ(se.InitTbeTask(desc, 0, 0, task), ACL_SUCCESS);
+    ASSERT_EQ(mng->ReleasePendingMemory(), ACL_SUCCESS);
 }
 
 TEST_F(OpExecutorTest, TestAllocateWorkspaces)
@@ -248,4 +253,12 @@ TEST_F(OpExecutorTest, TestAllocateWorkspaces)
     workspaceSizes.resize(18);
     StreamExecutor se(nullptr, nullptr);
     se.AllocateWorkspaces(workspaceSizes, workspaces);
+}
+
+TEST_F(OpExecutorTest, TestExecutors)
+{
+    StreamExecutor * exec = Executors::GetOrCreate(nullptr, nullptr);
+    ASSERT_NE(exec, nullptr);
+    ASSERT_EQ(exec, Executors::GetOrCreate(nullptr, nullptr));
+    Executors::Remove(nullptr, nullptr);
 }
