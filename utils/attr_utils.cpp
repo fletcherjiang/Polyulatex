@@ -642,7 +642,7 @@ bool OpAttrEquals(const aclopAttr *const lhs, const aclopAttr *const rhs)
 
 uint64_t GetCurrentTimestamp()
 {
-    ++time_stamp;
+    time_stamp.fetch_add(1);
     return time_stamp.load(std::memory_order_relaxed);
 }
 
