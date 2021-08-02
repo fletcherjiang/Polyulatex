@@ -19,6 +19,7 @@ namespace attr_utils {
 namespace {
 constexpr size_t DEFAULT_STRING_LEN = 32U;
 constexpr float FLOAT_DELTA = 1e-6;
+std::atomic<uint64_t> time_stamp{0UL};
 }
 
 template<typename T>
@@ -641,15 +642,8 @@ bool OpAttrEquals(const aclopAttr *const lhs, const aclopAttr *const rhs)
 
 uint64_t GetCurrentTimestamp()
 {
-    mmTimeval tv{};
-    const auto ret = mmGetTimeOfDay(&tv, nullptr);
-    if (ret != EN_OK) {
-        ACL_LOG_WARN("Func mmGetTimeOfDay failed, ret = %d", ret);
-    }
-    // 1000000: seconds to microseconds
-    const uint64_t total_use_time = static_cast<uint64_t>(tv.tv_usec) +
-        ((static_cast<uint64_t>(tv.tv_sec)) * 1000000U);
-    return total_use_time;
+    ++time_stamp;
+    return time_stamp.load(std::memory_order_relaxed);
 }
 
 static bool ConstToAttr(const vector<aclTensorDesc> &tensorDesc,

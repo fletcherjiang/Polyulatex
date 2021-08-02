@@ -46,14 +46,20 @@ struct ACL_FUNC_VISIBILITY aclTensorDesc {
     aclFormat storageFormat = ACL_FORMAT_UNDEFINED;
     aclFormat format;
     std::vector<int64_t> dims;
+    std::vector<int64_t> dimsBack;    
     std::vector<int64_t> storageDims;
+    std::vector<int64_t> storageDimsBack;
     std::string name;
     std::vector<std::pair<int64_t, int64_t>> shapeRange;
+    std::vector<std::pair<int64_t, int64_t>> shapeRangeBack;
     void *address = nullptr;
     std::string dynamicInputName;
     bool isConst = false;
     std::shared_ptr<void> constDataBuf;
     size_t constDataLen = 0U;
+    bool isConstBack = false;
+    std::shared_ptr<void> constDataBufBack;
+    size_t constDataLenBack = 0U;
     aclMemType memtype = ACL_MEMTYPE_DEVICE;
     // for windows compile,use map ignore dvpp.so find the implementation GeAttrValue
     std::map<acl::AttrRangeType, ge::GeAttrValue> valueRange;
@@ -77,6 +83,10 @@ struct ACL_FUNC_VISIBILITY aclTensorDesc {
     bool CheckConstTensor(bool needCheckHostMem) const;
 
     bool operator==(const aclTensorDesc* const other);
+    void BackDimsAndShapeRanges();
+    void RecoverDimsAndShapeRanges();
+    void BackConst();
+    void RecoverConst();
 
 private:
     mutable std::string cachedKey;

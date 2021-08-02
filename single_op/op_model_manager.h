@@ -68,6 +68,8 @@ private:
     using ModelMap = AclOpMap<std::shared_ptr<OpModelDef>>;
 
     using DynamicModelMap = AclShapeRangeMap<std::shared_ptr<OpModelDef>>;
+    
+    using ShapeStatusVec = std::vector<aclTensorShapeStatus>;
 
     aclError RegisterModel(OpModelDef &&modelConfig,
                            ModelMap &opModelDefs,
@@ -88,10 +90,11 @@ private:
 
     static bool IsDynamicOpModel(const AclOp &aclOp);
 
-    void SetTensorShapeStatus(const AclOp &aclOp, std::vector<aclTensorShapeStatus> &shapeStatus);
-    void SetTensorShapeRange(const AclOp &aclOp, const std::vector<aclTensorShapeStatus> &tensorShapeStatus);
-    void GetTensorShapeStatus(const AclOp &aclOp, std::vector<std::vector<aclTensorShapeStatus>> &shapeStatus);
-    void GetTensorShapeRange(const std::vector<aclTensorShapeStatus> &tensorShapeStatus,
+    void SetTensorShapeStatus(const AclOp &aclOp, std::shared_ptr<ShapeStatusVec> shapeStatus);
+    void SetTensorShapeRange(const AclOp &aclOp, const std::vector<aclTensorShapeStatus> &shapeStatus);
+    void GetTensorShapeStatus(const AclOp &aclOp,
+                              std::vector<std::pair<std::shared_ptr<ShapeStatusVec>, std::string>> &shapeStatus);
+    void GetTensorShapeRange(const std::string &shapeStatusDesc,
                              std::vector<std::vector<std::pair<int64_t, int64_t>>> &shapeRanges);
 
     static std::string TensorStatusToStr(const std::vector<aclTensorShapeStatus> &tensorShapeStatus);
@@ -100,9 +103,7 @@ private:
                                 const std::vector<std::pair<int64_t, int64_t>> &shapeRange);
     static void FixedAclopMatch(const AclOp &aclOpMatch,
                                 const std::vector<aclTensorShapeStatus> &tensorShapeStatus,
-                                const std::vector<std::pair<int64_t, int64_t>> &shapeRange,
-                                std::vector<std::vector<int64_t>> &tensorDims,
-                                std::vector<int64_t> &storageTensorDims);
+                                const std::vector<std::pair<int64_t, int64_t>> &shapeRange);
     static bool BackAclopMatch(const AclOp &aclOpMatch,
                                const std::vector<aclTensorShapeStatus> &tensorShapeStatus,
                                const std::vector<std::vector<int64_t>> &tensorDims,
@@ -119,7 +120,7 @@ private:
     std::uint32_t counter_ = 0;
 
     std::mutex shapeStatusMutex_;
-    std::unordered_map<std::string, std::vector<std::vector<aclTensorShapeStatus>>> tensorShapeStatus_;
+    std::unordered_map<std::string, std::vector<std::pair<std::shared_ptr<ShapeStatusVec>, std::string>>> tensorShapeStatus_;
     std::unordered_map<std::string, std::vector<std::string>> tensorShapeStatusDesc_;
     std::mutex tensorShapeMutex_;
     std::unordered_map<std::string, std::vector<std::vector<std::pair<int64_t, int64_t>>>> tensorShapeRange_;

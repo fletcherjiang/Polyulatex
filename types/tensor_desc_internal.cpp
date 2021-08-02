@@ -715,3 +715,55 @@ aclError aclSetTensorPlaceMent(aclTensorDesc *desc, aclMemType memType)
     return ACL_SUCCESS;
 }
 
+void aclTensorDesc::BackDimsAndShapeRanges()
+{
+    dimsBack.resize(dims.size());
+    for (size_t i = 0; i < dims.size(); ++i)
+    {
+        dimsBack[i] = dims[i];
+    }
+    shapeRangeBack.resize(shapeRange.size());
+    for (size_t i = 0; i < shapeRange.size(); ++i)
+    {
+        shapeRangeBack[i] = shapeRange[i];
+    }
+    storageDimsBack.resize(storageDims.size());
+    for (size_t i = 0; i < storageDims.size(); ++i)
+    {
+        storageDimsBack[i] = storageDims[i];
+    }
+}
+
+void aclTensorDesc::RecoverDimsAndShapeRanges()
+{
+    dims.resize(dimsBack.size());
+    for (size_t i = 0; i < dimsBack.size(); ++i)
+    {
+        dims[i] = dimsBack[i];
+    }
+    shapeRange.resize(shapeRangeBack.size());
+    for (size_t i = 0; i < shapeRangeBack.size(); ++i)
+    {
+        shapeRange[i] = shapeRangeBack[i];
+    }
+    storageDims.resize(storageDimsBack.size());
+    for (size_t i = 0; i < storageDimsBack.size(); ++i)
+    {
+        storageDims[i] = storageDimsBack[i];
+    }
+}
+
+void aclTensorDesc::BackConst()
+{
+    isConstBack = isConst;
+    constDataBufBack = constDataBuf;
+    constDataLenBack = constDataLen;
+}
+
+void aclTensorDesc::RecoverConst()
+{
+    isConst = isConstBack;
+    constDataBuf = constDataBufBack;
+    constDataLen = constDataLenBack;
+}
+
