@@ -27,7 +27,7 @@ AclOp::~AclOp()
 {
     if (this->isCopyConstructor) {
         if (this->inputDesc != nullptr) {
-            for (int i = 0; i < this->numInputs; ++i) {
+            for (int32_t i = 0; i < this->numInputs; ++i) {
                 if (this->inputDesc[i] != nullptr) {
                     delete this->inputDesc[i];
                 }
@@ -36,7 +36,7 @@ AclOp::~AclOp()
             this->inputDesc = nullptr;
         }
         if (this->outputDesc != nullptr) {
-            for (int i = 0; i < this->numOutputs; ++i) {
+            for (int32_t i = 0; i < this->numOutputs; ++i) {
                 if (this->outputDesc[i] != nullptr) {
                     delete this->outputDesc[i];
                 }
@@ -79,11 +79,11 @@ void AclOp::Init(const AclOp& aclOp)
     this->numInputs = aclOp.numInputs;
     this->numOutputs = aclOp.numOutputs;
     if ((aclOp.inputDesc != nullptr) && (aclOp.numInputs > 0)) {
-        size_t len = aclOp.numInputs * sizeof(aclTensorDesc *);
+        size_t len = static_cast<size_t>(aclOp.numInputs) * sizeof(aclTensorDesc *);
         aclTensorDesc **desc = static_cast<aclTensorDesc **>(malloc(len));
         ACL_REQUIRES_NOT_NULL_RET_VOID(desc);
         this->inputDesc = static_cast<const aclTensorDesc * const *>(desc);
-        for (int i = 0; i < this->numInputs; ++i) {
+        for (int32_t i = 0; i < this->numInputs; ++i) {
             if (aclOp.inputDesc[i] != nullptr) {
                 desc[i] = new(std::nothrow) aclTensorDesc(*aclOp.inputDesc[i]);
                 ACL_REQUIRES_NOT_NULL_RET_VOID(desc[i]);
@@ -93,7 +93,7 @@ void AclOp::Init(const AclOp& aclOp)
         }
     }
     if ((aclOp.outputDesc != nullptr) && (aclOp.numOutputs > 0)) {
-        size_t len = aclOp.numOutputs * sizeof(aclTensorDesc *);
+        size_t len = static_cast<size_t>(aclOp.numOutputs) * sizeof(aclTensorDesc *);
         aclTensorDesc **desc = static_cast<aclTensorDesc **>(malloc(len));
         ACL_REQUIRES_NOT_NULL_RET_VOID(desc);
         if (memset_s(desc, len, 0, len) != EOK) {
@@ -102,7 +102,7 @@ void AclOp::Init(const AclOp& aclOp)
             return;
         }
         this->outputDesc = static_cast<const aclTensorDesc * const *>(desc);
-        for (int i = 0; i < this->numOutputs; ++i) {
+        for (int32_t i = 0; i < this->numOutputs; ++i) {
             if (aclOp.outputDesc[i] != nullptr) {
                 desc[i] = new(std::nothrow) aclTensorDesc(*aclOp.outputDesc[i]);
                 ACL_REQUIRES_NOT_NULL_RET_VOID(desc[i]);
