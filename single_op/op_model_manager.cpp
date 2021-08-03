@@ -703,9 +703,9 @@ aclError OpModelManager::MatchStaticOpModel(const AclOp &aclOp, OpModel &opModel
     aclError ret = ACL_SUCCESS;
     isNeedMatchDymaic = false;
     bool isExistConst = false;
-    ACL_REQUIRES_OK(SetHostMemToConst(const_cast<AclOp&>(aclOp), isExistConst));
+    ACL_REQUIRES_OK(SetHostMemToConst(aclOp, isExistConst));
     if (isExistConst) {
-        ret = opModels_.Get(const_cast<AclOp&>(aclOp), modelDef, true);
+        ret = opModels_.Get(aclOp, modelDef, true);
         aclOp.RecoverConst();
         if (ret == ACL_SUCCESS) {
             isDynamic = false;
@@ -778,7 +778,7 @@ aclError OpModelManager::MatchDynamicOpModel(const AclOp &aclOp, OpModel &opMode
             }
             ACL_LOG_INFO("before FixedAclopMatch aclOp = %s", aclOp.DebugString().c_str());
             aclOp.RecoverdimsAndShaperanges();
-            FixedAclopMatch(const_cast<AclOp&>(aclOp), statusVec, shapeRanges[j]);
+            FixedAclopMatch(aclOp, statusVec, shapeRanges[j]);
             ACL_LOG_INFO("after FixedAclopMatch aclOp = %s", aclOp.DebugString().c_str());
             ret = dynamicOpModels_.Get(aclOp, modelDef, true);
             if (ret == ACL_SUCCESS) {
