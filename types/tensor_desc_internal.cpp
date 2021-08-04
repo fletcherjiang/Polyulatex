@@ -40,13 +40,19 @@ void aclTensorDesc::Init(const aclTensorDesc &tensorDesc)
     this->storageFormat = tensorDesc.storageFormat;
     this->format = tensorDesc.format;
     this->dims = tensorDesc.dims;
+    this->dimsBackup = tensorDesc.dimsBackup;
     this->storageDims = tensorDesc.storageDims;
+    this->storageDimsBackup = tensorDesc.storageDimsBackup;
     this->name = tensorDesc.name;
     this->shapeRange = tensorDesc.shapeRange;
+    this->shapeRangeBackup = tensorDesc.shapeRangeBackup;
     this->address = tensorDesc.address;
     this->isConst = tensorDesc.isConst;
+    this->isConstBackup = tensorDesc.isConstBackup;
     this->constDataLen = tensorDesc.constDataLen;
+    this->constDataLenBackup = tensorDesc.constDataLenBackup;
     this->constDataBuf = tensorDesc.constDataBuf;
+    this->constDataBufBackup=tensorDesc.constDataBufBackup;
     this->cachedKey = tensorDesc.cachedKey;
     this->cachedShapeKey = tensorDesc.cachedShapeKey;
     this->memtype = tensorDesc.memtype;
@@ -715,55 +721,55 @@ aclError aclSetTensorPlaceMent(aclTensorDesc *desc, aclMemType memType)
     return ACL_SUCCESS;
 }
 
-void aclTensorDesc::BackDimsAndShapeRanges()
+void aclTensorDesc::BackupDimsAndShapeRanges()
 {
-    dimsBack.resize(dims.size());
+    dimsBackup.resize(dims.size());
     for (size_t i = 0; i < dims.size(); ++i)
     {
-        dimsBack[i] = dims[i];
+        dimsBackup[i] = dims[i];
     }
-    shapeRangeBack.resize(shapeRange.size());
+    shapeRangeBackup.resize(shapeRange.size());
     for (size_t i = 0; i < shapeRange.size(); ++i)
     {
-        shapeRangeBack[i] = shapeRange[i];
+        shapeRangeBackup[i] = shapeRange[i];
     }
-    storageDimsBack.resize(storageDims.size());
+    storageDimsBackup.resize(storageDims.size());
     for (size_t i = 0; i < storageDims.size(); ++i)
     {
-        storageDimsBack[i] = storageDims[i];
+        storageDimsBackup[i] = storageDims[i];
     }
 }
 
 void aclTensorDesc::RecoverDimsAndShapeRanges()
 {
-    dims.resize(dimsBack.size());
-    for (size_t i = 0; i < dimsBack.size(); ++i)
+    dims.resize(dimsBackup.size());
+    for (size_t i = 0; i < dimsBackup.size(); ++i)
     {
-        dims[i] = dimsBack[i];
+        dims[i] = dimsBackup[i];
     }
-    shapeRange.resize(shapeRangeBack.size());
-    for (size_t i = 0; i < shapeRangeBack.size(); ++i)
+    shapeRange.resize(shapeRangeBackup.size());
+    for (size_t i = 0; i < shapeRangeBackup.size(); ++i)
     {
-        shapeRange[i] = shapeRangeBack[i];
+        shapeRange[i] = shapeRangeBackup[i];
     }
-    storageDims.resize(storageDimsBack.size());
-    for (size_t i = 0; i < storageDimsBack.size(); ++i)
+    storageDims.resize(storageDimsBackup.size());
+    for (size_t i = 0; i < storageDimsBackup.size(); ++i)
     {
-        storageDims[i] = storageDimsBack[i];
+        storageDims[i] = storageDimsBackup[i];
     }
 }
 
-void aclTensorDesc::BackConst()
+void aclTensorDesc::BackupConst()
 {
-    isConstBack = isConst;
-    constDataBufBack = constDataBuf;
-    constDataLenBack = constDataLen;
+    isConstBackup = isConst;
+    constDataBufBackup = constDataBuf;
+    constDataLenBackup = constDataLen;
 }
 
 void aclTensorDesc::RecoverConst()
 {
-    isConst = isConstBack;
-    constDataBuf = constDataBufBack;
-    constDataLen = constDataLenBack;
+    isConst = isConstBackup;
+    constDataBuf = constDataBufBackup;
+    constDataLen = constDataLenBackup;
 }
 

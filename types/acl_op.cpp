@@ -96,11 +96,7 @@ void AclOp::Init(const AclOp& aclOp)
         size_t len = static_cast<size_t>(aclOp.numOutputs) * sizeof(aclTensorDesc *);
         aclTensorDesc **desc = static_cast<aclTensorDesc **>(malloc(len));
         ACL_REQUIRES_NOT_NULL_RET_VOID(desc);
-        if (memset_s(desc, len, 0, len) != EOK) {
-            ACL_LOG_INNER_ERROR("memset failed");
-            ACL_FREE(desc);
-            return;
-        }
+
         this->outputDesc = static_cast<const aclTensorDesc * const *>(desc);
         for (int32_t i = 0; i < this->numOutputs; ++i) {
             if (aclOp.outputDesc[i] != nullptr) {
@@ -127,15 +123,15 @@ void AclOp::Init(const AclOp& aclOp)
     this->opModel = aclOp.opModel;
 }
 
-void AclOp::BackConst() const
+void AclOp::BackupConst() const
 {
     for (int32_t i = 0; i < numInputs; ++i) {
         aclTensorDesc **tmp = const_cast<aclTensorDesc **>(const_cast<aclTensorDesc *const *>(inputDesc));
-        tmp[i]->BackConst();
+        tmp[i]->BackupConst();
     }
         for (int32_t i = 0; i < numOutputs; ++i) {
         aclTensorDesc **tmp = const_cast<aclTensorDesc **>(const_cast<aclTensorDesc *const *>(outputDesc));
-        tmp[i]->BackConst();
+        tmp[i]->BackupConst();
     }
 }
 
@@ -151,19 +147,19 @@ void AclOp::RecoverConst() const
     }
 }
 
-void AclOp::BackDimsAndShapeRanges() const
+void AclOp::BackupDimsAndShapeRanges() const
 {
     for (int32_t i = 0; i < numInputs; ++i) {
         aclTensorDesc **tmp = const_cast<aclTensorDesc **>(const_cast<aclTensorDesc *const *>(inputDesc));
-        tmp[i]->BackDimsAndShapeRanges();
+        tmp[i]->BackupDimsAndShapeRanges();
     }
         for (int32_t i = 0; i < numOutputs; ++i) {
         aclTensorDesc **tmp = const_cast<aclTensorDesc **>(const_cast<aclTensorDesc *const *>(outputDesc));
-        tmp[i]->BackDimsAndShapeRanges();
+        tmp[i]->BackupDimsAndShapeRanges();
     }
 }
 
-void AclOp::RecoverdimsAndShaperanges() const
+void AclOp::RecoverDimsAndShaperanges() const
 {
     for (int32_t i = 0; i < numInputs; ++i) {
         aclTensorDesc **tmp = const_cast<aclTensorDesc **>(const_cast<aclTensorDesc *const *>(inputDesc));

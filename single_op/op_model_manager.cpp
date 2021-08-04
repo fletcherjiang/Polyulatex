@@ -777,7 +777,7 @@ aclError OpModelManager::MatchDynamicOpModel(const AclOp &aclOp, OpModel &opMode
                 continue;
             }
             ACL_LOG_INFO("before FixedAclopMatch aclOp = %s", aclOp.DebugString().c_str());
-            aclOp.RecoverdimsAndShaperanges();
+            aclOp.RecoverDimsAndShaperanges();
             FixedAclopMatch(aclOp, statusVec, shapeRanges[j]);
             ACL_LOG_INFO("after FixedAclopMatch aclOp = %s", aclOp.DebugString().c_str());
             ret = dynamicOpModels_.Get(aclOp, modelDef, true);
@@ -792,7 +792,7 @@ aclError OpModelManager::MatchDynamicOpModel(const AclOp &aclOp, OpModel &opMode
                 bool isExistConst = false;
                 ACL_REQUIRES_OK(SetHostMemToConst(aclOp, isExistConst));
                 if (!isExistConst) {
-                    aclOp.RecoverdimsAndShaperanges();
+                    aclOp.RecoverDimsAndShaperanges();
                     continue;
                 }
                 ret = dynamicOpModels_.Get(aclOp, modelDef, true);
@@ -815,17 +815,16 @@ aclError OpModelManager::MatchDynamicOpModel(const AclOp &aclOp, OpModel &opMode
 aclError OpModelManager::MatchOpModel(const AclOp &aclOp, OpModel &opModel, bool &isDynamic)
 {
     bool isNeedMatchDymaic = false;
-    aclOp.BackConst();
+    aclOp.BackupConst();
     aclError ret = MatchStaticOpModel(aclOp, opModel, isDynamic, isNeedMatchDymaic);
     aclOp.RecoverConst();
     if (!isNeedMatchDymaic) {
         return ret;
     }
-    aclOp.BackConst();
-    aclOp.BackDimsAndShapeRanges();
+    aclOp.BackupDimsAndShapeRanges();
     ret = MatchDynamicOpModel(aclOp, opModel, isDynamic);
     aclOp.RecoverConst();
-    aclOp.RecoverdimsAndShaperanges();
+    aclOp.RecoverDimsAndShaperanges();
     return ret;
 }
 
