@@ -723,40 +723,16 @@ aclError aclSetTensorPlaceMent(aclTensorDesc *desc, aclMemType memType)
 
 void aclTensorDesc::BackupDimsAndShapeRanges()
 {
-    dimsBackup.resize(dims.size());
-    for (size_t i = 0; i < dims.size(); ++i)
-    {
-        dimsBackup[i] = dims[i];
-    }
-    shapeRangeBackup.resize(shapeRange.size());
-    for (size_t i = 0; i < shapeRange.size(); ++i)
-    {
-        shapeRangeBackup[i] = shapeRange[i];
-    }
-    storageDimsBackup.resize(storageDims.size());
-    for (size_t i = 0; i < storageDims.size(); ++i)
-    {
-        storageDimsBackup[i] = storageDims[i];
-    }
+    dimsBackup = dims;
+    storageDimsBackup = storageDims;
+    shapeRangeBackup = shapeRange;
 }
 
 void aclTensorDesc::RecoverDimsAndShapeRanges()
 {
-    dims.resize(dimsBackup.size());
-    for (size_t i = 0; i < dimsBackup.size(); ++i)
-    {
-        dims[i] = dimsBackup[i];
-    }
-    shapeRange.resize(shapeRangeBackup.size());
-    for (size_t i = 0; i < shapeRangeBackup.size(); ++i)
-    {
-        shapeRange[i] = shapeRangeBackup[i];
-    }
-    storageDims.resize(storageDimsBackup.size());
-    for (size_t i = 0; i < storageDimsBackup.size(); ++i)
-    {
-        storageDims[i] = storageDimsBackup[i];
-    }
+    dims = dimsBackup;
+    storageDims = storageDimsBackup;
+    shapeRange = shapeRangeBackup;
 }
 
 void aclTensorDesc::BackupConst()
