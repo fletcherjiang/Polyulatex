@@ -19,7 +19,6 @@ namespace attr_utils {
 namespace {
 constexpr size_t DEFAULT_STRING_LEN = 32U;
 constexpr float FLOAT_DELTA = 1e-6;
-std::atomic<uint64_t> time_stamp{0UL};
 }
 
 template<typename T>
@@ -642,8 +641,9 @@ bool OpAttrEquals(const aclopAttr *const lhs, const aclopAttr *const rhs)
 
 uint64_t GetCurrentTimestamp()
 {
-    time_stamp.fetch_add(1);
-    return time_stamp.load(std::memory_order_relaxed);
+    static uint64_t time_stamp = 0UL;
+    ++time_stamp;
+    return time_stamp;
 }
 
 static bool ConstToAttr(const vector<aclTensorDesc> &tensorDesc,

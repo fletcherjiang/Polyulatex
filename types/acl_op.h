@@ -61,7 +61,7 @@ struct ACL_FUNC_VISIBILITY AclOp {
     void BackupConst() const;
     void RecoverConst() const;
     void BackupDimsAndShapeRanges() const;
-    void RecoverDimsAndShaperanges() const;
+    void RecoverDimsAndShapeRanges() const;
 };
 } // namespace acl
 
