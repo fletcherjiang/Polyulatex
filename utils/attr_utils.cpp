@@ -641,9 +641,9 @@ bool OpAttrEquals(const aclopAttr *const lhs, const aclopAttr *const rhs)
 
 uint64_t GetCurrentTimestamp()
 {
-    static uint64_t time_stamp = 0UL;
-    ++time_stamp;
-    return time_stamp;
+    static uint64_t timeStamp = 0UL;
+    ++timeStamp;
+    return timeStamp;
 }
 
 static bool ConstToAttr(const vector<aclTensorDesc> &tensorDesc,
