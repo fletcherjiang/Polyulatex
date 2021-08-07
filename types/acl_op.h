@@ -58,6 +58,10 @@ struct ACL_FUNC_VISIBILITY AclOp {
     OpModel opModel;
     std::string DebugString() const;
     void Init(const AclOp& aclOp);
+    void BackupConst() const;
+    void RecoverConst() const;
+    void BackupDimsAndShapeRanges() const;
+    void RecoverDimsAndShapeRanges() const;
 };
 } // namespace acl
 

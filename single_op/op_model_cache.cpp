@@ -19,7 +19,7 @@ namespace {
 namespace acl {
 aclError OpModelCache::GetOpModel(const OpModelDef &modelDef, OpModel &opModel)
 {
-    auto key = modelDef.modelPath;
+    auto &key = modelDef.modelPath;
     ACL_LOG_INFO("start to execute GetOpModel, modelPath = %s, key = %p", modelDef.modelPath.c_str(), &modelDef);
     {
         std::lock_guard<std::mutex> lock(mutex_);

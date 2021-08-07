@@ -228,33 +228,35 @@ static void SetShapeStatus(int32_t tensorNum,
     }
 }
 
-void OpModelManager::SetTensorShapeStatus(const AclOp &aclOp, std::vector<aclTensorShapeStatus> &shapeStatus)
+void OpModelManager::SetTensorShapeStatus(const AclOp &aclOp, std::shared_ptr<ShapeStatusVec> shapeStatus)
 {
     // Save shape status for tensors
-    SetShapeStatus(aclOp.numInputs, aclOp.inputDesc, shapeStatus);
-    SetShapeStatus(aclOp.numOutputs, aclOp.outputDesc, shapeStatus);
-    const string &shapeStatusDesc = TensorStatusToStr(shapeStatus);
+    ShapeStatusVec &statusVec = *shapeStatus;
+    SetShapeStatus(aclOp.numInputs, aclOp.inputDesc, statusVec);
+    SetShapeStatus(aclOp.numOutputs, aclOp.outputDesc, statusVec);
+    const string &shapeStatusDesc = TensorStatusToStr(statusVec);
     std::lock_guard<std::mutex> lk(shapeStatusMutex_);
     auto it = tensorShapeStatusDesc_.find(aclOp.opType);
     if (it != tensorShapeStatusDesc_.end()) {
         auto shapeStatusIt = find(it->second.begin(), it->second.end(), shapeStatusDesc);
         if (shapeStatusIt == it->second.end()) {
             it->second.emplace_back(shapeStatusDesc);
-            tensorShapeStatus_[aclOp.opType].emplace_back(shapeStatus);
+            tensorShapeStatus_[aclOp.opType].emplace_back(std::make_pair(shapeStatus, shapeStatusDesc));
         }
     } else {
-        tensorShapeStatus_[aclOp.opType].emplace_back(shapeStatus);
+        tensorShapeStatus_[aclOp.opType].emplace_back(std::make_pair(shapeStatus, shapeStatusDesc));
         tensorShapeStatusDesc_[aclOp.opType].emplace_back(shapeStatusDesc);
     }
 }
 
 void OpModelManager::GetTensorShapeStatus(const AclOp &aclOp,
-                                          std::vector<std::vector<aclTensorShapeStatus>> &shapeStatus)
+                                          std::vector<std::pair<std::shared_ptr<ShapeStatusVec>, std::string>> &shapeStatus)
 {
     std::lock_guard<std::mutex> lk(shapeStatusMutex_);
     auto it = tensorShapeStatus_.find(aclOp.opType);
     if (it != tensorShapeStatus_.end()) {
-        shapeStatus.assign(it->second.begin(), it->second.end());
+        shapeStatus.resize(it->second.size());
+        copy(it->second.begin(), it->second.end(), shapeStatus.begin());
     }
 
     ACL_LOG_INFO("GetTensorShapeStatus opType is %s, size of shapeStatus is %zu",
@@ -306,7 +308,7 @@ static void SetShapeRange(int32_t tensorNum, const aclTensorDesc *const tensorDe
     }
 }
 
-void OpModelManager::SetTensorShapeRange(const AclOp &aclOp, const std::vector<aclTensorShapeStatus> &tensorShapeStatus)
+void OpModelManager::SetTensorShapeRange(const AclOp &aclOp, const std::vector<aclTensorShapeStatus> &shapeStatus)
 {
     std::vector<std::pair<int64_t, int64_t>> shapeRanges;
     ACL_LOG_INFO("set input shape range");
@@ -314,30 +316,29 @@ void OpModelManager::SetTensorShapeRange(const AclOp &aclOp, const std::vector<a
     ACL_LOG_INFO("set output shape range");
     SetShapeRange(aclOp.numOutputs, aclOp.outputDesc, shapeRanges);
 
-    std::string tensorShapeStatusDesc = TensorStatusToStr(tensorShapeStatus);
-    ACL_LOG_INFO("SetTensorShapeRange tensorShapeStatusDesc is %s, shapeRanges size is %zu",
-        tensorShapeStatusDesc.c_str(), shapeRanges.size());
+    std::string shapeStatusDesc = TensorStatusToStr(shapeStatus);
+    ACL_LOG_INFO("SetTensorShapeRange shapeStatusDesc is %s, shapeRanges size is %zu",
+        shapeStatusDesc.c_str(), shapeRanges.size());
     std::lock_guard<std::mutex> lk(tensorShapeMutex_);
-    auto it = tensorShapeRange_.find(tensorShapeStatusDesc);
+    auto it = tensorShapeRange_.find(shapeStatusDesc);
     if (it != tensorShapeRange_.end()) {
         auto shapeRangeIt = find(it->second.begin(), it->second.end(), shapeRanges);
         if (shapeRangeIt == it->second.end()) {
             it->second.emplace_back(shapeRanges);
         }
     } else {
-        tensorShapeRange_[tensorShapeStatusDesc].emplace_back(shapeRanges);
+        tensorShapeRange_[shapeStatusDesc].emplace_back(shapeRanges);
     }
 }
 
-void OpModelManager::GetTensorShapeRange(const std::vector<aclTensorShapeStatus> &tensorShapeStatus,
+void OpModelManager::GetTensorShapeRange(const std::string &shapeStatusDesc,
                                          std::vector<std::vector<std::pair<int64_t, int64_t>>> &shapeRanges)
 {
-    const std::string &tensorShapeStatusDesc = TensorStatusToStr(tensorShapeStatus);
-    ACL_LOG_INFO("GetTensorShapeRange tensorShapeStatusDesc is %s", tensorShapeStatusDesc.c_str());
+    ACL_LOG_INFO("GetTensorShapeRange tensorShapeStatusDesc is %s", shapeStatusDesc.c_str());
     std::lock_guard<std::mutex> lk(tensorShapeMutex_);
-    auto it = tensorShapeRange_.find(tensorShapeStatusDesc);
+    auto it = tensorShapeRange_.find(shapeStatusDesc);
     if (it == tensorShapeRange_.end()) {
-        ACL_LOG_WARN("Match ShapeStatusDesc failed. ShapeStatusDesc = %s", tensorShapeStatusDesc.c_str());
+        ACL_LOG_WARN("Match ShapeStatusDesc failed. ShapeStatusDesc = %s", shapeStatusDesc.c_str());
         return;
     }
 
@@ -379,9 +380,10 @@ aclError OpModelManager::RegisterModel(OpModelDef &&modelConfig,
     shared_ptr<OpModelDef> agingModelDef = nullptr;
     if (isDynamic) {
         ACL_LOG_INFO("The model is dynamic shape");
-        std::vector<aclTensorShapeStatus> shapeStatus;
+        std::shared_ptr<ShapeStatusVec> shapeStatus;
+        ACL_MAKE_SHARED(shapeStatus = std::make_shared<ShapeStatusVec>(), return ACL_ERROR_BAD_ALLOC);
         SetTensorShapeStatus(aclOp, shapeStatus);
-        SetTensorShapeRange(aclOp, shapeStatus);
+        SetTensorShapeRange(aclOp, *shapeStatus);
         ACL_REQUIRES_OK(opDynamicModelDefs.Insert(aclOp, modelDefPtr, agingModelDef));
         if (agingModelDef != nullptr) {
             ACL_REQUIRES_OK(dynamicModelCache_.Delete(*agingModelDef));
@@ -424,16 +426,8 @@ aclError OpModelManager::SetTensorConst(aclTensorDesc *desc, const aclDataBuffer
     }
     desc->isConst = true;
 
-    auto *constData = new (std::nothrow) char[length];
-    ACL_REQUIRES_NOT_NULL(constData);
-    if (memcpy_s(constData, length, hostMem, length) != EOK) {
-        ACL_LOG_INNER_ERROR("[Copy][Mem]Copy const data failed. size = %zu", length);
-        ACL_DELETE_ARRAY_AND_SET_NULL(constData);
-        return ACL_ERROR_FAILURE;
-    }
-
-    desc->constDataBuf.reset(constData, [](const char *p)
-        { delete[]p; ACL_LOG_DEBUG("delete const data in SetTensorConst of OpModelManager"); });
+    desc->constDataBuf.reset((char *)hostMem, [](const char *p)
+        { ACL_LOG_DEBUG("do nothing when call reset of shared_ptr"); });
     desc->constDataLen = length;
     return ACL_SUCCESS;
 }
@@ -584,18 +578,11 @@ static void FixedAclOp(int32_t tensorNum,
                        const aclTensorDesc *const tensorDesc[],
                        const std::vector<aclTensorShapeStatus> &tensorShapeStatus,
                        const std::vector<std::pair<int64_t, int64_t>> &shapeRange,
-                       std::vector<std::vector<int64_t>> &tensorDims,
-                       std::vector<int64_t> &storageTensorDims, size_t &tensorStatusIndex,
-                       size_t &shapeIndex, size_t &shapeBegin)
+                       size_t &tensorStatusIndex, size_t &shapeIndex, size_t &shapeBegin)
 {
     size_t dimIndex = 0; // The index of dims
     for (int32_t tensorIndex = 0; tensorIndex < tensorNum; ++tensorIndex, ++tensorStatusIndex) {
         size_t statusIndex = 0;
-        std::vector<int64_t> dim;
-        for (size_t i = 0; i < tensorDesc[tensorIndex]->dims.size(); ++i) {
-            dim.emplace_back(tensorDesc[tensorIndex]->dims[i]);
-        }
-        tensorDims.emplace_back(dim);
         if (tensorShapeStatus[tensorStatusIndex].isUnkownRank) {
             const_cast<aclTensorDesc *>(tensorDesc[tensorIndex])->dims = {-2};
             const_cast<aclTensorDesc *>(tensorDesc[tensorIndex])->shapeRange.clear();
@@ -620,7 +607,6 @@ static void FixedAclOp(int32_t tensorNum,
         const_cast<aclTensorDesc *>(tensorDesc[tensorIndex])->shapeRange = inputTensorShapeRange;
 
         for (dimIndex = 0; dimIndex < tensorDesc[tensorIndex]->storageDims.size(); ++dimIndex) {
-            storageTensorDims.emplace_back(tensorDesc[tensorIndex]->storageDims[dimIndex]);
             if (!tensorShapeStatus[tensorStatusIndex].shapeStatus[statusIndex]) {
                 // -1 means dynamic dim
                 const_cast<aclTensorDesc *>(tensorDesc[tensorIndex])->storageDims[dimIndex] = -1;
@@ -632,9 +618,7 @@ static void FixedAclOp(int32_t tensorNum,
 
 void OpModelManager::FixedAclopMatch(const AclOp &aclOpMatch,
                                      const std::vector<aclTensorShapeStatus> &tensorShapeStatus,
-                                     const std::vector<std::pair<int64_t, int64_t>> &shapeRange,
-                                     std::vector<std::vector<int64_t>> &tensorDims,
-                                     std::vector<int64_t> &storageTensorDims)
+                                     const std::vector<std::pair<int64_t, int64_t>> &shapeRange)
 {
     // Modify the dynamic dimension entered by the user to -1 in order to match the model
     size_t shapeIndex = 0; // The end of shapeRange
@@ -643,10 +627,10 @@ void OpModelManager::FixedAclopMatch(const AclOp &aclOpMatch,
     // Before calling the FixedAclopMatch, it has been guaranteed that the statusIndex
     // will not exceed the length of shapeRange and tensorShapeStatus
     FixedAclOp(aclOpMatch.numInputs, aclOpMatch.inputDesc, tensorShapeStatus, shapeRange,
-        tensorDims, storageTensorDims, tensorStatusIndex, shapeIndex, shapeBegin);
+        tensorStatusIndex, shapeIndex, shapeBegin);
     ACL_LOG_INFO("InputDesc FixedAclopMatch success");
     FixedAclOp(aclOpMatch.numOutputs, aclOpMatch.outputDesc, tensorShapeStatus, shapeRange,
-        tensorDims, storageTensorDims, tensorStatusIndex, shapeIndex, shapeBegin);
+        tensorStatusIndex, shapeIndex, shapeBegin);
     ACL_LOG_INFO("OutputDesc FixedAclopMatch success");
 }
 
@@ -715,13 +699,13 @@ aclError OpModelManager::MatchStaticOpModel(const AclOp &aclOp, OpModel &opModel
     bool &isDynamic, bool &isNeedMatchDymaic)
 {
     shared_ptr<OpModelDef> modelDef;
-    AclOp aclopHostMemToConst = aclOp;
     aclError ret = ACL_SUCCESS;
     isNeedMatchDymaic = false;
     bool isExistConst = false;
-    ACL_REQUIRES_OK(SetHostMemToConst(aclopHostMemToConst, isExistConst));
+    ACL_REQUIRES_OK(SetHostMemToConst(aclOp, isExistConst));
     if (isExistConst) {
-        ret = opModels_.Get(aclopHostMemToConst, modelDef, true);
+        ret = opModels_.Get(aclOp, modelDef, true);
+        aclOp.RecoverConst();
         if (ret == ACL_SUCCESS) {
             isDynamic = false;
             ACL_LOG_INFO("Match static model with const memory successfully. opType = %s, opModel = %s",
@@ -769,46 +753,52 @@ aclError OpModelManager::MatchDynamicOpModel(const AclOp &aclOp, OpModel &opMode
     }
     // Need to refresh the shape(-1/-2) and go to map to find model when executing
     ACL_LOG_INFO("aclOp.numInputs is %d, aclOp.numOutputs is %d", aclOp.numInputs, aclOp.numOutputs);
-    std::vector<std::vector<aclTensorShapeStatus>> shapeStatus;
+    std::vector<std::pair<std::shared_ptr<ShapeStatusVec>, std::string>> shapeStatus;
     GetTensorShapeStatus(aclOp, shapeStatus);
     std::vector<std::vector<std::pair<int64_t, int64_t>>> shapeRanges;
-    std::vector<std::vector<int64_t>> tensorDims;
-    std::vector<int64_t> storageTensorDims;
     for (size_t i = 0; i < shapeStatus.size(); ++i) {
-        GetTensorShapeRange(shapeStatus[i], shapeRanges);
+        if (shapeStatus[i].first == nullptr) {
+            ACL_LOG_ERROR("shape status is empty");
+            return ACL_ERROR_FAILURE;
+        }
+        ShapeStatusVec &statusVec = *(shapeStatus[i].first);
+        if (static_cast<size_t>(aclOp.numInputs + aclOp.numOutputs) != statusVec.size()) {
+            ACL_LOG_WARN("The numbers of tensor[%zu] is not equal to tensor dims[%zu] in model",
+                static_cast<size_t>(aclOp.numInputs + aclOp.numOutputs), statusVec.size());
+            continue;
+        }
+        GetTensorShapeRange(shapeStatus[i].second, shapeRanges);
         for (size_t j = 0; j < shapeRanges.size(); ++j) {
             ACL_LOG_INFO("shapeRanges[%d] size is %zu, shapeStatus[%d] size is %zu",
-                j, shapeRanges[j].size(), i, shapeStatus[i].size());
-            if (static_cast<size_t>(aclOp.numInputs + aclOp.numOutputs) != shapeStatus[i].size()) {
-                ACL_LOG_WARN("The numbers of tensor[%zu] is not equal to tensor dims[%zu] in model",
-                    static_cast<size_t>(aclOp.numInputs + aclOp.numOutputs), shapeStatus[i].size());
-                continue;
-            }
-            if (!CheckShapeRange(aclOp, shapeStatus[i], shapeRanges[j])) {
+                j, shapeRanges[j].size(), i, statusVec.size());
+            if (!CheckShapeRange(aclOp, statusVec, shapeRanges[j])) {
                 ACL_LOG_WARN("the dims is not in range of shapeRange");
                 continue;
             }
-            AclOp aclOpMatch = AclOp(aclOp);
-            ACL_LOG_INFO("before FixedAclopMatch aclOpMatch = %s", aclOpMatch.DebugString().c_str());
-            tensorDims.clear();
-            storageTensorDims.clear();
-            FixedAclopMatch(aclOpMatch, shapeStatus[i], shapeRanges[j], tensorDims, storageTensorDims);
-            ACL_LOG_INFO("after FixedAclopMatch aclOpMatch = %s", aclOpMatch.DebugString().c_str());
-            ret = dynamicOpModels_.Get(aclOpMatch, modelDef, true);
+            ACL_LOG_INFO("before FixedAclopMatch aclOp = %s", aclOp.DebugString().c_str());
+            aclOp.RecoverDimsAndShapeRanges();
+            FixedAclopMatch(aclOp, statusVec, shapeRanges[j]);
+            ACL_LOG_INFO("after FixedAclopMatch aclOp = %s", aclOp.DebugString().c_str());
+            ret = dynamicOpModels_.Get(aclOp, modelDef, true);
             if (ret == ACL_SUCCESS) {
                 ACL_LOG_INFO("Match dynamic model success. opType = %s, opModel = %s",
-                    aclOpMatch.opType.c_str(), modelDef->modelPath.c_str());
+                    aclOp.opType.c_str(), modelDef->modelPath.c_str());
                 isDynamic = true;
                 ret = dynamicModelCache_.GetOpModel(*modelDef, opModel);
                 return ret;
             } else {
                 // aicpu is -2 but need to set const
                 bool isExistConst = false;
-                ACL_REQUIRES_OK(SetHostMemToConst(aclOpMatch, isExistConst));
-                ret = dynamicOpModels_.Get(aclOpMatch, modelDef, true);
+                ACL_REQUIRES_OK(SetHostMemToConst(aclOp, isExistConst));
+                if (!isExistConst) {
+                    aclOp.RecoverDimsAndShapeRanges();
+                    continue;
+                }
+                ret = dynamicOpModels_.Get(aclOp, modelDef, true);
+                aclOp.RecoverConst();
                 if (ret == ACL_SUCCESS) {
                     ACL_LOG_INFO("Match dynamic model success111. opType = %s, opModel = %s",
-                        aclOpMatch.opType.c_str(), modelDef->modelPath.c_str());
+                        aclOp.opType.c_str(), modelDef->modelPath.c_str());
                     isDynamic = true;
                     ret = dynamicModelCache_.GetOpModel(*modelDef, opModel);
                     return ret;
@@ -824,12 +814,16 @@ aclError OpModelManager::MatchDynamicOpModel(const AclOp &aclOp, OpModel &opMode
 aclError OpModelManager::MatchOpModel(const AclOp &aclOp, OpModel &opModel, bool &isDynamic)
 {
     bool isNeedMatchDymaic = false;
+    aclOp.BackupConst();
     aclError ret = MatchStaticOpModel(aclOp, opModel, isDynamic, isNeedMatchDymaic);
+    aclOp.RecoverConst();
     if (!isNeedMatchDymaic) {
         return ret;
     }
-
+    aclOp.BackupDimsAndShapeRanges();
     ret = MatchDynamicOpModel(aclOp, opModel, isDynamic);
+    aclOp.RecoverConst();
+    aclOp.RecoverDimsAndShapeRanges();
     return ret;
 }
 

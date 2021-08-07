@@ -125,9 +125,7 @@ TEST_F(UTEST_ACL_OpModelManager, FixedAclopMatchTest)
     opShapeStatus.isUnkownRank = true;
     std::vector<aclTensorShapeStatus> tensorShapeStatus = {opShapeStatus};
     std::vector<std::pair<int64_t, int64_t>> shapeRange;
-    std::vector<std::vector<int64_t>> tensorDims;
-    std::vector<int64_t> storageTensorDims;
-    OpModelManager::FixedAclopMatch(aclOp, tensorShapeStatus, shapeRange, tensorDims, storageTensorDims);
+    OpModelManager::FixedAclopMatch(aclOp, tensorShapeStatus, shapeRange);
     aclDestroyTensorDesc(inputDesc[0]);
 }
 
@@ -154,9 +152,11 @@ TEST_F(UTEST_ACL_OpModelManager, SetTensorShapeStatusTest)
     aclOp.inputDesc = inputDesc;
     aclOp.outputDesc = outputDesc;
     aclOp.opAttr = opAttr;
-    std::vector<aclTensorShapeStatus> shapeStatus;
+    std::shared_ptr<acl::OpModelManager::ShapeStatusVec> shapeStatus(new acl::OpModelManager::ShapeStatusVec);
     auto &instance = OpModelManager::GetInstance();
     instance.SetTensorShapeStatus(aclOp, shapeStatus);
+    //shapeStatus.reset();
+    shapeStatus = nullptr;
     aclDestroyTensorDesc(inputDesc[0]);
     aclDestroyTensorDesc(inputDesc[1]);
     aclDestroyTensorDesc(outputDesc[0]);

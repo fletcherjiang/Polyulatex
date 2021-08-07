@@ -40,13 +40,19 @@ void aclTensorDesc::Init(const aclTensorDesc &tensorDesc)
     this->storageFormat = tensorDesc.storageFormat;
     this->format = tensorDesc.format;
     this->dims = tensorDesc.dims;
+    this->dimsBackup = tensorDesc.dimsBackup;
     this->storageDims = tensorDesc.storageDims;
+    this->storageDimsBackup = tensorDesc.storageDimsBackup;
     this->name = tensorDesc.name;
     this->shapeRange = tensorDesc.shapeRange;
+    this->shapeRangeBackup = tensorDesc.shapeRangeBackup;
     this->address = tensorDesc.address;
     this->isConst = tensorDesc.isConst;
+    this->isConstBackup = tensorDesc.isConstBackup;
     this->constDataLen = tensorDesc.constDataLen;
+    this->constDataLenBackup = tensorDesc.constDataLenBackup;
     this->constDataBuf = tensorDesc.constDataBuf;
+    this->constDataBufBackup=tensorDesc.constDataBufBackup;
     this->cachedKey = tensorDesc.cachedKey;
     this->cachedShapeKey = tensorDesc.cachedShapeKey;
     this->memtype = tensorDesc.memtype;
@@ -713,5 +719,33 @@ aclError aclSetTensorPlaceMent(aclTensorDesc *desc, aclMemType memType)
     ACL_REQUIRES_NOT_NULL(desc);
     desc->memtype = memType;
     return ACL_SUCCESS;
+}
+
+void aclTensorDesc::BackupDimsAndShapeRanges()
+{
+    dimsBackup = dims;
+    storageDimsBackup = storageDims;
+    shapeRangeBackup = shapeRange;
+}
+
+void aclTensorDesc::RecoverDimsAndShapeRanges()
+{
+    dims = dimsBackup;
+    storageDims = storageDimsBackup;
+    shapeRange = shapeRangeBackup;
+}
+
+void aclTensorDesc::BackupConst()
+{
+    isConstBackup = isConst;
+    constDataBufBackup = constDataBuf;
+    constDataLenBackup = constDataLen;
+}
+
+void aclTensorDesc::RecoverConst()
+{
+    isConst = isConstBackup;
+    constDataBuf = constDataBufBackup;
+    constDataLen = constDataLenBackup;
 }
 

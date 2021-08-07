@@ -32,6 +32,7 @@ protected:
     }
     virtual void TearDown()
     {
+        Mock::VerifyAndClear((void *)(&MockFunctionTest::aclStubInstance()));
     }
 };
 
@@ -49,20 +50,20 @@ rtError_t rtEventQueryWaitStatus_Invoke2(rtEvent_t event, rtEventWaitStatus *sta
     return RT_ERROR_NONE;
 }
 
-TEST_F(UTEST_ACL_Runtime, aclrtSetDeviceSuccessTest)
+TEST_F(UTEST_ACL_Runtime, aclrtSetDeviceFailedTest)
 {
     int32_t deviceId = 1;
-    aclError ret = aclrtSetDevice(deviceId);
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtSetDevice(_))
-        .WillRepeatedly(Return((ACL_ERROR_RT_INVALID_DEVICEID)));
-    EXPECT_EQ(ret, ACL_SUCCESS);
+        .WillOnce(Return(ACL_ERROR_RT_INVALID_DEVICEID));
+    aclError ret = aclrtSetDevice(deviceId);
+    EXPECT_EQ(ret, ACL_ERROR_RT_INVALID_DEVICEID);
 }
 
-TEST_F(UTEST_ACL_Runtime, aclrtSetDeviceFailedTest)
+TEST_F(UTEST_ACL_Runtime, aclrtSetDeviceSuccessTest)
 {
     int32_t deviceId = 0;
     aclError ret = aclrtSetDevice(deviceId);
-    EXPECT_EQ(ret, ACL_ERROR_RT_INVALID_DEVICEID);
+    EXPECT_EQ(ret, ACL_SUCCESS);
 }
 
 TEST_F(UTEST_ACL_Runtime, aclrtResetDeviceTest)
@@ -399,14 +400,17 @@ TEST_F(UTEST_ACL_Runtime, aclrtQueryEventWaitStatusTest)
 TEST_F(UTEST_ACL_Runtime, aclrtQueryEventTest)
 {
     // aclrtQueryEvent
-    aclrtEvent event = (aclrtEvent)0x01;
+    aclrtEvent event;
     aclrtEventStatus status;
     aclError ret = aclrtResetEvent(nullptr, &status);
     EXPECT_NE(ret, ACL_SUCCESS);
-    ret = aclrtResetEvent(event, nullptr);
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtEventReset(_, _))
+        .WillOnce(Return(ACL_ERROR_RT_PARAM_INVALID));
+    ret = aclrtResetEvent(&event, nullptr);
     EXPECT_EQ(ret, ACL_ERROR_RT_PARAM_INVALID);
 
-    ret = aclrtQueryEvent(event, &status);
+    ret = aclrtQueryEvent(&event, &status);
     EXPECT_EQ(ret, ACL_SUCCESS);
     EXPECT_EQ(status, ACL_EVENT_STATUS_COMPLETE);
 
@@ -599,9 +603,7 @@ TEST_F(UTEST_ACL_Runtime, aclrtMalloc_DeviceTest)
 
     size = 1;
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtMalloc(_, _, _))
-        .WillOnce(Return((ACL_ERROR_RT_PARAM_INVALID)))
-        .WillOnce(Return((RT_ERROR_NONE)))
-        .WillOnce(Return((RT_ERROR_NONE)));
+        .WillOnce(Return(ACL_ERROR_RT_PARAM_INVALID));
     ret = aclrtMalloc(&devPtr, size, ACL_MEM_MALLOC_HUGE_ONLY);
     EXPECT_EQ(ret, ACL_ERROR_RT_PARAM_INVALID);
 }
@@ -717,9 +719,7 @@ TEST_F(UTEST_ACL_Runtime, memory_malloc_host)
     EXPECT_EQ(ret, ACL_SUCCESS);
 
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtMallocHost(_, _))
-        .WillOnce(Return((ACL_ERROR_RT_PARAM_INVALID)))
-        .WillOnce(Return((RT_ERROR_NONE)))
-        .WillOnce(Return((RT_ERROR_NONE)));
+        .WillOnce(Return(ACL_ERROR_RT_PARAM_INVALID));
     ret = aclrtMallocHost(&hostPtr, size);
     EXPECT_EQ(ret, ACL_ERROR_RT_PARAM_INVALID);
 }
@@ -859,8 +859,7 @@ TEST_F(UTEST_ACL_Runtime, aclrtMemsetAsyncFailedTest)
 
     // aclrtMemsetAsync failed
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtMemsetAsync(_, _, _, _, _))
-        .WillOnce(Return((ACL_ERROR_RT_PARAM_INVALID)))
-        .WillOnce(Return((RT_ERROR_NONE)));
+        .WillOnce(Return(ACL_ERROR_RT_PARAM_INVALID));
     ret = aclrtMemsetAsync(devPtr, 1, 1, 1, stream);
     EXPECT_EQ(ret, ACL_ERROR_RT_PARAM_INVALID);
 }
@@ -881,10 +880,7 @@ TEST_F(UTEST_ACL_Runtime, aclrtGetGroupCountTest)
 
     // aclrtGetGroupCount failed
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtGetGroupCount(_))
-        .WillOnce(Return((ACL_ERROR_RT_PARAM_INVALID)))
-        .WillOnce(Return(ACL_ERROR_RT_PARAM_INVALID))
-        .WillOnce(Return(RT_ERROR_NONE))
-        .WillOnce(Return(RT_ERROR_NONE));
+        .WillOnce(Return(ACL_ERROR_RT_PARAM_INVALID));
     EXPECT_EQ(aclrtGetGroupCount(&count), ACL_ERROR_RT_PARAM_INVALID);
 }
 
@@ -892,21 +888,24 @@ TEST_F(UTEST_ACL_Runtime, aclrtCreateGroupInfoTest)
 {
     // aclrtCreateGroupInfo success
     aclrtGroupInfo *groupInfo = aclrtCreateGroupInfo();
-    EXPECT_EQ(groupInfo, nullptr);
+    EXPECT_NE(groupInfo, nullptr);
 
     // aclrtCreateGroupInfo failed
-    EXPECT_NE(aclrtCreateGroupInfo(), nullptr);
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtGetGroupCount(_))
+        .WillOnce(Return(ACL_ERROR_RT_PARAM_INVALID));
+    EXPECT_EQ(aclrtCreateGroupInfo(), nullptr);
 }
 
 TEST_F(UTEST_ACL_Runtime, aclrtGetGroupInfoDetailTest)
 {
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtGetGroupCount(_))
+        .WillOnce(Return(RT_ERROR_NONE))
+        .WillOnce(Return(ACL_ERROR_RT_PARAM_INVALID))
+        .WillRepeatedly(Return(RT_ERROR_NONE));
+
     aclrtGroupInfo *groupInfo = aclrtCreateGroupInfo();
     uint32_t aicoreNum = 0;
     size_t param_ret_size = 0;
-    EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtGetGroupCount(_))
-        .WillOnce(Return((ACL_ERROR_RT_PARAM_INVALID)))
-        .WillRepeatedly(Return(RT_ERROR_NONE));
-
     EXPECT_EQ(aclrtGetGroupInfoDetail(groupInfo, 1, ACL_GROUP_AICORE_INT,
         (void *)(&aicoreNum), 4, &param_ret_size), ACL_ERROR_RT_PARAM_INVALID);
     EXPECT_EQ(aicoreNum, 0);

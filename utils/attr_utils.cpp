@@ -641,15 +641,9 @@ bool OpAttrEquals(const aclopAttr *const lhs, const aclopAttr *const rhs)
 
 uint64_t GetCurrentTimestamp()
 {
-    mmTimeval tv{};
-    const auto ret = mmGetTimeOfDay(&tv, nullptr);
-    if (ret != EN_OK) {
-        ACL_LOG_WARN("Func mmGetTimeOfDay failed, ret = %d", ret);
-    }
-    // 1000000: seconds to microseconds
-    const uint64_t total_use_time = static_cast<uint64_t>(tv.tv_usec) +
-        ((static_cast<uint64_t>(tv.tv_sec)) * 1000000U);
-    return total_use_time;
+    static uint64_t timeStamp = 0UL;
+    ++timeStamp;
+    return timeStamp;
 }
 
 static bool ConstToAttr(const vector<aclTensorDesc> &tensorDesc,

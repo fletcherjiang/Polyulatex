@@ -82,11 +82,6 @@ void AclOp::Init(const AclOp& aclOp)
         size_t len = static_cast<size_t>(aclOp.numInputs) * sizeof(aclTensorDesc *);
         aclTensorDesc **desc = static_cast<aclTensorDesc **>(malloc(len));
         ACL_REQUIRES_NOT_NULL_RET_VOID(desc);
-        if (memset_s(desc, len, 0, len) != EOK) {
-            ACL_LOG_INNER_ERROR("memset failed");
-            ACL_FREE(desc);
-            return;
-        }
         this->inputDesc = static_cast<const aclTensorDesc * const *>(desc);
         for (int32_t i = 0; i < this->numInputs; ++i) {
             if (aclOp.inputDesc[i] != nullptr) {
@@ -101,11 +96,7 @@ void AclOp::Init(const AclOp& aclOp)
         size_t len = static_cast<size_t>(aclOp.numOutputs) * sizeof(aclTensorDesc *);
         aclTensorDesc **desc = static_cast<aclTensorDesc **>(malloc(len));
         ACL_REQUIRES_NOT_NULL_RET_VOID(desc);
-        if (memset_s(desc, len, 0, len) != EOK) {
-            ACL_LOG_INNER_ERROR("memset failed");
-            ACL_FREE(desc);
-            return;
-        }
+
         this->outputDesc = static_cast<const aclTensorDesc * const *>(desc);
         for (int32_t i = 0; i < this->numOutputs; ++i) {
             if (aclOp.outputDesc[i] != nullptr) {
@@ -130,6 +121,54 @@ void AclOp::Init(const AclOp& aclOp)
     this->isMatched = aclOp.isMatched;
     this->isDynamic = aclOp.isDynamic;
     this->opModel = aclOp.opModel;
+}
+
+void AclOp::BackupConst() const
+{
+    for (int32_t i = 0; i < numInputs; ++i) {
+        aclTensorDesc **tmp = const_cast<aclTensorDesc **>(const_cast<aclTensorDesc *const *>(inputDesc));
+        tmp[i]->BackupConst();
+    }
+    for (int32_t i = 0; i < numOutputs; ++i) {
+        aclTensorDesc **tmp = const_cast<aclTensorDesc **>(const_cast<aclTensorDesc *const *>(outputDesc));
+        tmp[i]->BackupConst();
+    }
+}
+
+void AclOp::RecoverConst() const
+{
+    for (int32_t i = 0; i < numInputs; ++i) {
+        aclTensorDesc **tmp = const_cast<aclTensorDesc **>(const_cast<aclTensorDesc *const *>(inputDesc));
+        tmp[i]->RecoverConst();
+    }
+    for (int32_t i = 0; i < numOutputs; ++i) {
+        aclTensorDesc **tmp = const_cast<aclTensorDesc **>(const_cast<aclTensorDesc *const *>(outputDesc));
+        tmp[i]->RecoverConst();
+    }
+}
+
+void AclOp::BackupDimsAndShapeRanges() const
+{
+    for (int32_t i = 0; i < numInputs; ++i) {
+        aclTensorDesc **tmp = const_cast<aclTensorDesc **>(const_cast<aclTensorDesc *const *>(inputDesc));
+        tmp[i]->BackupDimsAndShapeRanges();
+    }
+    for (int32_t i = 0; i < numOutputs; ++i) {
+        aclTensorDesc **tmp = const_cast<aclTensorDesc **>(const_cast<aclTensorDesc *const *>(outputDesc));
+        tmp[i]->BackupDimsAndShapeRanges();
+    }
+}
+
+void AclOp::RecoverDimsAndShapeRanges() const
+{
+    for (int32_t i = 0; i < numInputs; ++i) {
+        aclTensorDesc **tmp = const_cast<aclTensorDesc **>(const_cast<aclTensorDesc *const *>(inputDesc));
+        tmp[i]->RecoverDimsAndShapeRanges();
+    }
+    for (int32_t i = 0; i < numOutputs; ++i) {
+        aclTensorDesc **tmp = const_cast<aclTensorDesc **>(const_cast<aclTensorDesc *const *>(outputDesc));
+        tmp[i]->RecoverDimsAndShapeRanges();
+    }
 }
 } // namespace acl
 
