@@ -128,7 +128,7 @@ struct Fp16Type {
         // Exponent overflow/NaN converts to signed inf/NaN
         // 0x8Fu:142=127+15
         if (eF > 0x8FU) {
-            eRet = static_cast<int16_t>(FP16_MAX_EXP - 1U);
+            eRet = static_cast<int16_t>(static_cast<uint16_t>(FP16_MAX_EXP) - 1U);
             mRet = static_cast<uint16_t>(FP16_MAX_MAN);
         }
 
@@ -145,7 +145,7 @@ struct Fp16Type {
                 if (needRound) {
                     mRet++;
                 }
-            } else if ((eF == 0x66U) && (mF > 0)) {
+            } else if ((eF == 0x66U) && (mF > 0U)) {
                 // 0x66:102 Denormal 0<f_v<min(Denormal)
                 mRet = 1U;
             } else {
@@ -161,14 +161,14 @@ struct Fp16Type {
             if (needRound) {
                 mRet++;
             }
-            if (mRet & static_cast<uint16_t>(FP16_MAN_HIDE_BIT)) {
+            if (static_cast<bool>(mRet & static_cast<uint16_t>(FP16_MAN_HIDE_BIT))) {
                 eRet++;
             }
         }
         Fp16Normalize(eRet, mRet);
-        val =  (((sRet) << static_cast<uint16_t>(FP16_SIGN_INDEX)) |
-                ((static_cast<uint16_t>(eRet)) << FP16_MAN_LEN) |
-                ((mRet) & static_cast<uint16_t>(FP16_MAX_MAN)));
+        val =  static_cast<uint16_t>(((sRet) << static_cast<uint16_t>(FP16_SIGN_INDEX)) |
+                                       ((static_cast<uint16_t>(eRet)) << FP16_MAN_LEN) |
+                                       ((mRet) & static_cast<uint16_t>(FP16_MAX_MAN)));
         return *this;
     }
 };
@@ -1065,7 +1065,7 @@ static std::string DimsDebugString(const aclmdlIODims &ioDims)
 static std::string AippDimsDebugString(const aclAippDims *const aippDims, const size_t shapeCount)
 {
     std::stringstream ssDims;
-    for (size_t i = 0; i < shapeCount; i++) {
+    for (size_t i = 0U; i < shapeCount; i++) {
         ssDims << " aclAippDims[" << i << "]: ";
         ssDims << DimsDebugString(aippDims[i].srcDims);
         ssDims << " srcSize:"<< aippDims[i].srcSize;
@@ -1158,6 +1158,8 @@ aclError aclmdlGetFirstAippInfo(uint32_t modelId, size_t idx, aclAippInfo *aippI
         ACL_LOG_CALL_ERROR("[Get][AIPPInfo]GetAIPPInfo failed, modelId[%u], index[%zu], ge result[%u]",
             modelId, idx, ret);
         return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
+    } else {
+        ;
     }
     SetAippInfo(aippInfo, aippParams);
 
