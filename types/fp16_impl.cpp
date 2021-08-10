@@ -44,20 +44,20 @@ static void ExtractFP16(const uint16_t &val, uint16_t *s, int16_t *e, uint16_t *
  */
 static bool IsRoundOne(uint64_t man, uint16_t truncLen)
 {
-    uint64_t mask0 = 0x4;
-    uint64_t mask1 = 0x2;
+    uint64_t mask0 = 0x4UL;
+    uint64_t mask1 = 0x2UL;
     uint64_t mask2;
-    uint16_t shiftOut = truncLen - 2; // shift 2 byte
+    uint16_t shiftOut = truncLen - 2U; // shift 2 byte
     mask0 = mask0 << shiftOut;
     mask1 = mask1 << shiftOut;
-    mask2 = mask1 - 1;
+    mask2 = mask1 - 1U;
 
-    bool lastBit = ((man & mask0) > 0);
+    bool lastBit = ((man & mask0) > 0UL);
     bool truncHigh = false;
     bool truncLeft = false;
     if (ROUND_TO_NEAREST == g_roundMode) {
-        truncHigh = ((man & mask1) > 0);
-        truncLeft = ((man & mask2) > 0);
+        truncHigh = ((man & mask1) > 0UL);
+        truncLeft = ((man & mask2) > 0UL);
     }
     return (truncHigh && (truncLeft || lastBit));
 }
@@ -72,31 +72,31 @@ static bool IsRoundOne(uint64_t man, uint16_t truncLen)
 static void Fp16Normalize(uint16_t &exp, uint16_t &man)
 {
     if (exp >= FP16_MAX_EXP) {
-        exp = FP16_MAX_EXP - 1;
+        exp = FP16_MAX_EXP - 1U;
         man = FP16_MAX_MAN;
-    } else if (exp == 0 && man == FP16_MAN_HIDE_BIT) {
+    } else if (exp == 0U && man == FP16_MAN_HIDE_BIT) {
         exp++;
-        man = 0;
+        man = 0U;
     }
 }
 
-float Fp16ToFloat(uint16_t value)
+float Fp16ToFloat(uint16_t val)
 {
     uint16_t hfSign;
     uint16_t hfMan;
     int16_t hfExp;
-    ExtractFP16(value, &hfSign, &hfExp, &hfMan);
+    ExtractFP16(val, &hfSign, &hfExp, &hfMan);
 
-    while (hfMan != 0 && (hfMan & FP16_MAN_HIDE_BIT) == 0) {
-        hfMan <<= 1u;
+    while ((hfMan != 0U) && ((hfMan & FP16_MAN_HIDE_BIT) == 0U)) {
+        hfMan <<= 1U;
         hfExp--;
     }
 
     uint32_t eRet;
     uint32_t mRet;
-    if (hfMan == 0) {
-        eRet = 0;
-        mRet = 0;
+    if (hfMan == 0U) {
+        eRet = 0U;
+        mRet = 0U;
     } else {
         eRet = hfExp - FP16_EXP_BIAS + FP32_EXP_BIAS;
         mRet = hfMan & FP16_MAN_MASK;
@@ -110,10 +110,10 @@ float Fp16ToFloat(uint16_t value)
     return ret;
 }
 
-uint16_t FloatToFp16(float value)
+uint16_t FloatToFp16(float val)
 {
     TypeUnion u;
-    u.fVal = value;
+    u.fVal = val;
     uint32_t ui32V = u.uVal;  // 1:8:23bit sign:exp:man
     auto sRet = static_cast<uint16_t>((ui32V & FP32_SIGN_MASK) >> FP32_SIGN_INDEX);  // 4Byte->2Byte
     uint32_t eF = (ui32V & FP32_EXP_MASK) >> FP32_MAN_LEN; // 8 bit exponent
@@ -123,34 +123,34 @@ uint16_t FloatToFp16(float value)
     uint16_t mRet;
     uint16_t eRet;
     // Exponent overflow/NaN converts to signed inf/NaN
-    if (eF > 0x8Fu) {  // 0x8Fu:142=127+15
-        eRet = FP16_MAX_EXP - 1;
+    if (eF > 0x8FU) {  // 0x8Fu:142=127+15
+        eRet = FP16_MAX_EXP - 1U;
         mRet = FP16_MAX_MAN;
-    } else if (eF <= 0x70u) {  // 0x70u:112=127-15 Exponent underflow converts to denormalized half or signed zero
-        eRet = 0;
-        if (eF >= 0x67u) {  // 0x67:103=127-24 Denormal
+    } else if (eF <= 0x70U) {  // 0x70u:112=127-15 Exponent underflow converts to denormalized half or signed zero
+        eRet = 0U;
+        if (eF >= 0x67U) {  // 0x67:103=127-24 Denormal
             mF = (mF | FP32_MAN_HIDE_BIT);
             uint16_t shiftOut = FP32_MAN_LEN;
-            uint64_t mTmp = (static_cast<uint64_t>(mF)) << (eF - 0x67u);
+            uint64_t mTmp = (static_cast<uint64_t>(mF)) << (eF - 0x67U);
 
             bool needRound = IsRoundOne(mTmp, shiftOut);
             mRet = static_cast<uint16_t>(mTmp >> shiftOut);
             if (needRound) {
                 mRet++;
             }
-        } else if (eF == 0x66 && mF > 0) {  // 0x66:102 Denormal 0<f_v<min(Denormal)
-            mRet = 1;
+        } else if ((eF == 0x66U) && (mF > 0U)) {  // 0x66:102 Denormal 0<f_v<min(Denormal)
+            mRet = 1U;
         } else {
-            mRet = 0;
+            mRet = 0U;
         }
     } else {  // Regular case with no overflow or underflow
-        eRet = eF - 0x70u;
+        eRet = eF - 0x70U;
         bool needRound = IsRoundOne(mF, mLenDelta);
         mRet = static_cast<uint16_t>(mF >> mLenDelta);
         if (needRound) {
             mRet++;
         }
-        if ((mRet & FP16_MAN_HIDE_BIT) != 0) {
+        if ((mRet & FP16_MAN_HIDE_BIT) != 0U) {
             eRet++;
         }
     }
@@ -162,6 +162,6 @@ uint16_t FloatToFp16(float value)
 
 bool Fp16Eq(uint16_t lhs, uint16_t rhs)
 {
-    return lhs == rhs || ((lhs | rhs) & INT16_T_MAX) == 0;
+    return (lhs == rhs) || (((lhs | rhs) & INT16_T_MAX) == 0U);
 }
 } // namespace acl
