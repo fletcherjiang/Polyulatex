@@ -32,7 +32,7 @@ namespace {
         std::unique_lock<std::mutex> lk(g_deviceCounterMutex);
         auto iter = g_deviceCounterMap.find(deviceId);
         if (iter == g_deviceCounterMap.end()) {
-            g_deviceCounterMap[deviceId] = 1;
+            g_deviceCounterMap[deviceId] = 1U;
         } else {
             ++iter->second;
         }
@@ -43,9 +43,9 @@ namespace {
         std::unique_lock<std::mutex> lk(g_deviceCounterMutex);
         auto iter = g_deviceCounterMap.find(deviceId);
         if (iter != g_deviceCounterMap.end()) {
-            if (iter->second != 0) {
+            if (iter->second != 0U) {
                 --iter->second;
-                if (iter->second == 0) {
+                if (iter->second == 0U) {
                     return true;
                 }
             }
@@ -77,7 +77,7 @@ aclError aclrtSetDeviceWithoutTsdVXX(int32_t deviceId)
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_ADD_APPLY_TOTAL_COUNT(ACL_STATISTICS_SET_RESET_DEVICE);
     ACL_LOG_INFO("start to execute aclrtSetDeviceWithoutTsdVXX, deviceId = %d.", deviceId);
-    std::string socVersion = GetSocVersion();
+    const std::string socVersion = GetSocVersion();
     if (strncmp(socVersion.c_str(), "Ascend910", strlen("Ascend910")) != 0) {
         ACL_LOG_INFO("The soc version is not Ascend910, not support");
         return ACL_ERROR_API_NOT_SUPPORT;
@@ -123,8 +123,8 @@ aclError aclrtResetDeviceWithoutTsdVXX(int32_t deviceId)
     ACL_PROFILING_REG(ACL_PROF_FUNC_RUNTIME);
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_SET_RESET_DEVICE);
     ACL_LOG_INFO("start to execute aclrtResetDeviceWithoutTsdVXX, deviceId = %d.", deviceId);
-    std::string socVersion = GetSocVersion();
-    if (strncmp(socVersion.c_str(), "Ascend910", strlen("Ascend910")) != 0) {
+    const std::string socVersion = GetSocVersion();
+    if (0 != strncmp(socVersion.c_str(), "Ascend910", strlen("Ascend910"))) {
         ACL_LOG_INNER_ERROR("The soc version is not Ascend910, not support");
         return ACL_ERROR_API_NOT_SUPPORT;
     }

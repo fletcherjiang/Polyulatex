@@ -18,7 +18,7 @@ namespace acl {
 namespace attr_utils {
 namespace {
 constexpr size_t DEFAULT_STRING_LEN = 32U;
-constexpr float FLOAT_DELTA = 1e-6;
+constexpr float FLOAT_DELTA = 1e-6F;
 }
 
 template<typename T>
@@ -139,7 +139,7 @@ void ScalarAttrToString<string>(std::string &buffer, const ge::GeAttrValue &attr
 template<>
 void ScalarAttrToString<float>(std::string &buffer, const ge::GeAttrValue &attrVal)
 {
-    float val = 0.0;
+    float val = 0.0F;
     (void)attrVal.GetValue<float>(val);
     buffer += std::to_string(val);
 }
@@ -292,8 +292,8 @@ bool AttrScalarValueEquals(const ge::GeAttrValue &lhs, const ge::GeAttrValue &rh
 template<>
 bool AttrScalarValueEquals<float>(const ge::GeAttrValue &lhs, const ge::GeAttrValue &rhs)
 {
-    float lhsValue = 0.0;
-    float rhsValue = 0.0;
+    float lhsValue = 0.0F;
+    float rhsValue = 0.0F;
     (void)lhs.GetValue<float>(lhsValue);
     (void)rhs.GetValue<float>(rhsValue);
 
@@ -550,7 +550,7 @@ bool CheckFloatValueRange(const std::map<AttrRangeType, ge::GeAttrValue> &valueR
             ACL_LOG_INFO("Get listfloat value");
             return IsListFloatEquals(valExactFloat, inputFloatData);
         } else {
-            float tmpFloat = 0.0;
+            float tmpFloat = 0.0F;
             if (it->second.GetValue<float>(tmpFloat) == ge::GRAPH_SUCCESS) {
                 valExactFloat.push_back(tmpFloat);
                 ACL_LOG_INFO("Get float value");
