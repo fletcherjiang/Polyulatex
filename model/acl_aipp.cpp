@@ -167,8 +167,8 @@ struct Fp16Type {
         }
         Fp16Normalize(eRet, mRet);
         val =  static_cast<uint16_t>(((sRet) << static_cast<uint16_t>(FP16_SIGN_INDEX)) |
-                                       ((static_cast<uint16_t>(eRet)) << FP16_MAN_LEN) |
-                                       ((mRet) & static_cast<uint16_t>(FP16_MAX_MAN)));
+                ((static_cast<uint16_t>(eRet)) << FP16_MAN_LEN) |
+                ((mRet) & static_cast<uint16_t>(FP16_MAX_MAN)));
         return *this;
     }
 };
