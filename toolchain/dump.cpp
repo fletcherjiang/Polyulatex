@@ -82,7 +82,7 @@ namespace acl {
         }
     }
 
-    static std::vector<std::string> Split(const std::string &str, const char *delimiter)
+    static std::vector<std::string> Split(const std::string &str, const char * const delimiter)
     {
         std::vector<std::string> resVec;
         if (str.empty()) {
@@ -113,7 +113,7 @@ namespace acl {
     {
         ACL_LOG_INFO("start to execute CheckDumpListValidity.");
         const nlohmann::json &jsDumpConfig = js.at(ACL_DUMP);
-        std::vector<DumpInfo> dumpList = jsDumpConfig.at(ACL_DUMP_LIST).get<std::vector<DumpInfo>>();
+        const std::vector<DumpInfo> dumpList = jsDumpConfig.at(ACL_DUMP_LIST).get<std::vector<DumpInfo>>();
         std::string dumpOpSwitch;
         if (jsDumpConfig.find(ACL_DUMP_OP_SWITCH) != jsDumpConfig.end()) {
             dumpOpSwitch = jsDumpConfig.at(ACL_DUMP_OP_SWITCH).get<std::string>();
@@ -170,14 +170,14 @@ namespace acl {
     {
         ACL_LOG_INFO("start to execute IsValidDirStr");
         const std::string pathWhiteList = "-=[];\\,./!@#$%^&*()_+{}:?";
-        size_t len = dumpPath.length();
+        const size_t len = dumpPath.length();
         for (size_t i = 0U; i < len; ++i) {
-            int32_t tmpChar = static_cast<int32_t>(dumpPath[i]);
+            const int32_t tmpChar = static_cast<int32_t>(dumpPath[i]);
             if ((std::islower(tmpChar) == 0) && (std::isupper(tmpChar) == 0) && (std::isdigit(tmpChar) == 0) &&
                 (pathWhiteList.find(dumpPath[i]) == std::string::npos)) {
                 ACL_LOG_ERROR("[Check][PathWhiteList]invalid dump_path [%s] in dump config at "
                     "location %zu", dumpPath.c_str(), i);
-                std::string errMsg = acl::AclErrorLogManager::FormatStr("dump config at location %zu", i);
+                const std::string errMsg = acl::AclErrorLogManager::FormatStr("dump config at location %zu", i);
                 acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
                     std::vector<std::string>({"param", "value", "reason"}),
                     std::vector<std::string>({"dump_path", dumpPath.c_str(), errMsg}));
@@ -193,7 +193,7 @@ namespace acl {
     {
         // check the valid of ipAddress in dump_path
         ACL_LOG_INFO("start to execute IsValidIpAddress.");
-        size_t colonPos = config.dumpPath.find_first_of(":");
+        const size_t colonPos = config.dumpPath.find_first_of(":");
         if (colonPos != std::string::npos) {
             ACL_LOG_INFO("dump_path field contains ip address.");
             if ((colonPos + 1U) == config.dumpPath.size()) {
@@ -204,10 +204,10 @@ namespace acl {
                 return false;
             }
 
-            std::string ipAddress = config.dumpPath.substr(0U, colonPos);
-            std::vector<std::string> ipRet = Split(ipAddress, ".");
+            const std::string ipAddress = config.dumpPath.substr(0U, colonPos);
+            const std::vector<std::string> ipRet = Split(ipAddress, ".");
             if (ipRet.size() == static_cast<size_t>(MAX_IPV4_ADDRESS_LENGTH)) {
-                for (auto ret : ipRet) {
+                for (const auto ret : ipRet) {
                     if ((atoi(ret.c_str()) < 0) || ((atoi(ret.c_str())) > MAX_IPV4_ADDRESS_VALUE)) {
                         ACL_LOG_WARN("ip address[%s] is invalid in dump_path field", ipAddress.c_str());
                         return false;
@@ -231,7 +231,7 @@ namespace acl {
         if (config.dumpPath.length() > static_cast<size_t>(MAX_DUMP_PATH_LENGTH)) {
             ACL_LOG_ERROR("[Check][dumpPath]the length[%d] of dump_path is larger than "
                 "MAX_DUMP_PATH_LENGTH[%d]", config.dumpPath.length(), MAX_DUMP_PATH_LENGTH);
-            std::string errMsg = acl::AclErrorLogManager::FormatStr(
+            const std::string errMsg = acl::AclErrorLogManager::FormatStr(
                 "dump_path is larger than MAX_DUMP_PATH_LENGTH[%d]", MAX_DUMP_PATH_LENGTH);
             acl::AclErrorLogManager::ReportInputError(acl::INVALID_PARAM_MSG,
                 std::vector<std::string>({"param", "value", "reason"}),
@@ -239,7 +239,7 @@ namespace acl {
             return false;
         }
 
-        size_t colonPos = config.dumpPath.find_first_of(":");
+        const size_t colonPos = config.dumpPath.find_first_of(":");
         isCutDumpPathFlag = CheckIpAddress(config);
         if (isCutDumpPathFlag) {
             config.dumpPath = config.dumpPath.substr(colonPos + 1U);
@@ -254,7 +254,8 @@ namespace acl {
         } else {
             // check dump result path in dump_path field of existence and readability
             char trustedPath[MMPA_MAX_PATH] = {0};
-            int32_t ret = mmRealPath(config.dumpPath.c_str(), trustedPath, static_cast<int32_t>(sizeof(trustedPath)));
+            const int32_t ret = mmRealPath(config.dumpPath.c_str(),
+                trustedPath, static_cast<int32_t>(sizeof(trustedPath)));
             if (ret != EN_OK) {
                 ACL_LOG_ERROR("[Get][RealPath]the dump_path %s is not like a real path, "
                     "mmRealPath return %d", config.dumpPath.c_str(), ret);
@@ -263,7 +264,7 @@ namespace acl {
                     std::vector<std::string>({config.dumpPath, "cannot convert to realpath"}));
                 return false;
             }
-            uint32_t accessMode = static_cast<uint32_t>(M_R_OK) | static_cast<uint32_t>(M_W_OK);
+            const uint32_t accessMode = static_cast<uint32_t>(M_R_OK) | static_cast<uint32_t>(M_W_OK);
             if (mmAccess2(trustedPath, static_cast<INT32>(accessMode)) != EN_OK) {
                 ACL_LOG_ERROR("[Check][Permisssion]the dump result path[%s] does't have read and "
                     "write permisssion", trustedPath);
@@ -301,7 +302,7 @@ namespace acl {
             return false;
         }
 
-        std::string dumpPath = jsDumpConfig.at(ACL_DUMP_PATH).get<std::string>();
+        const std::string dumpPath = jsDumpConfig.at(ACL_DUMP_PATH).get<std::string>();
         if (dumpPath.empty()) {
             ACL_LOG_WARN("dump_path field is null in config");
             return false;

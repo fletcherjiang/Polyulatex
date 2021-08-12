@@ -17,13 +17,13 @@
 
 namespace acl {
 namespace {
-const size_t MAX_WORKSPACES = 16;
+const size_t MAX_WORKSPACES = 16U;
 }
 
 std::mutex Executors::mu;
 std::map<uintptr_t, std::unique_ptr<StreamExecutor>> Executors::executors;
 
-StreamExecutor::StreamExecutor(ResourceManager *resMgr, aclrtStream stream) : resMgr_(resMgr), stream_(stream)
+StreamExecutor::StreamExecutor(ResourceManager *resMgr, aclrtStream stream): resMgr_(resMgr), stream_(stream)
 {
 }
 
@@ -45,9 +45,9 @@ aclError StreamExecutor::ExecuteAsync(const AclOp &aclOp,
 }
 
 aclError StreamExecutor::ExecuteAsync(const OpKernelDesc &kernelDesc,
-                                      int numInputs,
+                                      int32_t numInputs,
                                       const aclDataBuffer *const *inputs,
-                                      int numOutputs,
+                                      int32_t numOutputs,
                                       aclDataBuffer *const *outputs)
 {
     ACL_LOG_DEBUG("Start to execute op by dynamic kernel");
@@ -57,7 +57,7 @@ aclError StreamExecutor::ExecuteAsync(const OpKernelDesc &kernelDesc,
     return ACL_SUCCESS;
 }
 
-aclError StreamExecutor::InitTbeTask(const OpKernelDesc &desc, int numInputs, int numOutputs, TbeOpTask &task)
+aclError StreamExecutor::InitTbeTask(const OpKernelDesc &desc, int32_t numInputs, int32_t numOutputs, TbeOpTask &task)
 {
     // create new op task
     size_t numWorkSpaces = desc.workspaceSizes.size();
@@ -73,13 +73,13 @@ aclError StreamExecutor::InitTbeTask(const OpKernelDesc &desc, int numInputs, in
 
     // assemble args
     const std::string &tilingDesc = desc.extendArgs;
-    int sum = 0;
+    int32_t sum = 0;
     ACL_CHECK_ASSIGN_INT32_ADD(numInputs, numOutputs, sum);
-    size_t numArgs = 0;
+    size_t numArgs = 0U;
     ACL_CHECK_ASSIGN_SIZET_ADD(static_cast<size_t>(sum), numWorkSpaces, numArgs);
-    size_t numSize = 0;
+    size_t numSize = 0U;
     ACL_CHECK_ASSIGN_SIZET_MULTI(numArgs, sizeof(void *), numSize);
-    size_t argSize = 0;
+    size_t argSize = 0U;
     size_t descSize = tilingDesc.size();
     ACL_CHECK_ASSIGN_SIZET_ADD(numSize, descSize, argSize);
 
@@ -95,7 +95,7 @@ aclError StreamExecutor::InitTbeTask(const OpKernelDesc &desc, int numInputs, in
 
     // set tiling
     if (!tilingDesc.empty()) {
-        void *tilingStart = argBase + numArgs * sizeof(void *);
+        void *tilingStart = argBase + (numArgs * sizeof(void *));
         ACL_LOG_DEBUG("tiling desc size = %zu", tilingDesc.size());
         if (memcpy_s(tilingStart, tilingDesc.size(), tilingDesc.data(), tilingDesc.size()) != EOK) {
             ACL_LOG_INNER_ERROR("[Check][Memcpy]Invoking memcpy_s failed");
@@ -116,12 +116,12 @@ aclError StreamExecutor::AllocateWorkspaces(const std::vector<size_t> &workspace
         return ACL_ERROR_INVALID_PARAM;
     }
 
-    size_t totalSize = 0;
+    size_t totalSize = 0U;
     vector<uintptr_t> offsets;
-    uintptr_t offset = 0;
+    uintptr_t offset = 0U;
     for (auto wsSize : workspaceSizes) {
         offsets.emplace_back(offset);
-        size_t alignedSize = 0;
+        size_t alignedSize = 0U;
         ACL_REQUIRES_OK(GetAlignedSize(wsSize, alignedSize));
         totalSize += alignedSize;
         ACL_CHECK_ASSIGN_SIZET_ADD(totalSize, alignedSize, totalSize);
@@ -149,8 +149,8 @@ StreamExecutor::~StreamExecutor()
 
 StreamExecutor *Executors::GetOrCreate(aclrtContext context, aclrtStream stream)
 {
-    std::lock_guard<std::mutex> lock(mu);
-    uintptr_t key = stream != nullptr ? reinterpret_cast<uintptr_t>(stream) : reinterpret_cast<uintptr_t>(context);
+    std::lock_guard<std::mutex> lk(mu);
+    uintptr_t key = (stream != nullptr) ? reinterpret_cast<uintptr_t>(stream) : reinterpret_cast<uintptr_t>(context);
     auto it = executors.find(key);
     if (it != executors.end()) {
         return it->second.get();
@@ -173,9 +173,9 @@ StreamExecutor *Executors::GetOrCreate(aclrtContext context, aclrtStream stream)
 
 void Executors::Remove(aclrtContext context, aclrtStream stream)
 {
-    std::lock_guard<std::mutex> lock(mu);
+    std::lock_guard<std::mutex> lk(mu);
     auto key = reinterpret_cast<uintptr_t>(stream);
-    if (key != 0) {
+    if (key != 0U) {
         ACL_LOG_INFO("To remove executor by stream = %lu", key);
     } else {
         key = reinterpret_cast<uintptr_t>(context);

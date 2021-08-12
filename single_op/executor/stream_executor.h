@@ -30,9 +30,9 @@ public:
                           aclDataBuffer *const *outputs);
 
     aclError ExecuteAsync(const OpKernelDesc &kernelDesc,
-                          int numInputs,
+                          int32_t numInputs,
                           const aclDataBuffer *const *inputs,
-                          int numOutputs,
+                          int32_t numOutputs,
                           aclDataBuffer *const *outputs);
 
 private:
@@ -40,7 +40,7 @@ private:
 
     StreamExecutor(ResourceManager *resMgr, aclrtStream stream);
 
-    aclError InitTbeTask(const OpKernelDesc &desc, int numInputs, int numOutputs, TbeOpTask &task);
+    aclError InitTbeTask(const OpKernelDesc &desc, int32_t numInputs, int32_t numOutputs, TbeOpTask &task);
 
     aclError AllocateWorkspaces(const std::vector<size_t> &workspaceSizes, vector<uintptr_t> &workspaces);
 
