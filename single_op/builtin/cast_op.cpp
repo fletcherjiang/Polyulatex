@@ -18,14 +18,14 @@ namespace {
     constexpr char const *OP_NAME_CAST = "Cast";
     constexpr char const *ATTR_NAME_TRUNCATE = "truncate";
     constexpr char const *ATTR_NAME_DST_TYPE = "dst_type";
-    constexpr int CAST_INPUT_NUM = 1;
-    constexpr int CAST_OUTPUT_NUM = 1;
+    constexpr int32_t CAST_INPUT_NUM = 1;
+    constexpr int32_t CAST_OUTPUT_NUM = 1;
 }
 
-aclError aclopCast(const aclTensorDesc *srcDesc,
-                   const aclDataBuffer *srcBuffer,
-                   const aclTensorDesc *dstDesc,
-                   aclDataBuffer *dstBuffer,
+aclError aclopCast(const aclTensorDesc * const srcDesc,
+                   const aclDataBuffer * const srcBuffer,
+                   const aclTensorDesc * const dstDesc,
+                   aclDataBuffer * const dstBuffer,
                    uint8_t truncate,
                    aclrtStream stream)
 {
@@ -39,9 +39,9 @@ aclError aclopCast(const aclTensorDesc *srcDesc,
     aclopAttr opAttr;
     if (GetIfCastHasTruncateAttr()) {
         ACL_LOG_INFO("Need to set truncate attr in aclopCast");
-        opAttr.SetAttr(ATTR_NAME_TRUNCATE, static_cast<bool>(truncate));
+        (void)opAttr.SetAttr(ATTR_NAME_TRUNCATE, static_cast<bool>(truncate));
     }
-    opAttr.SetAttr(ATTR_NAME_DST_TYPE, static_cast<int64_t>(dstDesc->dataType));
+    (void)opAttr.SetAttr(ATTR_NAME_DST_TYPE, static_cast<int64_t>(dstDesc->dataType));
     return aclopExecuteV2(OP_NAME_CAST,
                           CAST_INPUT_NUM,
                           const_cast<aclTensorDesc **>(inputDesc),
@@ -53,10 +53,10 @@ aclError aclopCast(const aclTensorDesc *srcDesc,
                           stream);
 }
 
-aclError aclopCreateHandleForCast(aclTensorDesc *srcDesc,
-                                  aclTensorDesc *dstDesc,
+aclError aclopCreateHandleForCast(aclTensorDesc * const srcDesc,
+                                  aclTensorDesc * const dstDesc,
                                   uint8_t truncate,
-                                  aclopHandle **handle)
+                                  aclopHandle ** const handle)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
     ACL_STAGES_REG(acl::ACL_STAGE_CREATE, acl::ACL_STAGE_DEFAULT);
@@ -66,9 +66,9 @@ aclError aclopCreateHandleForCast(aclTensorDesc *srcDesc,
     aclopAttr opAttr;
     if (GetIfCastHasTruncateAttr()) {
         ACL_LOG_INFO("Need to set truncate attr in aclopCreateHandleForCast");
-        opAttr.SetAttr(ATTR_NAME_TRUNCATE, static_cast<bool>(truncate));
+        (void)opAttr.SetAttr(ATTR_NAME_TRUNCATE, static_cast<bool>(truncate));
     }
-    opAttr.SetAttr(ATTR_NAME_DST_TYPE, static_cast<int64_t>(dstDesc->dataType));
+    (void)opAttr.SetAttr(ATTR_NAME_DST_TYPE, static_cast<int64_t>(dstDesc->dataType));
     return aclopCreateHandle(OP_NAME_CAST,
                              CAST_INPUT_NUM,
                              inputDesc,
