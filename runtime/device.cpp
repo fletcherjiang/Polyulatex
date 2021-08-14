@@ -124,7 +124,7 @@ aclError aclrtResetDeviceWithoutTsdVXX(int32_t deviceId)
     ACL_ADD_RELEASE_TOTAL_COUNT(ACL_STATISTICS_SET_RESET_DEVICE);
     ACL_LOG_INFO("start to execute aclrtResetDeviceWithoutTsdVXX, deviceId = %d.", deviceId);
     const std::string socVersion = GetSocVersion();
-    if (0 != strncmp(socVersion.c_str(), "Ascend910", strlen("Ascend910"))) {
+    if (strncmp(socVersion.c_str(), "Ascend910", strlen("Ascend910")) != 0) {
         ACL_LOG_INNER_ERROR("The soc version is not Ascend910, not support");
         return ACL_ERROR_API_NOT_SUPPORT;
     }
