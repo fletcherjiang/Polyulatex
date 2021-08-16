@@ -21,8 +21,6 @@
 #include "acl/acl_rt.h"
 #include "common/log_inner.h"
 
-using namespace std;
-
 namespace {
     const std::string ACL_PROFILING_MODULE = "AclModule";
 }
@@ -40,14 +38,14 @@ AclProfilingManager &AclProfilingManager::GetInstance()
 
 aclError AclProfilingManager::Init()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    const std::lock_guard<std::mutex> lock(mutex_);
     if (reporterCallback_ == nullptr) {
         ACL_LOG_INNER_ERROR("[Check][ReporterCallback]prof reporter hasn't registered yet");
         return ACL_ERROR_PROFILING_FAILURE;
     }
 
-    int32_t result = reporterCallback_(static_cast<uint32_t>(MSPROF_MODULE_ACL),
-        static_cast<uint32_t>(MSPROF_REPORTER_INIT), nullptr, 0);
+    const int32_t result = reporterCallback_(static_cast<uint32_t>(MSPROF_MODULE_ACL), 
+        static_cast<uint32_t>(MSPROF_REPORTER_INIT), nullptr, 0U);
     if (result != 0) {
         ACL_LOG_INNER_ERROR("[Init][ProfEngine]init acl profiling engine failed, result = %d", result);
         return ACL_ERROR_PROFILING_FAILURE;
@@ -58,14 +56,14 @@ aclError AclProfilingManager::Init()
 
 aclError AclProfilingManager::UnInit()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    const std::lock_guard<std::mutex> lock(mutex_);
     if (reporterCallback_ == nullptr) {
         ACL_LOG_INNER_ERROR("[Check][ReporterCallback]prof reporter hasn't registered yet");
         return ACL_ERROR_PROFILING_FAILURE;
     }
 
-    int32_t result = reporterCallback_(static_cast<uint32_t>(MSPROF_MODULE_ACL),
-        static_cast<uint32_t>(MSPROF_REPORTER_UNINIT), nullptr, 0);
+    const int32_t result = reporterCallback_(static_cast<uint32_t>(MSPROF_MODULE_ACL),
+        static_cast<uint32_t>(MSPROF_REPORTER_UNINIT), nullptr, 0U);
     if (result != MSPROF_ERROR_NONE) {
         ACL_LOG_CALL_ERROR("[Uninit][ProfEngine]Uninit profiling engine failed, result = %d", result);
         return ACL_ERROR_PROFILING_FAILURE;
@@ -81,7 +79,7 @@ bool AclProfilingManager::IsDeviceListEmpty() const
 
 aclError AclProfilingManager::ProfilingData(ReporterData &data)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    const std::lock_guard<std::mutex> lock(mutex_);
     if (reporterCallback_ == nullptr) {
         return ACL_ERROR_PROFILING_FAILURE;
     } else {
@@ -93,29 +91,29 @@ aclError AclProfilingManager::ProfilingData(ReporterData &data)
     return ACL_SUCCESS;
 }
 
-aclError AclProfilingManager::AddDeviceList(const uint32_t *deviceIdList, uint32_t deviceNums)
+aclError AclProfilingManager::AddDeviceList(const uint32_t *const deviceIdList, uint32_t deviceNums)
 {
-    if (deviceNums == 0) {
+    if (deviceNums == 0U) {
         return ACL_SUCCESS;
     }
     ACL_REQUIRES_NOT_NULL(deviceIdList);
-    for (size_t devId = 0; devId < deviceNums; devId++) {
-        if (!deviceList_.count(deviceIdList[devId])) {
-            deviceList_.insert(deviceIdList[devId]);
-            ACL_LOG_INFO("device id %u is successfully added in acl profiling", deviceIdList[devId]);
+    for (size_t devId = 0U; devId < deviceNums; devId++) {
+        if (deviceList_.count(*(deviceIdList + devId)) == 0U) {
+            deviceList_.insert(*(deviceIdList + devId));
+            ACL_LOG_INFO("device id %u is successfully added in acl profiling", *(deviceIdList + devId));
         }
     }
     return ACL_SUCCESS;
 }
 
-aclError AclProfilingManager::RemoveDeviceList(const uint32_t *deviceIdList, uint32_t deviceNums)
+aclError AclProfilingManager::RemoveDeviceList(const uint32_t *const deviceIdList, uint32_t deviceNums)
 {
-    if (deviceNums == 0) {
+    if (deviceNums == 0U) {
         return ACL_SUCCESS;
     }
     ACL_REQUIRES_NOT_NULL(deviceIdList);
-    for (size_t devId = 0; devId < deviceNums; devId++) {
-        auto iter = deviceList_.find(deviceIdList[devId]);
+    for (size_t devId = 0U; devId < deviceNums; devId++) {
+        const auto iter = deviceList_.find(*(deviceIdList + devId));
         if (iter != deviceList_.end()) {
             deviceList_.erase(iter);
         }
@@ -123,24 +121,16 @@ aclError AclProfilingManager::RemoveDeviceList(const uint32_t *deviceIdList, uin
     return ACL_SUCCESS;
 }
 
-void AclProfilingManager::RemoveAllDeviceList()
+bool AclProfilingManager::IsDeviceEnable(const uint32_t &deviceId) const
 {
-    deviceList_.clear();
+    return deviceList_.count(deviceId) > 0U;
 }
 
-bool AclProfilingManager::IsDeviceEnable(const uint32_t &deviceId)
+aclError AclProfilingManager::QueryHashValue(const char *const funcName, int32_t deviceId, uint64_t &hashId)
 {
-    if (deviceList_.count(deviceId)) {
-        return true;
-    }
-    return false;
-}
-
-aclError AclProfilingManager::QueryHashValue(const char *funcName, int &deviceId, uint64_t &hashId)
-{
-    string apiName(funcName);
-    std::lock_guard<std::mutex> lock(mutex_);
-    auto iter = AclProfilingManager::GetInstance().HashMap.find(apiName);
+    const std::string apiName(funcName);
+    const std::lock_guard<std::mutex> lock(mutex_);
+    const auto iter = AclProfilingManager::GetInstance().HashMap.find(apiName);
     if (iter != AclProfilingManager::GetInstance().HashMap.end()) {
         hashId = iter->second;
     } else {
@@ -151,8 +141,8 @@ aclError AclProfilingManager::QueryHashValue(const char *funcName, int &deviceId
         MsprofHashData hashData;
         hashData.deviceId = deviceId;
         hashData.dataLen = apiName.size();
-        hashData.data = reinterpret_cast<unsigned char *>(const_cast<char *>(funcName));
-        int32_t ret = reporterCallback_(MSPROF_MODULE_ACL, MSPROF_REPORTER_HASH, &hashData, sizeof(MsprofHashData));
+        hashData.data = reinterpret_cast<unsigned char *>(const_cast<char*>(funcName));
+        const int32_t ret = reporterCallback_(MSPROF_MODULE_ACL, MSPROF_REPORTER_HASH, &hashData, sizeof(MsprofHashData));
         if ( ret != 0) {
             ACL_LOG_CALL_ERROR("[Get][HashId]call reporter failed, type is MSPROF_REPORTER_HASH, result = %d", ret);
             return ACL_ERROR_PROFILING_FAILURE;
@@ -163,16 +153,15 @@ aclError AclProfilingManager::QueryHashValue(const char *funcName, int &deviceId
     return ACL_SUCCESS;
 }
 
-AclProfilingReporter::AclProfilingReporter(const char *funcName, MsprofAclApiType funcType)
-    : funcName_(funcName),
-    funcType_(funcType)
+AclProfilingReporter::AclProfilingReporter(const char *const funName, MsprofAclApiType funType) :
+    funcName_(funName), funcType_(funType) 
 {
     if (AclProfilingManager::GetInstance().AclProfilingIsRun()) {
         if (aclrtGetDevice(&deviceId_) != ACL_SUCCESS) {
             ACL_LOG_WARN("Getting device id fail in AclProfiling!");
             deviceId_ = -1;
         }
-        switch (funcType) {
+        switch (funType) {
             case ACL_PROF_FUNC_OP:
                 funcTag_ = "acl_op";
                 break;
@@ -189,18 +178,18 @@ AclProfilingReporter::AclProfilingReporter(const char *funcName, MsprofAclApiTyp
                 funcTag_ = "acl_others";
                 break;
         }
-        mmTimespec timespec = mmGetTickCount();
+        const mmTimespec timeSpec = mmGetTickCount();
         // 1000 ^ 3 converts second to nanosecond
-        startTime_ = timespec.tv_sec * 1000 * 1000 * 1000 + timespec.tv_nsec;
+        startTime_ = (timeSpec.tv_sec * 1000 * 1000 * 1000) + timeSpec.tv_nsec;
     }
 }
 
 AclProfilingReporter::~AclProfilingReporter()
 {
     if (AclProfilingManager::GetInstance().AclProfilingIsRun()) {
-        mmTimespec timespec = mmGetTickCount();
+        const mmTimespec timeSpec = mmGetTickCount();
         // 1000 ^ 3 converts second to nanosecond
-        int64_t endTime = timespec.tv_sec * 1000 * 1000 * 1000 + timespec.tv_nsec;
+        const int64_t endTime = (timeSpec.tv_sec * 1000 * 1000 * 1000) + timeSpec.tv_nsec;
         if ((funcTag_ == nullptr) || (funcName_ == nullptr)) {
             ACL_LOG_WARN("function context is nullptr!");
             return;
@@ -220,7 +209,7 @@ AclProfilingReporter::~AclProfilingReporter()
 
         ReporterData reporter_data{};
         reporter_data.deviceId = deviceId_;
-        string tag_name = funcTag_;
+        const std::string tag_name = funcTag_;
         errno_t err = EOK;
         err = memcpy_s(reporter_data.tag, MSPROF_ENGINE_MAX_TAG_LEN,
             tag_name.c_str(), tag_name.size());
@@ -229,23 +218,23 @@ AclProfilingReporter::~AclProfilingReporter()
             return;
         }
 
-        uint64_t hashId = 0;
+        uint64_t hashId = 0U;
         aclError ret = AclProfilingManager::GetInstance().QueryHashValue(funcName_, deviceId_, hashId);
         if (ret != ACL_SUCCESS) {
             ACL_LOG_INNER_ERROR("[Query][HashValue]Failed to query hash value, error code is %u", ret);
             return;
         }
 
-        mmPid_t pid = static_cast<mmPid_t>(mmGetPid());
-        int32_t tid = mmGetTid();
-        // magic number is "5A5A" and tag is 0 for acl
-        MsprofAclProfData profData{MSPROF_DATA_HEAD_MAGIC_NUM, 0};
+        const mmPid_t pid = static_cast<mmPid_t>(mmGetPid());
+        const int32_t tid = mmGetTid();
+        //magic number is "5A5A" and tag is 0 for acl
+        MsprofAclProfData profData{MSPROF_DATA_HEAD_MAGIC_NUM, 0U};
         profData.apiType = static_cast<uint32_t>(funcType_);
         profData.apiHashValue = hashId;
-        profData.beginTime = startTime_;
+        profData.beginTime = static_cast<uint64_t>(startTime_);
         profData.endTime = endTime;
-        profData.processId = pid;
-        profData.threadId = tid;
+        profData.processId = static_cast<uint32_t>(pid);
+        profData.threadId = static_cast<uint32_t>(tid);
 
         reporter_data.data = reinterpret_cast<unsigned char *>(&profData);
         reporter_data.dataLen = sizeof(MsprofAclProfData);

@@ -35,13 +35,12 @@ namespace acl {
         // return flag of device list that needs report prof data is empty or not
         bool IsDeviceListEmpty() const;
         aclError ProfilingData(ReporterData &data);
-        aclError AddDeviceList(const uint32_t *deviceIdList, uint32_t deviceNums);
-        aclError RemoveDeviceList(const uint32_t *deviceIdList, uint32_t deviceNums);
-        void RemoveAllDeviceList();
-        bool IsDeviceEnable(const uint32_t &deviceId);
+        aclError AddDeviceList(const uint32_t *const deviceIdList, uint32_t deviceNums);
+        aclError RemoveDeviceList(const uint32_t *const deviceIdList, uint32_t deviceNums);
+        bool IsDeviceEnable(const uint32_t &deviceId) const;
         void SetProfReporterCallback(MsprofReporterCallback callback) { reporterCallback_ = callback; };
         MsprofReporterCallback GetProfReporterCallback() { return reporterCallback_; };
-        aclError QueryHashValue(const char *funcName, int &deviceId, uint64_t &hashId);
+        aclError QueryHashValue(const char *const funcName, int32_t deviceId, uint64_t &hashId);
 
     private:
         ~AclProfilingManager();
@@ -55,7 +54,7 @@ namespace acl {
 
     class ACL_FUNC_VISIBILITY AclProfilingReporter {
     public:
-        AclProfilingReporter(const char *funcName, MsprofAclApiType funcType);
+        AclProfilingReporter(const char *const funName, MsprofAclApiType funType);
         virtual ~AclProfilingReporter();
     private:
         int64_t startTime_ = 0;
