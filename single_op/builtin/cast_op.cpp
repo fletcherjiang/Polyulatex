@@ -22,10 +22,10 @@ namespace {
     constexpr int32_t CAST_OUTPUT_NUM = 1;
 }
 
-aclError aclopCast(const aclTensorDesc * const srcDesc,
-                   const aclDataBuffer * const srcBuffer,
-                   const aclTensorDesc * const dstDesc,
-                   aclDataBuffer * const dstBuffer,
+aclError aclopCast(const aclTensorDesc *srcDesc,
+                   const aclDataBuffer *srcBuffer,
+                   const aclTensorDesc *dstDesc,
+                   aclDataBuffer *dstBuffer,
                    uint8_t truncate,
                    aclrtStream stream)
 {
@@ -53,10 +53,10 @@ aclError aclopCast(const aclTensorDesc * const srcDesc,
                           stream);
 }
 
-aclError aclopCreateHandleForCast(aclTensorDesc * const srcDesc,
-                                  aclTensorDesc * const dstDesc,
+aclError aclopCreateHandleForCast(aclTensorDesc *srcDesc,
+                                  aclTensorDesc *dstDesc,
                                   uint8_t truncate,
-                                  aclopHandle ** const handle)
+                                  aclopHandle **handle)
 {
     ACL_PROFILING_REG(ACL_PROF_FUNC_OP);
     ACL_STAGES_REG(acl::ACL_STAGE_CREATE, acl::ACL_STAGE_DEFAULT);
