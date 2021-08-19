@@ -35,7 +35,7 @@ OpKernelRegistry::~OpKernelRegistry()
         ACL_LOG_DEBUG("To unregister kernel of op: %s", kernelsOfOp.first.c_str());
         for (auto &it : kernelsOfOp.second) {
             ACL_LOG_DEBUG("To unregister bin by handle: %p, kernelId = %s", it.second->binHandle, it.first.c_str());
-            rtDevBinaryUnRegister(it.second->binHandle);
+            (void)rtDevBinaryUnRegister(it.second->binHandle);
         }
     }
 }
@@ -48,7 +48,7 @@ aclError OpKernelRegistry::Register(std::unique_ptr<OpKernelRegistration> &&regi
     // do not deallocate if register failed
     registration->deallocator = nullptr;
     auto iter = kernels_.find(registration->opType);
-    if (iter != kernels_.end() && iter->second.count(registration->kernelId) > 0) {
+    if ((iter != kernels_.end()) && (iter->second.count(registration->kernelId) > 0U)) {
         ACL_LOG_INNER_ERROR("[Find][Kernel]Kernel already registered. kernelId = %s",
             registration->kernelId.c_str());
         return ACL_ERROR_KERNEL_ALREADY_REGISTERED;
@@ -57,7 +57,7 @@ aclError OpKernelRegistry::Register(std::unique_ptr<OpKernelRegistration> &&regi
     registration->stubName = std::string(STUB_NAME_PREFIX);
     registration->stubName += registration->kernelId;
     rtDevBinary_t binary;
-    binary.version = 0;
+    binary.version = 0U;
     binary.data = registration->binData;
     binary.length = registration->binSize;
     if (registration->enginetype == ACL_ENGINE_AICORE) {
@@ -77,7 +77,7 @@ aclError OpKernelRegistry::Register(std::unique_ptr<OpKernelRegistration> &&regi
     auto rtRet = rtFunctionRegister(binHandle, registration->stubName.c_str(), registration->stubName.c_str(),
         registration->kernelName.c_str(), static_cast<uint32_t>(FUNC_MODE_NORMAL));
     if (rtRet != RT_ERROR_NONE) {
-        rtDevBinaryUnRegister(binHandle);
+        (void)rtDevBinaryUnRegister(binHandle);
         ACL_LOG_CALL_ERROR("[Register][Dev]rtFunctionRegister failed. bin key = %s, kernel name = %s, "
             "runtime result = %d", registration->stubName.c_str(), registration->kernelName.c_str(),
             static_cast<int32_t>(rtRet));
@@ -86,7 +86,7 @@ aclError OpKernelRegistry::Register(std::unique_ptr<OpKernelRegistration> &&regi
 
     registration->binHandle = binHandle;
     registration->deallocator = deallocator;
-    kernels_[registration->opType].emplace(registration->kernelId, std::move(registration));
+    (void)kernels_[registration->opType].emplace(registration->kernelId, std::move(registration));
     return ACL_SUCCESS;
 }
 } // namespace acl
