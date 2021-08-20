@@ -141,7 +141,7 @@ aclError AclProfilingManager::QueryHashValue(const char *const funcName, int32_t
         MsprofHashData hashData;
         hashData.deviceId = deviceId;
         hashData.dataLen = apiName.size();
-        hashData.data = reinterpret_cast<unsigned char *>(const_cast<char*>(funcName));
+        hashData.data = reinterpret_cast<unsigned char *>(const_cast<char *>(funcName));
         const int32_t ret = reporterCallback_(MSPROF_MODULE_ACL, MSPROF_REPORTER_HASH, &hashData, sizeof(MsprofHashData));
         if ( ret != 0) {
             ACL_LOG_CALL_ERROR("[Get][HashId]call reporter failed, type is MSPROF_REPORTER_HASH, result = %d", ret);
