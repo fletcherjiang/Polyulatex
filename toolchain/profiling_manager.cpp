@@ -99,7 +99,7 @@ aclError AclProfilingManager::AddDeviceList(const uint32_t *const deviceIdList, 
     ACL_REQUIRES_NOT_NULL(deviceIdList);
     for (size_t devId = 0U; devId < deviceNums; devId++) {
         if (deviceList_.count(*(deviceIdList + devId)) == 0U) {
-            deviceList_.insert(*(deviceIdList + devId));
+            (void)deviceList_.insert(*(deviceIdList + devId));
             ACL_LOG_INFO("device id %u is successfully added in acl profiling", *(deviceIdList + devId));
         }
     }
@@ -115,7 +115,7 @@ aclError AclProfilingManager::RemoveDeviceList(const uint32_t *const deviceIdLis
     for (size_t devId = 0U; devId < deviceNums; devId++) {
         const auto iter = deviceList_.find(*(deviceIdList + devId));
         if (iter != deviceList_.end()) {
-            deviceList_.erase(iter);
+            (void)deviceList_.erase(iter);
         }
     }
     return ACL_SUCCESS;
