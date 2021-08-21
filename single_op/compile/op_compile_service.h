@@ -35,7 +35,7 @@ public:
 
     void RegisterCreator(CompileStrategy strategy, CompilerCreator creatorFn);
 
-    aclError SetCompileStrategy(CompileStrategy strategy, std::map<std::string, std::string> &options);
+    aclError SetCompileStrategy(CompileStrategy strategy, const std::map<std::string, std::string> &options);
 
     aclError CompileOp(const AclOp &aclOp, std::shared_ptr<void> &modelData, size_t &modelSize);
 

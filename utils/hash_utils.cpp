@@ -49,7 +49,7 @@ aclError GetTensorDescHash(const int32_t num, const aclTensorDesc *const descArr
 aclError GetAclOpHash(const AclOp &aclOp, const size_t &attrDigest, size_t &seed)
 {
     // Init seed to maintain consistency between Insert and Get
-    seed = 0;
+    seed = 0U;
 
     ACL_LOG_DEBUG("GetAclOpHash start, aclOp is %s", aclOp.DebugString().c_str());
     HashCombine(seed, aclOp.opType);

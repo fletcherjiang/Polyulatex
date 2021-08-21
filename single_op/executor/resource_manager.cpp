@@ -12,10 +12,9 @@
 #include "runtime/rt.h"
 #include "common/log_inner.h"
 
-using namespace std;
 
 namespace acl {
-ResourceManager::ResourceManager(aclrtContext context) : context_(context) {}
+ResourceManager::ResourceManager(aclrtContext thecontext) : context_(thecontext) {}
 
 ResourceManager::~ResourceManager()
 {

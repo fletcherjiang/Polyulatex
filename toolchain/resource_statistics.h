@@ -102,7 +102,7 @@ namespace acl {
         void AddApplySuccCount(ResourceType resourceType);
         void AddReleaseTotalCount(ResourceType resourceType);
         void AddReleaseSuccCount(ResourceType resourceType);
-        void TraverseStatistics();
+        const void TraverseStatistics();
     private:
         ResourceStatistics();
         ~ResourceStatistics();

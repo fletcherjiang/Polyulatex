@@ -13,19 +13,19 @@
 #include "framework/common/util.h"
 
 namespace {
-    std::atomic<std::uint64_t> atomicId(0);
+    std::atomic<std::uint64_t> atomicId(0U);
 }
 
 namespace acl {
-aclError OpModelCache::GetOpModel(const OpModelDef &modelDef, OpModel &opModel)
+aclError OpModelCache::GetOpModel(const OpModelDef &modelDef, OpModel &model)
 {
     auto key = modelDef.modelPath;
     ACL_LOG_INFO("start to execute GetOpModel, modelPath = %s, key = %p", modelDef.modelPath.c_str(), &modelDef);
     {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<std::mutex> locker(mutex_);
         auto iter = cachedModels_.find(key);
         if (iter != cachedModels_.end()) {
-            opModel = iter->second;
+            model = iter->second;
             ACL_LOG_INFO("GetOpModel success, modelPath = %s", modelDef.modelPath.c_str());
             return ACL_SUCCESS;
         }
@@ -34,13 +34,13 @@ aclError OpModelCache::GetOpModel(const OpModelDef &modelDef, OpModel &opModel)
     return ACL_ERROR_FAILURE;
 }
 
-aclError OpModelCache::Add(const OpModelDef &modelDef, OpModel &opModel)
+aclError OpModelCache::Add(const OpModelDef &modelDef, OpModel &model)
 {
     ACL_LOG_INFO("start to execute OpModelCache::Add, modelPath = %s, key = %p", modelDef.modelPath.c_str(), &modelDef);
     auto key = modelDef.modelPath;
-    std::lock_guard<std::mutex> lock(mutex_);
-    opModel.opModelId = atomicId++;
-    cachedModels_[key] = opModel;
+    std::lock_guard<std::mutex> locker(mutex_);
+    model.opModelId = atomicId++;
+    cachedModels_[key] = model;
     return ACL_SUCCESS;
 }
 
@@ -48,8 +48,8 @@ aclError OpModelCache::Delete(const OpModelDef &modelDef)
 {
     ACL_LOG_INFO("start to execute OpModelCache::Delete, modelPath = %s", modelDef.modelPath.c_str());
     auto key = modelDef.modelPath;
-    std::lock_guard<std::mutex> lock(mutex_);
-    cachedModels_.erase(key);
+    std::lock_guard<std::mutex> locker(mutex_);
+    (void)cachedModels_.erase(key);
     return ACL_SUCCESS;
 }
 } // namespace acl
