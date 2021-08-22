@@ -263,7 +263,7 @@ aclError AclOpMap<T>::Insert(const AclOp &op, const T &entry, T &agingT)
     {
         std::lock_guard<std::mutex> lk(mutex_);
         auto &modelVec = entries_[op.opType][inputDescStr][outputDescStr][digest];
-        AddMemAndAging(modelVec, *opAttr, entry, agingT, seed);
+        (void)AddMemAndAging(modelVec, *opAttr, entry, agingT, seed);
         ACL_LOG_INFO("AclShapeRangeMap::Insert success, seed = %zu, op = %s", seed, op.DebugString().c_str());
     }
     return ACL_SUCCESS;
