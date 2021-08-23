@@ -49,7 +49,7 @@ static constexpr uint32_t FP16_MAX_MAN = 0x03FFU;
  * @ingroup fp16 basic operator
  * @brief   constructor of fp16 from sign exponent and mantissa
  */
-#define FP16_CONSTRUCTOR(s, e, m)        (((s) << f) | ((e) << FP16_MAN_LEN) | ((m) & FP16_MAX_MAN))
+#define FP16_CONSTRUCTOR(s, e, m)        (((s) << FP16_SIGN_INDEX) | ((e) << FP16_MAN_LEN) | ((m) & FP16_MAX_MAN))
 /**
  * @ingroup fp32 basic parameter
  * @brief   bit index of sign in float/fp32
