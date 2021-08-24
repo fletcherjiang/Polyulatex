@@ -23,24 +23,25 @@ const size_t MAX_WORKSPACES = 16U;
 std::mutex Executors::mu;
 std::map<uintptr_t, std::unique_ptr<StreamExecutor>> Executors::executors;
 
-StreamExecutor::StreamExecutor(ResourceManager *resMgr, aclrtStream stream): resMgr_(resMgr), stream_(stream)
+StreamExecutor::StreamExecutor(ResourceManager *const resourceMgr, const aclrtStream aclStream)
+    : resMgr_(resourceMgr), stream_(aclStream)
 {
 }
 
-aclError StreamExecutor::ExecuteAsync(const AclOp &aclOp,
+aclError StreamExecutor::ExecuteAsync(const AclOp &aclOpDesc,
                                       const aclDataBuffer *const *inputs,
                                       aclDataBuffer *const *outputs)
 {
     std::shared_ptr<OpKernelDesc> desc;
-    auto ret = OpKernelSelector::GetInstance().GetOpKernelDesc(aclOp, desc);
+    auto ret = OpKernelSelector::GetInstance().GetOpKernelDesc(aclOpDesc, desc);
     if (ret != ACL_SUCCESS) {
         ACL_LOG_INNER_ERROR("[Get][OpKernelDesc]Op with the given shape was not compiled. aclOp = %s",
-            aclOp.DebugString().c_str());
+            aclOpDesc.DebugString().c_str());
         return ret;
     }
 
     ACL_REQUIRES_NOT_NULL(desc);
-    ACL_REQUIRES_OK(ExecuteAsync(*desc, aclOp.numInputs, inputs, aclOp.numOutputs, outputs));
+    ACL_REQUIRES_OK(ExecuteAsync(*desc, aclOpDesc.numInputs, inputs, aclOpDesc.numOutputs, outputs));
     return ACL_SUCCESS;
 }
 
@@ -85,17 +86,18 @@ aclError StreamExecutor::InitTbeTask(const OpKernelDesc &desc, int32_t numInputs
 
     auto args = std::unique_ptr<uint8_t[]>(new(std::nothrow)uint8_t[argSize]);
     ACL_CHECK_MALLOC_RESULT(args);
-    auto *argBase = args.get();
+    auto *const argBase = args.get();
 
     // set workspace addresses
     auto *workspaceBase = reinterpret_cast<uintptr_t *>(argBase) + numInputs + numOutputs;
     for (auto wsAddr : workspaces) {
-        *(workspaceBase++) = wsAddr;
+        *workspaceBase = wsAddr;
+        workspaceBase++;
     }
 
     // set tiling
     if (!tilingDesc.empty()) {
-        void *tilingStart = argBase + (numArgs * sizeof(void *));
+        void *const tilingStart = argBase + (numArgs * sizeof(void *));
         ACL_LOG_DEBUG("tiling desc size = %zu", tilingDesc.size());
         if (memcpy_s(tilingStart, tilingDesc.size(), tilingDesc.data(), tilingDesc.size()) != EOK) {
             ACL_LOG_INNER_ERROR("[Check][Memcpy]Invoking memcpy_s failed");
@@ -119,7 +121,7 @@ aclError StreamExecutor::AllocateWorkspaces(const std::vector<size_t> &workspace
     size_t totalSize = 0U;
     vector<uintptr_t> offsets;
     uintptr_t offset = 0U;
-    for (auto wsSize : workspaceSizes) {
+    for (const auto wsSize : workspaceSizes) {
         offsets.emplace_back(offset);
         size_t alignedSize = 0U;
         ACL_REQUIRES_OK(GetAlignedSize(wsSize, alignedSize));
@@ -133,8 +135,8 @@ aclError StreamExecutor::AllocateWorkspaces(const std::vector<size_t> &workspace
     void *wsMemory = nullptr;
     ACL_REQUIRES_OK(resMgr_->GetMemory(&wsMemory, totalSize));
 
-    auto wsBase = reinterpret_cast<uintptr_t>(wsMemory);
-    for (auto wsOffset : offsets) {
+    const auto wsBase = reinterpret_cast<uintptr_t>(wsMemory);
+    for (const auto wsOffset : offsets) {
         workspaces.emplace_back(wsBase + wsOffset);
     }
 
@@ -147,11 +149,11 @@ StreamExecutor::~StreamExecutor()
 }
 
 
-StreamExecutor *Executors::GetOrCreate(aclrtContext context, aclrtStream stream)
+StreamExecutor *Executors::GetOrCreate(const aclrtContext context, const aclrtStream stream)
 {
     std::lock_guard<std::mutex> lk(mu);
     uintptr_t key = (stream != nullptr) ? reinterpret_cast<uintptr_t>(stream) : reinterpret_cast<uintptr_t>(context);
-    auto it = executors.find(key);
+    const auto it = executors.find(key);
     if (it != executors.end()) {
         return it->second.get();
     }
@@ -167,11 +169,11 @@ StreamExecutor *Executors::GetOrCreate(aclrtContext context, aclrtStream stream)
         return nullptr;
     }
 
-    executors.emplace(key, std::unique_ptr<StreamExecutor>(executor));
+    (void)executors.emplace(key, std::unique_ptr<StreamExecutor>(executor));
     return executor;
 }
 
-void Executors::Remove(aclrtContext context, aclrtStream stream)
+void Executors::RemoveExecutor(const aclrtContext context, const aclrtStream stream)
 {
     std::lock_guard<std::mutex> lk(mu);
     auto key = reinterpret_cast<uintptr_t>(stream);
@@ -181,6 +183,6 @@ void Executors::Remove(aclrtContext context, aclrtStream stream)
         key = reinterpret_cast<uintptr_t>(context);
         ACL_LOG_INFO("To remove executor by context = %lu", key);
     }
-    executors.erase(key);
+    (void)executors.erase(key);
 }
 } // namespace acl

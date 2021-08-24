@@ -25,7 +25,7 @@ class StreamExecutor {
 public:
     ~StreamExecutor();
 
-    aclError ExecuteAsync(const AclOp &aclOp,
+    aclError ExecuteAsync(const AclOp &aclOpDesc,
                           const aclDataBuffer *const *inputs,
                           aclDataBuffer *const *outputs);
 
@@ -38,14 +38,14 @@ public:
 private:
     friend class Executors;
 
-    StreamExecutor(ResourceManager *resMgr, aclrtStream stream);
+    StreamExecutor(ResourceManager *const resourceMgr, const aclrtStream aclStream);
 
     aclError InitTbeTask(const OpKernelDesc &desc, int32_t numInputs, int32_t numOutputs, TbeOpTask &task);
 
     aclError AllocateWorkspaces(const std::vector<size_t> &workspaceSizes, vector<uintptr_t> &workspaces);
 
-    std::unique_ptr<ResourceManager> resMgr_;
-    aclrtStream stream_;
+    const std::unique_ptr<ResourceManager> resMgr_;
+    const aclrtStream stream_;
     std::mutex mu_;
 };
 
@@ -55,9 +55,9 @@ public:
 
     ~Executors() = default;
 
-    static StreamExecutor *GetOrCreate(aclrtContext context, aclrtStream stream);
+    static StreamExecutor *GetOrCreate(const aclrtContext context, const aclrtStream stream);
 
-    static void Remove(aclrtContext context, aclrtStream stream);
+    static void RemoveExecutor(const aclrtContext context, const aclrtStream stream);
 
 private:
     static std::mutex mu;
