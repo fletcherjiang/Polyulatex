@@ -15,6 +15,7 @@
 namespace acl {
 aclError GetAlignedSize(size_t size, size_t &alignedSize)
 {
+    const int32_t DATA_MEMORY_ALIGN_SIZE = 32;
     // check overflow, the max value of size must be less than 0xFFFFFFFFFFFFFFFF-32*2
     if (size + static_cast<size_t>(DATA_MEMORY_ALIGN_SIZE * 2) < size) {
         ACL_LOG_INNER_ERROR("[Check][Size]size too large: %zu", size);

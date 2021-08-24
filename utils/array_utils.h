@@ -19,7 +19,7 @@ namespace acl {
 namespace array_utils {
 using DynamicInputIndexPair = std::pair<std::vector<int32_t>, std::vector<int32_t>>;
 template<typename T>
-aclError CheckPtrArray(int size, const T *const *arr)
+aclError CheckPtrArray(int32_t size, const T *const *arr)
 {
     if (size == 0) {
         return ACL_SUCCESS;
@@ -37,7 +37,7 @@ aclError CheckPtrArray(int size, const T *const *arr)
 }
 
 template<typename T>
-aclError CheckPtrArray(int size, T *const *arr)
+aclError CheckPtrArray(int32_t size, T *const *arr)
 {
     if (size == 0) {
         return ACL_SUCCESS;
@@ -54,11 +54,11 @@ aclError CheckPtrArray(int size, T *const *arr)
     return ACL_SUCCESS;
 }
 
-ACL_FUNC_VISIBILITY bool IsAllTensorEmpty(int size, const aclTensorDesc *const *arr);
+ACL_FUNC_VISIBILITY bool IsAllTensorEmpty(int32_t size, const aclTensorDesc *const *arr);
 
-bool IsAllTensorEmpty(int size, const aclDataBuffer *const *arr);
+bool IsAllTensorEmpty(int32_t size, const aclDataBuffer *const *arr);
 
-ACL_FUNC_VISIBILITY aclError IsHostMemTensorDesc(int size, const aclTensorDesc *const *arr);
+ACL_FUNC_VISIBILITY aclError IsHostMemTensorDesc(int32_t size, const aclTensorDesc *const *arr);
 
 bool GetDynamicInputIndex(int32_t size, const aclTensorDesc *const *arr, DynamicInputIndexPair &indexPair);
 } // namespace array_utils

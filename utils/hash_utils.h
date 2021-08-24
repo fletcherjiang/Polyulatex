@@ -24,7 +24,7 @@ template <class T>
 inline void HashCombine(size_t &seed, const T& v)
 {
     std::hash<T> hasher;
-    seed ^= hasher(v) + 0x9e3779b9 + (seed<<6) + (seed>>2);
+    seed ^= hasher(v) + 0x9e3779b9U + (seed<<6U) + (seed>>2U);
 }
 
 aclError GetTensorDescHash(const int32_t num, const aclTensorDesc *const descArr[], size_t &seed);
@@ -44,15 +44,15 @@ bool CheckModelAndAttrMatch(const AclOp &aclOp, const aclopAttr* opAttr, const T
     }
     ACL_LOG_DEBUG("Check opType success!");
 
-    if (aclOp.numInputs != static_cast<int>(entry->inputDescArr.size())) {
+    if (aclOp.numInputs != static_cast<int32_t>(entry->inputDescArr.size())) {
         ACL_LOG_WARN("Check numInputs is equal to inputDescArr size failed, numInputs is %d, "
-            "inputDescArr size is %d", aclOp.numInputs, static_cast<int>(entry->inputDescArr.size()));
+            "inputDescArr size is %d", aclOp.numInputs, static_cast<int32_t>(entry->inputDescArr.size()));
             return false;
     }
     ACL_LOG_DEBUG("Check numInputs is equal success!");
 
 
-    for (int32_t i = 0; i < aclOp.numInputs; ++i) {
+    for (size_t i = 0U; i < aclOp.numInputs; ++i) {
         if (!(entry->inputDescArr[i] == aclOp.inputDesc[i])) {
             ACL_LOG_WARN("Check inputDescArr is equal to inputDesc failed");
             return false;
@@ -61,14 +61,14 @@ bool CheckModelAndAttrMatch(const AclOp &aclOp, const aclopAttr* opAttr, const T
     ACL_LOG_DEBUG("Check inputDesc is equal success!");
 
 
-    if (aclOp.numOutputs != static_cast<int>(entry->outputDescArr.size())) {
+    if (aclOp.numOutputs != static_cast<int32_t>(entry->outputDescArr.size())) {
         ACL_LOG_WARN("Check numOutputs is equal to outputDescArr size failed, numOutputs is %d, "
-            "outputDescArr size is %d", aclOp.numOutputs, static_cast<int>(entry->outputDescArr.size()));
+            "outputDescArr size is %d", aclOp.numOutputs, static_cast<int32_t>(entry->outputDescArr.size()));
             return false;
     }
     ACL_LOG_DEBUG("Check numOutputs is equal success!");
 
-    for (int32_t i = 0; i < aclOp.numOutputs; ++i) {
+    for (size_t i = 0U; i < aclOp.numOutputs; ++i) {
         if (!(entry->outputDescArr[i] == aclOp.outputDesc[i])) {
             ACL_LOG_WARN("Check outputDescArr is equal to outputDesc failed");
             return false;
