@@ -19,7 +19,7 @@
 #include "op_model.h"
 
 namespace acl {
-constexpr uint64_t DEFAULT_MAX_OPQUEUE_NUM = 10000;
+constexpr uint64_t DEFAULT_MAX_OPQUEUE_NUM = 10000U;
 
 enum OpCompileType {
     OP_COMPILE_SYS,
