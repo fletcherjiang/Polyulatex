@@ -161,7 +161,7 @@ struct Fp16Type {
             if (needRound) {
                 mRet++;
             }
-            if (static_cast<bool>(mRet & static_cast<uint16_t>(FP16_MAN_HIDE_BIT))) {
+            if ((mRet & static_cast<uint16_t>(FP16_MAN_HIDE_BIT)) != 0U) {
                 eRet++;
             }
         }

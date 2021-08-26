@@ -115,7 +115,7 @@ static void OptimizeTensorDescForTransdata(const AclOp &aclOp, bool isInput, GeT
 static aclError MakeInputCompileParam(const AclOp &aclOp, CompileParam &param,
                                       OpDesc *opDesc, int32_t compileFlag)
 {
-    for (size_t i = 0U; i < aclOp.numInputs; ++i) {
+    for (int32_t i = 0; i < aclOp.numInputs; ++i) {
         const aclTensorDesc *desc = aclOp.inputDesc[i];
         if (!desc->CheckShapeRange()) {
             ACL_LOG_INNER_ERROR("the number of shapeRange is not equal to number of dims");
@@ -186,7 +186,7 @@ static aclError MakeInputCompileParam(const AclOp &aclOp, CompileParam &param,
 static aclError MakeOutputCompileParam(const AclOp &aclOp, CompileParam &param,
                                        OpDesc *opDesc, int32_t compileFlag)
 {
-    for (size_t i = 0U; i < aclOp.numOutputs; ++i) {
+    for (int32_t i = 0; i < aclOp.numOutputs; ++i) {
         const aclTensorDesc *desc = aclOp.outputDesc[i];
         GeTensorDesc geTensorDesc(GeShape(desc->dims),
                                   static_cast<::ge::Format>(desc->format),
