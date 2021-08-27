@@ -22,7 +22,7 @@ using FileNameFilterFn = bool(const std::string &fileName);
 aclError ListFiles(const std::string &dirName,
     FileNameFilterFn filter,
     std::vector<std::string> &names,
-    int maxDepth);
+    int32_t maxDepth);
 } // namespace file_utils
 } // namespace acl
 

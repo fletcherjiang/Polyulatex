@@ -39,7 +39,7 @@ namespace acl {
         aclError RemoveDeviceList(const uint32_t *const deviceIdList, uint32_t deviceNums);
         bool IsDeviceEnable(const uint32_t &deviceId) const;
         void SetProfReporterCallback(MsprofReporterCallback callback) { reporterCallback_ = callback; };
-        MsprofReporterCallback GetProfReporterCallback() { return reporterCallback_; };
+        const MsprofReporterCallback GetProfReporterCallback() { return reporterCallback_; };
         aclError QueryHashValue(const char *const funcName, int32_t deviceId, uint64_t &hashId);
 
     private:

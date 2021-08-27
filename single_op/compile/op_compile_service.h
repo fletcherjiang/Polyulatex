@@ -15,7 +15,7 @@
 namespace acl {
 using CompilerCreator = OpCompiler *(*)();
 
-const int ACL_ERROR_COMPILER_NOT_REGISTERED = 16;
+const int32_t ACL_ERROR_COMPILER_NOT_REGISTERED = 16;
 
 enum CompileStrategy {
     NO_COMPILER,

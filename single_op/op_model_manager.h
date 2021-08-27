@@ -116,7 +116,7 @@ private:
     ModelMap onlineCompiledModels_;
     OpModelCache modelCache_;
     OpModelCache dynamicModelCache_;
-    std::uint32_t counter_ = 0;
+    std::uint32_t counter_ = 0U;
 
     std::mutex shapeStatusMutex_;
     std::unordered_map<std::string, std::vector<std::vector<aclTensorShapeStatus>>> tensorShapeStatus_;

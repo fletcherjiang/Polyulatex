@@ -18,16 +18,16 @@
 namespace acl {
 class OpTask {
 public:
-    virtual aclError ExecuteAsync(int numInputs,
+    virtual aclError ExecuteAsync(int32_t numInputs,
                                   const aclDataBuffer *const inputs[],
-                                  int numOutputs,
+                                  int32_t numOutputs,
                                   aclDataBuffer *const outputs[],
                                   aclrtStream stream) = 0;
 
     void SetArgs(std::unique_ptr<uint8_t[]> &&args, uint32_t argSize);
 
 protected:
-    uint32_t argSize_ = 0;
+    uint32_t argSize_ = 0U;
     std::unique_ptr<uint8_t[]> args_ = nullptr;
 };
 
@@ -36,15 +36,15 @@ public:
     TbeOpTask(const void *stubFunc, uint32_t blockDim);
     ~TbeOpTask() = default;
 
-    aclError ExecuteAsync(int numInputs,
+    aclError ExecuteAsync(int32_t numInputs,
                           const aclDataBuffer *const inputs[],
-                          int numOutputs,
+                          int32_t numOutputs,
                           aclDataBuffer *const outputs[],
                           aclrtStream stream) override;
 
 private:
     const void *stubFunc_ = nullptr;
-    uint32_t blockDim_ = 1;
+    uint32_t blockDim_ = 1U;
 };
 } // namespace acl
 #endif // TRUNK_PROJ_OP_TASK_H

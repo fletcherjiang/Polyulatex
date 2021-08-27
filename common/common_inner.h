@@ -13,7 +13,7 @@
 
 #include "acl/acl_base.h"
 
-constexpr size_t SOC_VERSION_LEN = 128;
+constexpr size_t SOC_VERSION_LEN = 128U;
 
 std::string GetSocVersion();
 
