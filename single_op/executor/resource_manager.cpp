@@ -14,7 +14,7 @@
 
 
 namespace acl {
-ResourceManager::ResourceManager(aclrtContext thecontext) : context_(thecontext) {}
+ResourceManager::ResourceManager(aclrtContext theContext) : context_(theContext) {}
 
 ResourceManager::~ResourceManager()
 {
