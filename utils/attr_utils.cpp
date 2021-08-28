@@ -274,9 +274,7 @@ size_t AttrMapToDigest(const std::map<std::string, ge::GeAttrValue> &attrMap)
         GeAttrValueToStringForDigest(digest, attr.second);
     }
 
-    std::hash<std::string> hashFunc;
-    auto seed = hashFunc(digest);
-    return seed;
+    return std::hash<std::string>{}(digest);
 }
 
 template<typename T>
