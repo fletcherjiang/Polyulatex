@@ -116,9 +116,9 @@ std::string AclErrorLogManager::FormatStr(const char *fmt, ...)
 }
 
 void AclErrorLogManager::ReportInputError(std::string errorCode, const std::vector<std::string> &key,
-    const std::vector<std::string> &value)
+    const std::vector<std::string> &val)
 {
-    REPORT_INPUT_ERROR(errorCode, key, value);
+    REPORT_INPUT_ERROR(errorCode, key, val);
 }
 
 void AclErrorLogManager::ReportInnerError(const char *fmt, ...)
