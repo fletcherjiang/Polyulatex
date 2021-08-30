@@ -128,7 +128,7 @@ struct Fp16Type {
         // Exponent overflow/NaN converts to signed inf/NaN
         // 0x8Fu:142=127+15
         if (eF > 0x8FU) {
-            eRet = static_cast<int16_t>(static_cast<uint16_t>(FP16_MAX_EXP) - 1U);
+            eRet = FP16_MAX_EXP - 1;
             mRet = static_cast<uint16_t>(FP16_MAX_MAN);
         }
 
@@ -1159,7 +1159,7 @@ aclError aclmdlGetFirstAippInfo(uint32_t modelId, size_t idx, aclAippInfo *aippI
             modelId, idx, ret);
         return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     } else {
-        ;
+        ACL_LOG_WARN("we do not process this ge result[%u]", ret);
     }
     SetAippInfo(aippInfo, aippParams);
 
