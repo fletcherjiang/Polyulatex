@@ -227,7 +227,7 @@ AclProfilingReporter::~AclProfilingReporter()
 
         const mmPid_t pid = static_cast<mmPid_t>(mmGetPid());
         const int32_t tid = mmGetTid();
-        //magic number is "5A5A" and tag is 0 for acl
+        // magic number is "5A5A" and tag is 0 for acl
         MsprofAclProfData profData{MSPROF_DATA_HEAD_MAGIC_NUM, 0U};
         profData.apiType = static_cast<uint32_t>(funcType_);
         profData.apiHashValue = hashId;
