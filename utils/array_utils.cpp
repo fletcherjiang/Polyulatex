@@ -16,7 +16,7 @@
 
 namespace acl {
 namespace array_utils {
-bool IsAllTensorEmpty(int size, const aclTensorDesc *const *arr)
+bool IsAllTensorEmpty(int32_t size, const aclTensorDesc *const *arr)
 {
     if (size == 0) {
         return false;
@@ -24,7 +24,7 @@ bool IsAllTensorEmpty(int size, const aclTensorDesc *const *arr)
 
     for (int32_t idx = 0; idx < size; ++idx) {
         bool flag = false;
-        for (size_t idy = 0; idy < arr[idx]->dims.size(); ++idy) {
+        for (size_t idy = 0U; idy < arr[idx]->dims.size(); ++idy) {
             if (arr[idx]->dims[idy] == 0) {
                 flag = true;
                 break;
@@ -39,14 +39,14 @@ bool IsAllTensorEmpty(int size, const aclTensorDesc *const *arr)
     return true;
 }
 
-bool IsAllTensorEmpty(int size, const aclDataBuffer *const *arr)
+bool IsAllTensorEmpty(int32_t size, const aclDataBuffer *const *arr)
 {
     if (size == 0) {
         return false;
     }
 
     for (int32_t idx = 0; idx < size; ++idx) {
-        if (arr[idx]->length > 0) {
+        if (arr[idx]->length > 0U) {
             return false;
         }
     }
@@ -66,11 +66,11 @@ bool GetDynamicInputIndex(int32_t size, const aclTensorDesc *const *arr, Dynamic
 
     std::set<std::string> attrNameSet;
     int32_t start = -1;
-    int32_t end = -1;
+    int32_t ended = -1;
     std::string lastName;
     for (int32_t i = 0; i < size; ++i) {
         std::string curName = arr[i]->dynamicInputName;
-        if (curName.size() == 0 && lastName.size() == 0) {
+        if ((curName.size() == 0U) && (lastName.size() == 0U)) {
             continue;
         }
 
@@ -81,36 +81,36 @@ bool GetDynamicInputIndex(int32_t size, const aclTensorDesc *const *arr, Dynamic
             }
 
             // valid attr name
-            if (lastName.size() > 0) {
+            if (lastName.size() > 0U) {
                 startVec.emplace_back(start);
-                endVec.emplace_back(end);
-                attrNameSet.insert(lastName);
+                endVec.emplace_back(ended);
+                (void)attrNameSet.insert(lastName);
             }
 
-            if (curName.size() > 0) {
+            if (curName.size() > 0U) {
                 start = i;
-                end = i;
+                ended = i;
             }
         }
-        end = i; // refresh end index
+        ended = i; // refresh ended index
         lastName = curName; // refresh lastName
     }
 
-    if (lastName.size() > 0) {
+    if (lastName.size() > 0U) {
         startVec.emplace_back(start);
-        endVec.emplace_back(end);
+        endVec.emplace_back(ended);
     }
 
     return true;
 }
 
-aclError IsHostMemTensorDesc(int size, const aclTensorDesc *const *arr)
+aclError IsHostMemTensorDesc(int32_t size, const aclTensorDesc *const *arr)
 {
     if (size == 0) {
         return ACL_SUCCESS;
     }
     ACL_REQUIRES_NOT_NULL(arr);
-    for (int idx = 0; idx < size; ++idx) {
+    for (int32_t idx = 0; idx < size; ++idx) {
         if ((!arr[idx]->IsConstTensor()) && (arr[idx]->IsHostMemTensor())) {
             ACL_LOG_INNER_ERROR("[Check][HostMemTensorDesc]PlaceMent of element at index %d is hostMem", idx);;
             return ACL_ERROR_INVALID_PARAM;

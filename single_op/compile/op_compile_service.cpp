@@ -19,7 +19,7 @@ OpCompileService::~OpCompileService()
 void OpCompileService::RegisterCreator(CompileStrategy strategy,
     CompilerCreator creatorFn)
 {
-    creators_.emplace(strategy, creatorFn);
+    (void)creators_.emplace(strategy, creatorFn);
 }
 
 aclError OpCompileService::CompileOp(const acl::AclOp &aclOp, std::shared_ptr<void> &modelData, size_t &modelSize)
@@ -33,7 +33,7 @@ aclError OpCompileService::CompileOp(const acl::AclOp &aclOp, std::shared_ptr<vo
 }
 
 aclError OpCompileService::SetCompileStrategy(CompileStrategy strategy,
-    std::map<std::string, std::string> &options)
+    const std::map<std::string, std::string> &options)
 {
     ACL_DELETE_AND_SET_NULL(compiler_);
 
@@ -42,7 +42,7 @@ aclError OpCompileService::SetCompileStrategy(CompileStrategy strategy,
         return ACL_SUCCESS;
     }
 
-    if (strategy != NATIVE_COMPILER && strategy != REMOTE_COMPILER) {
+    if ((strategy != NATIVE_COMPILER) && (strategy != REMOTE_COMPILER)) {
         ACL_LOG_INNER_ERROR("[Check][Strategy]The current compile strategy[%d] is invalid.",
             static_cast<int32_t>(strategy));
         return ACL_ERROR_INVALID_PARAM;

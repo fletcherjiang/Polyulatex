@@ -33,7 +33,7 @@ public:
 private:
     std::vector<void *> pending_mem_;
     void *current_mem_ = nullptr;
-    size_t current_mem_size_ = 0;
+    size_t current_mem_size_ = 0U;
 
     // used by release proc
     aclrtContext context_;

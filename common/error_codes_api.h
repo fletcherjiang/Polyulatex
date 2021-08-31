@@ -19,7 +19,7 @@ enum ModuleId {
     MODULE_ACL = 0,
     MODULE_GE = 1,
     MODULE_RTS = 2,
-    MODULE_INVALID
+    MODULE_INVALID = 3
 };
 
 namespace acl {
@@ -57,12 +57,12 @@ public:
 } // namespace acl
 
 #define ACL_REG_ERRCODE(errCode, moduleId, moduleErrCode, errDesc) \
-    const acl::ErrorCodeRegister g_##moduleId##_##moduleErrCode##_errorno(errCode, moduleId, moduleErrCode, errDesc)
+    const acl::ErrorCodeRegister g_##moduleId##_##moduleErrCode##_errorno((errCode), (moduleId), (moduleErrCode), (errDesc))
 
 #define ACL_GET_ERRCODE(moduleId, moduleErrCode) \
-    acl::ErrorCodeFactory::Instance().GetErrorCode(moduleId, moduleErrCode)
+    acl::ErrorCodeFactory::Instance().GetErrorCode((moduleId), (moduleErrCode))
 
 #define ACL_GET_ERRDESC(moduleId, moduleErrCode) \
-    acl::ErrorCodeFactory::Instance().GetErrDesc(moduleId, moduleErrCode)
+    acl::ErrorCodeFactory::Instance().GetErrDesc((moduleId), (moduleErrCode))
 
 #endif // ACL_ERROR_CODES_API_H_

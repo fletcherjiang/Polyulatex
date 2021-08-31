@@ -12,7 +12,6 @@
 #include "mmpa/mmpa_api.h"
 #include "common/log_inner.h"
 
-using namespace std;
 
 namespace acl {
 namespace file_utils {
@@ -32,12 +31,12 @@ private:
     int32_t count_;
 };
 
-int RegularFileFilterFn(const mmDirent2 *entry)
+static int32_t RegularFileFilterFn(const mmDirent2 *entry)
 {
-    return entry->d_type == MM_DT_DIR || entry->d_type == MM_DT_REG;
+    return (static_cast<int32_t>(entry->d_type) == MM_DT_DIR) || (static_cast<int32_t>(entry->d_type) == MM_DT_REG);
 }
 
-aclError ListFiles(const std::string &dirName, FileNameFilterFn filter, std::vector<std::string> &names, int maxDepth)
+aclError ListFiles(const std::string &dirName, FileNameFilterFn filter, std::vector<std::string> &names, int32_t maxDepth)
 {
     if (maxDepth <= 0) {
         return ACL_SUCCESS;
@@ -53,11 +52,11 @@ aclError ListFiles(const std::string &dirName, FileNameFilterFn filter, std::vec
     MmDirEntGuard guard(dirEntries, ret);
     for (int32_t i = 0; i < ret; ++i) {
         mmDirent2 *dirEnt = dirEntries[i];
-        string name = string(dirEnt->d_name);
-        if (dirEnt->d_type == MM_DT_DIR && name != "." && name != "..") {
+        std::string name = std::string(dirEnt->d_name);
+        if ((static_cast<int32_t>(dirEnt->d_type) == MM_DT_DIR) && (name != ".") && (name != "..")) {
             ACL_REQUIRES_OK(ListFiles(dirName + "/" += name, filter, names, maxDepth - 1));
-        } else if (dirEnt->d_type == MM_DT_REG) {
-            if (filter == nullptr || filter(name)) {
+        } else if (static_cast<int32_t>(dirEnt->d_type) == MM_DT_REG) {
+            if ((filter == nullptr) || filter(name)) {
                 names.emplace_back(dirName + "/" += name);
             }
         }

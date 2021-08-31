@@ -88,21 +88,21 @@ struct aclmdlDataset {
 
 enum CceAippInputFormat {
     CCE_YUV420SP_U8 = 1,
-    CCE_XRGB8888_U8,
-    CCE_NC1HWC0DI_FP16,
-    CCE_NC1HWC0DI_S8,
-    CCE_RGB888_U8,
-    CCE_ARGB8888_U8,
-    CCE_YUYV_U8,
-    CCE_YUV422SP_U8,
-    CCE_AYUV444_U8,
-    CCE_YUV400_U8,
-    CCE_RAW10,
-    CCE_RAW12,
-    CCE_RAW16,
+    CCE_XRGB8888_U8 = 2,
+    CCE_NC1HWC0DI_FP16 = 3,
+    CCE_NC1HWC0DI_S8 = 4,
+    CCE_RGB888_U8 = 5,
+    CCE_ARGB8888_U8 = 6,
+    CCE_YUYV_U8 = 7,
+    CCE_YUV422SP_U8 = 8,
+    CCE_AYUV444_U8 = 9,
+    CCE_YUV400_U8 = 10,
+    CCE_RAW10 = 11,
+    CCE_RAW12 = 12,
+    CCE_RAW16 = 13,
     // Hardware needs 15 and aipp component needs to reduce 1, so here it needs to be configured as 16.
     CCE_RAW24 = 16,
-    CCE_RESERVED
+    CCE_RESERVED = 17
 };
 
 enum AippMode {

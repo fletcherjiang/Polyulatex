@@ -47,7 +47,7 @@ aclError aclrtDestroyStream(aclrtStream stream)
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(stream);
 
     (void) ge::GeExecutor::ReleaseSingleOpResource(stream);
-    (void) acl::Executors::Remove(nullptr, stream);
+    (void) acl::Executors::RemoveExecutor(nullptr, stream);
     ACL_LOG_INFO("release singleop success");
     rtError_t rtErr = rtStreamDestroy(static_cast<rtStream_t>(stream));
     if (rtErr != RT_ERROR_NONE) {

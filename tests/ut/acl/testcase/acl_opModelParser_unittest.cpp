@@ -173,3 +173,19 @@ TEST_F(OpModelParserTest, TestToModelConfig2)
         .WillRepeatedly(Invoke(GetInt_invoke));
     OpModelParser::ToModelConfig(geModel, opModelDef);
 }
+
+TEST_F(OpModelParserTest, TestToModelConfig3)
+{
+    OpModelDef opModelDef;
+    ge::Model geModel;
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetListTensor(_, _, _))
+        .WillRepeatedly(Return(true));
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), GetInt(_, _, _))
+        .WillRepeatedly(Invoke(GetInt_invoke));
+
+    EXPECT_CALL(MockFunctionTest::aclStubInstance(), HasAttr(_, _))
+        .WillRepeatedly(Return(true));
+    OpModelParser::ToModelConfig(geModel, opModelDef);
+}

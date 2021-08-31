@@ -60,33 +60,33 @@ ResourceStatistics::~ResourceStatistics() {}
 
 ResourceStatistics &ResourceStatistics::GetInstance()
 {
-    static ResourceStatistics resourceStatistics;
-    return resourceStatistics;
+    static ResourceStatistics theResourceStatistics;
+    return theResourceStatistics;
 }
 
-void ResourceStatistics::AddApplyTotalCount(ResourceType resourceType)
+void ResourceStatistics::AddApplyTotalCount(ResourceType theResourceType)
 {
-    ++counter_[resourceType].appplyReleaseValue[APPLY_TOTAL];
+    ++counter_[theResourceType].appplyReleaseValue[APPLY_TOTAL];
 }
 
-void ResourceStatistics::AddApplySuccCount(ResourceType resourceType)
+void ResourceStatistics::AddApplySuccCount(ResourceType theResourceType)
 {
-    ++counter_[resourceType].appplyReleaseValue[APPLY_SUCCESS];
+    ++counter_[theResourceType].appplyReleaseValue[APPLY_SUCCESS];
 }
 
-void ResourceStatistics::AddReleaseTotalCount(ResourceType resourceType)
+void ResourceStatistics::AddReleaseTotalCount(ResourceType theResourceType)
 {
-    ++counter_[resourceType].appplyReleaseValue[RELEASE_TOTAL];
+    ++counter_[theResourceType].appplyReleaseValue[RELEASE_TOTAL];
 }
 
-void ResourceStatistics::AddReleaseSuccCount(ResourceType resourceType)
+void ResourceStatistics::AddReleaseSuccCount(ResourceType theResourceType)
 {
-    ++counter_[resourceType].appplyReleaseValue[RELEASE_SUCCESS];
+    ++counter_[theResourceType].appplyReleaseValue[RELEASE_SUCCESS];
 }
 
-void ResourceStatistics::TraverseStatistics()
+const void ResourceStatistics::TraverseStatistics()
 {
-    for (uint32_t i = 0; i < ACL_STATISTICS_RESOURCE_TPYE_SIZE; ++i) {
+    for (uint32_t i = 0U; i < ACL_STATISTICS_RESOURCE_TPYE_SIZE; ++i) {
         std::string resourceTypeToString;
         auto iter = RESOURCE_TPYR_TO_STRING.find(static_cast<ResourceType>(i));
         if (iter == RESOURCE_TPYR_TO_STRING.end()) {

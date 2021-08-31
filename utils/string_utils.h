@@ -22,9 +22,9 @@ std::string VectorToString(const std::vector<T> &values)
     std::stringstream ss;
     ss << '[';
     auto size = values.size();
-    for (size_t i = 0; i < size; ++i) {
+    for (size_t i = 0U; i < size; ++i) {
         ss << values[i];
-        if (i != size - 1) {
+        if (i != (size - 1U)) {
             ss << ", ";
         }
     }
@@ -42,18 +42,18 @@ std::string VectorToString(const std::vector<std::vector<T>> &values)
     auto size = values.size();
     std::stringstream ss;
     ss << '[';
-    for (size_t i = 0; i < size; ++i) {
+    for (size_t i = 0U; i < size; ++i) {
         ss << '[';
         const auto &subVec = values[i];
         auto subSize = subVec.size();
-        for (size_t j = 0; j < subSize; ++j) {
+        for (size_t j = 0U; j < subSize; ++j) {
             ss << subVec[j];
-            if (j != subSize - 1) {
+            if (j != (subSize - 1U)) {
                 ss << ", ";
             }
         }
         ss << "]";
-        if (i != size - 1) {
+        if (i != (size - 1U)) {
             ss << ", ";
         }
     }
@@ -71,13 +71,13 @@ std::string VectorToString(const std::vector<std::pair<T, T>> &values)
     auto size = values.size();
     std::stringstream ss;
     ss << '[';
-    for (size_t i = 0; i < size; ++i) {
+    for (size_t i = 0U; i < size; ++i) {
         ss << '[';
         ss << values[i].first;
         ss << ", ";
         ss << values[i].second;
         ss << "]";
-        if (i != size - 1) {
+        if (i != (size - 1U)) {
             ss << ", ";
         }
     }

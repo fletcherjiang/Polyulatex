@@ -13,21 +13,20 @@
 #include "framework/common/util.h"
 #include "utils/attr_utils.h"
 
-using namespace std;
 
 namespace acl {
 std::string OpModelDef::DebugString() const
 {
-    stringstream ss;
+    std::stringstream ss;
     ss << "[OpModelDef] Path: " << modelPath;
     ss << ", OpType: " << opType << ", ";
-    for (size_t i = 0; i < inputDescArr.size(); ++i) {
+    for (size_t i = 0U; i < inputDescArr.size(); ++i) {
         const aclTensorDesc &desc = inputDescArr.at(i);
         ss << "InputDesc[" << i << "]: ";
         ss << desc.DebugString() << " ";
     }
 
-    for (size_t i = 0; i < outputDescArr.size(); ++i) {
+    for (size_t i = 0U; i < outputDescArr.size(); ++i) {
         const aclTensorDesc &desc = outputDescArr.at(i);
         ss << "OutputDesc[" << i << "]: ";
         ss << desc.DebugString() << " ";
@@ -38,9 +37,9 @@ std::string OpModelDef::DebugString() const
     return ss.str();
 }
 
-aclError ReadOpModelFromFile(const std::string &path, OpModel &opModel)
+aclError ReadOpModelFromFile(const std::string &path, OpModel &model)
 {
-    int fileSize;
+    int32_t fileSize;
     char *data = nullptr;
     ACL_LOG_DEBUG("start to call ge::ReadBytesFromBinaryFile");
     if (!ge::ReadBytesFromBinaryFile(path.c_str(), &data, fileSize)) {
@@ -49,9 +48,9 @@ aclError ReadOpModelFromFile(const std::string &path, OpModel &opModel)
     }
 
     std::shared_ptr<void> p_data(data, [](const char *p) { delete[]p; });
-    opModel.data = p_data;
-    opModel.size = static_cast<uint32_t>(fileSize);
-    opModel.name = path;
+    model.data = p_data;
+    model.size = static_cast<uint32_t>(fileSize);
+    model.name = path;
 
     ACL_LOG_INFO("Read model file succeeded. file = %s, length = %d", path.c_str(), fileSize);
     return ACL_SUCCESS;

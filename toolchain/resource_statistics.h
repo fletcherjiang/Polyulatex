@@ -85,8 +85,8 @@ namespace acl {
 
         void Init()
         {
-            for (uint32_t i = 0; i < static_cast<uint32_t>(APPLY_RELEASE_SIZE); ++i) {
-                appplyReleaseValue[i].exchange(0);
+            for (uint32_t i = 0U; i < static_cast<uint32_t>(APPLY_RELEASE_SIZE); ++i) {
+                (void)appplyReleaseValue[i].exchange(0U);
             }
         }
 
@@ -102,7 +102,7 @@ namespace acl {
         void AddApplySuccCount(ResourceType resourceType);
         void AddReleaseTotalCount(ResourceType resourceType);
         void AddReleaseSuccCount(ResourceType resourceType);
-        void TraverseStatistics();
+        const void TraverseStatistics();
     private:
         ResourceStatistics();
         ~ResourceStatistics();

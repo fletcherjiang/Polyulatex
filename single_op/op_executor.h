@@ -26,8 +26,8 @@
 namespace acl {
 struct OpHandle {
     std::string opType;
-    int numInputs = 0;
-    int numOutputs = 0;
+    int32_t numInputs = 0;
+    int32_t numOutputs = 0;
     OpModel opModel;
     std::mutex mutexForStatic;
     std::unordered_map<aclrtStream, ge::SingleOp *> cachedOperators;
@@ -53,9 +53,9 @@ public:
                                   aclrtStream stream);
 
     static aclError ExecuteAsync(const std::string &opType,
-                                 int numInputs,
+                                 int32_t numInputs,
                                  const aclDataBuffer *const inputs[],
-                                 int numOutputs,
+                                 int32_t numOutputs,
                                  aclDataBuffer *const outputs[],
                                  aclrtStream stream);
 

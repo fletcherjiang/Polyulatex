@@ -48,7 +48,7 @@ public:
         : matrixDescA_(dataTypeA, {m, k}, ACL_FORMAT_ND),
           matrixDescB_(dataTypeB, {k, n}, ACL_FORMAT_ND),
           matrixDescC_(dataTypeC, {m, n}, ACL_FORMAT_ND),
-          alphaBetaDesc_(dataTypeC, 0, nullptr, ACL_FORMAT_ND),
+          alphaBetaDesc_(dataTypeC, 0U, nullptr, ACL_FORMAT_ND),
           transposeA_(transA),
           transposeB_(transB)
         {

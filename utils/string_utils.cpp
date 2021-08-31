@@ -28,7 +28,7 @@ void Split(const std::string &str, char delim, std::vector<std::string> &elems)
     }
 
     auto strSize = str.size();
-    if (strSize > 0 && str[strSize - 1] == delim) {
+    if ((strSize > 0U) && (str[strSize - 1U] == delim)) {
         elems.emplace_back("");
     }
 }
@@ -40,7 +40,7 @@ bool IsDigit(const std::string &str)
     }
 
     for (const char &c : str) {
-        if (!isdigit(c)) {
+        if (isdigit(static_cast<int32_t>(c)) == 0) {
             return false;
         }
     }

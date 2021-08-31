@@ -15,6 +15,62 @@
 #include <cmath>
 #include <algorithm>
 
+/**
+ * @ingroup fp16 basic operator
+ * @brief   get sign of fp16
+ */
+#define FP16_EXTRAC_SIGN(x)            (((x) >> 15U) & 1U)
+/**
+ * @ingroup fp16 basic parameter
+ * @brief   maximum exponent value of fp16 is 15(11111)
+ */
+static constexpr uint32_t FP16_MAX_EXP = 0x001FU;
+/**
+ * @ingroup fp16 basic operator
+ * @brief   get exponent of fp16
+ */
+#define FP16_EXTRAC_EXP(x)             (((x) >> 10U) & FP16_MAX_EXP)
+/**
+ * @ingroup fp16 basic operator
+ * @brief   get mantissa of fp16
+ */
+#define FP16_EXTRAC_MAN(x)             ((((x) >> 0U) & 0x3FFU)    | (((((x) >> 10U) & 0x1FU) > 0 ? 1 : 0) * 0x400))
+/**
+ * @ingroup fp16 basic parameter
+ * @brief   the mantissa bit length of fp16 is 10
+ */
+static constexpr uint32_t FP16_MAN_LEN = 10U;
+/**
+ * @ingroup fp16 basic parameter
+ * @brief   maximum mantissa value of fp16(11111 11111)
+ */
+static constexpr uint32_t FP16_MAX_MAN = 0x03FFU;
+/**
+ * @ingroup fp16 basic operator
+ * @brief   constructor of fp16 from sign exponent and mantissa
+ */
+#define FP16_CONSTRUCTOR(s, e, m)        (((s) << FP16_SIGN_INDEX) | ((e) << FP16_MAN_LEN) | ((m) & FP16_MAX_MAN))
+/**
+ * @ingroup fp32 basic parameter
+ * @brief   bit index of sign in float/fp32
+ */
+static constexpr uint32_t FP32_SIGN_INDEX = 31U;
+/**
+ * @ingroup fp32 basic parameter
+ * @brief   the mantissa bit length of float/fp32 is 23
+ */
+static constexpr uint32_t FP32_MAN_LEN = 23U;
+/**
+ * @ingroup fp32 basic parameter
+ * @brief   maximum mantissa value of fp32    (1111 1111 1111 1111 1111 111)
+ */
+static constexpr uint32_t FP32_MAX_MAN = 0x7FFFFFU;
+/**
+ * @ingroup fp32 basic operator
+ * @brief   constructor of fp32 from sign exponent and mantissa
+ */
+#define FP32_CONSTRUCTOR(s, e, m)        (((s) << FP32_SIGN_INDEX) | ((e) << FP32_MAN_LEN) | ((m) & FP32_MAX_MAN))
+
 namespace acl {
 /**
  * @ingroup fp16 basic parameter
@@ -26,11 +82,6 @@ static constexpr uint32_t FP16_EXP_BIAS = 15U;
  * @brief   the exponent bit lengt h of fp16 is 5
  */
 static constexpr int32_t FP16_EXP_LEN = 5;
-/**
- * @ingroup fp16 basic parameter
- * @brief   the mantissa bit length of fp16 is 10
- */
-static constexpr uint32_t FP16_MAN_LEN = 10U;
 /**
  * @ingroup fp16 basic parameter
  * @brief   bit index of sign in fp16
@@ -73,39 +124,9 @@ static constexpr int32_t FP16_MIN = 0xFBFF;
 static constexpr int32_t FP16_ABS_MAX = 0x7FFF;
 /**
  * @ingroup fp16 basic parameter
- * @brief   maximum exponent value of fp16 is 15(11111)
- */
-static constexpr uint32_t FP16_MAX_EXP = 0x001FU;
-/**
- * @ingroup fp16 basic parameter
  * @brief   maximum valid exponent value of fp16 is 14(11110)
  */
 static constexpr int32_t FP16_MAX_VALID_EXP = 0x001E;
-/**
- * @ingroup fp16 basic parameter
- * @brief   maximum mantissa value of fp16(11111 11111)
- */
-static constexpr uint32_t FP16_MAX_MAN = 0x03FFU;
-/**
- * @ingroup fp16 basic operator
- * @brief   get sign of fp16
- */
-#define FP16_EXTRAC_SIGN(x)            (((x) >> 15U) & 1U)
-/**
- * @ingroup fp16 basic operator
- * @brief   get exponent of fp16
- */
-#define FP16_EXTRAC_EXP(x)             (((x) >> 10U) & FP16_MAX_EXP)
-/**
- * @ingroup fp16 basic operator
- * @brief   get mantissa of fp16
- */
-#define FP16_EXTRAC_MAN(x)             ((((x) >> 0U) & 0x3FFU)    | (((((x) >> 10U) & 0x1FU) > 0 ? 1 : 0) * 0x400))
-/**
- * @ingroup fp16 basic operator
- * @brief   constructor of fp16 from sign exponent and mantissa
- */
-#define FP16_CONSTRUCTOR(s, e, m)        (((s) << FP16_SIGN_INDEX) | ((e) << FP16_MAN_LEN) | ((m) & FP16_MAX_MAN))
 /**
  * @ingroup fp32 basic parameter
  * @brief   fp32 exponent bias
@@ -118,19 +139,9 @@ static constexpr int32_t FP32_EXP_BIAS = 127;
 static constexpr int32_t FP32_EXP_LEN = 8;
 /**
  * @ingroup fp32 basic parameter
- * @brief   the mantissa bit length of float/fp32 is 23
- */
-static constexpr uint32_t FP32_MAN_LEN = 23U;
-/**
- * @ingroup fp32 basic parameter
- * @brief   bit index of sign in float/fp32
- */
-static constexpr uint32_t FP32_SIGN_INDEX = 31U;
-/**
- * @ingroup fp32 basic parameter
  * @brief   sign mask of fp32         (1 0000 0000  0000 0000 0000 0000 000)
  */
-static constexpr uint32_t FP32_SIGN_MASK = 0x80000000;
+static constexpr uint32_t FP32_SIGN_MASK = 0x80000000U;
 /**
  * @ingroup fp32 basic parameter
  * @brief   exponent mask of fp32     (  1111 1111  0000 0000 0000 0000 000)
@@ -157,17 +168,6 @@ static constexpr uint32_t FP32_ABS_MAX = 0x7FFFFFFFU;
  */
 static constexpr int32_t FP32_MAX_EXP = 0xFF;
 /**
- * @ingroup fp32 basic parameter
- * @brief   maximum mantissa value of fp32    (1111 1111 1111 1111 1111 111)
- */
-static constexpr uint32_t FP32_MAX_MAN = 0x7FFFFFU;
-/**
- * @ingroup fp32 basic operator
- * @brief   constructor of fp32 from sign exponent and mantissa
- */
-#define FP32_CONSTRUCTOR(s, e, m)        (((s) << FP32_SIGN_INDEX) | ((e) << FP32_MAN_LEN) | ((m) & FP32_MAX_MAN))
-
-/**
  * @ingroup fp64 basic parameter
  * @brief   fp64 exponent bias
  */
@@ -191,7 +191,7 @@ static constexpr int32_t FP64_SIGN_INDEX = 63;
  * @ingroup fp64 basic parameter
  * @brief   sign mask of fp64                 (1 000                   (total 63bits 0))
  */
-static constexpr uint64_t FP64_SIGN_MASK = 0x8000000000000000;
+static constexpr uint64_t FP64_SIGN_MASK = 0x8000000000000000U;
 /**
  * @ingroup fp64 basic parameter
  * @brief   exponent mask of fp64            (0 1 11111 11111  0000?-?-(total 52bits 0))
@@ -251,7 +251,7 @@ static constexpr uint32_t INT32_T_MAX = 0x7FFFFFFFU;
  * @ingroup integer special value judgment
  * @brief   maximum value of a data with 32 bits length (1111 1111 1111 1111 1111 1111 1111 1111)
  */
-static constexpr uint32_t BIT_LEN32_MAX = 0xFFFFFFFF;
+static constexpr uint32_t BIT_LEN32_MAX = 0xFFFFFFFFU;
 /**
  * @ingroup fp16_t enum
  * @brief   round mode of last valid digital

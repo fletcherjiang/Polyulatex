@@ -260,5 +260,5 @@ TEST_F(OpExecutorTest, TestExecutors)
     StreamExecutor * exec = Executors::GetOrCreate(nullptr, nullptr);
     ASSERT_NE(exec, nullptr);
     ASSERT_EQ(exec, Executors::GetOrCreate(nullptr, nullptr));
-    Executors::Remove(nullptr, nullptr);
+    Executors::RemoveExecutor(nullptr, nullptr);
 }

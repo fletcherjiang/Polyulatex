@@ -19,20 +19,22 @@ TbeOpTask::TbeOpTask(const void *stubFunc, uint32_t blockDim) : stubFunc_(stubFu
 {
 }
 
-aclError TbeOpTask::ExecuteAsync(int numInputs,
+aclError TbeOpTask::ExecuteAsync(int32_t numInputs,
                                  const aclDataBuffer *const inputs[],
-                                 int numOutputs,
+                                 int32_t numOutputs,
                                  aclDataBuffer *const outputs[],
                                  aclrtStream stream)
 {
     // update args
     auto *ptrArgs = reinterpret_cast<uintptr_t *>(args_.get());
-    int argIndex = 0;
-    for (int i = 0; i < numInputs; ++i) {
-        ptrArgs[argIndex++] = reinterpret_cast<uintptr_t>(inputs[i]->data);
+    int32_t argIndex = 0;
+    for (int32_t i = 0; i < numInputs; ++i) {
+        ptrArgs[argIndex] = reinterpret_cast<uintptr_t>(inputs[i]->data);
+        argIndex++;
     }
-    for (int i = 0; i < numOutputs; ++i) {
-        ptrArgs[argIndex++] = reinterpret_cast<uintptr_t>(outputs[i]->data);
+    for (int32_t i = 0; i < numOutputs; ++i) {
+        ptrArgs[argIndex] = reinterpret_cast<uintptr_t>(outputs[i]->data);
+        argIndex++;
     }
 
     // launch kernel

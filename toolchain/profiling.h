@@ -24,6 +24,7 @@ namespace acl {
 
         static bool GetProfilingConfigFile(std::string &fileName);
     };
+    
 }
 
 aclError aclMsprofCtrlHandle(uint32_t dataType, void* data, uint32_t dataLen);

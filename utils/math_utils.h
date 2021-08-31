@@ -15,11 +15,10 @@
 #include "common/log_inner.h"
 
 namespace acl {
-const int DATA_MEMORY_ALIGN_SIZE = 32;
 
 inline aclError CheckSizeTMultiOverflow(size_t a, size_t b, size_t &res)
 {
-    if ((a != 0) && (b != 0) && ((ULONG_MAX / a) < b)) {
+    if ((a != 0U) && (b != 0U) && ((static_cast<size_t>(ULONG_MAX) / a) < b)) {
         ACL_LOG_ERROR("[Check][Overflow]%zu multiplies %zu overflow", a, b);
         return ACL_ERROR_FAILURE;
     }
@@ -29,7 +28,7 @@ inline aclError CheckSizeTMultiOverflow(size_t a, size_t b, size_t &res)
 
 inline aclError CheckUint32MultiOverflow(uint32_t a, uint32_t b, uint32_t &res)
 {
-    if ((a != 0) && (b != 0) && ((UINT32_MAX / a) < b)) {
+    if ((a != 0U) && (b != 0U) && ((UINT32_MAX / a) < b)) {
         ACL_LOG_ERROR("[Check][Overflow]%u multiplies %u overflow", a, b);
         return ACL_ERROR_FAILURE;
     }
@@ -37,7 +36,7 @@ inline aclError CheckUint32MultiOverflow(uint32_t a, uint32_t b, uint32_t &res)
     return ACL_SUCCESS;
 }
 
-inline aclError CheckIntAddOverflow(int a, int b, int &res)
+inline aclError CheckIntAddOverflow(int32_t a, int32_t b, int32_t &res)
 {
     if (((b > 0) && (a > (INT_MAX - b))) || ((b < 0) && (a < (INT_MIN - b)))) {
         ACL_LOG_ERROR("[Check][Overflow]%d adds %d overflow", a, b);

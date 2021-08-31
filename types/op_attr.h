@@ -51,13 +51,13 @@ struct ACL_FUNC_VISIBILITY aclopAttr {
         return constDataBuf_;
     }
 
-    aclError SetAttrByType(const char *attrName, aclDataType type, const void *value);
+    aclError SetAttrByType(const char *attrName, aclDataType type, const void *val);
 
     template<typename T>
-    aclError SetAttr(const char *attrName, T value)
+    aclError SetAttr(const char *attrName, T val)
     {
         ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(attrName);
-        auto attrVal = ge::GeAttrValue::CreateFrom<T>(value);
+        auto attrVal = ge::GeAttrValue::CreateFrom<T>(val);
         attrs_[std::string(attrName)] = attrVal;
         return ACL_SUCCESS;
     }

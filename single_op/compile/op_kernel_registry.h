@@ -35,7 +35,7 @@ struct OpKernelRegistration {
     std::string kernelName;
     aclopEngineType enginetype = ACL_ENGINE_SYS;
     void *binData = nullptr;
-    uint64_t binSize = 0;
+    uint64_t binSize = 0U;
     void (*deallocator)(void *data, size_t length) = nullptr;
     void *binHandle = nullptr;
 };

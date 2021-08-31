@@ -15,7 +15,7 @@
 namespace acl {
 using CompilerCreator = OpCompiler *(*)();
 
-const int ACL_ERROR_COMPILER_NOT_REGISTERED = 16;
+const int32_t ACL_ERROR_COMPILER_NOT_REGISTERED = 16;
 
 enum CompileStrategy {
     NO_COMPILER,
@@ -35,7 +35,7 @@ public:
 
     void RegisterCreator(CompileStrategy strategy, CompilerCreator creatorFn);
 
-    aclError SetCompileStrategy(CompileStrategy strategy, std::map<std::string, std::string> &options);
+    aclError SetCompileStrategy(CompileStrategy strategy, const std::map<std::string, std::string> &options);
 
     aclError CompileOp(const AclOp &aclOp, std::shared_ptr<void> &modelData, size_t &modelSize);
 

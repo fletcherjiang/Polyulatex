@@ -29,10 +29,10 @@ struct OpModel {
     ~OpModel() = default;
 
     std::shared_ptr<void> data;
-    uint32_t size = 0;
+    uint32_t size = 0U;
     std::string name;
-    uint64_t opModelId = 0;
-    size_t isStaticModelWithFuzzCompile = 0;
+    uint64_t opModelId = 0U;
+    size_t isStaticModelWithFuzzCompile = 0U;
 };
 
 struct OpModelDef {
@@ -45,11 +45,11 @@ struct OpModelDef {
     // 0: ACL_OP_COMPILE_DEFAULT mode
     // 1：ACL_OP_COMPILE_FUZZ mode but model is static
     // 2：ACL_OP_COMPILE_FUZZ mode and model is dynamic
-    size_t isStaticModelWithFuzzCompile = 0;
+    size_t isStaticModelWithFuzzCompile = 0U;
 
     std::string DebugString() const;
 
-    uint64_t timestamp = ULLONG_MAX;
+    uint64_t timestamp = static_cast<uint64_t>(ULLONG_MAX);
 };
 
 ACL_FUNC_VISIBILITY aclError ReadOpModelFromFile(const std::string &path, OpModel &opModel);

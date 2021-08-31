@@ -12,12 +12,12 @@
 
 #include "fp16_impl.h"
 
-float aclFloat16ToFloat(aclFloat16 value)
+float aclFloat16ToFloat(aclFloat16 val)
 {
-    return acl::Fp16ToFloat(value);
+    return acl::Fp16ToFloat(val);
 }
 
-aclFloat16 aclFloatToFloat16(float value)
+aclFloat16 aclFloatToFloat16(float val)
 {
-    return acl::FloatToFp16(value);
+    return acl::FloatToFp16(val);
 }
