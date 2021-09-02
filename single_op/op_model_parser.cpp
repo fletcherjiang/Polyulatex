@@ -303,11 +303,6 @@ static aclError ParseConstTensor(const ge::GeTensorDesc &tensorDesc, aclTensorDe
     }
     const uint8_t *constDataBuf = constTensor->GetData().GetData();
     ACL_CHECK_MALLOC_RESULT(constDataBuf);
-    if (constDataLen < 0U) {
-        ACL_LOG_INNER_ERROR("[Get][Data]get const dataLen failed, constDataLen:[%zu] <= 0", constDataLen);
-        return ACL_ERROR_PARSE_MODEL;
-    }
-
     auto *constData = new (std::nothrow) char[constDataLen];
     ACL_CHECK_MALLOC_RESULT(constData);
     if (memcpy_s(constData, constDataLen, constDataBuf, constDataLen) != EOK) {

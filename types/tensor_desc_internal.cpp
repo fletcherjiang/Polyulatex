@@ -689,7 +689,7 @@ aclError aclSetTensorConst(aclTensorDesc *desc, void *dataBuffer, size_t length)
     ACL_LOG_INFO("start to execute aclSetTensorConst");
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(desc);
     ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(dataBuffer);
-    if (length <= 0U) {
+    if (length == 0U) {
         ACL_LOG_ERROR("[Check][Length]The length of const dataBuffer is invalid. size = %zu", length);
         acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
             std::vector<std::string>({"param"}),
