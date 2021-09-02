@@ -250,7 +250,7 @@ void OpModelManager::SetTensorShapeStatus(const AclOp &aclOp, std::shared_ptr<Sh
 }
 
 void OpModelManager::GetTensorShapeStatus(const AclOp &aclOp,
-                                          std::vector<std::pair<std::shared_ptr<ShapeStatusVec>, std::string>> &shapeStatus)
+    std::vector<std::pair<std::shared_ptr<ShapeStatusVec>, std::string>> &shapeStatus)
 {
     std::lock_guard<std::mutex> lk(shapeStatusMutex_);
     auto it = tensorShapeStatus_.find(aclOp.opType);

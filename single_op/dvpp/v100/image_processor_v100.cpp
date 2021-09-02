@@ -119,6 +119,7 @@ namespace dvpp {
             acldvppPixelFormat::PIXEL_FORMAT_YVU_SEMIPLANAR_444,
             acldvppPixelFormat::PIXEL_FORMAT_YVU_SEMIPLANAR_440,
             acldvppPixelFormat::PIXEL_FORMAT_YUV_SEMIPLANAR_440,
+            acldvppPixelFormat::PIXEL_FORMAT_YUV_SEMIPLANAR_444,
             acldvppPixelFormat::PIXEL_FORMAT_YUV_SEMIPLANAR_422,
             acldvppPixelFormat::PIXEL_FORMAT_UNKNOWN
         };
