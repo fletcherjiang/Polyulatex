@@ -64,7 +64,16 @@ class FormatTransferRegister {
 #define REGISTER_FORMAT_TRANSFER(TransferClass, format1, format2)                    \
   namespace {                                                                        \
   FormatTransferRegister format_transfer_register_##TransferClass##format1##format2( \
-      []() { return std::make_shared<TransferClass>(); }, format1, format2);         \
+      []() {                                                                         \
+        std::shared_ptr<TransferClass> ptr = nullptr;                                \
+        try {                                                                        \
+          ptr = std::make_shared<TransferClass>();                                   \
+        } catch (...) {                                                              \
+          ptr = nullptr;                                                             \
+        }                                                                            \
+        return ptr;                                                                  \
+      },                                                                             \
+      format1, format2);                                                             \
   }
 
 /// Build a formattransfer according to 'args'

@@ -24,6 +24,7 @@
 #include "register/graph_optimizer/buffer_fusion/buffer_fusion_constant.h"
 #include "register/graph_optimizer/buffer_fusion/buffer_fusion_pattern.h"
 #include "register/graph_optimizer/graph_optimize_register_error_codes.h"
+#include "register/graph_optimizer/fusion_common/op_slice_info.h"
 
 namespace fe {
 enum BufferFusionPassType {
@@ -40,6 +41,7 @@ class BufferFusionPassBase {
   virtual ~BufferFusionPassBase();
   virtual std::vector<BufferFusionPattern *> DefinePatterns() = 0;
   virtual Status GetFusionNodes(const BufferFusionMapping &mapping, vector<ge::NodePtr> &fusion_nodes);
+  virtual Status CalcFusionOpSliceInfo(vector<ge::NodePtr> &fusion_nodes, OpCalcInfo &op_slice_info);
   std::vector<ge::NodePtr> GetMatchedNodes(const BufferFusionMapping &mapping);
   std::vector<ge::NodePtr> GetMatchedNodesByDescName(const std::string &desc_name, const BufferFusionMapping &mapping);
   ge::NodePtr GetMatchedHeadNode(const std::vector<ge::NodePtr> &matched_nodes);
