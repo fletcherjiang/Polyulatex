@@ -50,6 +50,31 @@ using namespace ge;
 
 namespace {
     std::string STAGES_STR = "[TEST][TEST]";
+    std::unordered_map<TypeId, AnyValue::ValueType> type_ids_to_value_type = {
+    {nullptr, AnyValue::VT_NONE},
+    {GetTypeId<std::string>(), AnyValue::VT_STRING},
+    {GetTypeId<float>(), AnyValue::VT_FLOAT},
+    {GetTypeId<bool>(), AnyValue::VT_BOOL},
+    {GetTypeId<int64_t>(), AnyValue::VT_INT},
+    {GetTypeId<GeTensorDesc>(), AnyValue::VT_TENSOR_DESC},
+    {GetTypeId<GeTensor>(), AnyValue::VT_TENSOR},
+    {GetTypeId<Buffer>(), AnyValue::VT_BYTES},
+    {GetTypeId<proto::GraphDef>(), AnyValue::VT_GRAPH},
+    {GetTypeId<NamedAttrs>(), AnyValue::VT_NAMED_ATTRS},
+    {GetTypeId<std::vector<std::vector<int64_t>>>(), AnyValue::VT_LIST_LIST_INT},
+    {GetTypeId<DataType>(), AnyValue::VT_DATA_TYPE},
+    {GetTypeId<std::vector<std::vector<float>>>(), AnyValue::VT_LIST_LIST_FLOAT},
+    {GetTypeId<std::vector<std::string>>(), AnyValue::VT_LIST_STRING},
+    {GetTypeId<std::vector<float>>(), AnyValue::VT_LIST_FLOAT},
+    {GetTypeId<std::vector<bool>>(), AnyValue::VT_LIST_BOOL},
+    {GetTypeId<std::vector<int64_t>>(), AnyValue::VT_LIST_INT},
+    {GetTypeId<std::vector<GeTensorDesc>>(), AnyValue::VT_LIST_TENSOR_DESC},
+    {GetTypeId<std::vector<GeTensor>>(), AnyValue::VT_LIST_TENSOR},
+    {GetTypeId<std::vector<Buffer>>(), AnyValue::VT_LIST_BYTES},
+    {GetTypeId<std::vector<proto::GraphDef>>(), AnyValue::VT_LIST_GRAPH},
+    {GetTypeId<std::vector<NamedAttrs>>(), AnyValue::VT_LIST_NAMED_ATTRS},
+    {GetTypeId<std::vector<DataType>>(), AnyValue::VT_LIST_DATA_TYPE},
+};
 }
 
 ge::Status aclStub::SetDump(const ge::DumpConfig &dumpConfig)
@@ -148,7 +173,7 @@ bool aclStub::GetInt(ge::AttrUtils::ConstAttrHolderAdapter&& obj, const std::str
     return true;
 }
 
-bool aclStub::GetListNamedAttrs(ge::AttrUtils::ConstAttrHolderAdapter &&obj, std::string const &name, vector<GeAttrValue::NAMED_ATTRS> &value)
+bool aclStub::GetListNamedAttrs(ge::AttrUtils::ConstAttrHolderAdapter &&obj, std::string const &name, vector<AnyValue::NAMED_ATTRS> &value)
 {
     return true;
 }
@@ -390,18 +415,18 @@ float g_geAttrValueFloat;
 DataType g_geAttrValueDataType;
 int64_t g_geAttrValueInt;
 thread_local GEThreadLocalContext threadContext;
-GeAttrValue g_geAttrValue;
+AnyValue g_geAttrValue;
 
 std::vector<bool> g_geAttrValueListBool;
 std::vector<std::string> g_geAttrValueListString;
 std::vector<float> g_geAttrValueListFloat;
 std::vector<int64_t> g_geAttrValueListInt;
-std::vector<ge::GeAttrValue::DATA_TYPE> g_geAttrValueListDataType;
+std::vector<ge::AnyValue::DATA_TYPE> g_geAttrValueListDataType;
 std::vector<std::vector<int64_t>> g_geAttrValueListListInt;
 std::vector<std::vector<float, std::allocator<float>> ,std::allocator<std::vector<float, std::allocator<float> > > > g_geAttrValueListListListInt;
-ge::GeAttrValue::ValueType g_geAttrValueType = ge::GeAttrValue::VT_FLOAT;
+ge::AnyValue::ValueType g_geAttrValueType = ge::AnyValue::VT_FLOAT;
 
-std::map<string, GeAttrValue> g_geAttrMap;
+std::map<string, AnyValue> g_geAttrMap;
 }
 
     TensorDesc::TensorDesc(void)
@@ -705,11 +730,11 @@ std::map<string, GeAttrValue> g_geAttrMap;
     {
     }
 
-    ProtoAttrMapHelper Model::MutableAttrMap()
+    ProtoAttrMap &Model::MutableAttrMap()
     {
     }
 
-    ConstProtoAttrMapHelper Model::GetAttrMap() const
+    ConstProtoAttrMap &Model::GetAttrMap() const
     {
     }
 
@@ -718,19 +743,16 @@ std::map<string, GeAttrValue> g_geAttrMap;
         return MockFunctionTest::aclStubInstance().Load(data, len, model);
     }
 
-    GeAttrValue NamedAttrs::GetItem(const string &key) const
+    AnyValue NamedAttrs::GetItem(const string &key) const
     {
         return g_geAttrValue;
     }
 
-    NamedAttrs::NamedAttrs()
-    {
-    }
-    ProtoAttrMapHelper NamedAttrs::MutableAttrMap()
+    ProtoAttrMap &NamedAttrs::MutableAttrMap()
     {
     }
 
-    ConstProtoAttrMapHelper NamedAttrs::GetAttrMap() const
+    ConstProtoAttrMap &NamedAttrs::GetAttrMap() const
     {
     }
 
@@ -779,7 +801,7 @@ std::map<string, GeAttrValue> g_geAttrMap;
         return true;
     }
 
-    bool AttrUtils::GetListNamedAttrs(ge::AttrUtils::ConstAttrHolderAdapter &&obj, std::string const &name, vector<GeAttrValue::NAMED_ATTRS> &value)
+    bool AttrUtils::GetListNamedAttrs(ge::AttrUtils::ConstAttrHolderAdapter &&obj, std::string const &name, vector<AnyValue::NAMED_ATTRS> &value)
     {
         return MockFunctionTest::aclStubInstance().GetListNamedAttrs(obj, name, value);
     }
@@ -860,11 +882,11 @@ std::map<string, GeAttrValue> g_geAttrMap;
 
     }
 
-    const std::map<string, GeAttrValue> AttrHolder::GetAllAttrs() const
+    const std::map<string, AnyValue> AttrHolder::GetAllAttrs() const
     {
-        GeAttrValue attr;
+        AnyValue attr;
         std::string name = "ATTR_MODEL_test";
-        std::map<string, GeAttrValue> m;
+        std::map<string, AnyValue> m;
         m.insert(std::make_pair(name, attr));
         return m;
     }
@@ -885,15 +907,15 @@ std::map<string, GeAttrValue> g_geAttrMap;
     {
     }
 
-    GeTensorDesc::GeTensorDesc(GeShape, Format, DataType)
+    GeTensorDesc::GeTensorDesc(const GeShape &shape, Format format, DataType dt)
     {
     }
 
-    ProtoAttrMapHelper GeTensorDesc::MutableAttrMap()
+    ProtoAttrMap &GeTensorDesc::MutableAttrMap()
     {
     }
 
-    ConstProtoAttrMapHelper GeTensorDesc::GetAttrMap() const
+    ConstProtoAttrMap &GeTensorDesc::GetAttrMap() const
     {
     }
 
@@ -927,18 +949,23 @@ std::map<string, GeAttrValue> g_geAttrMap;
         return DT_FLOAT;
     }
 
-    void GeTensorDesc::SetShape(GeShape shape)
+    void GeTensorDesc::SetShape(const GeShape &shape)
     {
         return;
     }
 
-    GeShape GeTensorDesc::GetShape() const
+    void GeTensorDesc::SetShape(GeShape &&shape) 
+    {
+        return;
+    }
+
+    const GeShape &GeTensorDesc::GetShape() const
     {
         GeShape shape;
         return shape;
     }
 
-    GeShape GeTensorDesc::GetOriginShape() const
+    const GeShape &GeTensorDesc::GetOriginShape() const
     {
         GeShape shape;
         return shape;
@@ -988,180 +1015,153 @@ std::map<string, GeAttrValue> g_geAttrMap;
     {
     }
 
+    GeTensor::GeTensor(GeTensor &&other) noexcept
+    {
+    }
+
     GeTensor::GeTensor(const GeTensorDesc &tensorDesc, const uint8_t *data, size_t size)
     {
     }
 
-    GeTensorDesc GeTensor::GetTensorDesc() const
+    const GeTensorDesc &GeTensor::GetTensorDesc() const
     {
         GeTensorDesc tenosrDesc;
         return tenosrDesc;
     }
 
-
-    GeAttrValue::GeAttrValue()
-    {
+    template<>
+    GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<bool>() {
+        return reinterpret_cast<TypeId>(1);
     }
 
-
-    graphStatus GeAttrValue::SetValue(bool const& value)
-    {
-        g_geAttrValueType = GeAttrValue::VT_BOOL;
-        g_geAttrValueBool = value;
-        return GRAPH_SUCCESS;
+    template<>
+    GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<std::string>() {
+    return reinterpret_cast<TypeId>(2);
     }
 
-    graphStatus GeAttrValue::SetValue(long const& value)
-    {
-        g_geAttrValueType = GeAttrValue::VT_INT;
-        g_geAttrValueInt = value;
-        return GRAPH_SUCCESS;
+    template<>
+    GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<float>() {
+    return reinterpret_cast<TypeId>(3);
     }
 
-    graphStatus GeAttrValue::SetValue(float const& value)
-    {
-        g_geAttrValueType = GeAttrValue::VT_FLOAT;
-        g_geAttrValueFloat = value;
-        return GRAPH_SUCCESS;
+    template<>
+    GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<int64_t>() {
+    return reinterpret_cast<TypeId>(4);
     }
 
-    graphStatus GeAttrValue::SetValue(DataType const& value)
-    {
-        g_geAttrValueType = GeAttrValue::VT_DATA_TYPE;
-        g_geAttrValueDataType = value;
-        return GRAPH_SUCCESS;
+    template<>
+    GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<GeTensorDesc>() {
+    return reinterpret_cast<TypeId>(5);
     }
 
-    graphStatus GeAttrValue::SetValue(std::string const& value)
-    {
-        g_geAttrValueType = GeAttrValue::VT_STRING;
-        g_geAttrValueString = value;
-        return GRAPH_SUCCESS;
+    template<>
+    GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<GeTensor>() {
+    return reinterpret_cast<TypeId>(6);
     }
 
-    graphStatus GeAttrValue::SetValue(std::vector<bool> const& value)
-    {
-        g_geAttrValueType = GeAttrValue::VT_LIST_BOOL;
-        g_geAttrValueListBool = value;
-        return GRAPH_SUCCESS;
+    template<>
+    GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<Buffer>() {
+    return reinterpret_cast<TypeId>(7);
     }
 
-    graphStatus GeAttrValue::SetValue(std::vector<long> const& value)
-    {
-        g_geAttrValueType = GeAttrValue::VT_LIST_INT;
-        g_geAttrValueListInt = value;
-        return GRAPH_SUCCESS;
+    template<>
+    GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<proto::GraphDef>() {
+    return reinterpret_cast<TypeId>(8);
     }
 
-    graphStatus GeAttrValue::SetValue(std::vector<DATA_TYPE> const& value)
-    {
-        g_geAttrValueType = GeAttrValue::VT_LIST_DATA_TYPE;
-        g_geAttrValueListDataType = value;
-        return GRAPH_SUCCESS;
+    template<>
+    GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<NamedAttrs>() {
+    return reinterpret_cast<TypeId>(9);
     }
 
-    graphStatus GeAttrValue::SetValue(std::vector<float> const& value)
-    {
-        g_geAttrValueType = GeAttrValue::VT_LIST_FLOAT;
-        g_geAttrValueListFloat = value;
-        return GRAPH_SUCCESS;
+    template<>
+    GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<std::vector<std::vector<int64_t>>>() {
+    return reinterpret_cast<TypeId>(10);
     }
 
-    graphStatus GeAttrValue::SetValue(std::vector<std::string> const& value)
-    {
-        g_geAttrValueType = GeAttrValue::VT_LIST_STRING;
-        g_geAttrValueListString = value;
-        return GRAPH_SUCCESS;
+    template<>
+    GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<DataType>() {
+    return reinterpret_cast<TypeId>(11);
     }
 
-    graphStatus GeAttrValue::SetValue(std::vector<std::vector<int64_t>> const& value)
-    {
-        g_geAttrValueType = GeAttrValue::VT_LIST_LIST_INT;
-        g_geAttrValueListListInt = value;
-        return GRAPH_SUCCESS;
+    template<>
+    GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<std::vector<std::vector<float>>>() {
+    return reinterpret_cast<TypeId>(12);
     }
 
+    template<>
+    GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<std::vector<std::string>>() {
+    return reinterpret_cast<TypeId>(13);
+    }
 
-    GeAttrValue::ValueType GeAttrValue::GetValueType() const
+    template<>
+    GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<std::vector<float>>() {
+    return reinterpret_cast<TypeId>(14);
+    }
+
+    template<>
+    GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<std::vector<bool>>() {
+    return reinterpret_cast<TypeId>(15);
+    }
+
+    template<>
+    GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<std::vector<int64_t>>() {
+    return reinterpret_cast<TypeId>(16);
+    }
+
+    template<>
+    GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<std::vector<GeTensorDesc>>() {
+    return reinterpret_cast<TypeId>(17);
+    }
+
+    template<>
+    GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<std::vector<GeTensor>>() {
+    return reinterpret_cast<TypeId>(18);
+    }
+
+    template<>
+    GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<std::vector<Buffer>>() {
+    return reinterpret_cast<TypeId>(19);
+    }
+
+    template<>
+    GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<std::vector<proto::GraphDef>>() {
+    return reinterpret_cast<TypeId>(20);
+    }
+
+    template<>
+    GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<std::vector<NamedAttrs>>() {
+    return reinterpret_cast<TypeId>(21);
+    }
+
+    template<>
+    GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<std::vector<DataType>>() {
+    return reinterpret_cast<TypeId>(22);
+    }
+
+    AnyValue::AnyValue(AnyValue &&other) noexcept
+    {
+    }
+    AnyValue &AnyValue::operator=(AnyValue &&other) noexcept {
+        return *this;
+    }
+    AnyValue &AnyValue::operator=(const AnyValue &other) {
+        return *this;
+    }
+
+    AnyValue::ValueType AnyValue::GetValueType() const noexcept
     {
         return g_geAttrValueType;
     }
 
-    GeAttrValue GeAttrValue::Copy() const
+    AnyValue AnyValue::Copy() const
     {
         return g_geAttrValue;
     }
 
-    graphStatus GeAttrValue::GetValue(bool& value) const
+    const void *AnyValue::GetAddr() const
     {
-        value = g_geAttrValueBool;
-        return GRAPH_SUCCESS;
-    }
-
-    graphStatus GeAttrValue::GetValue(long& value) const
-    {
-        value = g_geAttrValueInt;
-        return GRAPH_SUCCESS;
-    }
-
-    graphStatus GeAttrValue::GetValue(float& value) const
-    {
-        value = g_geAttrValueFloat;
-        return GRAPH_SUCCESS;
-    }
-
-    graphStatus GeAttrValue::GetValue(DataType& value) const
-    {
-        value = g_geAttrValueDataType;
-        return GRAPH_SUCCESS;
-    }
-
-    graphStatus GeAttrValue::GetValue(string& value) const
-    {
-        value = g_geAttrValueString;
-        return GRAPH_SUCCESS;
-    }
-
-    graphStatus GeAttrValue::GetValue(std::vector<std::string>& value) const
-    {
-        value = g_geAttrValueListString;
-        return GRAPH_SUCCESS;
-    }
-
-    graphStatus GeAttrValue::GetValue(std::vector<bool>& value) const
-    {
-        value = g_geAttrValueListBool;
-        return GRAPH_SUCCESS;
-    }
-
-    graphStatus GeAttrValue::GetValue(std::vector<float>& value) const
-    {
-        value = g_geAttrValueListFloat;
-        return GRAPH_SUCCESS;
-    }
-
-    graphStatus GeAttrValue::GetValue(std::vector<long >& value) const
-    {
-        value = g_geAttrValueListInt;
-        return GRAPH_SUCCESS;
-    }
-
-    graphStatus GeAttrValue::GetValue(std::vector<DATA_TYPE >& value) const
-    {
-        value = g_geAttrValueListDataType;
-        return GRAPH_SUCCESS;
-    }
-
-    graphStatus GeAttrValue::GetValue(std::vector<std::vector<int64_t>>& value) const
-    {
-        value = g_geAttrValueListListInt;
-        return GRAPH_SUCCESS;
-    }
-
-    graphStatus GeAttrValue::GetValue(std::vector<std::vector<float, std::allocator<float>> ,std::allocator<std::vector<float, std::allocator<float> > > > &value) const
-    {
-        value = g_geAttrValueListListListInt;
-        return GRAPH_SUCCESS;
+        return nullptr;
     }
 
     graphStatus OpDesc::AddInputDesc(const string &name, const GeTensorDesc &input_desc)
@@ -1196,11 +1196,11 @@ std::map<string, GeAttrValue> g_geAttrMap;
         return "";
     }
 
-    ProtoAttrMapHelper OpDesc::MutableAttrMap()
+    ProtoAttrMap &OpDesc::MutableAttrMap()
     {
     }
 
-    ConstProtoAttrMapHelper OpDesc::GetAttrMap() const
+    ConstProtoAttrMap &OpDesc::GetAttrMap() const
     {
     }
 
@@ -1240,7 +1240,7 @@ std::map<string, GeAttrValue> g_geAttrMap;
     {
     }
 
-    graphStatus AttrHolder::SetAttr(const string& name, const GeAttrValue& value)
+    graphStatus AttrHolder::SetAttr(const string& name, const AnyValue& value)
     {
         return GRAPH_SUCCESS;
     }

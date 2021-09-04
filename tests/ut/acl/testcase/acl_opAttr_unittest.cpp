@@ -129,73 +129,73 @@ TEST_F(UTEST_ACL_OpAttr, SetAttrByTypeTest)
     EXPECT_NE(opAttr.SetAttrByType("value", static_cast<aclDataType>(1000), &int8Value), ACL_SUCCESS);
 };
 
-TEST_F(UTEST_ACL_OpAttr, GeAttrValueToStringForDigestTest)
-{
-    string buffer;
-    ge::GeAttrValue value;
-    value.SetValue<string>("hello");
-    attr_utils::GeAttrValueToStringForDigest(buffer, value);
-    EXPECT_EQ(buffer, "hello");
+// TEST_F(UTEST_ACL_OpAttr, GeAttrValueToStringForDigestTest)
+// {
+//     string buffer;
+//     ge::GeAttrValue value;
+//     value.SetValue<string>("hello");
+//     attr_utils::GeAttrValueToStringForDigest(buffer, value);
+//     EXPECT_EQ(buffer, "hello");
 
-    value.SetValue<bool>(false);
-    attr_utils::GeAttrValueToStringForDigest(buffer, value);
-    EXPECT_EQ(buffer, "helloF");
-    value.SetValue<bool>(true);
-    attr_utils::GeAttrValueToStringForDigest(buffer, value);
-    EXPECT_EQ(buffer, "helloFT");
+//     value.SetValue<bool>(false);
+//     attr_utils::GeAttrValueToStringForDigest(buffer, value);
+//     EXPECT_EQ(buffer, "helloF");
+//     value.SetValue<bool>(true);
+//     attr_utils::GeAttrValueToStringForDigest(buffer, value);
+//     EXPECT_EQ(buffer, "helloFT");
 
-    value.SetValue<int64_t>(666);
-    attr_utils::GeAttrValueToStringForDigest(buffer, value);
-    EXPECT_EQ(buffer, "helloFT666");
+//     value.SetValue<int64_t>(666);
+//     attr_utils::GeAttrValueToStringForDigest(buffer, value);
+//     EXPECT_EQ(buffer, "helloFT666");
 
-    value.SetValue<float>(1.11f);
-    attr_utils::GeAttrValueToStringForDigest(buffer, value);
+//     value.SetValue<float>(1.11f);
+//     attr_utils::GeAttrValueToStringForDigest(buffer, value);
 
-    vector<string> val1{"hello", "world"};
-    vector<bool> val2{false, true};
-    vector<int64_t> val3{666, 444};
-    vector<vector<int64_t>> val4;
-    val4.emplace_back(vector<int64_t>{1,2});
-    val4.emplace_back(vector<int64_t>{3,4,5});
-    vector<float> val5{1.0f, 2.0f};
+//     vector<string> val1{"hello", "world"};
+//     vector<bool> val2{false, true};
+//     vector<int64_t> val3{666, 444};
+//     vector<vector<int64_t>> val4;
+//     val4.emplace_back(vector<int64_t>{1,2});
+//     val4.emplace_back(vector<int64_t>{3,4,5});
+//     vector<float> val5{1.0f, 2.0f};
 
-    buffer = "";
-    value.SetValue(val1);
-    attr_utils::GeAttrValueToStringForDigest(buffer, value);
-    EXPECT_EQ(buffer, "hello,world,");
-    value.SetValue(val2);
-    attr_utils::GeAttrValueToStringForDigest(buffer, value);
-    EXPECT_EQ(buffer, "hello,world,FT");
-    value.SetValue(val3);
-    attr_utils::GeAttrValueToStringForDigest(buffer, value);
-    EXPECT_EQ(buffer, "hello,world,FT666,444,");
-    value.SetValue(val4);
-    attr_utils::GeAttrValueToStringForDigest(buffer, value);
-    EXPECT_EQ(buffer, "hello,world,FT666,444,1,2,|3,4,5,|");
-    value.SetValue(val5);
-    attr_utils::GeAttrValueToStringForDigest(buffer, value);
+//     buffer = "";
+//     value.SetValue(val1);
+//     attr_utils::GeAttrValueToStringForDigest(buffer, value);
+//     EXPECT_EQ(buffer, "hello,world,");
+//     value.SetValue(val2);
+//     attr_utils::GeAttrValueToStringForDigest(buffer, value);
+//     EXPECT_EQ(buffer, "hello,world,FT");
+//     value.SetValue(val3);
+//     attr_utils::GeAttrValueToStringForDigest(buffer, value);
+//     EXPECT_EQ(buffer, "hello,world,FT666,444,");
+//     value.SetValue(val4);
+//     attr_utils::GeAttrValueToStringForDigest(buffer, value);
+//     EXPECT_EQ(buffer, "hello,world,FT666,444,1,2,|3,4,5,|");
+//     value.SetValue(val5);
+//     attr_utils::GeAttrValueToStringForDigest(buffer, value);
 
-    map<string, ge::GeAttrValue> attr;
-    EXPECT_EQ(attr_utils::AttrMapToDigest(attr), 0);
-    attr.emplace("alpha", value);
-    attr_utils::AttrMapToDigest(attr);
-}
+//     map<string, ge::GeAttrValue> attr;
+//     EXPECT_EQ(attr_utils::AttrMapToDigest(attr), 0);
+//     attr.emplace("alpha", value);
+//     attr_utils::AttrMapToDigest(attr);
+// }
 
-TEST_F(UTEST_ACL_OpAttr, ListFloatEqualsTest)
-{
-    vector<float> lhsValue;
-    vector<float> rhsValue;
-    ASSERT_TRUE(attr_utils::IsListFloatEquals(lhsValue, rhsValue));
+// TEST_F(UTEST_ACL_OpAttr, ListFloatEqualsTest)
+// {
+//     vector<float> lhsValue;
+//     vector<float> rhsValue;
+//     ASSERT_TRUE(attr_utils::IsListFloatEquals(lhsValue, rhsValue));
 
-    lhsValue.push_back(1.0000001f);
-    ASSERT_FALSE(attr_utils::IsListFloatEquals(lhsValue, rhsValue));
+//     lhsValue.push_back(1.0000001f);
+//     ASSERT_FALSE(attr_utils::IsListFloatEquals(lhsValue, rhsValue));
 
-    rhsValue.push_back(1.0000002f);
-    ASSERT_TRUE(attr_utils::IsListFloatEquals(lhsValue, rhsValue));
+//     rhsValue.push_back(1.0000002f);
+//     ASSERT_TRUE(attr_utils::IsListFloatEquals(lhsValue, rhsValue));
 
-    rhsValue[0] = 1.0002f;
-    ASSERT_FALSE(attr_utils::IsListFloatEquals(lhsValue, rhsValue));
-}
+//     rhsValue[0] = 1.0002f;
+//     ASSERT_FALSE(attr_utils::IsListFloatEquals(lhsValue, rhsValue));
+// }
 
 
 TEST_F(UTEST_ACL_OpAttr, TestSaveConstToAttr)
