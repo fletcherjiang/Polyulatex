@@ -1036,47 +1036,47 @@ std::map<string, AnyValue> g_geAttrMap;
 
     template<>
     GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<std::string>() {
-    return reinterpret_cast<TypeId>(2);
+        return reinterpret_cast<TypeId>(2);
     }
 
     template<>
     GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<float>() {
-    return reinterpret_cast<TypeId>(3);
+        return reinterpret_cast<TypeId>(3);
     }
 
     template<>
     GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<int64_t>() {
-    return reinterpret_cast<TypeId>(4);
+        return reinterpret_cast<TypeId>(4);
     }
 
     template<>
     GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<GeTensorDesc>() {
-    return reinterpret_cast<TypeId>(5);
+        return reinterpret_cast<TypeId>(5);
     }
 
     template<>
     GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<GeTensor>() {
-    return reinterpret_cast<TypeId>(6);
+        return reinterpret_cast<TypeId>(6);
     }
 
     template<>
     GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<Buffer>() {
-    return reinterpret_cast<TypeId>(7);
+        return reinterpret_cast<TypeId>(7);
     }
 
     template<>
     GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<proto::GraphDef>() {
-    return reinterpret_cast<TypeId>(8);
+        return reinterpret_cast<TypeId>(8);
     }
 
     template<>
     GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<NamedAttrs>() {
-    return reinterpret_cast<TypeId>(9);
+        return reinterpret_cast<TypeId>(9);
     }
 
     template<>
     GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<std::vector<std::vector<int64_t>>>() {
-    return reinterpret_cast<TypeId>(10);
+        return reinterpret_cast<TypeId>(10);
     }
 
     template<>
@@ -1086,82 +1086,125 @@ std::map<string, AnyValue> g_geAttrMap;
 
     template<>
     GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<std::vector<std::vector<float>>>() {
-    return reinterpret_cast<TypeId>(12);
+        return reinterpret_cast<TypeId>(12);
     }
 
     template<>
     GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<std::vector<std::string>>() {
-    return reinterpret_cast<TypeId>(13);
+        return reinterpret_cast<TypeId>(13);
     }
 
     template<>
     GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<std::vector<float>>() {
-    return reinterpret_cast<TypeId>(14);
+        return reinterpret_cast<TypeId>(14);
     }
 
     template<>
     GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<std::vector<bool>>() {
-    return reinterpret_cast<TypeId>(15);
+        return reinterpret_cast<TypeId>(15);
     }
 
     template<>
     GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<std::vector<int64_t>>() {
-    return reinterpret_cast<TypeId>(16);
+        return reinterpret_cast<TypeId>(16);
     }
 
     template<>
     GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<std::vector<GeTensorDesc>>() {
-    return reinterpret_cast<TypeId>(17);
+        return reinterpret_cast<TypeId>(17);
     }
 
     template<>
     GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<std::vector<GeTensor>>() {
-    return reinterpret_cast<TypeId>(18);
+        return reinterpret_cast<TypeId>(18);
     }
 
     template<>
     GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<std::vector<Buffer>>() {
-    return reinterpret_cast<TypeId>(19);
+        return reinterpret_cast<TypeId>(19);
     }
 
     template<>
     GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<std::vector<proto::GraphDef>>() {
-    return reinterpret_cast<TypeId>(20);
+        return reinterpret_cast<TypeId>(20);
     }
 
     template<>
     GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<std::vector<NamedAttrs>>() {
-    return reinterpret_cast<TypeId>(21);
+        return reinterpret_cast<TypeId>(21);
     }
 
     template<>
     GE_FUNC_DEV_VISIBILITY GE_FUNC_HOST_VISIBILITY TypeId GetTypeId<std::vector<DataType>>() {
-    return reinterpret_cast<TypeId>(22);
+        return reinterpret_cast<TypeId>(22);
     }
 
-    AnyValue::AnyValue(AnyValue &&other) noexcept
-    {
+    void AnyValue::Swap(AnyValue &other) noexcept {
+        AnyValue tmp;
+        if (!other.IsEmpty()) {
+            other.operate_(kOpMove, &other, &tmp);
+        }
+
+        other.Clear();
+        if (!IsEmpty()) {
+            operate_(kOpMove, this, &other);
+        }
+
+        Clear();
+        if (!tmp.IsEmpty()) {
+            tmp.operate_(kOpMove, &tmp, this);
+        }
+    }
+
+    AnyValue::AnyValue(AnyValue &&other) noexcept {
+    if (!other.IsEmpty()) {
+        other.operate_(kOpMove, &other, this);
+    }
     }
     AnyValue &AnyValue::operator=(AnyValue &&other) noexcept {
+        Clear();
+        if (!other.IsEmpty()) {
+            other.operate_(kOpMove, &other, this);
+        }
+        return *this;
+        }
+        AnyValue &AnyValue::operator=(const AnyValue &other) {
+        Clear();
+        if (!other.IsEmpty()) {
+            other.operate_(kOpClone, &other, this);
+        }
         return *this;
     }
-    AnyValue &AnyValue::operator=(const AnyValue &other) {
-        return *this;
+    TypeId AnyValue::GetValueTypeId() const noexcept {
+        TypeId vt{kInvalidTypeId};
+        if (!IsEmpty()) {
+            operate_(kGetTypeId, this, &vt);
+        }
+        return vt;
+        }
+        AnyValue::ValueType AnyValue::GetValueType() const noexcept {
+        auto vt = GetValueTypeId();
+        auto iter = type_ids_to_value_type.find(vt);
+        if (iter == type_ids_to_value_type.end()) {
+            return AnyValue::VT_NONE;
+        }
+        return iter->second;
+        }
+        AnyValue AnyValue::Copy() const {
+        AnyValue av(*this);
+        return av;
     }
-
-    AnyValue::ValueType AnyValue::GetValueType() const noexcept
-    {
-        return g_geAttrValueType;
+    bool AnyValue::operator==(const AnyValue &other) const noexcept {
+        if (operate_ == nullptr) {
+            return operate_ == other.operate_;
+        }
+        // 这里仅仅是沿用历史实现，比对指针感觉不太对
+        return operate_ == other.operate_ && GetAddr() == other.GetAddr();
     }
-
-    AnyValue AnyValue::Copy() const
-    {
-        return g_geAttrValue;
-    }
-
-    const void *AnyValue::GetAddr() const
-    {
-        return nullptr;
+    const void *AnyValue::GetAddr() const {
+        void *addr = nullptr;
+        operate_(kOpGetAddr, this, &addr);
+        return addr;
     }
 
     graphStatus OpDesc::AddInputDesc(const string &name, const GeTensorDesc &input_desc)
