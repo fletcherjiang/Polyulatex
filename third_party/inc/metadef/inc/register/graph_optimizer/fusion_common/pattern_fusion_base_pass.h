@@ -84,6 +84,8 @@ class PatternFusionBasePass : public GraphPass {
 
   bool CheckOpSupported(const ge::OpDescPtr &op_desc_ptr);
 
+  bool CheckOpSupported(const ge::NodePtr &node);
+
  private:
   /** match all nodes in graph according to pattern
    *

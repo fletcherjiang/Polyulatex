@@ -1,5 +1,5 @@
 /**
- * Copyright 2019-2020 Huawei Technologies Co., Ltd
+ * Copyright 2019-2021 Huawei Technologies Co., Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,8 @@
 #include "register/op_tiling_registry.h"
 
 namespace optiling {
-
-extern "C" ge::graphStatus OpParaCalculate(const ge::Node &node, OpRunInfo &run_info);
-extern "C" ge::graphStatus OpAtomicCalculate(const ge::Node &node, OpRunInfo &run_info);
-extern "C" ge::graphStatus OpParaCalculateV2(const ge::Node &node, optiling::utils::OpRunInfo &run_info);
-extern "C" ge::graphStatus OpAtomicCalculateV2(const ge::Node &node, optiling::utils::OpRunInfo &run_info);
-
+using OpRunInfoV2 = utils::OpRunInfo;
+extern "C" ge::graphStatus OpParaCalculateV2(const ge::Node &node, OpRunInfoV2 &run_info);
+extern "C" ge::graphStatus OpAtomicCalculateV2(const ge::Node &node, OpRunInfoV2 &run_info);
 }  // namespace optiling
-
 #endif  // INC_REGISTER_OP_TILING_H_
