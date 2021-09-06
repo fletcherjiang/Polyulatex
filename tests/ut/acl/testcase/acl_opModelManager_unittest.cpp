@@ -272,7 +272,17 @@ TEST_F(UTEST_ACL_OpModelManager, MatchModelDynamicTest)
     aclOp.opAttr = opAttr;
     EXPECT_NE(instance.MatchOpModel(aclOp, opModel, isDynamic), ACL_SUCCESS);
     aclopSetAttrString(opAttr, "testAttr", "invalid");
+    const_cast<aclTensorDesc *>(aclOp.outputDesc[0])->memtype = ACL_MEMTYPE_HOST;
+    const_cast<aclTensorDesc *>(aclOp.outputDesc[0])->isConst = false;
+    aclDataBuffer *const *outputs = nullptr;
+    void *ptr = new char[4];
+    outputs = reinterpret_cast<aclDataBuffer *const *>(aclCreateDataBuffer(ptr, 4));
+    aclOp.outputs = outputs;
     EXPECT_NE(instance.MatchOpModel(aclOp, opModel, isDynamic), ACL_SUCCESS);
+    const_cast<aclTensorDesc *>(aclOp.outputDesc[0])->memtype = ACL_MEMTYPE_DEVICE;
+    const_cast<aclTensorDesc *>(aclOp.outputDesc[0])->isConst = false;
+    delete []ptr;
+    ptr = nullptr;
     aclopSetAttrString(opAttr, "testAttr", "attrValue");
     EXPECT_EQ(instance.MatchOpModel(aclOp, opModel, isDynamic), ACL_ERROR_OP_NOT_FOUND);
     aclOp.isCompile = true;
