@@ -775,8 +775,8 @@ aclError OpModelManager::MatchDynamicOpModel(const AclOp &aclOp, OpModel &opMode
                 ACL_LOG_WARN("the dims is not in range of shapeRange");
                 continue;
             }
-            ACL_LOG_INFO("before FixedAclopMatch aclOp = %s", aclOp.DebugString().c_str());
             aclOp.RecoverDimsAndShapeRanges();
+            ACL_LOG_INFO("before FixedAclopMatch aclOp = %s", aclOp.DebugString().c_str());
             FixedAclopMatch(aclOp, statusVec, shapeRanges[j]);
             ACL_LOG_INFO("after FixedAclopMatch aclOp = %s", aclOp.DebugString().c_str());
             ret = dynamicOpModels_.Get(aclOp, modelDef, true);
@@ -803,6 +803,7 @@ aclError OpModelManager::MatchDynamicOpModel(const AclOp &aclOp, OpModel &opMode
                     ret = dynamicModelCache_.GetOpModel(*modelDef, opModel);
                     return ret;
                 }
+                aclOp.RecoverDimsAndShapeRanges();
             }
         }
     }
