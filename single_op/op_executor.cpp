@@ -14,6 +14,7 @@
 #include "types/acl_op.h"
 #include "common/log_inner.h"
 #include "op_model_manager.h"
+#include "ge_tensor_cache.h"
 #include "single_op/executor/stream_executor.h"
 #include "error_codes_inner.h"
 #include "utils/string_utils.h"
@@ -72,16 +73,9 @@ aclError OpExecutor::DoExecuteAsync(ge::SingleOp *singleOp,
     return ACL_SUCCESS;
 }
 
-aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
-                                    const AclOp &aclOp,
-                                    const aclDataBuffer *const inputs[],
-                                    aclDataBuffer *const outputs[],
-                                    bool executeWithExactModel)
+static void GetInputAndOutputNum(const AclOp &aclOp, bool executeWithExactModel, size_t &inputNum, size_t &outputNum)
 {
-    std::vector<ge::DataBuffer> inputVec;
-    std::vector<ge::DataBuffer> outputVec;
-    std::vector<ge::GeTensorDesc> inputDesc;
-    std::vector<ge::GeTensorDesc> outputDesc;
+    inputNum =0;
     for (int32_t i = 0; i < aclOp.numInputs; ++i) {
         // skip optional input
         if (aclOp.inputDesc[i]->IsOptinalTensor()) {
@@ -92,111 +86,127 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
             ACL_LOG_INFO("the inputTensor is const tensor, index %d", i);
             continue;
         }
-        ge::Format geFormat = ge::FORMAT_RESERVED;
-        if (aclOp.inputDesc[i]->storageFormat != ACL_FORMAT_UNDEFINED) {
-            geFormat = static_cast<::ge::Format>(aclOp.inputDesc[i]->storageFormat);
-        }
-        ge::DataType geDataType = ge::DT_UNDEFINED;
-        if (aclOp.inputDesc[i]->dataType != ACL_DT_UNDEFINED) {
-            geDataType = static_cast<::ge::DataType>(aclOp.inputDesc[i]->dataType);
-        }
-        ge::Format geOriginFormat = ge::FORMAT_RESERVED;
-        if (aclOp.inputDesc[i]->format != ACL_FORMAT_UNDEFINED) {
-            geOriginFormat = static_cast<::ge::Format>(aclOp.inputDesc[i]->format);
-        }
-        ACL_LOG_DEBUG("Use storageDims to construct GeShape in op execute");
-        ge::GeTensorDesc tensorDesc;
-        if ((geFormat != ge::FORMAT_RESERVED) && (geOriginFormat != geFormat)) {
-            ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are not equal",
-                static_cast<int32_t>(geOriginFormat), static_cast<int32_t>(geFormat));
-            tensorDesc.SetShape(ge::GeShape(aclOp.inputDesc[i]->storageDims));
-            tensorDesc.SetFormat(geFormat);
-            tensorDesc.SetOriginShape(ge::GeShape(aclOp.inputDesc[i]->dims));
-        } else {
-            ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are equal",
-                static_cast<int32_t>(geOriginFormat), static_cast<int32_t>(geFormat));
-            tensorDesc.SetShape(ge::GeShape(aclOp.inputDesc[i]->dims));
-            tensorDesc.SetFormat(geOriginFormat);
-            tensorDesc.SetOriginShape(tensorDesc.GetShape());
-        }
-        tensorDesc.SetOriginFormat(geOriginFormat);
-        tensorDesc.SetDataType(geDataType);
-        (void)ge::AttrUtils::SetInt(tensorDesc, ge::ATTR_NAME_PLACEMENT,
-            static_cast<int64_t>(aclOp.inputDesc[i]->memtype));
-        inputDesc.emplace_back(std::move(tensorDesc));
-
-        ge::DataBuffer buffer;
-        buffer.data = inputs[i]->data;
-        buffer.length = inputs[i]->length;
-        buffer.placement = aclOp.inputDesc[i]->memtype;
-        inputVec.emplace_back(buffer);
+        ++inputNum;
     }
-    ACL_LOG_INFO("Inputbuff and inputDesc are ready");
+
+    outputNum =0;
     for (int32_t i = 0; i < aclOp.numOutputs; ++i) {
         if (aclOp.outputDesc[i]->CheckConstTensor(executeWithExactModel)) {
             ACL_LOG_INFO("the outputTensor is const tensor, index %d", i);
             continue;
         }
-        ge::Format geFormat = ge::FORMAT_RESERVED;
-        if (aclOp.outputDesc[i]->storageFormat != ACL_FORMAT_UNDEFINED) {
-            geFormat = static_cast<::ge::Format>(aclOp.outputDesc[i]->storageFormat);
-        }
-        ge::DataType geDataType = ge::DT_UNDEFINED;
-        if (aclOp.outputDesc[i]->dataType != ACL_DT_UNDEFINED) {
-            geDataType = static_cast<::ge::DataType>(aclOp.outputDesc[i]->dataType);
-        }
-        ge::Format geOriginFormat = ge::FORMAT_RESERVED;
-        if (aclOp.outputDesc[i]->format != ACL_FORMAT_UNDEFINED) {
-            geOriginFormat = static_cast<::ge::Format>(aclOp.outputDesc[i]->format);
-        }
-
-        ACL_LOG_DEBUG("Use storageDims to construct GeShape in op execute");
-        ge::GeTensorDesc tensorDesc;
-        if ((geFormat != ge::FORMAT_RESERVED) && (geOriginFormat != geFormat)) {
-            ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are not equal",
-                static_cast<int32_t>(geOriginFormat), static_cast<int32_t>(geFormat));
-            tensorDesc.SetShape(ge::GeShape(aclOp.outputDesc[i]->storageDims));
-            tensorDesc.SetFormat(geFormat);
-            tensorDesc.SetOriginShape(ge::GeShape(aclOp.outputDesc[i]->dims));
-        } else {
-            ACL_LOG_DEBUG("geOriginFormat is %d,  geFormat is %d, they are equal",
-                static_cast<int32_t>(geOriginFormat), static_cast<int32_t>(geFormat));
-            tensorDesc.SetShape(ge::GeShape(aclOp.outputDesc[i]->dims));
-            tensorDesc.SetFormat(geOriginFormat);
-            tensorDesc.SetOriginShape(tensorDesc.GetShape());
-        }
-
-        tensorDesc.SetOriginFormat(geOriginFormat);
-        tensorDesc.SetDataType(geDataType);
-        (void)ge::AttrUtils::SetInt(tensorDesc, ge::ATTR_NAME_PLACEMENT,
-            static_cast<int64_t>(aclOp.outputDesc[i]->memtype));
-        outputDesc.emplace_back(std::move(tensorDesc));
-
-        ge::DataBuffer buffer;
-        buffer.data = outputs[i]->data;
-        buffer.length = outputs[i]->length;
-        buffer.placement = aclOp.outputDesc[i]->memtype;
-        outputVec.emplace_back(buffer);
+        ++outputNum;
     }
+}
 
-    ACL_LOG_INFO("To invoke GeExecutor::ExecuteAsync");
-    ge::Status ret = ge::GeExecutor::ExecuteAsync(singleOp, inputDesc, inputVec, outputDesc, outputVec);
+static void FixGeTensorDesc(const aclTensorDesc &aclDesc, ge::GeTensorDesc &geTensorDesc)
+{
+    ge::Format geFormat = ge::FORMAT_RESERVED;
+    if (aclDesc.storageFormat != ACL_FORMAT_UNDEFINED) {
+        geFormat = static_cast<::ge::Format>(aclDesc.storageFormat);
+    }
+    ge::DataType geDataType = ge::DT_UNDEFINED;
+    if (aclDesc.dataType != ACL_DT_UNDEFINED) {
+        geDataType = static_cast<::ge::DataType>(aclDesc.dataType);
+    }
+    ge::Format geOriginFormat = ge::FORMAT_RESERVED;
+    if (aclDesc.format != ACL_FORMAT_UNDEFINED) {
+        geOriginFormat = static_cast<::ge::Format>(aclDesc.format);
+    }
+    ACL_LOG_DEBUG("use storageDims to construct GeShape in op execute");
+    if ((geFormat != ge::FORMAT_RESERVED) && (geOriginFormat != geFormat)) {
+        ACL_LOG_DEBUG("geOriginFormat is %d, geFormat is %d, they are not equal",
+            static_cast<int32_t>(geOriginFormat), static_cast<int32_t>(geFormat));
+        WrapGeShape(geTensorDesc.MutableShape(), aclDesc.storageDims);
+        geTensorDesc.SetFormat(geFormat);
+        const ge::GeShape &shape = geTensorDesc.GetOriginShape();
+        WrapGeShape(const_cast<ge::GeShape &>(shape), aclDesc.dims);
+        geTensorDesc.SetOriginShape(shape);
+    } else {
+        ACL_LOG_DEBUG("geOriginFormat is %d, geFormat is %d, they are equal",
+            static_cast<int32_t>(geOriginFormat), static_cast<int32_t>(geFormat));
+        WrapGeShape(geTensorDesc.MutableShape(), aclDesc.dims);
+        geTensorDesc.SetFormat(geOriginFormat);
+        geTensorDesc.SetOriginShape(geTensorDesc.GetShape());
+    }
+    geTensorDesc.SetOriginFormat(geOriginFormat);
+    geTensorDesc.SetDataType(geDataType);
+}
+
+static void FixGeDataBuffer(const aclDataBuffer *aclBuf, aclMemType memType, ge::DataBuffer &geBuf)
+{
+    geBuf.data = aclBuf->data;
+    geBuf.length = aclBuf->length;
+    geBuf.placement = memType;
+}
+aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
+                                    const AclOp &aclOp,
+                                    const aclDataBuffer *const inputs[],
+                                    aclDataBuffer *const outputs[],
+                                    bool executeWithExactModel)
+{
+    size_t inputNum = 0U;
+    size_t outputNum = 0U;
+    GetInputAndOutputNum(aclOp, executeWithExactModel, inputNum, outputNum);
+    GeTensorDescVecPtr inputDesc = GeTensorDescCache::GetInstance().GetDescVecPtr(inputNum);
+    ACL_CHECK_WITH_MESSAGE_AND_RETURN(inputDesc != nullptr, ACL_ERROR_BAD_ALLOC, "get input tensor desc failed!");
+    GeTensorDescVecPtr outputDesc = GeTensorDescCache::GetInstance().GetDescVecPtr(outputNum);
+    ACL_CHECK_WITH_MESSAGE_AND_RETURN(outputDesc != nullptr, ACL_ERROR_BAD_ALLOC, "get output tensor desc failed!");
+    std::vector<ge::DataBuffer> inputVec(inputNum);
+    std::vector<ge::DataBuffer> outputVec(outputNum);
+
+    size_t inCnt = 0U;
+    for (int32_t i = 0U; (i < aclOp.numInputs) && (inCnt < inputNum); ++i) {
+        // skip optional input
+        if (aclOp.inputDesc[i]->IsOptinalTensor()) {
+            continue;
+        }
+        if (aclOp.inputDesc[i]->CheckConstTensor(executeWithExactModel)) {
+            continue;
+        }
+        auto &vecDesc = *inputDesc;
+        const aclTensorDesc *aclDesc = aclOp.inputDesc[i];
+        FixGeTensorDesc(*aclDesc, vecDesc[inCnt]);
+        FixGeDataBuffer(inputs[i], aclDesc->memtype, inputVec[inCnt]);
+        ++inCnt;
+    }
+    ACL_LOG_INFO("inputBuffer and inputDesc for ge are ready");
+
+    size_t outCnt = 0U;
+    for (int32_t i = 0U; (i < aclOp.numOutputs) && (outCnt < outputNum); ++i) {
+        if (aclOp.outputDesc[i]->CheckConstTensor(executeWithExactModel)) {
+            continue;
+        }
+        auto &vecDesc = *outputDesc;
+        const aclTensorDesc *aclDesc = aclOp.outputDesc[i];
+        FixGeTensorDesc(*aclDesc, vecDesc[outCnt]);
+        FixGeDataBuffer(outputs[i], aclDesc->memtype, outputVec[outCnt]);
+        ++outCnt;
+    }
+    ACL_LOG_INFO("outputBuffer and outputDesc for ge are ready");
+
+    ACL_LOG_INFO("to invoke GeExecutor::ExecuteAsync");
+    ge::Status ret = ge::GeExecutor::ExecuteAsync(singleOp, *inputDesc, inputVec, *outputDesc, outputVec);
     if (ret != ge::SUCCESS) {
-        ACL_LOG_CALL_ERROR("[Exec][Op]Execute op failed. ge result = %u", ret);
+        ACL_LOG_CALL_ERROR("[Exec][Op]Execute op failed, ge result = %u", ret);
+        GeTensorDescCache::GetInstance().ReleaseDescVecPtr(inputDesc);
+        GeTensorDescCache::GetInstance().ReleaseDescVecPtr(outputDesc);
         return ACL_GET_ERRCODE_GE(static_cast<int32_t>(ret));
     }
 
     if (aclOp.exeucteType == ACL_OP_EXECUTE_V2) {
-        ACL_LOG_INFO("Begin to update outputDesc");
-        for (size_t i = 0U; i < outputDesc.size(); ++i) {
-            ge::GeShape outputShape = outputDesc[i].GetShape();
+        ACL_LOG_INFO("begin to update outputDesc");
+        for (size_t i = 0U; i < outputDesc->size(); ++i) {
+            ge::GeShape outputShape = (*outputDesc)[i].GetShape();
             std::vector<int64_t> outputDims = outputShape.GetDims();
             ACL_LOG_INFO("update outputDesc[%zu] dims is [%s]", i, string_utils::VectorToString(outputDims).c_str());
             const_cast<aclTensorDesc *>(aclOp.outputDesc[i])->dims = outputDims;
         }
-        ACL_LOG_INFO("Update outputDesc success");
+        ACL_LOG_INFO("update outputDesc successfully");
     }
-    ACL_LOG_INFO("GeExecutor::ExecuteAsync success");
+
+    GeTensorDescCache::GetInstance().ReleaseDescVecPtr(inputDesc);
+    GeTensorDescCache::GetInstance().ReleaseDescVecPtr(outputDesc);
     return ACL_SUCCESS;
 }
 

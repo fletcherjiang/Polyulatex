@@ -872,6 +872,16 @@ std::map<string, AnyValue> g_geAttrMap;
         return 0;
     }
 
+    void GeShape::SetDimNum(size_t dim_num)
+    {
+       return;
+    }
+
+    graphStatus GeShape::SetDim(size_t idx, int64_t value)
+    {
+        return GRAPH_SUCCESS;
+    }
+
     GeShape &GeShape::operator=(const GeShape &other)
     {
 

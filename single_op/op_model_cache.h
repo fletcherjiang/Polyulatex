@@ -10,7 +10,7 @@
 #ifndef ACL_OP_EXEC_OP_MODEL_CACHE_H_
 #define ACL_OP_EXEC_OP_MODEL_CACHE_H_
 
-#include <map>
+#include <unordered_map>
 #include <mutex>
 
 #include "types/op_model.h"
@@ -29,7 +29,7 @@ public:
     aclError Delete(const OpModelDef &modelDef);
 
 private:
-    std::map<std::string, OpModel> cachedModels_;
+    std::unordered_map<std::string, OpModel> cachedModels_;
     std::mutex mutex_;
 };
 } // namespace acl
