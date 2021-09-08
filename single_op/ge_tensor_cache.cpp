@@ -3,6 +3,7 @@
 namespace acl {
 
 const size_t MAX_SIZE = 10000U;
+const size_t MIN_SIZE = 10U;
 
 GeTensorDescCache& GeTensorDescCache::GetInstance()
 {
@@ -41,7 +42,7 @@ void GeTensorDescCache::ReleaseDescVecPtr(const GeTensorDescVecPtr ptr)
     }
     descCache_.emplace_back(ptr);
     if (descCache_.size() >= MAX_SIZE) {
-        descCache_.clear();
+        descCache_.resize(MIN_SIZE);
     }
 }
 } //namespace acl
