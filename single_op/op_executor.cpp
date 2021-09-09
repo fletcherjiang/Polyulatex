@@ -139,6 +139,7 @@ static void FixGeDataBuffer(const aclDataBuffer *aclBuf, aclMemType memType, ge:
     geBuf.length = aclBuf->length;
     geBuf.placement = memType;
 }
+
 aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
                                     const AclOp &aclOp,
                                     const aclDataBuffer *const inputs[],
@@ -149,9 +150,9 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
     size_t outputNum = 0U;
     GetInputAndOutputNum(aclOp, executeWithExactModel, inputNum, outputNum);
     GeTensorDescVecPtr inputDesc = GeTensorDescCache::GetInstance().GetDescVecPtr(inputNum);
-    ACL_CHECK_WITH_MESSAGE_AND_RETURN(inputDesc != nullptr, ACL_ERROR_BAD_ALLOC, "get input tensor desc failed!");
+    ACL_CHECK_WITH_MESSAGE_AND_RETURN(inputDesc != nullptr, ACL_ERROR_BAD_ALLOC, "get input tensor desc failed");
     GeTensorDescVecPtr outputDesc = GeTensorDescCache::GetInstance().GetDescVecPtr(outputNum);
-    ACL_CHECK_WITH_MESSAGE_AND_RETURN(outputDesc != nullptr, ACL_ERROR_BAD_ALLOC, "get output tensor desc failed!");
+    ACL_CHECK_WITH_MESSAGE_AND_RETURN(outputDesc != nullptr, ACL_ERROR_BAD_ALLOC, "get output tensor desc failed");
     std::vector<ge::DataBuffer> inputVec(inputNum);
     std::vector<ge::DataBuffer> outputVec(outputNum);
 
