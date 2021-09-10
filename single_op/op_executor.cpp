@@ -208,6 +208,7 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
 
     GeTensorDescCache::GetInstance().ReleaseDescVecPtr(inputDesc);
     GeTensorDescCache::GetInstance().ReleaseDescVecPtr(outputDesc);
+    ACL_LOG_INFO("GeExecutor::ExecuteAsync success");
     return ACL_SUCCESS;
 }
 
