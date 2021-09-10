@@ -75,7 +75,7 @@ aclError OpExecutor::DoExecuteAsync(ge::SingleOp *singleOp,
 
 static void GetInputAndOutputNum(const AclOp &aclOp, bool executeWithExactModel, size_t &inputNum, size_t &outputNum)
 {
-    inputNum =0;
+    inputNum = 0;
     for (int32_t i = 0; i < aclOp.numInputs; ++i) {
         // skip optional input
         if (aclOp.inputDesc[i]->IsOptinalTensor()) {
@@ -89,7 +89,7 @@ static void GetInputAndOutputNum(const AclOp &aclOp, bool executeWithExactModel,
         ++inputNum;
     }
 
-    outputNum =0;
+    outputNum = 0;
     for (int32_t i = 0; i < aclOp.numOutputs; ++i) {
         if (aclOp.outputDesc[i]->CheckConstTensor(executeWithExactModel)) {
             ACL_LOG_INFO("the outputTensor is const tensor, index %d", i);
