@@ -42,4 +42,5 @@ private:
     std::mutex cacheMutex_;
 };
 } //namespace acl
-#endif
+
+#endif // ACL_OP_GE_TENSOR_CACHE_H
