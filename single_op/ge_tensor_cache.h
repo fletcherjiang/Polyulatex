@@ -33,6 +33,7 @@ class GeTensorDescCache {
 public:
     GeTensorDescCache() = default;
     ~GeTensorDescCache() = default;
+    // must use GetInstance when we need use this calss, or memory error may happen
     static GeTensorDescCache& GetInstance();
     GeTensorDescVecPtr GetDescVecPtr(size_t size);
     void ReleaseDescVecPtr(const GeTensorDescVecPtr ptr);
