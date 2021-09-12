@@ -152,7 +152,11 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
     GeTensorDescVecPtr inputDesc = GeTensorDescCache::GetInstance().GetDescVecPtr(inputNum);
     ACL_CHECK_WITH_MESSAGE_AND_RETURN(inputDesc != nullptr, ACL_ERROR_BAD_ALLOC, "get input tensor desc failed");
     GeTensorDescVecPtr outputDesc = GeTensorDescCache::GetInstance().GetDescVecPtr(outputNum);
-    ACL_CHECK_WITH_MESSAGE_AND_RETURN(outputDesc != nullptr, ACL_ERROR_BAD_ALLOC, "get output tensor desc failed");
+    if (outputDesc == nullptr) {
+        GeTensorDescCache::GetInstance().ReleaseDescVecPtr(inputDesc);
+        ACL_LOG_ERROR("get input tensor desc failed");
+        return ACL_ERROR_BAD_ALLOC;
+    }
     std::vector<ge::DataBuffer> inputVec(inputNum);
     std::vector<ge::DataBuffer> outputVec(outputNum);
 

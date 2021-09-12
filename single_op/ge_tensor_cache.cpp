@@ -16,6 +16,7 @@ GeTensorDescCache::~GeTensorDescCache()
             delete descCache_[i];
         }
     }
+    descCache_.clear();
 }
 
 GeTensorDescVecPtr GeTensorDescCache::GetDescVecPtr(size_t size)

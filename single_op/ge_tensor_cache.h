@@ -33,7 +33,7 @@ class GeTensorDescCache {
 public:
     GeTensorDescCache() = default;
     ~GeTensorDescCache() = default;
-    // must use GetInstance when we need use this calss, or memory error may happen
+    // must use GetInstance when we need use this calss, otherwise memory error may happen
     static GeTensorDescCache& GetInstance();
     GeTensorDescVecPtr GetDescVecPtr(size_t size);
     void ReleaseDescVecPtr(const GeTensorDescVecPtr ptr);
@@ -41,6 +41,6 @@ private:
     std::vector<GeTensorDescVecPtr> descCache_;
     std::mutex cacheMutex_;
 };
-} //namespace acl
+} // namespace acl
 
 #endif // ACL_OP_GE_TENSOR_CACHE_H
