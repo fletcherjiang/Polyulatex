@@ -157,7 +157,7 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
     std::vector<ge::DataBuffer> outputVec(outputNum);
 
     size_t inCnt = 0U;
-    for (int32_t i = 0U; (i < aclOp.numInputs) && (inCnt < inputNum); ++i) {
+    for (int32_t i = 0; (i < aclOp.numInputs) && (inCnt < inputNum); ++i) {
         // skip optional input
         if (aclOp.inputDesc[i]->IsOptinalTensor()) {
             continue;
@@ -174,7 +174,7 @@ aclError OpExecutor::DoExecuteAsync(ge::DynamicSingleOp *singleOp,
     ACL_LOG_INFO("inputBuffer and inputDesc for ge are ready");
 
     size_t outCnt = 0U;
-    for (int32_t i = 0U; (i < aclOp.numOutputs) && (outCnt < outputNum); ++i) {
+    for (int32_t i = 0; (i < aclOp.numOutputs) && (outCnt < outputNum); ++i) {
         if (aclOp.outputDesc[i]->CheckConstTensor(executeWithExactModel)) {
             continue;
         }
