@@ -50,7 +50,7 @@ namespace acl {
         if (GetDstInfo(deviceId, QS_PID, qsPid) == RT_ERROR_NONE) {
             rtEschedEventSummary_t eventSum = {0};
             rtEschedEventReply_t ack = {0};
-            bqs::QsProcMsgRsp qsRsp = {0};
+            QsProcMsgRsp qsRsp = {0};
             int32_t cpPid = 0;
             ACL_REQUIRES_OK(GetDstInfo(deviceId, CP_PID, cpPid));
             eventSum.pid = cpPid;
@@ -146,7 +146,7 @@ namespace acl {
         ACL_REQUIRES_OK(GetDstInfo(deviceId, CP_PID, dstPid));
         rtEschedEventSummary_t eventSum = {0};
         rtEschedEventReply_t ack = {0};
-        bqs::QsProcMsgRsp qsRsp = {0};
+        QsProcMsgRsp qsRsp = {0};
         eventSum.pid = dstPid;
         eventSum.grpId = 0;
         eventSum.eventId = RT_MQ_SCHED_EVENT_QS_MSG;
@@ -174,7 +174,7 @@ namespace acl {
         ACL_REQUIRES_OK(GetDstInfo(deviceId, CP_PID, dstPid));
         rtEschedEventSummary_t eventSum = {0};
         rtEschedEventReply_t ack = {0};
-        bqs::QsProcMsgRsp qsRsp = {0};
+        QsProcMsgRsp qsRsp = {0};
         eventSum.pid = dstPid;
         eventSum.grpId = 0;
         eventSum.eventId = RT_MQ_SCHED_EVENT_QS_MSG;
@@ -201,7 +201,7 @@ namespace acl {
         ACL_REQUIRES_OK(GetDstInfo(deviceId, CP_PID, dstPid));
         rtEschedEventSummary_t eventSum = {0};
         rtEschedEventReply_t ack = {0};
-        bqs::QsProcMsgRsp qsRsp = {0};
+        QsProcMsgRsp qsRsp = {0};
         eventSum.pid = dstPid;
         eventSum.grpId = 0;
         eventSum.eventId = RT_MQ_SCHED_EVENT_QS_MSG;

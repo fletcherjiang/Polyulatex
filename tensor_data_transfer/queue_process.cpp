@@ -42,14 +42,14 @@ namespace acl {
         // get qs id
         int32_t dstPid = 0;
         size_t routeNum = 0;
-        std::lock_guard<std::recursive_mutex> lock(muForQueueCtrl_);
+        std::lock_guard<std::recursive_mutex> lk(muForQueueCtrl_);
         if (GetDstInfo(deviceId, QS_PID, dstPid) == ACL_SUCCESS) {
             ACL_LOG_INFO("find qs pid %d", dstPid);
             rtEschedEventSummary_t eventSum = {0};
             rtEschedEventReply_t ack = {0};
-            bqs::QsProcMsgRsp qsRsp = {0};
+            QsProcMsgRsp qsRsp = {0};
             eventSum.pid = dstPid;
-            eventSum.grpId = bqs::BINDQUEUEGRPID;
+            eventSum.grpId = BINDQUEUEGRPID;
             eventSum.eventId = RT_MQ_SCHED_EVENT_QS_MSG; // qs EVENT_ID
             eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
             ack.buf = reinterpret_cast<char *>(&qsRsp);
@@ -76,7 +76,7 @@ namespace acl {
         uint64_t endTime = 0;
         bool continueFlag = (timeout < 0) ? true : false;
         do {
-            std::lock_guard<std::mutex> lock(muPtr->muForEnqueue);
+            std::lock_guard<std::mutex> lk(muPtr->muForDequeue);
             int32_t deviceId = 0;
             rtError_t rtRet = rtMemQueueEnQueue(deviceId, qid, buf);
             if (rtRet == RT_ERROR_NONE) {
@@ -101,7 +101,7 @@ namespace acl {
         uint64_t endTime = 0;
         bool continueFlag = (timeout < 0) ? true : false;
         do {
-            std::lock_guard<std::mutex> lock(muPtr->muForEnqueue);
+            std::lock_guard<std::mutex> lk(muPtr->muForEnqueue);
             int32_t deviceId = 0;
             rtError_t rtRet = rtMemQueueDeQueue(deviceId, qid, buf);
             if (rtRet == RT_ERROR_NONE) {
@@ -232,14 +232,14 @@ namespace acl {
     {
         // send contact msg
         ACL_LOG_INFO("start to send contact msg");
-        bqs::QsBindInit qsInitMsg = {0};
+        QsBindInit qsInitMsg = {0};
         qsInitMsg.pid = mmGetPid();
         qsInitMsg.grpId = 0;
-        eventSum.subeventId = bqs::ACL_BIND_QUEUE_INIT;
+        eventSum.subeventId = ACL_BIND_QUEUE_INIT;
         eventSum.msgLen = sizeof(qsInitMsg);
         eventSum.msg = reinterpret_cast<char *>(&qsInitMsg);
         ACL_REQUIRES_CALL_RTS_OK(rtEschedSubmitEventSync(deviceId, &eventSum, &ack), rtEschedSubmitEventSync);
-        bqs::QsProcMsgRsp *rsp = reinterpret_cast<bqs::QsProcMsgRsp *>(ack.buf);
+        QsProcMsgRsp *rsp = reinterpret_cast<QsProcMsgRsp *>(ack.buf);
         if (rsp->retCode != 0) {
             ACL_LOG_INNER_ERROR("send connet qs failed,  ret code id %d", rsp->retCode);
             return ACL_ERROR_FAILURE;
@@ -260,16 +260,16 @@ namespace acl {
     {
         ACL_LOG_INFO("start to send bind or unbind msg");
         // send bind or unbind msg
-        size_t routeSize = qRouteList->routeList.size() * sizeof(bqs::QueueRoute);
+        size_t routeSize = qRouteList->routeList.size() * sizeof(QueueRoute);
         void *devPtr = nullptr;
         void *mBuf = nullptr;
         ACL_REQUIRES_OK(AllocBuf(&devPtr, &mBuf, routeSize, isMbuffAlloc));
         size_t offset = 0;
         for (size_t i = 0; i < qRouteList->routeList.size(); ++i) {
-            bqs::QueueRoute *tmp = reinterpret_cast<bqs::QueueRoute *>(static_cast<uint8_t *>(devPtr) + offset);
+            QueueRoute *tmp = reinterpret_cast<QueueRoute *>(static_cast<uint8_t *>(devPtr) + offset);
             tmp->srcId = qRouteList->routeList[i].srcId;
             tmp->dstId = qRouteList->routeList[i].dstId;
-            offset += sizeof(bqs::QueueRoute);
+            offset += sizeof(QueueRoute);
         }
         if (isMbuffAlloc) {
             // device need to use mbuff
@@ -282,17 +282,17 @@ namespace acl {
                 return ret;
             }
         }
-        bqs::QueueRouteList bqsBindUnbindMsg = {0};
+        QueueRouteList bqsBindUnbindMsg = {0};
         bqsBindUnbindMsg.routeNum = qRouteList->routeList.size();
         bqsBindUnbindMsg.routeListAddr = isMbuffAlloc ? 0 : reinterpret_cast<uint64_t>(devPtr);
-        eventSum.subeventId = isBind ? bqs::ACL_BIND_QUEUE : bqs::ACL_UNBIND_QUEUE;
+        eventSum.subeventId = isBind ? ACL_BIND_QUEUE : ACL_UNBIND_QUEUE;
         eventSum.msgLen = sizeof(bqsBindUnbindMsg);
         eventSum.msg = reinterpret_cast<char *>(&bqsBindUnbindMsg);
         auto ret = rtEschedSubmitEventSync(deviceId, &eventSum, &ack);
         eventSum.msgLen = 0;
         eventSum.msg = nullptr;
         if (ret == RT_ERROR_NONE) {
-            bqs::QsProcMsgRsp *rsp = reinterpret_cast<bqs::QsProcMsgRsp *>(ack.buf);
+            QsProcMsgRsp *rsp = reinterpret_cast<QsProcMsgRsp *>(ack.buf);
             if (rsp->retCode != 0) {
                 ACL_LOG_INNER_ERROR("send connet qs failed,  ret code id %d", rsp->retCode);
                 FreeBuf(devPtr, mBuf, isMbuffAlloc);
@@ -302,9 +302,9 @@ namespace acl {
             }
             offset = 0;
             for (size_t i = 0; i < qRouteList->routeList.size(); ++i) {
-                bqs::QueueRoute *tmp = reinterpret_cast<bqs::QueueRoute *>(static_cast<uint8_t *>(devPtr) + offset);
+                QueueRoute *tmp = reinterpret_cast<QueueRoute *>(static_cast<uint8_t *>(devPtr) + offset);
                 qRouteList->routeList[i].status = tmp->status;
-                offset += sizeof(bqs::QueueRoute);
+                offset += sizeof(QueueRoute);
             }
         } else {
             ACL_LOG_CALL_ERROR("[Call][Rts]call rts api rtEschedSubmitEventSync failed.");
@@ -322,17 +322,17 @@ namespace acl {
                                               size_t &routeNum)
     {
         ACL_LOG_INFO("start to get queue route num");
-        bqs::QueueRouteQuery routeQuery= {0};
+        QueueRouteQuery routeQuery= {0};
         routeQuery.queryType = queryInfo->mode;
         routeQuery.srcId = queryInfo->srcId;
         routeQuery.dstId = queryInfo->dstId;
         routeQuery.routeNum = 0;
 
-        eventSum.subeventId = bqs::ACL_QUERY_QUEUE_NUM;
+        eventSum.subeventId = ACL_QUERY_QUEUE_NUM;
         eventSum.msgLen = sizeof(routeQuery);
         eventSum.msg = reinterpret_cast<char *>(&routeQuery);
         ACL_REQUIRES_CALL_RTS_OK(rtEschedSubmitEventSync(deviceId, &eventSum, &ack), rtEschedSubmitEventSync);
-        bqs::QsProcMsgRsp *rsp = reinterpret_cast<bqs::QsProcMsgRsp *>(ack.buf);
+        QsProcMsgRsp *rsp = reinterpret_cast<QsProcMsgRsp *>(ack.buf);
         if (rsp->retCode != 0) {
             ACL_LOG_INNER_ERROR("get queue route num failed,  ret code id %d", rsp->retCode);
             return ACL_ERROR_FAILURE;
@@ -353,7 +353,7 @@ namespace acl {
                                               acltdtQueueRouteList *qRouteList)
     {
         ACL_LOG_INFO("start to query queue route %zu", routeNum);
-        size_t routeSize = routeNum * sizeof(bqs::QueueRoute);
+        size_t routeSize = routeNum * sizeof(QueueRoute);
         void *devPtr = nullptr;
         void *mBuf = nullptr;
         ACL_REQUIRES_OK(AllocBuf(&devPtr, &mBuf, routeSize, isMbufAlloc));
@@ -369,13 +369,13 @@ namespace acl {
             }
         }
 
-        bqs::QueueRouteQuery routeQuery= {0};
+        QueueRouteQuery routeQuery= {0};
         routeQuery.queryType = queryInfo->mode;
         routeQuery.srcId = queryInfo->srcId;
         routeQuery.dstId = queryInfo->dstId;
         routeQuery.routeNum = routeNum;
         routeQuery.routeListAddr = isMbufAlloc ? 0 : reinterpret_cast<uint64_t>(devPtr);
-        eventSum.subeventId = bqs::ACL_QUERY_QUEUE;
+        eventSum.subeventId = ACL_QUERY_QUEUE;
         eventSum.msgLen = sizeof(routeQuery);
         eventSum.msg = reinterpret_cast<char *>(&routeQuery);
 
@@ -388,7 +388,7 @@ namespace acl {
             mBuf = nullptr;
             return ret;
         }
-        bqs::QsProcMsgRsp *rsp = reinterpret_cast<bqs::QsProcMsgRsp *>(ack.buf);
+        QsProcMsgRsp *rsp = reinterpret_cast<QsProcMsgRsp *>(ack.buf);
         if (rsp->retCode != 0) {
             ACL_LOG_INNER_ERROR("query queue route failed,  ret code id %d", rsp->retCode);
             FreeBuf(devPtr, mBuf, isMbufAlloc);
@@ -398,10 +398,10 @@ namespace acl {
         }
         size_t offset = 0;
         for (size_t i = 0; i < routeNum; ++i) {
-            bqs::QueueRoute *tmp = reinterpret_cast<bqs::QueueRoute *>(static_cast<uint8_t *>(devPtr) + offset);
+            QueueRoute *tmp = reinterpret_cast<QueueRoute *>(static_cast<uint8_t *>(devPtr) + offset);
             acltdtQueueRoute tmpQueueRoute = {tmp->srcId, tmp->dstId, tmp->status};
             qRouteList->routeList.push_back(tmpQueueRoute);
-            offset += sizeof(bqs::QueueRoute);
+            offset += sizeof(QueueRoute);
         }
         FreeBuf(devPtr, mBuf, isMbufAlloc);
         devPtr = nullptr;
@@ -443,7 +443,7 @@ namespace acl {
 
     QueueDataMutexPtr QueueProcessor::GetMutexForData(uint32_t qid)
     {
-        std::lock_guard<std::mutex> lock(muForQueueMap_);
+        std::lock_guard<std::mutex> lk(muForQueueMap_);
         auto it = muForQueue_.find(qid);
         if (it != muForQueue_.end()) {
             return it->second;
@@ -456,7 +456,7 @@ namespace acl {
 
     void QueueProcessor::DeleteMutexForData(uint32_t qid)
     {
-        std::lock_guard<std::mutex> lock(muForQueueMap_);
+        std::lock_guard<std::mutex> lk(muForQueueMap_);
         auto it = muForQueue_.find(qid);
         if (it != muForQueue_.end()) {
             muForQueue_.erase(it);
