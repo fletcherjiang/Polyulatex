@@ -94,6 +94,7 @@ set(SRC_FILES
     "${BASE_DIR}/single_op/op_model_cache.cpp"
     "${BASE_DIR}/single_op/op_model_manager.cpp"
     "${BASE_DIR}/single_op/op_model_parser.cpp"
+    "${BASE_DIR}/single_op/ge_tensor_cache.cpp"
     "${BASE_DIR}/toolchain/dump.cpp"
     "${BASE_DIR}/toolchain/profiling.cpp"
     "${BASE_DIR}/toolchain/profiling_manager.cpp"

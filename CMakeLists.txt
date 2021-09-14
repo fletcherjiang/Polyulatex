@@ -196,6 +196,7 @@ set(SRC_LIST
     single_op/op_model_cache.cpp
     single_op/op_model_manager.cpp
     single_op/op_model_parser.cpp
+    single_op/ge_tensor_cache.cpp
     types/acl_op.cpp
     types/fp16.cpp
     types/fp16_impl.cpp
