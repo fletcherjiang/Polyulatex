@@ -133,9 +133,9 @@ namespace acl {
         }
         rtEschedEventSummary_t eventSum = {0};
         rtEschedEventReply_t ack = {0};
-        bqs::QsProcMsgRsp qsRsp = {0};
+        QsProcMsgRsp qsRsp = {0};
         eventSum.pid = dstPid;
-        eventSum.grpId = bqs::BINDQUEUEGRPID;
+        eventSum.grpId = BINDQUEUEGRPID;
         eventSum.eventId = RT_MQ_SCHED_EVENT_QS_MSG;
         eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
         ack.buf = reinterpret_cast<char *>(&qsRsp);
@@ -159,9 +159,9 @@ namespace acl {
         ACL_REQUIRES_OK(GetDstInfo(deviceId, QS_PID, dstPid));
         rtEschedEventSummary_t eventSum = {0};
         rtEschedEventReply_t ack = {0};
-        bqs::QsProcMsgRsp qsRsp = {0};
+        QsProcMsgRsp qsRsp = {0};
         eventSum.pid = dstPid;
-        eventSum.grpId = bqs::BINDQUEUEGRPID;
+        eventSum.grpId = BINDQUEUEGRPID;
         eventSum.eventId = RT_MQ_SCHED_EVENT_QS_MSG;
         eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
         ack.buf = reinterpret_cast<char *>(&qsRsp);
@@ -185,9 +185,9 @@ namespace acl {
         ACL_REQUIRES_OK(GetDstInfo(deviceId, QS_PID, dstPid));
         rtEschedEventSummary_t eventSum = {0};
         rtEschedEventReply_t ack = {0};
-        bqs::QsProcMsgRsp qsRsp = {0};
+        QsProcMsgRsp qsRsp = {0};
         eventSum.pid = dstPid;
-        eventSum.grpId = bqs::BINDQUEUEGRPID;
+        eventSum.grpId = BINDQUEUEGRPID;
         eventSum.eventId = RT_MQ_SCHED_EVENT_QS_MSG;
         eventSum.dstEngine = RT_MQ_DST_ENGINE_CCPU_DEVICE;
         ack.buf = reinterpret_cast<char *>(&qsRsp);
