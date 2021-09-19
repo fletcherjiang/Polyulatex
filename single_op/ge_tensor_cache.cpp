@@ -1,3 +1,12 @@
+/**
+* @file ge_tensor_cache.cpp
+*
+* Copyright (c) Huawei Technologies Co., Ltd. 2019-2021. All Rights Reserved.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+*/
 #include "ge_tensor_cache.h"
 
 namespace acl {
