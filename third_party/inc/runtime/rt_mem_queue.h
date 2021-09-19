@@ -31,6 +31,14 @@ extern "C" {
 #define RT_MQ_MODE_PULL 2
 #define RT_MQ_MODE_DEFAULT RT_MQ_MODE_PUSH
 
+typedef struct tagMemQueueInfo
+{
+    int32_t id;
+    int32_t size;
+    uint32_t depth;
+    int32_t status;
+} rtMemQueueInfo_t;
+
 typedef struct tagMemQueueAttr {
     char name[RT_MQ_MAX_NAME_LEN];
     uint32_t depth;
@@ -159,6 +167,8 @@ RTS_API rtError_t rtMemQueueDeQueueBuff(int32_t devId, uint32_t qid, rtMemQueueB
 
 RTS_API rtError_t rtMemQueueQuery(int32_t devId, rtMemQueueQueryCmd_t cmd, void *inBuff, uint32_t inLen,
                                   void *outBuff, uint32_t *outLen) WEAKFUC;
+
+RTS_API rtError_t rtMemQueueQueryInfo(int32_t device, uint32_t qid, rtMemQueueInfo_t *queueInfo) WEAKFUC;
 
 RTS_API rtError_t rtMemQueueGrant(int32_t devId, uint32_t qid, int32_t pid, rtMemQueueShareAttr_t *attr) WEAKFUC;
 

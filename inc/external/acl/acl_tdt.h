@@ -224,6 +224,23 @@ ACL_FUNC_VISIBILITY acltdtChannelHandle *acltdtCreateChannel(uint32_t deviceId, 
 
 /**
  * @ingroup AscendCL
+ * @brief Create the channel with max size
+ *
+ * @param deviceId [IN]  the device id
+ * @param name [IN]      the channel's name
+ * @param maxSize [IN]      the max size
+ *
+ * @retval null for failed
+ * @retval OtherValues success
+ *
+ * @see acltdtStopChannel | acltdtDestroyChannel
+ */
+ACL_FUNC_VISIBILITY acltdtChannelHandle *acltdtCreateChannelWithMaxSize(uint32_t deviceId,
+                                                                        const char *name,
+                                                                        uint32_t maxSize);
+
+/**
+ * @ingroup AscendCL
  * @brief Destroy the channel
  *
  * @param handle [IN]  pointer to the channel handle
@@ -268,6 +285,19 @@ ACL_FUNC_VISIBILITY aclError acltdtSendTensor(const acltdtChannelHandle *handle,
 ACL_FUNC_VISIBILITY aclError acltdtReceiveTensor(const acltdtChannelHandle *handle,
                                                  acltdtDataset *dataset,
                                                  int32_t timeout);
+
+/**
+ * @ingroup AscendCL
+ * @brief query the size of the channel
+ *
+ * @param handle [IN]      pointer to the channel handle
+ * @param size [OUT]       current size of this channel
+ *
+ * @retval ACL_SUCCESS  The function is successfully executed.
+ * @retval OtherValues Failure
+ *
+ */
+ACL_FUNC_VISIBILITY aclError acltdtQueryChannelSize(const acltdtChannelHandle *handle, uint32_t *size);
 
 #ifdef __cplusplus
 }

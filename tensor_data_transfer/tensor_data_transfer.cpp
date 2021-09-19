@@ -657,11 +657,11 @@ acltdtChannelHandle *acltdtCreateChannel(uint32_t deviceId, const char *name)
     return handle;
 }
 
-acltdtChannelHandle *acltdtCreateChannelWithDepth(uint32_t deviceId, const char *name, uint32_t maxDepth)
+acltdtChannelHandle *acltdtCreateChannelWithMaxSize(uint32_t deviceId, const char *name, uint32_t maxSize)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_CREATE, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_RET_NULL(name);
-    ACL_LOG_INFO("acltdtCreateChannelWithDepth devId is %u, name is %s, maxDepth is %u", deviceId, name, maxDepth);
+    ACL_LOG_INFO("acltdtCreateChannelWithMaxSize devId is %u, name is %s, maxSize is %u", deviceId, name, maxSize);
     if (strlen(name) + 1 > RT_MQ_MAX_NAME_LEN) {
         ACL_LOG_ERROR("name [%s] length %d can not be larger than %d", name, strlen(name) + 1, RT_MQ_MAX_NAME_LEN);
         return nullptr;
@@ -680,7 +680,7 @@ acltdtChannelHandle *acltdtCreateChannelWithDepth(uint32_t deviceId, const char 
         ACL_DELETE_AND_SET_NULL(handle);
         return nullptr;
     }
-    attr.depth = maxDepth;
+    attr.depth = maxSize;
     attr.workMode = RT_MQ_MODE_DEFAULT;
     attr.flowCtrlFlag = false;
     attr.flowCtrlDropTime = 0;
@@ -689,7 +689,7 @@ acltdtChannelHandle *acltdtCreateChannelWithDepth(uint32_t deviceId, const char 
         ACL_DELETE_AND_SET_NULL(handle);
         return nullptr;
     }
-    ACL_LOG_INFO("acltdtCreateChannelWithDepth devId is %u, name is %s, real name is %s, qid is %u",
+    ACL_LOG_INFO("acltdtCreateChannelWithMaxSize devId is %u, name is %s, real name is %s, qid is %u",
                  deviceId, handle->name.c_str(), name, handle->qid);
     return handle;
 }
@@ -908,5 +908,27 @@ aclError acltdtReceiveTensor(const acltdtChannelHandle *handle, acltdtDataset *d
 
     ACL_LOG_INFO("success to execute acltdtReceiveTensor, device is %u, name is %s",
         handle->devId, handle->name.c_str());
+    return ACL_SUCCESS;
+}
+
+aclError acltdtQueryChannelSize(const acltdtChannelHandle *handle, uint32_t *size)
+{
+    ACL_STAGES_REG(acl::ACL_STAGE_TDT, acl::ACL_STAGE_DEFAULT);
+    ACL_REQUIRES_NOT_NULL_WITH_INPUT_REPORT(handle);
+    if (handle->isTdtProcess) {
+        ACL_LOG_WARN("acltdtQueryChannelSize is not supported");
+        return ACL_ERROR_FEATURE_UNSUPPORTED;
+    }
+    ACL_LOG_INFO("start to execute acltdtQueryChannelSize, device is %u, qid is %u", handle->devId, handle->qid);
+    rtMemQueueInfo_t info = {0};
+    rtError_t ret = rtMemQueueQueryInfo(handle->devId, handle->qid, &info);
+    if (ret != RT_ERROR_NONE) {
+        ACL_LOG_CALL_ERROR("[Call][Rts]call rtMemQueueQueryInfo failed, device is %u, qid is %u",
+                           handle->devId, handle->qid);
+        return ret;
+    }
+    *size = static_cast<uint32_t>(info.size);
+    ACL_LOG_INFO("success to execute acltdtQueryChannelSize, size is %u, device is %u, qid is %u",
+                *size, handle->devId, handle->qid);
     return ACL_SUCCESS;
 }

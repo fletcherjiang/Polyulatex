@@ -497,6 +497,14 @@ rtError_t aclStub::rtMemQueueQuery(int32_t devId, rtMemQueueQueryCmd_t cmd, void
     return RT_ERROR_NONE;
 }
 
+rtError_t aclStub::rtMemQueueQueryInfo(int32_t device, uint32_t qid, rtMemQueueInfo_t *queueInfo)
+{
+    if (queueInfo != nullptr) {
+        queueInfo->size = 4;
+    }
+    return RT_ERROR_NONE;
+}
+
 rtError_t aclStub::rtMemQueueGrant(int32_t devId, uint32_t qid, int32_t pid, rtMemQueueShareAttr_t *attr)
 {
     return RT_ERROR_NONE;
@@ -1028,6 +1036,11 @@ rtError_t rtMemQueueEnQueueBuff(int32_t devId, uint32_t qid, rtMemQueueBuff_t *i
 
 {
     return MockFunctionTest::aclStubInstance().rtMemQueueEnQueueBuff(devId, qid, inBuf, timeout);
+}
+
+rtError_t rtMemQueueQueryInfo(int32_t device, uint32_t qid, rtMemQueueInfo_t *queueInfo)
+{
+    return MockFunctionTest::aclStubInstance().rtMemQueueQueryInfo(device, qid, queueInfo);
 }
 
 rtError_t rtMemQueueDeQueueBuff(int32_t devId, uint32_t qid, rtMemQueueBuff_t *outBuf, int32_t timeout)
