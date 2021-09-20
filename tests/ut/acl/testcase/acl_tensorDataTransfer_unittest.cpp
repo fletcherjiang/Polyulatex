@@ -521,11 +521,13 @@ TEST_F(UTEST_tensor_data_transfer, acltdtReceiveTensorV2)
 
 TEST_F(UTEST_tensor_data_transfer, acltdtQueryChannelSize)
 {
-    uint32_t size = 999;
+    size_t size = 999;
     aclError ret = acltdtQueryChannelSize(nullptr, &size);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
     acltdtChannelHandle *handle = acltdtCreateChannelWithMaxSize(0, "TF_RECEIVE_1", 3);
     EXPECT_NE(handle, nullptr);
+    ret = acltdtQueryChannelSize(handle, nullptr);
+    EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
     handle->isTdtProcess = true;
     ret = acltdtQueryChannelSize(handle, &size);
     EXPECT_EQ(ret, ACL_ERROR_FEATURE_UNSUPPORTED);
