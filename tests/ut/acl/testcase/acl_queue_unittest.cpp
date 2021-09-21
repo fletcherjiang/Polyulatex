@@ -213,6 +213,10 @@ TEST_F(UTEST_QUEUE, acltdtGetQueueRoute)
     EXPECT_EQ(route.srcId, 111);
     EXPECT_EQ(route.dstId, 222);
     EXPECT_EQ(route.status, 0);
+    size_t size = acltdtGetQueueRouteNum(nullptr);
+    EXPECT_EQ(size, 0);
+    size = acltdtGetQueueRouteNum(&routeList);
+    EXPECT_EQ(size, 1);
 }
 
 TEST_F(UTEST_QUEUE, CheckQueueRouteQueryInfo)

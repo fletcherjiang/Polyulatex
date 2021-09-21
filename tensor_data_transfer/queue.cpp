@@ -386,6 +386,19 @@ aclError acltdtGetQueueRoute(const acltdtQueueRouteList *routeList,
     return ACL_SUCCESS;
 }
 
+size_t acltdtGetQueueRouteNum(const acltdtQueueRouteList *routeList)
+{
+    ACL_STAGES_REG(acl::ACL_STAGE_GET, acl::ACL_STAGE_DEFAULT);
+    if (routeList == nullptr) {
+        ACL_LOG_ERROR("[Check][routeList]input param[routeList] is null");
+        acl::AclErrorLogManager::ReportInputError(acl::INVALID_NULL_POINTER_MSG,
+            std::vector<std::string>({"param"}),
+            std::vector<std::string>({"dataset"}));
+        return 0U;
+    }
+    return routeList->routeList.size();
+}
+
 acltdtQueueRouteQueryInfo* acltdtCreateQueueRouteQueryInfo()
 {
     ACL_STAGES_REG(acl::ACL_STAGE_QUEUE, acl::ACL_STAGE_DEFAULT);

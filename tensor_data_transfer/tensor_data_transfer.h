@@ -82,8 +82,6 @@ struct acltdtChannelHandle {
     bool isTdtProcess;
 };
 
-acltdtChannelHandle *acltdtCreateChannelWithDepth(uint32_t deviceId, const char *name, uint32_t maxDepth);
-
 aclError acltdtSendTensorV2(const acltdtChannelHandle *handle, const acltdtDataset *dataset, int32_t timeout);
 
 aclError acltdtReceiveTensorV2(const acltdtChannelHandle *handle, acltdtDataset *dataset, int32_t timeout);

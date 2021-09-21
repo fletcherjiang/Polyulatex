@@ -385,6 +385,17 @@ ACL_FUNC_VISIBILITY aclError acltdtGetQueueRoute(const acltdtQueueRouteList *rou
 
 /**
  * @ingroup AscendCL
+ * @brief get queue route num from route list
+ *
+ * @param routeList [IN]  pointer to the queue route list
+ *
+ * @retval the number of queue route
+ *
+ */
+ACL_FUNC_VISIBILITY size_t acltdtGetQueueRouteNum(const acltdtQueueRouteList *routeList);
+
+/**
+ * @ingroup AscendCL
  * @brief Create the queue route query info
  *
  * @retval null for failed
