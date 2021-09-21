@@ -657,11 +657,11 @@ acltdtChannelHandle *acltdtCreateChannel(uint32_t deviceId, const char *name)
     return handle;
 }
 
-acltdtChannelHandle *acltdtCreateChannelWithMaxSize(uint32_t deviceId, const char *name, size_t maxSize)
+acltdtChannelHandle *acltdtCreateChannelWithCapacity(uint32_t deviceId, const char *name, size_t capacity)
 {
     ACL_STAGES_REG(acl::ACL_STAGE_CREATE, acl::ACL_STAGE_DEFAULT);
     ACL_REQUIRES_NOT_NULL_RET_NULL(name);
-    ACL_LOG_INFO("acltdtCreateChannelWithMaxSize devId is %u, name is %s, maxSize is %u", deviceId, name, maxSize);
+    ACL_LOG_INFO("acltdtCreateChannelWithCapacity devId is %u, name is %s, capacity is %u", deviceId, name, capacity);
     if (strlen(name) + 1 > RT_MQ_MAX_NAME_LEN) {
         ACL_LOG_ERROR("name [%s] length %d can not be larger than %d", name, strlen(name) + 1, RT_MQ_MAX_NAME_LEN);
         return nullptr;
@@ -680,7 +680,7 @@ acltdtChannelHandle *acltdtCreateChannelWithMaxSize(uint32_t deviceId, const cha
         ACL_DELETE_AND_SET_NULL(handle);
         return nullptr;
     }
-    attr.depth = static_cast<uint32_t>(maxSize);
+    attr.depth = static_cast<uint32_t>(capacity);
     attr.workMode = RT_MQ_MODE_DEFAULT;
     attr.flowCtrlFlag = false;
     attr.flowCtrlDropTime = 0;
@@ -689,7 +689,7 @@ acltdtChannelHandle *acltdtCreateChannelWithMaxSize(uint32_t deviceId, const cha
         ACL_DELETE_AND_SET_NULL(handle);
         return nullptr;
     }
-    ACL_LOG_INFO("acltdtCreateChannelWithMaxSize devId is %u, name is %s, real name is %s, qid is %u",
+    ACL_LOG_INFO("acltdtCreateChannelWithCapacity devId is %u, name is %s, real name is %s, qid is %u",
                  deviceId, handle->name.c_str(), name, handle->qid);
     return handle;
 }

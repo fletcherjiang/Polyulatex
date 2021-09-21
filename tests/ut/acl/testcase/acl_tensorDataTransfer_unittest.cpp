@@ -496,7 +496,7 @@ TEST_F(UTEST_tensor_data_transfer, acltdtSendTensorV2)
 {
     EXPECT_CALL(MockFunctionTest::aclStubInstance(), rtGetRunMode(_))
         .WillOnce(Return((RT_ERROR_NONE)));
-    acltdtChannelHandle *handle = acltdtCreateChannelWithMaxSize(0, "test", 3);
+    acltdtChannelHandle *handle = acltdtCreateChannelWithCapacity(0, "test", 3);
     EXPECT_NE(handle, nullptr);
     acltdtDataset *dataset = acltdtCreateDataset();
     EXPECT_NE(dataset, nullptr);
@@ -509,7 +509,7 @@ TEST_F(UTEST_tensor_data_transfer, acltdtSendTensorV2)
 
 TEST_F(UTEST_tensor_data_transfer, acltdtReceiveTensorV2)
 {
-    acltdtChannelHandle *handle = acltdtCreateChannelWithMaxSize(0, "TF_RECEIVE_1", 3);
+    acltdtChannelHandle *handle = acltdtCreateChannelWithCapacity(0, "TF_RECEIVE_1", 3);
     EXPECT_NE(handle, nullptr);
     acltdtDataset *dataset = acltdtCreateDataset();
     EXPECT_NE(dataset, nullptr);
@@ -524,7 +524,7 @@ TEST_F(UTEST_tensor_data_transfer, acltdtQueryChannelSize)
     size_t size = 999;
     aclError ret = acltdtQueryChannelSize(nullptr, &size);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);
-    acltdtChannelHandle *handle = acltdtCreateChannelWithMaxSize(0, "TF_RECEIVE_1", 3);
+    acltdtChannelHandle *handle = acltdtCreateChannelWithCapacity(0, "TF_RECEIVE_1", 3);
     EXPECT_NE(handle, nullptr);
     ret = acltdtQueryChannelSize(handle, nullptr);
     EXPECT_EQ(ret, ACL_ERROR_INVALID_PARAM);

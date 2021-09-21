@@ -228,16 +228,16 @@ ACL_FUNC_VISIBILITY acltdtChannelHandle *acltdtCreateChannel(uint32_t deviceId, 
  *
  * @param deviceId [IN]  the device id
  * @param name [IN]      the name of channel
- * @param maxSize [IN]   the max size of channel
+ * @param capacity [IN]   the capacity of channel
  *
  * @retval null for failed
  * @retval OtherValues success
  *
  * @see acltdtDestroyChannel
  */
-ACL_FUNC_VISIBILITY acltdtChannelHandle *acltdtCreateChannelWithMaxSize(uint32_t deviceId,
-                                                                        const char *name,
-                                                                        size_t maxSize);
+ACL_FUNC_VISIBILITY acltdtChannelHandle *acltdtCreateChannelWithCapacity(uint32_t deviceId,
+                                                                         const char *name,
+                                                                         size_t capacity);
 
 /**
  * @ingroup AscendCL
