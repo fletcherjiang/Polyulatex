@@ -375,7 +375,7 @@ ACL_FUNC_VISIBILITY aclError acltdtAddQueueRoute(acltdtQueueRouteList *routeList
  *
  * @retval ACL_SUCCESS  The function is successfully executed.
  * @retval OtherValues Failure
- * 
+ *
  * @see acltdtCreateQueueRouteList | acltdtCreateQueueRoute
  *
  */
@@ -400,7 +400,7 @@ ACL_FUNC_VISIBILITY size_t acltdtGetQueueRouteNum(const acltdtQueueRouteList *ro
  *
  * @retval null for failed
  * @retval OtherValues success
- * 
+ *
  * @see acltdtDestroyQueueRouteQueryInfo
  */
 ACL_FUNC_VISIBILITY  acltdtQueueRouteQueryInfo* acltdtCreateQueueRouteQueryInfo();
