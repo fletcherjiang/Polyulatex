@@ -1,9 +1,19 @@
-#include "op_kernel_registry.h"
+/**
+* @file op_kernel_registry.cpp
+*
+* Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+*/
 
+#include "op_kernel_registry.h"
 #include "utils/file_utils.h"
 #include "framework/common/util.h"
 #include "common/log_inner.h"
 #include "error_codes_inner.h"
+#include "runtime/rt.h"
 
 namespace acl {
 namespace {
