@@ -9,11 +9,11 @@
 */
 
 #include "op_kernel_registry.h"
-#include "utils/file_utils.h"
+#include "runtime/rt.h"
 #include "framework/common/util.h"
+#include "utils/file_utils.h"
 #include "common/log_inner.h"
 #include "error_codes_inner.h"
-#include "runtime/rt.h"
 
 namespace acl {
 namespace {
