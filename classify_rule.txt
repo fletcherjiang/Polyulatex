@@ -1,9 +1,0 @@
-[acl]
-common
-model
-runtime
-single_op
-tensor_data_transfer
-toolchain
-types
-utils
